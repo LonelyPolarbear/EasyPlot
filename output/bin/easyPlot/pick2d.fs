@@ -1,6 +1,6 @@
 #version 430 core
  out uvec4 FragColor;
-uniform unsigned int objectID;
+uniform uint objectID;
 
 layout(binding =3) uniform sampler2D previousDepthTexture;
 uniform float depthPeelingEpsilon;

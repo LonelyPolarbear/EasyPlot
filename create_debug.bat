@@ -7,6 +7,6 @@ del /f /q "build\*.*"
 mkdir build
 @rem echo 文件夹 "build" 已创建！
 
-cmake -B build -DCMAKE_BUILD_TYPE=Debug -G  "Visual Studio 17 2022"
+cmake -B build -DCMAKE_BUILD_TYPE=Debug -G  "Visual Studio 16 2019"
 
 pause

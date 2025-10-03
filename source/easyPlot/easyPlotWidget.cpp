@@ -357,7 +357,8 @@ void easyPlotWidget::wheelEvent(QWheelEvent* event)
 			auto selectIem = d->sceneLeft->getGraphicsItem(*selectId);
 			if (auto chart = std::dynamic_pointer_cast<XChartItem>(selectIem)) {
 				double factor = 1;
-				if (std::signbit(angle)) {
+				float t = angle;
+				if (std::signbit(t)) {
 					factor = 1.1;
 				}
 				else {

@@ -776,7 +776,8 @@ void XScene::wheelEvent(int angle,int x,int y)
     if(!isBelongtoViewPort(x,y))
         return;
 	double factor = 1;
-	if (!std::signbit(angle)) {
+    float t = angle;
+	if (!std::signbit(t)) {
 		factor = 1.1;
 	}
 	else {
