@@ -1,0 +1,31 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icon/fit_view.svg</file>
+        <file>icon/cone.svg</file>
+        <file>icon/cube.svg</file>
+        <file>icon/sphere.svg</file>
+        <file>icon/rect.svg</file>
+        <file>icon/model.svg</file>
+        <file>icon/saveModel.svg</file>
+        <file>icon/rectSelect.svg</file>
+        <file>icon/circle.svg</file>
+        <file>icon/line.svg</file>
+        <file>icon/triangle.svg</file>
+        <file>icon/cylinder.svg</file>
+        <file>icon/cylinder2.svg</file>
+        <file>icon/opengl.svg</file>
+        <file>icon/cornerRect.svg</file>
+        <file>icon/fitView.svg</file>
+        <file>icon/deleteObj.svg</file>
+        <file>icon/clearAll.svg</file>
+        <file>icon/showGrid.svg</file>
+        <file>icon/hideGrid.svg</file>
+        <file>icon/axis3d.svg</file>
+        <file>icon/curve.svg</file>
+        <file>icon/chart.svg</file>
+        <file>icon/bar.svg</file>
+        <file>icon/font.svg</file>
+        <file>icon/sdf.svg</file>
+        <file>icon/text.svg</file>
+    </qresource>
+</RCC>

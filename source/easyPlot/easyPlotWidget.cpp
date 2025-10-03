@@ -1,0 +1,834 @@
+#include "easyPlotWidget.h"
+#include <glew/glew.h>
+#include <windows.h>
+#include <Eigen/Eigen>
+#include <lib01_shader/xshader.h>
+#include <lib01_shader/xshaderManger.h>
+#include <lib02_camera/xcamera.h>
+#include <lib00_utilty/myUtilty.h>
+
+#include <QMouseEvent> 
+#include <QWheelEvent> 
+#include <iostream>
+#include <QDebug>
+#include <lib03_stbImage/stbImage.h>
+
+#include <lib04_opengl/XOpenGLBuffer.h>
+#include <lib04_opengl/XOpenGLTexture.h>
+#include <lib04_opengl/XOpenGLVertexArrayObject.h>
+#include <lib04_opengl/XOpenGLFramebufferObject.h>
+
+#include <lib05_shape/xsphereSource.h>
+#include <lib05_shape/xfileSource.h>
+#include <lib05_shape/xcubeSource.h>
+#include <lib05_shape/xchamferCubeSource.h>
+#include <lib05_shape/xregularPrimSource.h>
+#include <lib05_shape/xcylinderSource.h>
+#include <lib05_shape/xconeSource.h>
+#include <lib05_shape/xshape.h>
+#include <lib05_shape/XGraphicsItem.h>
+#include <lib05_shape/XRectItem.h>
+#include <lib05_shape/XLineItem.h>
+#include <lib05_shape/XBarItem.h>
+#include <lib05_shape/XChartItem.h>
+#include <lib05_shape/XPolyline.h>
+#include <lib05_shape/XTextItem.h>
+
+#include <lib06_select/xviewselection.h>
+#include <lib07_scene/xscene.h>
+
+#include <QTimer>
+#include <QContextMenuEvent>
+#include <QMenu>
+#include <QAction>
+#include <QFutureWatcher>
+#include <QtConcurrent> 
+
+#include <lib08_freetype/xfreetype.h>
+
+using namespace std::chrono_literals;
+enum class CameraAction {
+	None = 1,
+	Rotate = 1 << 1,
+	Move = 1 << 2
+};
+
+struct easyPlotWidget::Internal {
+	std::shared_ptr<xShaderManger> shaderManger = makeShareDbObject<xShaderManger>();
+	std::shared_ptr<XScene> sceneLeft = makeShareDbObject<XScene>();
+	std::shared_ptr<XGraphicsItem> rect = makeShareDbObject<XRectItem>();		//实时绘制的矩形
+	
+	//鼠标的位置实时更新
+	QPoint mouseMoveLastTimePos = QPoint(0, 0);							//鼠标实时移动第一个位置
+	QPoint mouseMoveRealTimePos = QPoint(0, 0);							//鼠标实时移动第二个位置
+	QPoint mousePressPos = QPoint(0, 0);											//鼠标左键按下位置
+
+	std::set<uint32_t> select3dObject;			//选中的三维物体
+	std::set<uint32_t> select2dObject;		//选中的二维物体
+
+	CameraAction cameraAction = CameraAction::None;
+	QTimer *timer = nullptr;
+
+	uint32_t mSelectId = 0;		//当前鼠标中键选中的Id
+	QFutureWatcher<std::shared_ptr< XFileSource>>* mFutureWatcher;
+
+	QFutureWatcher<void>* mFutureWatcherVoid;
+
+	bool rectPickEnable = true;
+	bool mIsMouseLeftPress = false;
+	bool mIsMouseRightPressMoved = false;
+	bool mIsMouseRightPress = false;
+
+	render::graphicsItemType mDrawItemType = render::graphicsItemType::none;
+	int mDrawItemMethod = -1;
+
+	//当前绘制的数据和类型
+	DarwItemData mDrawItemData;
+};
+
+easyPlotWidget::easyPlotWidget(QWidget* parent) :XOpenGLWidget(parent),d(std::make_unique<Internal>())
+{
+	qRegisterMetaType<std::shared_ptr<XFileSource>>("std::shared_ptr<XFileSource>");
+	d->mFutureWatcher = new QFutureWatcher<std::shared_ptr< XFileSource>>();
+	d->mFutureWatcherVoid = new QFutureWatcher<void>();
+
+	setFocusPolicy(Qt::StrongFocus); // 添加这行
+	setMouseTracking(true);
+	//d->timer = new QTimer(this);
+	//d->timer->setInterval(100);
+	//connect(d->timer, &QTimer::timeout, this, &easyPlotWidget::timerOut);
+
+	//d->timer->start();
+
+	buildUI();
+	attachSignalSlot();
+
+	if (!QResource::registerResource(qApp->applicationDirPath() + "/easyPlot.rcc")) {
+	   std::cout << "register resource failed" << std::endl;
+	}
+
+
+	QFuture<void> future = QtConcurrent::run([]()->void {
+		auto ss = myUtilty::ShareVar::instance().currentExeDir + "\\sdf\\data.txt";
+		xfreetype::Instance()->LoadGlyphSdf(QString::fromStdString(ss));
+		});
+
+
+	d->mFutureWatcherVoid->setFuture(future);
+
+	
+}
+
+easyPlotWidget::~easyPlotWidget()
+{
+}
+
+void easyPlotWidget::render()
+{
+	d->sceneLeft->render();
+
+	swapBuffers();
+}
+
+void easyPlotWidget::initGLResource()
+{
+	//创建opengl资源
+	d->shaderManger->initGLResource();		//创建所有需要的shader
+
+	auto cameraLeft = makeShareDbObject<xcamera>();
+
+	d->sceneLeft->setCamera(cameraLeft);
+	d->sceneLeft->setShaderManger(d->shaderManger);
+	d->sceneLeft->setContext(getContext());
+
+	{
+		auto rect = d->rect;
+		rect->setLineWidth(1);
+		rect->setFixedLine(true);
+		rect->setSingleColor(myUtilty::Vec4f(1, 1,1, 1));
+		rect->initResource();
+		rect->setVisible(false);
+		d->sceneLeft->addGraphicsItem(rect);
+	}
+}
+
+void easyPlotWidget::buildUI()
+{
+}
+
+void easyPlotWidget::attachSignalSlot()
+{
+	connect(d->mFutureWatcher, &QFutureWatcher<std::shared_ptr<XFileSource>>::finished, this, &easyPlotWidget::slotFileLoadFinished);
+
+	connect(d->mFutureWatcherVoid, &QFutureWatcher<void>::finished, this, &easyPlotWidget::slotAnyTaskFinished);
+}
+
+uint32_t easyPlotWidget::getSelectId()
+{
+	return d->mSelectId;
+}
+
+void easyPlotWidget::mousePressEvent(QMouseEvent* event)
+{
+	//std::cout<<std::dec<< "鼠标摁下: (" << event->pos().x() << "," << event->pos().y() << ")" << std::endl;
+	//左键旋转 右键平移  中键缩放
+	d->mousePressPos = event->pos();
+	if (event->button() == Qt::LeftButton) {
+		d->mouseMoveLastTimePos = event->pos();
+
+		d->select2dObject.clear();
+		d->select3dObject.clear();
+		//鼠标按下：记录当前选中的物体
+
+		{
+			auto selects = d->sceneLeft->getPointSelection(event->pos().x(), mHeight - event->pos().y());
+			for (auto select : selects) {
+				if (select.objectId != 0) {
+					d->select3dObject.insert(select.objectId);
+					std::cout << std::dec << "select object id:" << select.objectId << " primitive id:" << select.primitiveId << std::endl;
+					d->mSelectId = select.objectId;
+				}
+			}
+		}
+		{
+			auto selects = d->sceneLeft->getPointSelection2D(event->pos().x(), mHeight - event->pos().y());
+			for (auto select : selects) {
+				if (select.objectId != 0) {
+					d->select2dObject.insert(select.objectId);
+					std::cout << std::dec << "2d select object id:" << select.objectId << " primitive id:" << select.primitiveId << std::endl;
+					d->mSelectId = select.objectId;
+				}
+			}
+		}
+
+		d->mIsMouseLeftPress = true;
+
+		//如果启用了绘制，则左键按下时不启用相机交互
+		if(d->mDrawItemType ==render::graphicsItemType::none)
+			d->cameraAction = CameraAction::Rotate;	
+		else {
+			//创建一个Item
+			d->mDrawItemData = createItem(d->mDrawItemType);
+			if(d->mDrawItemData.item)
+				d->sceneLeft->addGraphicsItem(d->mDrawItemData.item);
+		}
+	}
+	else if (event->button() == Qt::MiddleButton) {
+		d->cameraAction = CameraAction::Move;
+		d->mouseMoveLastTimePos = event->pos();
+	}
+
+	if(event->button() == Qt::RightButton){
+		d->mIsMouseRightPressMoved = false;
+		d->mIsMouseRightPress = true;
+	}
+}
+
+void easyPlotWidget::mouseMoveEvent(QMouseEvent* event)
+{	
+	d->mouseMoveRealTimePos = event->pos();
+	updateItem();
+
+	if (d->mIsMouseRightPress) {
+		d->mIsMouseRightPressMoved = true;
+		if (!d->sceneLeft->getGraphicsItem(d->rect->getID())) {
+			d->sceneLeft->addGraphicsItem(d->rect);
+		}
+		d->rect->resetTransform();
+		d->rect->setVisible(true);
+
+		auto s1 = d->sceneLeft->screenPos2ScenePos(mapToGLScreen(event->pos()));
+		auto s2 = d->sceneLeft->screenPos2ScenePos(mapToGLScreen(d->mousePressPos));
+		auto rect = std::dynamic_pointer_cast<XRectItem>(d->rect);
+		if (rect) {
+			rect->setRect(s1,s2);
+		}
+	}
+
+	if ((uint32_t)d->cameraAction & (uint32_t)CameraAction::Rotate ) {
+
+		d->sceneLeft->rotate(mapToGLScreen(d->mouseMoveRealTimePos),mapToGLScreen(d->mouseMoveLastTimePos));
+		d->mouseMoveLastTimePos = d->mouseMoveRealTimePos;
+	}
+	else if ((uint32_t)d->cameraAction & (uint32_t)CameraAction::Move) {
+		bool flag = true;
+		{
+			auto selectId = d->select2dObject.begin();
+			if (selectId != d->select2dObject.end()) {
+				auto selectIem = d->sceneLeft->getGraphicsItem(*selectId);
+				if (auto chart = std::dynamic_pointer_cast<XChartItem>(selectIem)) {
+					auto s1 = d->sceneLeft->screenPos2ScenePos(mapToGLScreen(event->pos()));
+					auto s2 = d->sceneLeft->screenPos2ScenePos(mapToGLScreen(d->mousePressPos));
+					chart->setPosition(s1.x, s1.y);
+					flag = false;
+				}
+			}
+		}
+		if(flag)
+		d->sceneLeft->translate(mapToGLScreen(d->mouseMoveRealTimePos), mapToGLScreen(d->mouseMoveLastTimePos));
+
+		d->mouseMoveLastTimePos = d->mouseMoveRealTimePos;
+	}
+
+	 d->sceneLeft->mouseMoveEvent(event->pos().x(), mHeight - event->pos().y());
+}
+
+void easyPlotWidget::mouseReleaseEvent(QMouseEvent* event)
+{
+	if (event->button() == Qt::LeftButton || event->button() == Qt::MiddleButton ) {
+		d->cameraAction = CameraAction::None;
+		d->mIsMouseLeftPress = false;
+		d->mDrawItemData.item = nullptr;
+		d->mDrawItemData.coordArray = nullptr;	
+		d->mDrawItemData.type = render::graphicsItemType::none;
+	}
+
+	if (event->button() == Qt::RightButton) {
+		d->mIsMouseRightPress = false;
+		d->rect->setVisible(false);
+		if (d->rectPickEnable) {
+			//遍历像素
+
+			if(event->pos() == d->mousePressPos){
+				return;
+			}
+			auto start = mapToGLScreen(d->mousePressPos);
+			auto end = mapToGLScreen(event->pos());
+
+			auto x = std::min(start.x, end.x);
+			auto y = std::min(start.y, end.y);
+			int w = start.x - end.x;
+			int h = start.y - end.y;
+			w = std::abs(w);
+			h = std::abs(h);
+
+			d->select2dObject.clear();
+			d->select3dObject.clear();
+			auto selectDatas = d->sceneLeft->getBoxSelection(x, y, w, h);
+			
+			for (int layerNum = 0; layerNum < selectDatas.size(); layerNum++) {
+				auto selectData = selectDatas[layerNum];
+				for (auto select : selectData) {
+					if (select.objectId != 0) {
+						d->select3dObject.insert(select.objectId);
+						//std::cout << std::dec << "layerNum:" << layerNum << " select object id:" << select.objectId << " primitive id:" << select.primitiveId << std::endl;
+					}
+				}
+			}
+			std::cout << "3d框选结果统计\n";
+			for (auto s : d->select3dObject) {
+				std::cout << std::dec <<  " select object id:" << s << std::endl;
+			}
+
+			auto selectDatas2D = d->sceneLeft->getBoxSelection2D(x, y, w, h);
+			
+			for (int layerNum = 0; layerNum < selectDatas2D.size(); layerNum++) {
+				auto selectData = selectDatas2D[layerNum];
+				for (auto select : selectData) {
+					select.objectId;
+					select.primitiveId;
+
+					if (select.objectId != 0) {
+						d->select2dObject.insert(select.objectId);
+						//std::cout << std::dec << "layerNum:" << layerNum << " select object id:" << select.objectId << " primitive id:" << select.primitiveId << std::endl;
+					}
+				}
+			}
+			std::cout << "2d框选结果统计\n";
+			for (auto s : d->select2dObject) {
+				std::cout << std::dec << "select object id:" << s << std::endl;
+			}
+		}
+	}
+}
+
+void easyPlotWidget::mouseDoubleClickEvent(QMouseEvent* event)
+{
+	d->sceneLeft->mouseDoublePressEvent(event->pos().x(), mHeight - event->pos().y(), event->button());
+}
+
+void easyPlotWidget::wheelEvent(QWheelEvent* event)
+{	
+	auto angle = event->angleDelta().y();
+
+	{
+		auto selectId = d->select2dObject.begin();
+		if (selectId != d->select2dObject.end()) {
+			auto selectIem = d->sceneLeft->getGraphicsItem(*selectId);
+			if (auto chart = std::dynamic_pointer_cast<XChartItem>(selectIem)) {
+				double factor = 1;
+				if (std::signbit(angle)) {
+					factor = 1.1;
+				}
+				else {
+					factor = 1. / 1.1;
+				}
+
+				chart->gridSale(factor, factor);
+				return;
+			}
+		}
+	}
+
+	//std::cout << std::dec << "滚轮滚动: " << angle << std::endl;
+	auto pos = event->pos();
+	d->sceneLeft->wheelEvent(angle, event->pos().x(), mHeight - event->pos().y());
+}
+
+void easyPlotWidget::resizeEvent(QResizeEvent* event)
+{
+	XOpenGLWidget::resizeEvent(event);
+	
+	d->sceneLeft->resizeEvent(0, 0, mWidth,  mHeight);
+}
+
+void easyPlotWidget::contextMenuEvent(QContextMenuEvent* event)
+{
+	// 1. 创建上下文菜单
+
+	if(d->mIsMouseRightPressMoved)
+		return;
+	QMenu* menu = new QMenu(this);
+
+	// 2. 添加菜单项（QAction）
+	QAction* ActFitView = menu->addAction(QIcon(":/icon/fitView.svg"), "FitView3D");
+	QAction* ActFitView2D = menu->addAction(QIcon(":/icon/fitView.svg"), "FitView2D");
+	QAction* ActDelete = menu->addAction(QIcon(":/icon/deleteObj.svg"), "DeleteSelect");
+	QAction* ActDeleteAll = menu->addAction(QIcon(":/icon/clearAll.svg"), "DeleteAll");
+
+	// 3. 绑定菜单项的点击信号到槽函数
+	connect(ActFitView, &QAction::triggered, this, &easyPlotWidget::slotFitView3D);
+	connect(ActFitView2D, &QAction::triggered, this, &easyPlotWidget::slotFitView2D);
+	connect(ActDelete, &QAction::triggered, this, &easyPlotWidget::slotDelete);
+	connect(ActDeleteAll, &QAction::triggered, this, &easyPlotWidget::slotDeleteAll);
+
+	// 4. 在鼠标点击位置显示菜单（exec()会阻塞，直到菜单关闭）
+	menu->show();
+	d->mouseMoveRealTimePos = event->globalPos();
+	menu->exec(event->globalPos()); // event->pos()是相对于当前控件的位置
+}
+
+void easyPlotWidget::timerOut()
+{
+	return;
+	#if 0
+	static int end = 0;
+	static bool add = true;
+	if (end == 0) {
+		//正向
+		add = true;
+	}
+	if (end == 361) {
+		//开始反向
+		add = false;
+	}
+	if (add) {
+		d->sphereSource->setEWRange(0, end++);
+		d->sphereSource->setEWNum(end);
+	}
+	else {
+		d->sphereSource->setEWRange(0, end--);
+		d->sphereSource->setEWNum(end);
+	}
+
+	d->sphereSource->setSNRange(30, 150);
+	d->sphereSource->setSNNum(180);
+
+	d->sphereSource->Modified();
+	#endif
+}
+
+DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
+{
+	DarwItemData result;
+	if (type == render::graphicsItemType::rect)
+	{
+		makeCurrent();
+		auto item = makeShareDbObject<XRectItem>();
+		item->setPenStyle(XGraphicsItem::PenStyle::DashDotDot);
+		item->setRectType((XRectItem::RectType)d->mDrawItemMethod);
+		item->setConnectSmoothEnable(false);
+		item->setLineWidth(1);
+		item->setSingleColor(myUtilty::Vec4f(0, 1, 1, 1));
+		item->setFillColor(myUtilty::Vec4f(0, 0, 0, 1));
+		item->initResource();
+		item->setVisible(true);
+		item->setIsFilled(false);
+
+		auto coord = item->getCoordArray();
+		item->setCoordArray(coord);
+		item->setVisible(false);
+
+		result.type = type;
+		result.item = item;
+		result.coordArray = coord;
+		doneCurrent();
+	}
+
+	if (type == render::graphicsItemType::line)
+	{
+		makeCurrent();
+		auto item = makeShareDbObject<XLineItem>();
+		item->setLineWidth(2);
+		item->setPenStyle(XGraphicsItem::PenStyle::Solid);
+		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		item->initResource();
+		item->setVisible(true);
+
+		item->setVisible(false);
+
+		result.type = type;
+		result.item = item;
+		doneCurrent();
+	}
+	
+	return result;
+}
+
+void easyPlotWidget::slotSaveFile( const QString& fileName)
+{
+	auto s = d->sceneLeft->getShape(d->mSelectId);
+	if(s)
+		s->getInput()->writeToFile(fileName.toUtf8().constData());
+}
+
+void easyPlotWidget::slotOpenFile(const QString& fileName)
+{
+	
+	QFuture<std::shared_ptr<XFileSource>> future = QtConcurrent::run([fileName]()->std::shared_ptr<XFileSource>{
+		auto source = makeShareDbObject<XFileSource>();
+		source->readFile(fileName.toUtf8().constData());
+		return source;
+	});
+
+	d->mFutureWatcher->setFuture(future);
+	
+}
+
+void easyPlotWidget::slotDelete()
+{
+	{
+		auto selects = /*d->sceneLeft->getPointSelection(d->mouseMoveRealTimePos.x(), mHeight - d->mouseMoveRealTimePos.y())*/d->select3dObject;
+		for (auto select : selects) {
+				auto shape = d->sceneLeft->getShape(select);
+				d->sceneLeft->removeShape(shape);
+		}
+	}
+	
+	{
+		auto selects = /*d->sceneLeft->getPointSelection2D(d->mouseMoveRealTimePos.x(), mHeight - d->mouseMoveRealTimePos.y())*/d->select2dObject;
+		for (auto select : selects) {
+				auto shape = d->sceneLeft->getGraphicsItem(select);
+				d->sceneLeft->removeGraphicsItem(shape);
+		}
+	}
+	
+}
+
+void easyPlotWidget::slotDeleteAll()
+{
+	d->sceneLeft->removeAll();
+}
+
+void easyPlotWidget::slotCreateCube()
+{
+	makeCurrent();
+	std::shared_ptr<xchamferCubeSource> cubeSource = makeShareDbObject<xchamferCubeSource>();
+	std::shared_ptr<XShape> cubeActor = makeShareDbObject<XShape>();
+
+	cubeActor->initResource();
+	cubeActor->setInput(cubeSource);
+
+	cubeSource->Modified();
+
+	d->sceneLeft->addShape(cubeActor);
+	doneCurrent();
+}
+
+void easyPlotWidget::slotCreateSphere()
+{
+	makeCurrent();
+	std::shared_ptr<XSphereSource> sphereSource = makeShareDbObject<XSphereSource>();
+	std::shared_ptr<XShape> sphereActor = makeShareDbObject<XShape>();
+
+	sphereActor->initResource();
+	sphereActor->setInput(sphereSource);
+	sphereActor->scale(10,10,10);
+	sphereSource->setDirection(XSphereSource::Direaction::horizontal);
+	sphereSource->setEWRange(0, 360);
+	sphereSource->setSNRange(0, 180);
+	sphereSource->setEWNum(360);
+	sphereSource->setSNNum(180);
+	sphereSource->Modified();
+	d->sceneLeft->addShape(sphereActor);
+	doneCurrent();
+}
+
+void easyPlotWidget::slotCreateCone()
+{
+	makeCurrent();
+	std::shared_ptr<XConeSource> coneSource = makeShareDbObject<XConeSource>();
+	std::shared_ptr<XShape> coneActor = makeShareDbObject<XShape>();
+	coneActor->initResource();
+	coneActor->setInput(coneSource);
+	coneActor->translate(0, 0, 4);
+	coneActor->scale(2, 2, 2);
+	d->sceneLeft->addShape(coneActor);
+	coneActor->setSingleColor(myUtilty::Vec4f(0,1,0,1));
+	coneActor->setColorMode(ColorMode::SingleColor);
+	doneCurrent();
+}
+
+void easyPlotWidget::slotFileLoadFinished()
+{
+	makeCurrent();
+	//创建一个新的shape
+	auto shape = makeShareDbObject<XShape>();
+	shape->initResource();
+
+	auto source =d->mFutureWatcher->result();
+
+	shape->setInput(source);
+	shape->setColorMode(ColorMode::SingleColor);
+	shape->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+	shape->translate(4, 2, 0);
+	shape->scale(2, 1, 1);
+
+	d->sceneLeft->addShape(shape);
+	doneCurrent();
+
+	auto boundbox = shape->getBoundBox();
+	d->sceneLeft->getCamera()->resetCamera((double*)&boundbox);
+}
+
+void easyPlotWidget::slotAnyTaskFinished()
+{
+	std::cout << "任务完成" << std::endl;
+}
+
+void easyPlotWidget::slotRectPickEnable(bool flag)
+{
+	d->rectPickEnable = flag;
+}
+
+void easyPlotWidget::slotSetDarwItemType(int type,int method)
+{
+	d->mDrawItemType = (render::graphicsItemType)type;
+	d->mDrawItemMethod = method;
+}
+
+void easyPlotWidget::slotFitView2D()
+{
+	d->sceneLeft->fitView2D();
+}
+
+void easyPlotWidget::slotFitView3D()
+{
+	d->sceneLeft->fitView3D();
+}
+
+void easyPlotWidget::updateItem()
+{
+	if(!d->mIsMouseLeftPress)
+		return;
+	auto firstPos = d->sceneLeft->screenPos2ScenePos(mapToGLScreen( d->mousePressPos));
+	auto secondPos = d->sceneLeft->screenPos2ScenePos( mapToGLScreen(d->mouseMoveRealTimePos));
+	
+
+	if (d->mDrawItemData.item) {
+
+		//d->mDrawItemData.item->resetTransform();
+		d->mDrawItemData.item->setVisible(true);
+		if (d->mDrawItemType == render::graphicsItemType::rect) {
+			auto rect = std::dynamic_pointer_cast<XRectItem>(d->mDrawItemData.item); {
+				rect->resetTransform();
+				auto scalex = (firstPos - secondPos).x;
+				auto scaley = (firstPos - secondPos).y;
+				auto center = (firstPos + secondPos) * 0.5;
+				rect->translate(center.x, center.y);
+				rect->scale(abs(0.5*scalex), abs(0.5*scaley));
+			}
+			//rect->setRect(firstPos,secondPos);
+		}
+		if (d->mDrawItemType == render::graphicsItemType::line) {
+			
+			auto line = std::dynamic_pointer_cast<XLineItem>(d->mDrawItemData.item);
+			line->resetTransform();
+			line->setLine(firstPos, secondPos);
+		}
+	}
+}
+
+void easyPlotWidget::slotShowGrid2D(bool flag)
+{
+	d->sceneLeft->setGrid2dVisible(flag);
+}
+
+void easyPlotWidget::slotShowGrid3D(bool flag)
+{
+	d->sceneLeft->setGrid3dVisible(flag);
+}
+
+void easyPlotWidget::slotShowAxis3D(bool flag)
+{
+	d->sceneLeft->setAxis3dVisible(flag);
+}
+
+void easyPlotWidget::slotAddLine2D()
+{
+	//创建一条曲线
+	makeCurrent();
+	auto item = makeShareDbObject<XPolyline>();
+	item->setLineWidth(2);
+	item->setPenStyle(XGraphicsItem::PenStyle::Dash);
+
+	//生成随机颜色
+	auto r =myUtilty::math::randon_color();
+	auto g = myUtilty::math::randon_color();
+	auto b= myUtilty::math::randon_color();
+	item->setSingleColor(myUtilty::Vec4f(r,g, b, 1));
+	item->initResource();
+	item->setVisible(true);
+
+	//数据
+	auto curveData =makeShareDbObject<XFloatArray>();
+	curveData->setComponent(3);
+	
+	auto xoffset = myUtilty::math::randon<float>(-200, 200);
+	auto yoffset = myUtilty::math::randon<float>(10, 50);
+	auto fre = myUtilty::math::randon<float>(0.05, 0.1);
+	int num = 200;
+	curveData->setNumOfTuple(num);
+	//x随机偏移
+	//y随机偏移
+	for (int i = 0; i < num; i++) {
+		auto x = i;
+		auto y = 100*sin(fre *x);
+		auto z =0;
+		curveData->setTuple(i, x, y, z);
+	}
+	item->translate(xoffset, yoffset);
+	curveData->Modified();
+	item->setCoordArray(curveData);
+	
+	bool flag = true;
+	auto selectId = d->select2dObject.begin();
+	if (selectId != d->select2dObject.end()) {
+		auto selectIem = d->sceneLeft->getGraphicsItem(*selectId);
+		if (auto chart = std::dynamic_pointer_cast<XChartItem>(selectIem)) {
+			chart->addPolyline(item);
+			flag = false;
+		}
+	}
+
+	if (flag) {
+		d->sceneLeft->addGraphicsItem(item);
+	}
+	
+	doneCurrent();
+}
+
+void easyPlotWidget::slotAddChart()
+{
+	makeCurrent();
+
+	auto chart = makeShareDbObject<XChartItem>();
+	chart->initResource();
+	chart->setVisible(true);
+	
+	auto tx = myUtilty::math::randon<double>(-200, 200);
+	auto ty = myUtilty::math::randon<double>(-200, 200);
+	auto sx = myUtilty::math::randon<double>(100, 200);
+	auto sy = myUtilty::math::randon<double>(100, 300);
+
+	chart->translate(tx, ty);
+	
+	auto angle = myUtilty::math::randon<double>(-90, 90);
+	chart->rotate(angle);
+
+	chart->scale(sx, sy);
+
+	d->sceneLeft->addGraphicsItem(chart);
+
+	doneCurrent();
+}
+
+void easyPlotWidget::slotAddBar()
+{
+	//创建一条曲线
+	makeCurrent();
+	auto item = makeShareDbObject<XBarItem>();
+	item->setLineWidth(1);
+	item->setPenStyle(XGraphicsItem::PenStyle::Dash);
+
+	//生成随机颜色
+	auto r = myUtilty::math::randon_color();
+	auto g = myUtilty::math::randon_color();
+	auto b = myUtilty::math::randon_color();
+	item->setSingleColor(myUtilty::Vec4f(r, g, b, 1));
+	item->setFillColor(myUtilty::Vec4f(r, g, b, 1));
+	item->initResource();
+	item->setVisible(true);
+
+	//数据
+	auto curveData = makeShareDbObject<XFloatArray>();
+	curveData->setComponent(3);
+
+	auto xoffset = myUtilty::math::randon<float>(-200, 200);
+	auto yoffset = myUtilty::math::randon<float>(10, 50);
+	auto fre = myUtilty::math::randon<float>(0.05, 0.1);
+	int num = 10000;
+	curveData->setNumOfTuple(num);
+	//x随机偏移
+	//y随机偏移
+
+	//柱坐标系应该规范多条数据X轴坐标相同，都为整数
+	for (int i = 0; i < num; i++) {
+		auto x =-0.5*num + i;
+		auto y = myUtilty::math::randon<int>(10, 200);
+		auto z = 0;
+		curveData->setTuple(i, x, y, z);
+	}
+	item->translate(xoffset,0);
+	curveData->Modified();
+	item->setCoordArray(curveData);
+
+	bool flag = true;
+	auto selectId = d->select2dObject.begin();
+	if (selectId != d->select2dObject.end()) {
+		auto selectIem = d->sceneLeft->getGraphicsItem(*selectId);
+		if (auto chart = std::dynamic_pointer_cast<XChartItem>(selectIem)) {
+			chart->addPolyline(item);
+			flag = false;
+		}
+	}
+
+	if (flag) {
+		d->sceneLeft->addGraphicsItem(item);
+	}
+
+	doneCurrent();
+}
+
+void easyPlotWidget::slotAddText()
+{
+	makeCurrent();
+	auto item = makeShareDbObject<XTextItem>();
+	item->initResource();
+	item->setVisible(true);
+	item->scale(20,20);
+	item->setText( L"宋伟军");
+	item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+	d->sceneLeft->addGraphicsItem(item);
+	doneCurrent();
+}
+
+void easyPlotWidget::slotGenerateFontTextures()
+{
+	xfreetype::Instance()->generateFontTextures(qApp->applicationDirPath() + "/simsun_ttc", true, false);
+}
+
+void easyPlotWidget::slotGenerateFontSdf()
+{
+	xfreetype::Instance()->generateFontSdf(qApp->applicationDirPath() + "/sdf", true, false);
+}

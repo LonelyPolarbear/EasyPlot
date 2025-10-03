@@ -1,0 +1,26 @@
+#pragma once
+#include "XGraphicsItem.h"
+
+
+class LIB05_SHAPE_API XRectItem :public XGraphicsItem {
+public:
+	enum RectType {
+		center_rect,			// 矩形中心点和任意一个顶点
+		corner_rect,		// 矩形任意两个顶点
+		diagonal_rect		// 矩形任意两个对角顶点
+	};
+	XRectItem();
+	virtual ~XRectItem();
+
+	void setRectType(RectType rectType);
+	RectType getRectType() const;
+
+	void setRect(myUtilty::Vec2f pos1,myUtilty::Vec2f pos2);
+
+protected:
+	virtual void updateData();
+	virtual uint32_t computeNumofVertices() override;
+private:
+	RectType m_rectType = RectType::diagonal_rect;
+
+};
