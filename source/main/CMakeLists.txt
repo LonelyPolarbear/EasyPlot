@@ -72,12 +72,12 @@ SET(LIB_NAMES
 				opengl32
 				myUtilty${DLL_DEBUG_POSTFIX}
 				xshader${DLL_DEBUG_POSTFIX}
-				xtexture${DLL_DEBUG_POSTFIX}
+				#xtexture${DLL_DEBUG_POSTFIX}
 				XOpenGLWidget${DLL_DEBUG_POSTFIX}
-				OpenGLWidget1${DLL_DEBUG_POSTFIX}
-				OpenGLWidget2${DLL_DEBUG_POSTFIX}
-				OpenGLWidgetCube${DLL_DEBUG_POSTFIX}
-				MultiPolygonModeCube${DLL_DEBUG_POSTFIX}
+				#OpenGLWidget1${DLL_DEBUG_POSTFIX}
+				#OpenGLWidget2${DLL_DEBUG_POSTFIX}
+				#OpenGLWidgetCube${DLL_DEBUG_POSTFIX}
+				#MultiPolygonModeCube${DLL_DEBUG_POSTFIX}
 				xeasyplot${DLL_DEBUG_POSTFIX}
 				
 	)
