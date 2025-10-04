@@ -817,9 +817,9 @@ void easyPlotWidget::slotAddText()
 	auto item = makeShareDbObject<XTextItem>();
 	item->initResource();
 	item->setVisible(true);
-	item->scale(20,20);
-	item->setText( L"宋伟军");
-	item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+	item->setPosition(0,20);
+	item->setText( L"路漫漫修远兮，吾将上下而求索！");
+	item->setSingleColor(myUtilty::Vec4f(0, 0, 1, 1));
 	d->sceneLeft->addGraphicsItem(item);
 	doneCurrent();
 }

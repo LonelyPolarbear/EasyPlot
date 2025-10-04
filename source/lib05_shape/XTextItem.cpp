@@ -91,16 +91,10 @@ void XTextItem::setText(const std::wstring& text)
 	m_instacePos->setNumOfTuple(text.size());
 
 	auto num = text.size();
-	for (int i = 0; i < text.size(); i++) {
-		Eigen::Affine3f tranform = Eigen::Affine3f::Identity();
-		tranform.translate(Eigen::Vector3f(i*2,0,0));
-		Eigen::Matrix4f m = tranform.matrix();
-		auto p = m.data();
-		m_instacePos->setTuple(i, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
-	}
-
 	m_textureArray->setNumOfTuple(num*4);
 	//获取每个字符的纹理
+	int start_x = 0;
+	int start_y = 0;
 	for (int i=0;i< num;i++) {
 		//wchar_t c(L'我');
 		auto c = text.at(i);
@@ -122,6 +116,22 @@ void XTextItem::setText(const std::wstring& text)
 		m_textureArray->setTuple(4 * i + 1, x_ + w_, y_, layer);
 		m_textureArray->setTuple(4 * i + 2, x_ + w_, y_ + h_, layer);
 		m_textureArray->setTuple(4 * i + 3, x_, y_ + h_, layer);
+
+		//字符位置
+		
+		float scale_x = glyph.width * 0.5;
+		float scale_y = glyph.height*0.5;
+
+		Eigen::Affine3f tranform = Eigen::Affine3f::Identity();
+		tranform.translate(Eigen::Vector3f(start_x + glyph.bearX, start_y -glyph.height+ glyph.bearY, 0));
+		tranform.scale(Eigen::Vector3f(scale_x,scale_y,1));
+		tranform.translate(Eigen::Vector3f(1,1,0));
+		Eigen::Matrix4f m = tranform.matrix();
+		auto p = m.data();
+		m_instacePos->setTuple(i, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+
+		start_x += glyph.Advance;
+		
 	}
 }
 

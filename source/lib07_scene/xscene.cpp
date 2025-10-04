@@ -595,9 +595,10 @@ void XScene::render3D()
 void XScene::render2D()
 {
     makeCurrent();
-
+#if 1
 	{
         if (!d->fontTexture) {
+           
 			auto texture = makeShareDbObject<XOpenGLTexture>();
 
 			texture->setTarget(XOpenGLTexture::Target::Target2DArray);
@@ -611,7 +612,8 @@ void XScene::render2D()
 			std::vector<const void*> datas;
 			int width = 0;
 			int height = 0;
-            #if 1
+
+            //这个过程比较耗时，启动一个线程去加载数据 TODO
 			for (int i = 0; i < 11; i++) {
 				std::string  str = std::to_string(i).append(".bmp");
 				auto info = stbImage::readPicture(myUtilty::ShareVar::instance().currentExeDir + "\\sdf\\" + str, false);
@@ -619,26 +621,16 @@ void XScene::render2D()
 				height = info.height;
 				datas.push_back(info.data);
 			}
-            #else
-
-			std::string  str = "container.jpg";
-			auto info = stbImage::readPicture(myUtilty::ShareVar::instance().currentExeDir + "\\simsun_ttc\\" + str, true);
-			width = info.width;
-			height = info.height;
-			datas.push_back(info.data);
-            #endif
-
 
 			texture->setData(width, height, 0, XOpenGLTexture::TextureFormat::RGB8_UNorm, XOpenGLTexture::PixelFormat::RGB, XOpenGLTexture::PixelType::UInt8, datas);
-			//texture->setData(width, height, 0, XOpenGLTexture::TextureFormat::RGB8_UNorm, XOpenGLTexture::PixelFormat::RGB, XOpenGLTexture::PixelType::UInt8, datas[0]);
 			texture->release();
             d->fontTexture = texture;
         }
         d->fontTexture->bind();
         d->fontTexture->bindUnit(6);
         d->fontTexture->release();
-
 	}
+#endif
 
     d->createGrid2d();
 

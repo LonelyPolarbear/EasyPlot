@@ -2,8 +2,6 @@
 #include <QApplication>
 #include <filesystem>
 #include <thread>
-
-
 #include<lib00_utilty/myUtilty.h>
 #include<libPanle03_OpenGLWidget2/OpenGLWidget2.h>
 #include "mainwindow.h"
