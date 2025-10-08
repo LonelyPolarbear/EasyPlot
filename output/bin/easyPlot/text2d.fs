@@ -20,7 +20,7 @@ void main()
 	float derivate = fwidth(dis);
 	float alpha =smoothstep(-derivate, derivate, dis);
 	
-	FragColor = vec4(1,0,0, alpha);
+	FragColor = vec4(singleColor.xyz, alpha);
 	//FragColor = vec4(color.r,0,0,1);
 #endif
 }

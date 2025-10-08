@@ -5,6 +5,7 @@
 #include "lib06_select/xviewselection.h"
 #include "lib06_select/xviewselection2d.h"
 #include "lib00_utilty/myUtilty.h"
+#include<Eigen/Eigen>
 class XShape;
 class xcamera;
 class xshader;
@@ -125,6 +126,9 @@ protected:
 
 		//场景坐标系到屏幕坐标系的转换	
 		myUtilty::Vec2u scenePos2ScreenPos(myUtilty::Vec2f) const;
+
+		//屏幕坐标系到场景坐标系的转换
+		Eigen::Matrix4f screenPos2ScenePos() const;
 
 
 		//判断点是否在视口内(点是屏幕坐标系下的点，原点左下角 向右为x轴正方向，向上为y轴正方向)

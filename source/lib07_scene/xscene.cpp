@@ -13,6 +13,7 @@
 #include <lib05_shape/XGraphicsItem.h>
 #include <lib05_shape/XRectItem.h>
 #include <lib05_shape/XGridItem.h>
+#include <lib05_shape/XTextItem.h>
 #include <lib02_camera/xcamera.h>
 #include <set>
 #include <iostream>
@@ -657,7 +658,16 @@ void XScene::render2D()
     //![3] 绘制图元
     {
 		for (auto grapicsItem : d->shapes2D) {
-			grapicsItem->draw(Eigen::Matrix4f::Identity());
+            if (auto text = std::dynamic_pointer_cast<XTextItem>(grapicsItem)) {    
+                auto mat = screenPos2ScenePos();        //表示屏幕坐标系在场景坐标系下的位姿
+                auto pos = text->getTextScrrenPos();
+                text->setPosition(pos.x, getViewportHeight() - pos.y);
+                //grapicsItem->draw(Eigen::Matrix4f::Identity());
+                grapicsItem->draw(mat);
+            }
+            else {
+                grapicsItem->draw(Eigen::Matrix4f::Identity());
+            }
 		}
     }
     
@@ -934,6 +944,24 @@ myUtilty::Vec2u XScene::scenePos2ScreenPos(myUtilty::Vec2f pos) const
     //视口到屏幕
     auto screenPos = viewportPos2ScreenPos(viewportPos);
     return screenPos;
+}
+
+Eigen::Matrix4f XScene::screenPos2ScenePos() const
+{
+    Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+    auto scene_w = getViewportWidth();
+    auto scene_h = getViewportHeight();
+
+    transform.translate(Eigen::Vector3f(-0.5 * scene_w, -0.5 * scene_h, 0));
+    transform.translate(Eigen::Vector3f(-d->startx, -d->starty, 0));
+
+    //transform.translate(Eigen::Vector3f(0, scene_h, 0));
+
+    //transform.scale(Eigen::Vector3f(1, -1, 1));
+
+    Eigen::Matrix4f screen2viewPort = transform.matrix();
+
+    return d->sceneFrameInVirtualWorld.inverse() * screen2viewPort;
 }
 
 bool XScene::isBelongtoViewPort(int x, int y)

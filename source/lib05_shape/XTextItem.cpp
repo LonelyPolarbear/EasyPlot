@@ -85,56 +85,91 @@ void XTextItem::initResource()
 
 void XTextItem::setText(const std::wstring& text)
 {
+	m_text = text;
 	//设置实例化属性
 	m_instacePos = makeShareDbObject<XFloatArray>();
 	m_instacePos->setComponent(16);
-	m_instacePos->setNumOfTuple(text.size());
+	
 
+	//遍历text，确认有效字符的个数
 	auto num = text.size();
-	m_textureArray->setNumOfTuple(num*4);
+	int validNum = 0;
+	for (int i = 0; i < num; i++) {
+		auto c = text.at(i);
+		if (c != '\n') {
+			validNum++;
+		}
+	}
+	m_instacePos->setNumOfTuple(validNum);
+	m_textureArray->setNumOfTuple(validNum *4);
 	//获取每个字符的纹理
 	int start_x = 0;
 	int start_y = 0;
+
+	double scale = (double)m_fontSize/(double)64;		//字形的缩放系数
+	int idx = 0;
 	for (int i=0;i< num;i++) {
-		//wchar_t c(L'我');
 		auto c = text.at(i);
-		auto glyph = xfreetype::Instance()->getCharacterSdf(c);
-		auto layer = glyph.layer;
-		auto width = glyph.width;
-		auto height = glyph.height;
-		auto x = glyph.x * xfreetype::Instance()->getSdfSingleTextWidth();		//字形位置
-		auto y = glyph.y * xfreetype::Instance()->getSdfSingleTextHeight();
-		y += (xfreetype::Instance()->getSdfSingleTextHeight() - height);
-		auto picture_width = xfreetype::Instance()->getSdfPictureWidth();
-		auto fontBlockWidth = xfreetype::Instance()->getSdfSingleTextWidth();
-		auto x_ = (float)x / picture_width;
-		auto y_ = (float)y / picture_width;
-		auto w_ = (float)fontBlockWidth / picture_width;
-		auto h_ = (float)fontBlockWidth / picture_width;
+		if (c == '\n') {
+			start_x = 0;
+			start_y -= 64;
+			continue;
+		}
+		else {
+			auto glyph = xfreetype::Instance()->getCharacterSdf(c);
+			auto layer = glyph.layer;
+			auto width = glyph.width;
+			auto height = glyph.height;
+			auto x = glyph.x * xfreetype::Instance()->getSdfSingleTextWidth();		//字形位置
+			auto y = glyph.y * xfreetype::Instance()->getSdfSingleTextHeight();
+			y += (xfreetype::Instance()->getSdfSingleTextHeight() - height);
+			auto picture_width = xfreetype::Instance()->getSdfPictureWidth();
+			auto fontBlockWidth = xfreetype::Instance()->getSdfSingleTextWidth();
+			auto x_ = (float)x / picture_width;
+			auto y_ = (float)y / picture_width;
+			auto w_ = (float)fontBlockWidth / picture_width;
+			auto h_ = (float)fontBlockWidth / picture_width;
 
-		m_textureArray->setTuple(4*i+ 0, x_, y_, layer);
-		m_textureArray->setTuple(4 * i + 1, x_ + w_, y_, layer);
-		m_textureArray->setTuple(4 * i + 2, x_ + w_, y_ + h_, layer);
-		m_textureArray->setTuple(4 * i + 3, x_, y_ + h_, layer);
+			m_textureArray->setTuple(4 * idx + 0, x_, y_, layer);
+			m_textureArray->setTuple(4 * idx + 1, x_ + w_, y_, layer);
+			m_textureArray->setTuple(4 * idx + 2, x_ + w_, y_ + h_, layer);
+			m_textureArray->setTuple(4 * idx + 3, x_, y_ + h_, layer);
 
-		//字符位置
-		
-		float scale_x = glyph.width * 0.5;
-		float scale_y = glyph.height*0.5;
+			//字符位置
 
-		Eigen::Affine3f tranform = Eigen::Affine3f::Identity();
-		tranform.translate(Eigen::Vector3f(start_x + glyph.bearX, start_y -glyph.height+ glyph.bearY, 0));
-		tranform.scale(Eigen::Vector3f(scale_x,scale_y,1));
-		tranform.translate(Eigen::Vector3f(1,1,0));
-		Eigen::Matrix4f m = tranform.matrix();
-		auto p = m.data();
-		m_instacePos->setTuple(i, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+			float scale_x = glyph.width * 0.5*scale;
+			float scale_y = glyph.height * 0.5 * scale;
+			
+			Eigen::Affine3f tranform = Eigen::Affine3f::Identity();
+			tranform.translate(Eigen::Vector3f(start_x + abs(glyph.bearX*scale), start_y*scale + glyph.bearY*scale, 0));
+			tranform.scale(Eigen::Vector3f(scale_x, scale_y, 1));
+			tranform.translate(Eigen::Vector3f(1, -1, 0));
+			Eigen::Matrix4f m = tranform.matrix();
+			auto p = m.data();
+			m_instacePos->setTuple(idx, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
 
-		start_x += glyph.Advance;
-		
+			start_x += glyph.Advance*scale;
+			idx++;
+		}
 	}
 }
 
+void XTextItem::setTextScreenPos(int x, int y) {
+	m_screenPos = myUtilty::Vec2i(x, y);
+}
+
+void XTextItem::setFontSize(int size) {
+	m_fontSize = size;
+}
+
+int XTextItem::getFontSize() const {
+	return m_fontSize;
+}
+
+myUtilty::Vec2i XTextItem::getTextScrrenPos()
+{
+	return m_screenPos;
+}
 
 void XTextItem::updateData()
 {

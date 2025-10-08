@@ -817,10 +817,22 @@ void easyPlotWidget::slotAddText()
 	auto item = makeShareDbObject<XTextItem>();
 	item->initResource();
 	item->setVisible(true);
-	item->setPosition(0,20);
-	item->setText( L"路漫漫修远兮，吾将上下而求索！");
+	item->setTextScreenPos(0,50);
+	item->setFontSize(48);
+	std::string ss = R"(路漫漫其修远兮，吾将上下而求索！)";
+	item->setText( L"路漫漫其修远兮，\n吾将上下而求索！\n SDF字体的渲染");
 	item->setSingleColor(myUtilty::Vec4f(0, 0, 1, 1));
 	d->sceneLeft->addGraphicsItem(item);
+	{
+		auto item = makeShareDbObject<XTextItem>();
+		item->initResource();
+		item->setVisible(true);
+		item->setTextScreenPos(300, 50);
+		item->setFontSize(36);
+		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		item->setText(L"云在青天水在瓶");
+		d->sceneLeft->addGraphicsItem(item);
+	}
 	doneCurrent();
 }
 
