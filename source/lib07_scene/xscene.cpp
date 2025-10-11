@@ -13,7 +13,7 @@
 #include <lib05_shape/XGraphicsItem.h>
 #include <lib05_shape/XRectItem.h>
 #include <lib05_shape/XGridItem.h>
-#include <lib05_shape/XTextItem.h>
+#include <lib05_shape/XScreenTextItem.h>
 #include <lib02_camera/xcamera.h>
 #include <set>
 #include <iostream>
@@ -22,6 +22,8 @@
 
 #include <Eigen/Eigen>
 #include <lib03_stbImage/stbImage.h>
+
+#include <future>
 
 class SceneUbo:public DataBaseObject{
 protected:
@@ -119,6 +121,9 @@ public:
 	std::shared_ptr<XShape> gridShape;
 	std::shared_ptr<XGraphicsItem> gridShape2d;
 	std::shared_ptr<XShape> axisShape;
+
+    bool fontinitialized{ false };
+    std::future<std::tuple<int, int, std::vector<const void*>>> result_future;
 
 	void createGrid() {
 		if (!gridShape) {
@@ -596,7 +601,7 @@ void XScene::render3D()
 void XScene::render2D()
 {
     makeCurrent();
-#if 1
+
 	{
         if (!d->fontTexture) {
            
@@ -609,29 +614,55 @@ void XScene::render2D()
 			texture->setMagnificationFilter(XOpenGLTexture::Filter::Linear);
 			//texture->setWrapMode(XOpenGLTexture::CoordinateDirection::DirectionS, XOpenGLTexture::WrapMode::ClampToEdge);
 			//texture->setWrapMode(XOpenGLTexture::CoordinateDirection::DirectionT, XOpenGLTexture::WrapMode::ClampToEdge);
-
-			std::vector<const void*> datas;
-			int width = 0;
-			int height = 0;
-
-            //这个过程比较耗时，启动一个线程去加载数据 TODO
-			for (int i = 0; i < 11; i++) {
-				std::string  str = std::to_string(i).append(".bmp");
-				auto info = stbImage::readPicture(myUtilty::ShareVar::instance().currentExeDir + "\\sdf\\" + str, false);
-				width = info.width;
-				height = info.height;
-				datas.push_back(info.data);
-			}
-
-			texture->setData(width, height, 0, XOpenGLTexture::TextureFormat::RGB8_UNorm, XOpenGLTexture::PixelFormat::RGB, XOpenGLTexture::PixelType::UInt8, datas);
-			texture->release();
+    
             d->fontTexture = texture;
+
+			d->fontTexture->bind();
+			d->fontTexture->bindUnit(6);
+			d->fontTexture->release();
         }
-        d->fontTexture->bind();
-        d->fontTexture->bindUnit(6);
-        d->fontTexture->release();
+        else {
+            //纹理存在，但是可能数据尚未加载，因此需要重新加载数据
+			if (d->fontinitialized == false) {
+
+				d->result_future = std::async(std::launch::async, []() {
+					int width = 0;
+					int height = 0;
+					std::tuple<int, int, std::vector<const void*>> result;
+					(&std::get<2>(result))->resize(11);
+
+					auto fn = [&result, &width, &height](int i) {
+						std::string  str = std::to_string(i).append(".bmp");
+						auto info = stbImage::readPicture(myUtilty::ShareVar::instance().currentExeDir + "\\sdf\\" + str, false);
+						width = info.width;
+						height = info.height;
+						std::get<2>(result)[i] = info.data;
+						};
+
+					myUtilty::ParaAlgo::ParallelForeach(0, 11, fn, 1);
+
+					std::get<0>(result) = width;
+					std::get<1>(result) = height;
+					return result;
+					});
+
+				d->fontinitialized = true;
+			}
+				//判断任务是否完成
+				if (d->result_future.valid() &&  d->result_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready) {
+					auto datas = d->result_future.get();
+					d->fontTexture->bind();
+					d->fontTexture->setData(std::get<0>(datas), std::get<1>(datas), 0, XOpenGLTexture::TextureFormat::RGB8_UNorm, XOpenGLTexture::PixelFormat::RGB, XOpenGLTexture::PixelType::UInt8, std::get<2>(datas));
+					d->fontTexture->release();
+
+                    //内存释放
+                    for (auto data : std::get<2>(datas)) {
+                        stbImage::freeImageData((void*)data);
+                    }
+					std::cout << "font texture data loaded" << std::endl;
+				}	
+        }
 	}
-#endif
 
     d->createGrid2d();
 
@@ -654,15 +685,26 @@ void XScene::render2D()
 		updateViewport();
 	}
 
+
+	//!
+	//![4] 绘制屏幕网格
+	{
+		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		auto shader = d->shaderManger->getGridShader2D();
+		auto shape = d->gridShape2d;
+		shape->draw(Eigen::Matrix4f::Identity());
+		glEnableObj->restore();
+	}
+
 	//!
     //![3] 绘制图元
     {
 		for (auto grapicsItem : d->shapes2D) {
-            if (auto text = std::dynamic_pointer_cast<XTextItem>(grapicsItem)) {    
+            if (auto text = std::dynamic_pointer_cast<XScreenTextItem>(grapicsItem)) {    
                 auto mat = screenPos2ScenePos();        //表示屏幕坐标系在场景坐标系下的位姿
                 auto pos = text->getTextScrrenPos();
                 text->setPosition(pos.x, getViewportHeight() - pos.y);
-                //grapicsItem->draw(Eigen::Matrix4f::Identity());
                 grapicsItem->draw(mat);
             }
             else {
@@ -670,18 +712,6 @@ void XScene::render2D()
             }
 		}
     }
-    
-	//!
-    //![4] 绘制屏幕网格
-    {
-	    glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		auto shader = d->shaderManger->getGridShader2D();
-		auto shape = d->gridShape2d;
-		shape->draw(Eigen::Matrix4f::Identity());
-		glEnableObj->restore();
-    }
-
     
     glEnableObj->restore();
 
@@ -954,10 +984,6 @@ Eigen::Matrix4f XScene::screenPos2ScenePos() const
 
     transform.translate(Eigen::Vector3f(-0.5 * scene_w, -0.5 * scene_h, 0));
     transform.translate(Eigen::Vector3f(-d->startx, -d->starty, 0));
-
-    //transform.translate(Eigen::Vector3f(0, scene_h, 0));
-
-    //transform.scale(Eigen::Vector3f(1, -1, 1));
 
     Eigen::Matrix4f screen2viewPort = transform.matrix();
 

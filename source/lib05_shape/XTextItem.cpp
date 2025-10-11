@@ -86,30 +86,54 @@ void XTextItem::initResource()
 void XTextItem::setText(const std::wstring& text)
 {
 	m_text = text;
+	updateText();
+}
+
+//void XTextItem::setTextScreenPos(int x, int y) {
+//	m_screenPos = myUtilty::Vec2i(x, y);
+//	updateText();
+//}
+
+void XTextItem::setFontSize(int size) {
+	m_fontSize = size;
+	updateText();
+}
+
+int XTextItem::getFontSize() const {
+	return m_fontSize;
+}
+
+//myUtilty::Vec2i XTextItem::getTextScrrenPos()
+//{
+//	return m_screenPos;
+//}
+
+void XTextItem::updateText()
+{
 	//设置实例化属性
 	m_instacePos = makeShareDbObject<XFloatArray>();
 	m_instacePos->setComponent(16);
-	
 
 	//遍历text，确认有效字符的个数
-	auto num = text.size();
+	auto num = m_text.size();
 	int validNum = 0;
 	for (int i = 0; i < num; i++) {
-		auto c = text.at(i);
+		auto c = m_text.at(i);
 		if (c != '\n') {
 			validNum++;
 		}
 	}
 	m_instacePos->setNumOfTuple(validNum);
-	m_textureArray->setNumOfTuple(validNum *4);
+	m_textureArray->setNumOfTuple(validNum * 4);
+	m_textureArray->Modified();
 	//获取每个字符的纹理
 	int start_x = 0;
 	int start_y = 0;
 
-	double scale = (double)m_fontSize/(double)64;		//字形的缩放系数
+	double scale = (double)m_fontSize / (double)64;		//字形的缩放系数
 	int idx = 0;
-	for (int i=0;i< num;i++) {
-		auto c = text.at(i);
+	for (int i = 0; i < num; i++) {
+		auto c = m_text.at(i);
 		if (c == '\n') {
 			start_x = 0;
 			start_y -= 64;
@@ -120,15 +144,21 @@ void XTextItem::setText(const std::wstring& text)
 			auto layer = glyph.layer;
 			auto width = glyph.width;
 			auto height = glyph.height;
-			auto x = glyph.x * xfreetype::Instance()->getSdfSingleTextWidth();		//字形位置
-			auto y = glyph.y * xfreetype::Instance()->getSdfSingleTextHeight();
-			y += (xfreetype::Instance()->getSdfSingleTextHeight() - height);
+			
 			auto picture_width = xfreetype::Instance()->getSdfPictureWidth();
+			auto picture_height = xfreetype::Instance()->getSdfPictureWidth();
 			auto fontBlockWidth = xfreetype::Instance()->getSdfSingleTextWidth();
+			auto fontBlockHeight = xfreetype::Instance()->getSdfSingleTextHeight();
+
+			auto x = glyph.x * fontBlockWidth;		//字形位置
+			auto y = glyph.y * fontBlockHeight;
+			y += (fontBlockHeight - height);
+			//y +=  height;
+
 			auto x_ = (float)x / picture_width;
-			auto y_ = (float)y / picture_width;
-			auto w_ = (float)fontBlockWidth / picture_width;
-			auto h_ = (float)fontBlockWidth / picture_width;
+			auto y_ = (float)y / picture_height;
+			auto w_ = (float)width / picture_width;
+			auto h_ = (float)height / picture_height;
 
 			m_textureArray->setTuple(4 * idx + 0, x_, y_, layer);
 			m_textureArray->setTuple(4 * idx + 1, x_ + w_, y_, layer);
@@ -137,44 +167,26 @@ void XTextItem::setText(const std::wstring& text)
 
 			//字符位置
 
-			float scale_x = glyph.width * 0.5*scale;
+			float scale_x = glyph.width * 0.5 * scale;
 			float scale_y = glyph.height * 0.5 * scale;
-			
+
 			Eigen::Affine3f tranform = Eigen::Affine3f::Identity();
-			tranform.translate(Eigen::Vector3f(start_x + abs(glyph.bearX*scale), start_y*scale + glyph.bearY*scale, 0));
+			int bearx = start_x ==0 ? abs(glyph.bearX) : glyph.bearX;
+			tranform.translate(Eigen::Vector3f(start_x + bearx*scale, start_y * scale + glyph.bearY * scale, 0));
 			tranform.scale(Eigen::Vector3f(scale_x, scale_y, 1));
 			tranform.translate(Eigen::Vector3f(1, -1, 0));
 			Eigen::Matrix4f m = tranform.matrix();
 			auto p = m.data();
 			m_instacePos->setTuple(idx, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
 
-			start_x += glyph.Advance*scale;
+			start_x += glyph.Advance * scale;
 			idx++;
 		}
 	}
 }
 
-void XTextItem::setTextScreenPos(int x, int y) {
-	m_screenPos = myUtilty::Vec2i(x, y);
-}
-
-void XTextItem::setFontSize(int size) {
-	m_fontSize = size;
-}
-
-int XTextItem::getFontSize() const {
-	return m_fontSize;
-}
-
-myUtilty::Vec2i XTextItem::getTextScrrenPos()
-{
-	return m_screenPos;
-}
-
 void XTextItem::updateData()
 {
-	//std::lock_guard<std::mutex> lock(d->m_mutex);
-
 	//顶点数据已经更新
 	auto m_coord = m_coordArray;
 	if (m_coord && m_coord->GetTimeStamp() > m_UpdateTime) {

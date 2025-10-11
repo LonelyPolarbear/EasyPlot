@@ -51,6 +51,12 @@ stbImage::imageInfo stbImage::readPicture(const std::string& file,bool flip) {
     return info;
 }
 
+void stbImage::freeImageData(void* data)
+{
+    if(data)
+        stbi_image_free(data);
+}
+
 //X+ X- Y+ Y- Z+ Z-     右左 上下 前后
 unsigned int stbImage::loadCubeMap(const std::vector<std::string>& textures_faces)
 {

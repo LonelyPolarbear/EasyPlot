@@ -12,6 +12,7 @@
 #include <iomanip>
 #include <chrono>
 #include <random>
+#include <future>
 namespace render {
 	enum  class lib00_utilty_API graphicsItemType{
 		none,
@@ -434,6 +435,80 @@ namespace myUtilty {
 				static_assert("true", "myUtilty::randon(T) 类型错误");
 			}
 		}
+	}
+}
+
+#define USE_PARALLEL_ALGO  1
+//并行算法
+namespace myUtilty::ParaAlgo
+{
+	template<class iterator>
+	size_t Distance(iterator first, iterator last) {
+		if constexpr (std::is_integral_v< iterator>) {
+			return last -first;
+		}else{
+			return std::distance(first, last);	
+		}
+	}
+
+	template <class _InIt, class _Diff>
+	void Advance(_InIt& _Where, _Diff _Off) {
+		if constexpr (std::is_integral_v< _InIt>) {
+			_Where += _Off;
+		}
+		else {
+			std::advance(_Where, _Off);
+		}
+	}
+
+	/// <summary>
+	/// 并行for_each
+	/// </summary>
+	/// <typeparam name="iterator"></typeparam>
+	/// <typeparam name="Function"></typeparam>
+	/// <param name="begin"></param>
+	/// <param name="end"> 区间右端是开区间</param>
+	/// <param name="func"></param>
+	/// <param name="minBlockSize"></param>
+	template <class iterator,class Function>
+	void ParallelForeach(iterator begin, iterator end, Function func, const int minBlockSize = 256) {
+#if USE_PARALLEL_ALGO
+		unsigned int core_count = std::thread::hardware_concurrency(); //硬件支持的并发线程数量
+		//auto dataSize = end - begin;
+		auto dataSize = Distance(begin,end);
+		auto block_size = std::max<int>(minBlockSize, std::ceil(static_cast<double>(dataSize) / core_count));// 每个核至少
+
+		//统计需要使用多少个核
+		unsigned int use_core_count = std::ceil(static_cast<double>(dataSize) / block_size);
+
+		std::vector<std::future<void>> futures;
+		for (size_t i = 0; i < use_core_count; i++) {
+			auto startIdx =  i * block_size;
+			auto endIdx = std::min(startIdx + block_size, dataSize);
+
+			auto startId = begin;
+			Advance(startId, startIdx);
+
+			auto endId = begin;
+			Advance(endId, endIdx);
+
+			futures.emplace_back(
+				std::async(std::launch::async, [&func,startId, endId]() {
+					for (auto i = startId; i != endId; ++i)
+						func(i);
+					})
+			);
+		}
+
+		//等待线程结束
+		for (auto& f : futures) {
+			f.get();
+		}
+
+#else
+		for (auto i = begin; i != end; ++i)
+			func(i);
+#endif
 	}
 }
 #endif

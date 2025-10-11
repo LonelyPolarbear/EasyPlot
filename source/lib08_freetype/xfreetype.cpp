@@ -13,6 +13,7 @@
 #include <QImage>
 #include <QString>
 #include <regex>
+#include <lib00_utilty/myUtilty.h>
 
 FT_Library ft;
 FT_Face face;
@@ -192,14 +193,14 @@ void xfreetype::generateFontSdf(const QString& dir, bool flip, bool inverse)
 		// 加载字形
 		if (FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT ) != 0) {
             //宽 高 偏移x 偏移y advance pitch
-            outFile <<pictureIndex<<" " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 <<std::endl;
+            outFile << glyphIndex << " " << pictureIndex << " " << x << " " << y << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
 			continue;
 		}
 
 		// 检查是否支持SDF渲染
 		if (!FT_IS_SCALABLE(face)) {
 			std::cerr << "字体不支持缩放，无法生成SDF" << std::endl;
-            outFile << pictureIndex << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
+            outFile << glyphIndex << " " << pictureIndex << " " << x << " " << y << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
 		}
 
 		FT_Render_Mode renderMode = FT_RENDER_MODE_SDF;
@@ -215,7 +216,7 @@ void xfreetype::generateFontSdf(const QString& dir, bool flip, bool inverse)
 		}
 
 		if (!face->glyph->bitmap.buffer) {
-            outFile << pictureIndex << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
+            outFile << glyphIndex << " " << pictureIndex << " " << x << " " << y << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
 			continue;
 		}
 
@@ -283,6 +284,59 @@ xfreetype::Character xfreetype::getCharacterSdf(wchar_t c)
 
 void xfreetype::LoadGlyphImpl(const QString& dir, std::vector<Character>& charactersList)
 {
+#if 1
+	std::ifstream inFile(dir.toStdString(), std::ios::ate);
+	std::streamsize size = inFile.tellg();
+		inFile.seekg(0, std::ios::beg); // 回到文件开头
+		//读取所有数据
+		std::string buffer(size, '\0');
+		if (inFile.read(&buffer[0], size)) {
+			inFile.close();
+		}
+        std::regex pattern(R"(\n)");
+        
+        std::sregex_token_iterator iter(buffer.begin(), buffer.end(), pattern,-1);
+        auto glyphNum = std::stoi( iter->str());
+        iter++;
+		std::vector<std::string> result(
+            iter,  // -1表示取匹配之外的部分
+			std::sregex_token_iterator()
+		);
+
+        charactersList.resize(glyphNum);
+       
+		myUtilty::ParaAlgo::ParallelForeach(0, glyphNum, [&charactersList, &result](int idx) {
+        #if 0
+            //正则表达式不具备线程安全性,多线程反而会变慢
+           static std::regex ws_re("\\s+");
+            //手动分割
+            std::vector<std::string> result_number(
+			            std::sregex_token_iterator(result[idx].begin(), result[idx].end(), ws_re, -1), std::sregex_token_iterator()
+            );// -1表示取匹配之外的部分
+        #else
+			std::vector<std::string> tokens;
+            tokens.reserve(10);
+			std::stringstream ss(result[idx]);
+			std::string token;
+			while (ss >> token) {
+				tokens.push_back(token);
+			}
+        #endif
+
+			charactersList[idx].idx = std::stoi(tokens[0]);
+			charactersList[idx].layer = std::stoi(tokens[1]);
+			charactersList[idx].x = std::stoi(tokens[2]);
+			charactersList[idx].y = std::stoi(tokens[3]);
+			charactersList[idx].width = std::stoi(tokens[4]);
+			charactersList[idx].height = std::stoi(tokens[5]);
+			charactersList[idx].bearX = std::stoi(tokens[6]);
+			charactersList[idx].bearY = std::stoi(tokens[7]);
+			charactersList[idx].Advance = std::stoi(tokens[8]);
+			charactersList[idx].pitch = std::stoi(tokens[9]);
+        });
+
+        int iii=0;
+#else        
 	std::ifstream inFile(dir.toStdString());
 	std::regex ws_re("\\s+");  // 匹配一个或多个空白字符
 	std::string line;  // 存储每行内容
@@ -317,6 +371,7 @@ void xfreetype::LoadGlyphImpl(const QString& dir, std::vector<Character>& charac
             idx++;
         }
 	}
+    #endif
 }
 
 xfreetype::xfreetype()

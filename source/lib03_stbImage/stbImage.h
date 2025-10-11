@@ -22,4 +22,6 @@ public:
 
 	static imageInfo stbImage::readPicture(const std::string& file, bool flip);
 
+    static void freeImageData(void * data);
+
 };

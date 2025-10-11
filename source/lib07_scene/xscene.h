@@ -139,6 +139,8 @@ protected:
 
 		int mousePosx{0};
 		int mousePosy{0};
+
+		
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;

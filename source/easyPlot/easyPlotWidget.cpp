@@ -33,6 +33,7 @@
 #include <lib05_shape/XChartItem.h>
 #include <lib05_shape/XPolyline.h>
 #include <lib05_shape/XTextItem.h>
+#include <lib05_shape/XScreenTextItem.h>
 
 #include <lib06_select/xviewselection.h>
 #include <lib07_scene/xscene.h>
@@ -45,6 +46,7 @@
 #include <QtConcurrent> 
 
 #include <lib08_freetype/xfreetype.h>
+#include <qapplication.h>
 
 using namespace std::chrono_literals;
 enum class CameraAction {
@@ -57,6 +59,7 @@ struct easyPlotWidget::Internal {
 	std::shared_ptr<xShaderManger> shaderManger = makeShareDbObject<xShaderManger>();
 	std::shared_ptr<XScene> sceneLeft = makeShareDbObject<XScene>();
 	std::shared_ptr<XGraphicsItem> rect = makeShareDbObject<XRectItem>();		//实时绘制的矩形
+	std::shared_ptr<XScreenTextItem> screenTextItem = makeShareDbObject<XScreenTextItem>();		//实时绘制的矩形
 	
 	//鼠标的位置实时更新
 	QPoint mouseMoveLastTimePos = QPoint(0, 0);							//鼠标实时移动第一个位置
@@ -115,8 +118,6 @@ easyPlotWidget::easyPlotWidget(QWidget* parent) :XOpenGLWidget(parent),d(std::ma
 
 
 	d->mFutureWatcherVoid->setFuture(future);
-
-	
 }
 
 easyPlotWidget::~easyPlotWidget()
@@ -149,6 +150,17 @@ void easyPlotWidget::initGLResource()
 		rect->initResource();
 		rect->setVisible(false);
 		d->sceneLeft->addGraphicsItem(rect);
+	}
+
+	{
+		auto item = d->screenTextItem;
+		item->initResource();
+		item->setVisible(true);
+		item->setTextScreenPos(0, 40);
+		item->setFontSize(36);
+		//item->setText(L"屏幕坐标系下的文字");
+		item->setSingleColor(myUtilty::Vec4f(0, 0, 1, 1));
+		d->sceneLeft->addGraphicsItem(item);
 	}
 }
 
@@ -604,7 +616,16 @@ void easyPlotWidget::slotFileLoadFinished()
 
 void easyPlotWidget::slotAnyTaskFinished()
 {
-	std::cout << "任务完成" << std::endl;
+	//加载文件
+	QString str;
+	QString filePath = qApp->applicationDirPath()+"/tip.txt";
+	QFile file1(filePath);
+	if (!file1.open(QIODevice::ReadWrite | QIODevice::Text)) {
+		return;
+	}
+	str = file1.readAll();
+	file1.close();
+	d->screenTextItem->setText(str.toStdWString());
 }
 
 void easyPlotWidget::slotRectPickEnable(bool flag)
@@ -649,7 +670,6 @@ void easyPlotWidget::updateItem()
 				rect->translate(center.x, center.y);
 				rect->scale(abs(0.5*scalex), abs(0.5*scaley));
 			}
-			//rect->setRect(firstPos,secondPos);
 		}
 		if (d->mDrawItemType == render::graphicsItemType::line) {
 			
@@ -698,15 +718,17 @@ void easyPlotWidget::slotAddLine2D()
 	auto xoffset = myUtilty::math::randon<float>(-200, 200);
 	auto yoffset = myUtilty::math::randon<float>(10, 50);
 	auto fre = myUtilty::math::randon<float>(0.05, 0.1);
-	int num = 200;
+	int num = 13;
 	curveData->setNumOfTuple(num);
 	//x随机偏移
 	//y随机偏移
+	std::vector<int> x{ 2500,-2500,-2500,-500,-500,-1500,-1500,1500,1500,500,500,2500,2500 };
+	std::vector<int> y{ 5000,5000,4000,4000,1000,1000,0,0,1000,1000,4000,4000,5000 };
 	for (int i = 0; i < num; i++) {
-		auto x = i;
-		auto y = 100*sin(fre *x);
+		//auto x = i;
+		//auto y = 100*sin(fre *x);
 		auto z =0;
-		curveData->setTuple(i, x, y, z);
+		curveData->setTuple(i, x[i]/50, y[i]/50, z);
 	}
 	item->translate(xoffset, yoffset);
 	curveData->Modified();
@@ -814,23 +836,14 @@ void easyPlotWidget::slotAddBar()
 void easyPlotWidget::slotAddText()
 {
 	makeCurrent();
-	auto item = makeShareDbObject<XTextItem>();
-	item->initResource();
-	item->setVisible(true);
-	item->setTextScreenPos(0,50);
-	item->setFontSize(48);
-	std::string ss = R"(路漫漫其修远兮，吾将上下而求索！)";
-	item->setText( L"路漫漫其修远兮，\n吾将上下而求索！\n SDF字体的渲染");
-	item->setSingleColor(myUtilty::Vec4f(0, 0, 1, 1));
-	d->sceneLeft->addGraphicsItem(item);
 	{
 		auto item = makeShareDbObject<XTextItem>();
 		item->initResource();
 		item->setVisible(true);
-		item->setTextScreenPos(300, 50);
+		item->setPosition(0,300);
 		item->setFontSize(36);
 		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-		item->setText(L"云在青天水在瓶");
+		item->setText(L"12.235");
 		d->sceneLeft->addGraphicsItem(item);
 	}
 	doneCurrent();
