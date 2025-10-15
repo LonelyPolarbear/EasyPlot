@@ -10,6 +10,7 @@
 #include <lib00_utilty/myUtilty.h>
 #include <lib04_opengl/XOpenGLEnable.h>
 #include <lib01_shader/xshaderManger.h>
+#include <iostream>
 
 static std::atomic< uint64_t>  object_id_counter(0);
 
@@ -84,11 +85,21 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 void XGraphicsItem::pickBorderDraw(std::shared_ptr<xshader> shader,const Eigen::Matrix4f& m)
 {
 	drawBorderImpl(shader, m, true);
+
+	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
+	for (auto item : m_childItems) {
+		item->drawBorderImpl(m_shaderManger->getShader2D(getDrawType()),mat,true);
+	}
 }
 
 void XGraphicsItem::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
 {
-	drawFill(shader,m);
+	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
+	for (auto item : m_childItems) {
+		item->drawFill(m_shaderManger->getPickFillShader2D(), mat);
+	}
+
+	drawFill(shader, m);
 }
 
 void XGraphicsItem::drawBorder(std::shared_ptr<xshader> shader,  const Eigen::Matrix4f& m ){
@@ -159,10 +170,15 @@ void XGraphicsItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matri
 		if (m_indexArray) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			auto indexCount = m_indexArray->getNumOfTuple() * m_indexArray->getComponent();
-			if (m_isInstance) {
-				auto instanceNum =  m_instacePos->getNumOfTuple();
-				if(instanceNum > 0)
-					glDrawElementsInstanced((unsigned int)PrimitveType::triangle, indexCount, GL_UNSIGNED_INT, (void*)0, instanceNum);  // 最后一个参数是实例数量
+			if (m_isInstance ) {
+				if(m_instacePos){
+					auto instanceNum =  m_instacePos->getNumOfTuple();
+					if(instanceNum > 0)
+						glDrawElementsInstanced((unsigned int)PrimitveType::triangle, indexCount, GL_UNSIGNED_INT, (void*)0, instanceNum);  // 最后一个参数是实例数量
+				}
+				else {
+					//std::cout<<__FILE__ <<" Line:" <<std::dec <<__LINE__ << " m_instacePos is null" << std::endl;
+				}
 			}
 			else {
 				glDrawElements((unsigned int)PrimitveType::triangle, indexCount, GL_UNSIGNED_INT, 0);
@@ -412,6 +428,12 @@ void XGraphicsItem::translate(float dx, float dy)
 void XGraphicsItem::setPosition(float x, float y)
 {
 	d->m_transform.translation()<<x,y,0;
+}
+
+myUtilty::Vec2f XGraphicsItem::getPosition() const
+{
+	Eigen::Vector3f pos= d->m_transform.translation();
+	return myUtilty::Vec2f(pos.x(), pos.y());
 }
 
 void XGraphicsItem::scale(float sx, float sy)

@@ -10,8 +10,11 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
 include_directories(${PROJECT_SOURCE_DIR}/source/main)
 
 #递归目录获取所有源文件
-set(SOURCES_FILES		main.cpp MainWindow.cpp)
-set(HERDERS_FILES		MainWindow.h)
+#set(SOURCES_FILES		main.cpp MainWindow.cpp)
+#set(HERDERS_FILES		MainWindow.h)
+
+file(GLOB_RECURSE HERDERS_FILES *.h)
+file(GLOB_RECURSE SOURCES_FILES *.cpp)
 
 #-------------------------------------------------------
 #Qt支持

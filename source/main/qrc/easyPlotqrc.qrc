@@ -27,5 +27,14 @@
         <file>icon/font.svg</file>
         <file>icon/sdf.svg</file>
         <file>icon/text.svg</file>
+        <file>icon/invisible.svg</file>
+        <file>icon/visible.svg</file>
+        <file>icon/align_bottom.svg</file>
+        <file>icon/align_hcenter.svg</file>
+        <file>icon/align_left.svg</file>
+        <file>icon/align_right.svg</file>
+        <file>icon/align_top.svg</file>
+        <file>icon/align_vcenter.svg</file>
+        <file>icon/setting.svg</file>
     </qresource>
 </RCC>

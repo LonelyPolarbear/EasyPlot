@@ -46,6 +46,8 @@ public:
 
 	uint32_t getSelectId();
 
+	bool isAllowContextmenu() const;
+
 protected:
 	virtual void mousePressEvent(QMouseEvent* event) override;
 	virtual void mouseMoveEvent(QMouseEvent* event) override;
@@ -64,9 +66,12 @@ public slots:
 	void slotOpenFile(const QString& fileName);
 	void slotDelete();
 	void slotDeleteAll();
+	void slotVisibleAll();
+	void slotInvisible();
 	void slotCreateCube();
 	void slotCreateSphere();
 	void slotCreateCone();
+	void slotSetting();
 
 	void slotFileLoadFinished();
 	void slotAnyTaskFinished();
@@ -93,6 +98,8 @@ public slots:
 	void slotGenerateFontTextures();
 
 	void slotGenerateFontSdf();
+
+	void slotScreenTextVisible(bool flag);
 
 private:
 	struct Internal;

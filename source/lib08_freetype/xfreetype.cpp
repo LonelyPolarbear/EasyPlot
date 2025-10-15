@@ -35,6 +35,37 @@ void xfreetype::test()
  
 }
 
+void xfreetype::printFaceInfo() {
+	std::cout << "=== 字体信息 ===" << std::endl;
+	std::cout << "字体家族: " << face->family_name << std::endl;
+	std::cout << "字体样式: " << face->style_name << std::endl;
+	std::cout << "字形数量: " << face->num_glyphs << std::endl;
+
+	std::cout << "=== 设计度量 ===" << std::endl;
+	std::cout << "units_per_EM: " << face->units_per_EM << std::endl;
+	std::cout << "ascender: " << face->ascender << " 设计单位" << std::endl;
+	std::cout << "descender: " << face->descender << " 设计单位" << std::endl;
+	std::cout << "height: " << face->height << " 设计单位" << std::endl;
+
+	std::cout << "=== 当前尺寸 ===" << std::endl;
+	if (face->size) {
+		std::cout << "缩放后行高: " << (face->size->metrics.height >> 6) << " 像素" << std::endl;
+		std::cout << "x_ppem: " << face->size->metrics.x_ppem << std::endl;
+		std::cout << "y_ppem: " << face->size->metrics.y_ppem << std::endl;
+	}
+
+	std::cout << "=== 字体特性 ===" << std::endl;
+	if (face->face_flags & FT_FACE_FLAG_SCALABLE) {
+		std::cout << "- 可缩放字体" << std::endl;
+	}
+	if (face->face_flags & FT_FACE_FLAG_FIXED_SIZES) {
+		std::cout << "- 包含固定尺寸: " << face->num_fixed_sizes << " 种" << std::endl;
+	}
+	if (face->face_flags & FT_FACE_FLAG_KERNING) {
+		std::cout << "- 支持字距调整" << std::endl;
+	}
+}
+
 void xfreetype::generateFontTextures(const QString&dir, bool flip,bool inverse)
 {
 	auto sdfDataPath = dir + "/data.txt";
@@ -54,7 +85,13 @@ void xfreetype::generateFontTextures(const QString&dir, bool flip,bool inverse)
 		std::cerr << "警告：字体不支持 Unicode 映射表，可能无法获取所有字符" << std::endl;
 	}
 
+	//字体信息
 	FT_UInt maxGlyphIndex = face->num_glyphs;       //总共的字形数量
+	face->family_name;		// 字体系列名称（如 "Arial", "Times New Roman"）
+	face->style_name;			// 字体风格名称（如 "Bold", "Italic"）
+	face->num_faces;			// 字体文件中包含的字体数量（.ttc集合文件可能包含多个）
+
+
     #if 0
 	for (FT_UInt glyphIndex = 0; glyphIndex < maxGlyphIndex; ++glyphIndex) {
 		// 检查字形是否有效（仅加载轮廓，不渲染位图，提高效率）
@@ -107,7 +144,17 @@ void xfreetype::generateFontTextures(const QString&dir, bool flip,bool inverse)
 			continue;
 		}
         if (!face->glyph->bitmap.buffer) {
-            outFile << glyphIndex << " " << pictureIndex << " " << x << " " << y << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
+            auto advance = face->glyph->advance.x >> 6;
+			outFile << glyphIndex
+				<< " " << pictureIndex
+				<< " " << x
+				<< " " << 0
+				<< " " << 0
+				<< " " << 0
+				<< " " << 0
+				<< " " << 0
+				<< " " << advance
+				<< " " << 0 << std::endl;
             continue;
         }
 
@@ -118,6 +165,7 @@ void xfreetype::generateFontTextures(const QString&dir, bool flip,bool inverse)
 			auto* buffer = face->glyph->bitmap.buffer;
 			FontTextures[pictureIndex]->setData(x * perPixelWidth, y * perPixelHeight, bmpWidth, bmpHeight, buffer);
             auto advance = face->glyph->advance.x >> 6;
+			auto lineSpace = face->size->metrics.height; //行距，表达的是基线到基线的距离
            int flipy = (flip ?  pixelNumY-y-1:y);
             outFile << glyphIndex 
             << " " << pictureIndex 
@@ -216,7 +264,17 @@ void xfreetype::generateFontSdf(const QString& dir, bool flip, bool inverse)
 		}
 
 		if (!face->glyph->bitmap.buffer) {
-            outFile << glyphIndex << " " << pictureIndex << " " << x << " " << y << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << " " << 0 << std::endl;
+			auto advance = face->glyph->advance.x >> 6;
+			outFile << glyphIndex
+				<< " " << pictureIndex
+				<< " " << x
+				<< " " << 0
+				<< " " << 0
+				<< " " << 0
+				<< " " << 0
+				<< " " << 0
+				<< " " << advance
+				<< " " << 0 << std::endl;
 			continue;
 		}
 
@@ -281,6 +339,135 @@ xfreetype::Character xfreetype::getCharacterSdf(wchar_t c)
 	return mCharactersListSdf[idx];
 }
 
+double xfreetype::computeLineStrWidth(std::wstring data, double FontSize)
+{
+	double scale =FontSize / 64.;
+	double width = 0;
+
+	for (auto c = data.begin(); c != data.end(); c++)
+	{
+        auto ch =getCharacterSdf(*c);
+		width += ch.Advance*scale;
+	}
+
+	return width;
+}
+
+int xfreetype::getLineRowSpace()
+{
+	return face->size->metrics.height >> 6;
+}
+
+int xfreetype::computeLineNum(const std::wstring& data, double FontSize, double Fixedwidth,  bool isFixed)
+{
+	int lineNum = 1;
+	auto num = data.size();
+	
+	//获取每个字符的纹理
+	double start_x = 0;
+	double start_y = 0;
+
+	double scale = (double)FontSize / (double)64;		//字形的缩放系数
+
+	auto adjust = [this, scale, Fixedwidth, isFixed](double& start_x, double& start_y) {
+		if(isFixed ==false)
+			return false;
+		if (start_x > Fixedwidth) {
+			start_y -= 64 * scale;
+			return true;
+		}
+		return false;
+		};
+
+	for (int i = 0; i < num; i++) {
+		auto c = data.at(i);
+		auto glyph = xfreetype::Instance()->getCharacterSdf(c);
+
+		double tmp = start_x + glyph.Advance * scale;
+		if (adjust(tmp, start_y)) {
+			start_x = 0;
+			lineNum++;
+		}
+
+		if (c == '\n') {
+			lineNum++;
+			start_x = 0;
+			start_y -= 64 * scale;
+		}
+
+
+		if (c != '\n') {
+			start_x += glyph.Advance * scale;
+		}
+	}
+
+	return lineNum;
+}
+
+std::shared_ptr<XDoubleArray> xfreetype::computeLineNums(const std::wstring& data, double FontSize, double Fixedwidth,bool isFixed)
+{
+	auto lineNums =computeLineNum(data,FontSize, Fixedwidth,isFixed);
+	auto result =makeShareDbObject<XDoubleArray>();
+	result->setComponent(4);
+	result->setNumOfTuple(lineNums);
+
+	int lineNum = 0;
+	auto num = data.size();
+
+	//获取每个字符的纹理
+	double start_x = 0;
+	double start_y = 0;
+
+	double scale = (double)FontSize / (double)64;		//字形的缩放系数
+
+	auto adjust = [this, scale, Fixedwidth,isFixed](double& start_x, double& start_y) {
+		if(isFixed ==false)
+			return false;
+		if (start_x > Fixedwidth) {
+			start_y -= 64 * scale;
+			return true;
+		}
+		return false;
+		};
+	//int lastRowStartIdx =0;
+	double maxCharHeightTop = -100;
+	double maxCharHeightBottom = 0;
+	for (int i = 0; i < num; i++) {
+		auto c = data.at(i);
+		auto glyph = xfreetype::Instance()->getCharacterSdf(c);
+		maxCharHeightTop = std::max<double>(maxCharHeightTop,  glyph.bearY);
+		if(glyph.bearY<0 || maxCharHeightTop<0 || maxCharHeightBottom<0){
+			int hhh =10;
+		}
+		maxCharHeightBottom = std::max<double>(maxCharHeightBottom, glyph.height - glyph.bearY);
+		double tmp = start_x + glyph.Advance * scale;
+		if (adjust(tmp, start_y)) {
+			result->setTuple(lineNum, i, start_x, maxCharHeightTop,maxCharHeightBottom);
+			start_x = 0;
+			maxCharHeightTop = -100;
+			maxCharHeightBottom = 0;
+			lineNum++;
+			//lastRowStartIdx = i;
+		}
+
+		if (c == '\n') {
+			result->setTuple(lineNum, i, start_x, maxCharHeightTop, maxCharHeightBottom);
+			maxCharHeightBottom = 0;
+			maxCharHeightTop = -100;
+			lineNum++;
+			start_x = 0;
+			start_y -= 64 * scale;
+			//lastRowStartIdx = i;
+		}
+
+		if (c != '\n') {
+			start_x += glyph.Advance * scale;
+			result->setTuple(lineNum, i, start_x, maxCharHeightTop, maxCharHeightBottom);
+		}
+	}
+
+	return result;
+}
 
 void xfreetype::LoadGlyphImpl(const QString& dir, std::vector<Character>& charactersList)
 {
@@ -388,108 +575,6 @@ xfreetype::xfreetype()
     FT_Set_Pixel_Sizes(face, 0, 64);
 }
 
-#if 0
-void xfreetype::LoadCharacter(std::wstring data)
-{
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); //禁用字节对齐限制
-    for (auto c : data) {
-        //获取编码值
-        uint16_t code = *((uint16_t*)&c);
-
-        if (Characters.find(code) != Characters.end())
-            continue;
-        if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-        {
-            std::cout << "ERROR::FREETYTPE: Failed to load Glyph" << std::endl;
-            continue;
-        }
-
-        // 生成纹理
-        GLuint texture;
-        glGenTextures(1, &texture);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RED,
-            face->glyph->bitmap.width,
-            face->glyph->bitmap.rows,
-            0,
-            GL_RED,
-            GL_UNSIGNED_BYTE,
-            face->glyph->bitmap.buffer
-        );
-        // 设置纹理选项
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // 储存字符供之后使用
-        Character character = {
-            texture,
-            face->glyph->bitmap.width, face->glyph->bitmap.rows,
-            face->glyph->bitmap_left, face->glyph->bitmap_top,
-            face->glyph->advance.x
-        };
-        Characters.insert({ code, character });
-    }
-}
-
-std::pair<double, double> xfreetype::computeStrSize(std::wstring data,int FontSize)
-{
-    LoadCharacter(data);
-
-    float scale = (float)FontSize / 200.;
-    float x = 0;
-    float maxHeight = 0;
-    for (auto c = data.begin(); c != data.end(); c++)
-    {
-        uint16_t code = *((uint16_t*)&(*c));
-        auto  ch = xfreetype::Instance()->Characters[code];
-
-        GLfloat w = ch.width * scale;
-        GLfloat h = ch.height * scale;
-
-        maxHeight = std::max(maxHeight, ch.height * scale);
-        x += (ch.Advance >> 6) * scale; // 位偏移6个单位来获取单位为像素的值 (2^6 = 64)
-    }
-    return std::pair<double, double>(x, maxHeight);
-}
-
-void xfreetype::getVertices(wchar_t c, float(&vertices)[24], int fontSize)
-{
-    LoadCharacter(std::wstring(1, c));
-    //获取该字符的纹理
-    float x = 0;
-    float y = 0;
-    uint16_t code = *((uint16_t*)&(c));
-    auto  ch = xfreetype::Instance()->Characters[code];
-    float scale = (float)fontSize / 200.;
-    GLfloat xpos = x + ch.bearX * scale;
-    GLfloat ypos = y - (ch.height - ch.bearY) * scale;
-
-    GLfloat w = ch.width * scale;
-    GLfloat h = ch.height * scale;
-    // 对每个字符更新VBO
-    GLfloat _vertices[6][4] = {
-        { xpos,     ypos + h,   0.0, 0.0 },
-        { xpos,     ypos,       0.0, 1.0 },
-        { xpos + w, ypos,       1.0, 1.0 },
-
-        { xpos,     ypos + h,   0.0, 0.0 },
-        { xpos + w, ypos,       1.0, 1.0 },
-        { xpos + w, ypos + h,   1.0, 0.0 }
-    };
-    
-    memcpy(vertices, _vertices, 18 * sizeof(float));
-}
-
-xfreetype::Character xfreetype::getCharacter(wchar_t c)
-{
-    uint16_t code = *((uint16_t*)&(c));
-    return this->Characters[code];
-}
-#endif
 xfreetype::~xfreetype() {
     FT_Done_Face(face);
     FT_Done_FreeType(ft);

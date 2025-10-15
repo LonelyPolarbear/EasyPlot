@@ -6,7 +6,7 @@
 #include <lib08_freetype/xfreetype.h>
 #include <Eigen/Eigen>
 
-XTextItem::XTextItem():XGraphicsItem()
+XTextItem::XTextItem() :XGraphicsItem()
 {
 	m_textureBuffer = makeShareDbObject<XOpenGLBuffer>();
 
@@ -74,77 +74,86 @@ void XTextItem::initResource()
 
 	m_textureBuffer->create();
 
-	m_vao->addBuffer(5, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3*0, true);
+	m_vao->addBuffer(5, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3 * 0, true);
 	m_vao->addBuffer(6, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3 * 1, true);
 	m_vao->addBuffer(7, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3 * 2, true);
 	m_vao->addBuffer(8, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3 * 3, true);
 
 	m_vao->release();
-	
 }
 
 void XTextItem::setText(const std::wstring& text)
 {
 	m_text = text;
-	updateText();
+	//updateText();
+	configDataModified();
 }
 
-//void XTextItem::setTextScreenPos(int x, int y) {
-//	m_screenPos = myUtilty::Vec2i(x, y);
-//	updateText();
-//}
-
-void XTextItem::setFontSize(int size) {
+void XTextItem::setFontSize(double size) {
 	m_fontSize = size;
-	updateText();
+	if (m_text.size())
+		//updateText();
+		configDataModified();
 }
 
-int XTextItem::getFontSize() const {
+double XTextItem::getFontSize() const {
 	return m_fontSize;
 }
 
-//myUtilty::Vec2i XTextItem::getTextScrrenPos()
-//{
-//	return m_screenPos;
-//}
+double XTextItem::getFixedWidth() const {
+	return mFixedWidth;
+}
 
 void XTextItem::updateText()
 {
+
+if(mConfigDataTimeStamp < m_UpdateTime)
+	return;
+
 	//设置实例化属性
 	m_instacePos = makeShareDbObject<XFloatArray>();
 	m_instacePos->setComponent(16);
 
-	//遍历text，确认有效字符的个数
 	auto num = m_text.size();
-	int validNum = 0;
-	for (int i = 0; i < num; i++) {
-		auto c = m_text.at(i);
-		if (c != '\n') {
-			validNum++;
-		}
-	}
-	m_instacePos->setNumOfTuple(validNum);
-	m_textureArray->setNumOfTuple(validNum * 4);
+	m_instacePos->setNumOfTuple(num);
+	m_textureArray->setNumOfTuple(num * 4);
 	m_textureArray->Modified();
 	//获取每个字符的纹理
-	int start_x = 0;
-	int start_y = 0;
-
+	double start_x = 0;
 	double scale = (double)m_fontSize / (double)64;		//字形的缩放系数
-	int idx = 0;
+
+	double start_y = 0;
+
+	auto adjust = [this, scale](double& start_x, double& start_y) {
+		if (mIsFixWidth == false) {
+			return false;
+		}
+		if (start_x > mFixedWidth) {
+			//start_x = 0;
+			start_y -= xfreetype::Instance()->getLineRowSpace() * scale;
+			return true;
+		}
+		return false;
+		};
+
+	//首先计算每一行的字符数
+	auto rowInfos = xfreetype::Instance()->computeLineNums(m_text, m_fontSize,mFixedWidth,mIsFixWidth);
+	int rowNum = 0;
 	for (int i = 0; i < num; i++) {
 		auto c = m_text.at(i);
-		if (c == '\n') {
-			start_x = 0;
-			start_y -= 64;
-			continue;
-		}
-		else {
+		{
 			auto glyph = xfreetype::Instance()->getCharacterSdf(c);
+
+			double tmp = start_x + glyph.Advance * scale;
+			if (adjust(tmp, start_y)) {
+				start_x = 0;
+				rowNum++;
+			}
+
 			auto layer = glyph.layer;
 			auto width = glyph.width;
 			auto height = glyph.height;
-			
+
 			auto picture_width = xfreetype::Instance()->getSdfPictureWidth();
 			auto picture_height = xfreetype::Instance()->getSdfPictureWidth();
 			auto fontBlockWidth = xfreetype::Instance()->getSdfSingleTextWidth();
@@ -160,10 +169,10 @@ void XTextItem::updateText()
 			auto w_ = (float)width / picture_width;
 			auto h_ = (float)height / picture_height;
 
-			m_textureArray->setTuple(4 * idx + 0, x_, y_, layer);
-			m_textureArray->setTuple(4 * idx + 1, x_ + w_, y_, layer);
-			m_textureArray->setTuple(4 * idx + 2, x_ + w_, y_ + h_, layer);
-			m_textureArray->setTuple(4 * idx + 3, x_, y_ + h_, layer);
+			m_textureArray->setTuple(4 * i + 0, x_, y_, layer);
+			m_textureArray->setTuple(4 * i + 1, x_ + w_, y_, layer);
+			m_textureArray->setTuple(4 * i + 2, x_ + w_, y_ + h_, layer);
+			m_textureArray->setTuple(4 * i + 3, x_, y_ + h_, layer);
 
 			//字符位置
 
@@ -171,22 +180,69 @@ void XTextItem::updateText()
 			float scale_y = glyph.height * 0.5 * scale;
 
 			Eigen::Affine3f tranform = Eigen::Affine3f::Identity();
-			int bearx = start_x ==0 ? abs(glyph.bearX) : glyph.bearX;
-			tranform.translate(Eigen::Vector3f(start_x + bearx*scale, start_y * scale + glyph.bearY * scale, 0));
+			//int bearx = start_x == 0 ? abs(glyph.bearX) : glyph.bearX;
+			int bearx = glyph.bearX;
+
+			if (c == '\n') {
+				//前一行绘制结束，根据水平对齐方式重新调整上一行的起始位置
+				start_x = 0;
+				start_y -= xfreetype::Instance()->getLineRowSpace() * scale;
+				rowNum++;
+			}
+
+			//获取该行的信息
+			double offset_x = 0;
+			double offset_y = 0;
+			{	
+				//if (mIsFixWidth) {
+					auto rowLen = rowInfos->data(rowNum)[1];
+					if (getHAlignment() == HAlign::Center) {
+						//offset_x = (mFixedWidth - rowLen) * 0.5;
+						offset_x -= rowLen * 0.5;
+					}
+					else if (getHAlignment() == HAlign::Right) {
+						//offset_x = mFixedWidth - rowLen;
+						offset_x -=   rowLen;
+					}
+				//}
+			}
+
+			{
+				if (mValignment == VAlign::Top) {
+					auto aboveBaseLineLen = rowInfos->data(rowNum)[2];
+					if (aboveBaseLineLen < 0) {
+						int gggg =10;
+					}
+					auto downBaseLineLen = rowInfos->data(rowNum)[3];
+					//offset_y -= xfreetype::Instance()->getLineRowSpace() * scale;
+					//offset_y -= (xfreetype::Instance()->getLineRowSpace() - aboveBaseLineLen) * scale;
+					offset_y -= aboveBaseLineLen * scale;
+				}
+					
+				else if (mValignment == VAlign::Middle)
+				{
+					auto aboveBaseLineLen = rowInfos->data(rowNum)[2];
+					auto downBaseLineLen = rowInfos->data(rowNum)[3];
+					offset_y -= (aboveBaseLineLen - downBaseLineLen)*0.5*scale;
+				}
+			}
+			tranform.translate(Eigen::Vector3f(start_x + bearx * scale+ offset_x, start_y + glyph.bearY * scale+offset_y, 0));
 			tranform.scale(Eigen::Vector3f(scale_x, scale_y, 1));
 			tranform.translate(Eigen::Vector3f(1, -1, 0));
 			Eigen::Matrix4f m = tranform.matrix();
 			auto p = m.data();
-			m_instacePos->setTuple(idx, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+			m_instacePos->setTuple(i, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
 
-			start_x += glyph.Advance * scale;
-			idx++;
+			if (c != '\n') {
+				start_x += glyph.Advance * scale;
+			}
 		}
 	}
 }
 
 void XTextItem::updateData()
 {
+	updateText();
 	//顶点数据已经更新
 	auto m_coord = m_coordArray;
 	if (m_coord && m_coord->GetTimeStamp() > m_UpdateTime) {
@@ -195,7 +251,7 @@ void XTextItem::updateData()
 
 		m_vbo_coord->allocate(m_coord->data(0), m_coord->size());
 		m_indexArray->setTuple(0, 0, 1, 2);
-		m_indexArray->setTuple(1, 0, 2,3);
+		m_indexArray->setTuple(1, 0, 2, 3);
 		m_indexArray->Modified();
 
 		m_vbo_coord->release();
@@ -236,10 +292,103 @@ void XTextItem::updateData()
 	m_UpdateTime.Modified();
 }
 
+void XTextItem::setIsFixWidth(bool isFixWidth)
+{
+	mIsFixWidth = isFixWidth;
+	if (m_text.size())
+		//updateText();
+		configDataModified();
+}
+
+void XTextItem::setFixedWidth(double fixedWidth)
+{
+	mFixedWidth = fixedWidth;
+	if (m_text.size())
+		//updateText();
+		configDataModified();
+}
+
+void XTextItem::setVAlignment(VAlign valignment)
+{
+	mValignment = valignment;
+	if (m_text.size())
+		//updateText();
+		configDataModified();
+}
+
+void XTextItem::setHAlignment(HAlign halignment)
+{
+	mHAlignment = halignment;
+	if (m_text.size())
+		//updateText();
+		configDataModified();
+}
+
+XTextItem::VAlign XTextItem::getVAlignment() const
+{
+	return mValignment;
+}
+
+XTextItem::HAlign XTextItem::getHAlignment() const
+{
+	return mHAlignment;
+}
+
+bool XTextItem::isFixWidth() const
+{
+	return mIsFixWidth;
+}
+
 uint32_t XTextItem::computeNumofVertices()
 {
-	if(m_drawType == PrimitveType::line_strip_adjacency)
-		return m_coordArray->getNumOfTuple()+3;
+	if (m_drawType == PrimitveType::line_strip_adjacency)
+		return m_coordArray->getNumOfTuple() + 3;
 	else
 		return m_coordArray->getNumOfTuple();
+}
+
+void XTextItem::configDataModified()
+{
+	mConfigDataTimeStamp.Modified();
+}
+
+void XTextItem::adjustHAligment(int instanceStartIdx, int instanceEndIdx, int curRowLen)
+{
+	if (getHAlignment() == HAlign::Center) {
+		//当前行的总长度=start_x
+		auto offset_ = (mFixedWidth - curRowLen) * 0.5;
+		for (int instaceIdx = instanceStartIdx; instaceIdx < instanceEndIdx; instaceIdx++) {
+			auto pMatrix = m_instacePos->data(instaceIdx);
+			Eigen::Matrix4f mat;
+			memcpy(mat.data(), pMatrix, 16 * sizeof(float));
+			Eigen::Matrix4f translate = Eigen::Matrix4f::Identity();
+			translate.col(3) = Eigen::Vector4f(offset_, 0, 0, 1);
+			mat = translate * mat;
+			memcpy(pMatrix, mat.data(), 16 * sizeof(float));
+		}
+	}
+	else if (getHAlignment() == HAlign::Right) {
+		auto offset_ = mFixedWidth - curRowLen;
+		for (int instaceIdx = instanceStartIdx; instaceIdx < instanceEndIdx; instaceIdx++) {
+			auto pMatrix = m_instacePos->data(instaceIdx);
+			Eigen::Matrix4f mat;
+			memcpy(mat.data(), pMatrix, 16 * sizeof(float));
+			Eigen::Matrix4f translate = Eigen::Matrix4f::Identity();
+			translate.col(3) = Eigen::Vector4f(offset_, 0, 0, 1);
+			mat = translate * mat;
+			memcpy(pMatrix, mat.data(), 16 * sizeof(float));
+		}
+	}
+	else if (getHAlignment() == HAlign::Left) {
+		auto offset_ = 0;
+		for (int instaceIdx = instanceStartIdx; instaceIdx < instanceEndIdx; instaceIdx++) {
+			auto pMatrix = m_instacePos->data(instaceIdx);
+			Eigen::Matrix4f mat;
+			memcpy(mat.data(), pMatrix, 16 * sizeof(float));
+			Eigen::Matrix4f translate = Eigen::Matrix4f::Identity();
+			translate.col(3) = Eigen::Vector4f(offset_, 0, 0, 1);
+			mat = translate * mat;
+			memcpy(pMatrix, mat.data(), 16 * sizeof(float));
+		}
+	}
 }

@@ -71,6 +71,8 @@ public:
 
 	void setPosition(float x, float y);
 
+	myUtilty::Vec2f getPosition() const;
+
 	void scale(float sx, float sy);
 
 	void resetTransform();

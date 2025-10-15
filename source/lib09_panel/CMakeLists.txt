@@ -1,5 +1,5 @@
-project(easyPlot)
-set(proName easyPlot)
+project(lib09_panel)
+set(proName lib09_panel)
 
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/qt.cmake)
@@ -8,23 +8,23 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
 #-------------------------------------------------------
 #设置包含的头文件
 #-------------------------------------------------------
-#include_directories(${PROJECT_SOURCE_DIR}/source/libPanle01_XOpenGLWidget)
+include_directories(${PROJECT_SOURCE_DIR}/source/lib09_panel)
 
 #递归目录获取所有源文件
 file(GLOB_RECURSE HERDERS_FILES *.h)
 file(GLOB_RECURSE SOURCES_FILES *.cpp)
+
 #-------------------------------------------------------
 #Qt支持
 #-------------------------------------------------------
 #查找所有的需要moc预处理的文件
-set(MOC_FILES easyPlotWidget.h)
+set(MOC_FILES FontSetDlg.h)
 
 #GLOB_RECURSE 
 FILE(GLOB UI_FILES "ui/*.ui")
 FILE(GLOB QRC_FILES "qrc/*.qrc")
 find_package(Qt5 REQUIRED COMPONENTS Core )
 find_package(Qt5 REQUIRED COMPONENTS Widgets )
-find_package(Qt5 REQUIRED COMPONENTS Concurrent )
 qt5_wrap_cpp(MOC_SOURCES ${MOC_FILES})
 qt5_wrap_ui(UI_SOURCES ${UI_FILES})	
 qt5_add_resources(RCC_SOURCES ${QRC_FILES})
@@ -69,21 +69,10 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 SET(LIB_NAMES 	
 				Qt5::Widgets
 				Qt5::Core
-				Qt5::Concurrent
 				glew32
 				opengl32
-				myUtilty${DLL_DEBUG_POSTFIX}
-				xshader${DLL_DEBUG_POSTFIX}
-				xcamera${DLL_DEBUG_POSTFIX}
-				XOpenGLWidget${DLL_DEBUG_POSTFIX}
 				xopengl${DLL_DEBUG_POSTFIX}
-				xshape${DLL_DEBUG_POSTFIX}
-				dataBase${DLL_DEBUG_POSTFIX}
-				xselect${DLL_DEBUG_POSTFIX}
-				xscene${DLL_DEBUG_POSTFIX}
-				xfreetype${DLL_DEBUG_POSTFIX}
-				stbImage${DLL_DEBUG_POSTFIX}
-				xpanel${DLL_DEBUG_POSTFIX}
+				myUtilty${DLL_DEBUG_POSTFIX}
 	)
 
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin
@@ -95,8 +84,8 @@ target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})			#包�
 target_link_libraries(${proName} ${LIB_NAMES})									#库名称
 
 
-target_compile_definitions(${proName} PRIVATE LIB_EASYPLOT_DLL)
-set_target_properties(${proName} PROPERTIES OUTPUT_NAME "xeasyPlot")
+target_compile_definitions(${proName} PRIVATE LIBPANEL09_XPANEL)
+set_target_properties(${proName} PROPERTIES OUTPUT_NAME "xpanel")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
 #cmake -B build -DCMAKE_BUILD_TYPE=Debug -G  "Visual Studio 17 2022"

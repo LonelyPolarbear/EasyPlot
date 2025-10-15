@@ -699,6 +699,8 @@ void XScene::render2D()
 
 	//!
     //![3] »æÖÆÍ¼Ôª
+    
+    glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
     {
 		for (auto grapicsItem : d->shapes2D) {
             if (auto text = std::dynamic_pointer_cast<XScreenTextItem>(grapicsItem)) {    

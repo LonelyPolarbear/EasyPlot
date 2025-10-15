@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
+#include <dataBase/XDataArray.h>
 class QString;
 
 class LIB08_FREETYPE_API xfreetype
@@ -27,7 +29,7 @@ public:
         unsigned int  Advance;    // 原点距下一个字形原点的距离
     };
 	static  void test();
-
+	void printFaceInfo();
 	void generateFontTextures(const QString& dir, bool flip, bool inverse);
 	void generateFontSdf(const QString& dir, bool flip, bool inverse);
 	
@@ -50,6 +52,15 @@ public:
 	int getNormalPictureHeight() { return 4096; }
 	int getNormalPictureWidth() { return 4096; }
 
+	double computeLineStrWidth(std::wstring data, double FontSize);
+
+	int getLineRowSpace();
+
+	int computeLineNum(const std::wstring& data, double FontSize, double width, bool isFixed);
+
+	//统计每一行的字符数、每一行所有字符的宽度 每一行字符的最大有效高度(基础线上方和基线下方两部分)
+	std::shared_ptr<XDoubleArray> computeLineNums(const std::wstring& data, double FontSize, double width, bool isFixed);
+
 private:
 	void LoadGlyphImpl(const QString& dir, std::vector<Character>& charactersList);
    xfreetype();
@@ -57,15 +68,6 @@ private:
 
    std::vector<Character> mCharactersList;									//<字体的所有字符信息>
    std::vector<Character> mCharactersListSdf;								//<字体的所有字符信息>
-  
-  #if 0
-public:
-	std::map<uint32_t, Character> Characters;  //<字体,<字符编码,字符信息>
-   void LoadCharacter(std::wstring data);
-   Character getCharacter(wchar_t  c);
-   void getVertices(wchar_t  c, float(&vertices)[24], int fontSize);
-   std::pair<double, double> computeStrSize(std::wstring data, int FontSize);
-#endif
 public:
    static xfreetype* Instance();
    static void Release();

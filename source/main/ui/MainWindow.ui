@@ -316,6 +316,18 @@
    <addaction name="ActFontBmp"/>
    <addaction name="ActFontSdf"/>
   </widget>
+  <widget class="QToolBar" name="toolBar_7">
+   <property name="windowTitle">
+    <string>toolBar_7</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="ActScreenTipVisible"/>
+  </widget>
   <action name="ActCube">
    <property name="icon">
     <iconset resource="../qrc/easyPlotqrc.qrc">
@@ -571,6 +583,22 @@
    </property>
    <property name="text">
     <string>text</string>
+   </property>
+  </action>
+  <action name="ActScreenTipVisible">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/visible.svg</normaloff>
+     <normalon>:/icon/invisible.svg</normalon>:/icon/visible.svg</iconset>
+   </property>
+   <property name="text">
+    <string>ScreenTextVisible</string>
    </property>
   </action>
  </widget>
