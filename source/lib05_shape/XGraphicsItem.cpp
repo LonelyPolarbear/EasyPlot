@@ -118,6 +118,8 @@ void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen:
 	shader->setObjectID(d->m_id);
 	shader->setLineWidth(m_lineWidth);
 	shader->setPenStyle((int)getPenStyle());
+	shader->setPositionType((int)getPositionType());
+	shader->setOrientation((int)getOrientation());
 	shader->setConenctSmoothEnable(m_connectSmoothEnable);
 	shader->setPreSelectColor(m_preSelectColor.x, m_preSelectColor.y, m_preSelectColor.z, m_preSelectColor.w);
 	shader->setColorMode((int)m_colorMode);
@@ -129,7 +131,10 @@ void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen:
 
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();
 
+	Eigen::Matrix4f selfMat = Eigen::Matrix4f::Identity();
+
 	shader->setModelMatrix(mat.data());
+	shader->setModelSelfMatrix(selfMat.data());
 
 	m_vao->bind();
 	if (m_polygonMode == PolygonMode::line) {
@@ -157,10 +162,13 @@ void XGraphicsItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matri
 	shader->setObjectID(d->m_id);
 	shader->setSingleColor(m_singleColor.x, m_singleColor.y, m_singleColor.z, m_singleColor.w);
 	shader->setFillColor(m_fillColor.x, m_fillColor.y, m_fillColor.z, m_fillColor.w);
+	shader->setPositionType((int)getPositionType());
+	shader->setOrientation((int)getOrientation());
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();
-	//Eigen::Matrix4f mat = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f selfMat = Eigen::Matrix4f::Identity();
 
 	shader->setModelMatrix(mat.data());
+	shader->setModelSelfMatrix(selfMat.data());
 
 	m_vao->bind();
 
@@ -189,36 +197,6 @@ void XGraphicsItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matri
 	shader->unUse();
 	m_vao->release();
 }
-
-#if 0
-void XGraphicsItem::drawGrid(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
-{
-	if (!m_IsVisible || !m_isShowGrid)
-		return;
-	updateData();
-	shader->use();
-
-	Eigen::Matrix4f mat = m * d->m_transform.matrix();
-	shader->setModelMatrix(mat.data());
-
-	Eigen::Matrix4f objectMat = d->m_transform.matrix();
-	shader->setMat4("ObjectMat", d->m_loc2gridTrans.matrix().inverse());
-
-	//Eigen::Affine3f gridTrans = Eigen::Affine3f::Identity();
-	//gridTrans.scale(Eigen::Vector3f(100,100,1));
-	//shader->setMat4("ObjectInGridMat", d->m_loc2gridTrans.matrix().inverse());
-
-	m_vao->bind();
-
-	if (m_IsFilled && m_IsClosed) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawElements((unsigned int)PrimitveType::triangle, m_indexArray->getNumOfTuple() * m_indexArray->getComponent(), GL_UNSIGNED_INT, 0);
-	}
-
-	shader->unUse();
-	m_vao->release();
-}
-#endif
 
 void XGraphicsItem::beginClip(const Eigen::Matrix4f& m)
 {
@@ -363,6 +341,11 @@ void XGraphicsItem::setDrawType(PrimitveType type)
 	m_drawType = type;
 	}
 
+myUtilty::Vec4f XGraphicsItem::getSingleColor() const
+{
+	return m_singleColor;
+}
+
 PrimitveType XGraphicsItem::getDrawType() const
 {
 	return m_drawType;
@@ -428,6 +411,26 @@ void XGraphicsItem::translate(float dx, float dy)
 void XGraphicsItem::setPosition(float x, float y)
 {
 	d->m_transform.translation()<<x,y,0;
+}
+
+void XGraphicsItem::setPositionType(XGL::PositionType type)
+{
+	m_positionType = type;
+}
+
+XGL::PositionType XGraphicsItem::getPositionType() const
+{
+	return m_positionType;
+}
+
+void XGraphicsItem::setOrientation(XGL::Orientation orientation)
+{
+	m_orientation = orientation;
+}
+
+XGL::Orientation XGraphicsItem::getOrientation() const
+{
+	return m_orientation;
 }
 
 myUtilty::Vec2f XGraphicsItem::getPosition() const
@@ -580,6 +583,12 @@ void XGraphicsItem::addChildItem(std::shared_ptr<XGraphicsItem> item)
 		}
 		m_childItems.push_back(item);
 	}
+}
+
+void XGraphicsItem::addChildItem(std::vector<std::shared_ptr<XGraphicsItem>> items)
+{
+	for(auto item : items)
+		addChildItem(item);
 }
 
 void XGraphicsItem::removeChildItem(std::shared_ptr<XGraphicsItem> item)

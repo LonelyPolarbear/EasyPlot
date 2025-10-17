@@ -6,6 +6,7 @@
 #include "lib06_select/xviewselection2d.h"
 #include "lib00_utilty/myUtilty.h"
 #include<Eigen/Eigen>
+#include <dataBase/XDataArray.h>
 class XShape;
 class xcamera;
 class xshader;
@@ -127,9 +128,14 @@ protected:
 		//场景坐标系到屏幕坐标系的转换	
 		myUtilty::Vec2u scenePos2ScreenPos(myUtilty::Vec2f) const;
 
-		//屏幕坐标系到场景坐标系的转换
-		Eigen::Matrix4f screenPos2ScenePos() const;
+	
+		/// <summary>
+		/// 屏幕场景坐标系到场景坐标系的转换，原点在d->startx,d->starty,向右为x轴正方向，向上为y轴正方向
+		/// </summary>
+		/// <returns></returns>
+		Eigen::Matrix4f sceneScreenPos2ScenePos();
 
+		static Eigen::Matrix4f sceneScreenPos2ScenePosMat(std::shared_ptr<DataBaseObject> scene);
 
 		//判断点是否在视口内(点是屏幕坐标系下的点，原点左下角 向右为x轴正方向，向上为y轴正方向)
 		bool isBelongtoViewPort(int x, int y);
@@ -140,6 +146,7 @@ protected:
 		int mousePosx{0};
 		int mousePosy{0};
 
+		std::shared_ptr<XUCharArray2D> grabFramebuffer();
 		
 private:
 	class Internal;

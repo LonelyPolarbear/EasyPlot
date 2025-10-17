@@ -12,6 +12,7 @@ add_subdirectory(source/lib05_shape)
 add_subdirectory(source/lib06_select)
 add_subdirectory(source/lib07_scene)
 add_subdirectory(source/lib08_freetype)
+add_subdirectory(source/lib09_panel)
 
 add_subdirectory(source/libPanle01_XOpenGLWidget)
 #add_subdirectory(source/libPanle02_OpenGLWidget1)
@@ -35,11 +36,11 @@ add_dependencies(libPanle01_XOpenGLWidget  lib00_utilty lib01_shader lib02_camer
 #add_dependencies(libPanle04_OpenGLWidgetCube  libPanle01_XOpenGLWidget)
 
 #add_dependencies(libPanle05_multiPolygonMode  libPanle01_XOpenGLWidget)
-add_dependencies(easyPlot  libPanle01_XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype)
+add_dependencies(easyPlot  libPanle01_XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel)
 
 
 #									libPanle02_OpenGLWidget1 
 #									libPanle03_OpenGLWidget2
 #									libPanle04_OpenGLWidgetCube
 #									libPanle05_multiPolygonMode
-add_dependencies(main easyPlot)
+add_dependencies(main easyPlot lib09_panel)

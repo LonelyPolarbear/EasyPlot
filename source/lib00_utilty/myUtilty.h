@@ -17,7 +17,13 @@ namespace render {
 	enum  class lib00_utilty_API graphicsItemType{
 		none,
 		rect,
-		line
+		line,
+		triangle,
+		circle,
+		ellipse,
+		polyline,
+		polygon,
+		text
 	};
 }
 

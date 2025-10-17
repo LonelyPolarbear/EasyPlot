@@ -16,12 +16,11 @@ XScreenTextItem::~XScreenTextItem()
 {
 }
 
-void XScreenTextItem::setTextScreenPos(int x, int y) {
-	m_screenPos = myUtilty::Vec2i(x,y);
+void XScreenTextItem::setTextSceneScreenPos(int x, int y) {
+	m_scene_screenPos = myUtilty::Vec2i(x,y);
 }
 
-
-myUtilty::Vec2i XScreenTextItem::getTextScrrenPos()
+myUtilty::Vec2i XScreenTextItem::getTextSceneScreenPos() const
 {
-	return m_screenPos;
+	return m_scene_screenPos;
 }

@@ -9,7 +9,11 @@ public:
 	XScreenTextItem();
 	virtual ~XScreenTextItem();
 
-	void setTextScreenPos(int x, int y);
-	 myUtilty::Vec2i getTextScrrenPos();
-	myUtilty::Vec2i m_screenPos;
+	void setTextSceneScreenPos(int x, int y);
+	
+	myUtilty::Vec2i getTextSceneScreenPos() const;
+private:
+	myUtilty::Vec2i m_scene_screenPos;
+
+	
 };

@@ -4,6 +4,7 @@
 #include "lib01_shader/xshader.h"
 #include <glew/glew.h>
 #include <lib05_shape/XGraphicsItem.h>
+#include <lib05_shape/XScreenTextItem.h>
 #include <lib02_camera/xcamera.h>
 
 class XViewSelection2D::Internal {
@@ -19,6 +20,9 @@ public:
 	int PeelLayerNum = 10;
 	int currentPass = 1;		//当前的有效层数
 	std::vector<unsigned int> queryHandles;
+
+	std::weak_ptr<DataBaseObject> scene;	//拾取记录场景的weakptr，对于一些屏幕显示对象，需要获取场景到屏幕的变换矩阵，该信息在拾取时需要使用
+	std::function<Eigen::Matrix4f(std::shared_ptr<DataBaseObject>)> screenPos2ScenePosFn;
 };
 
 XViewSelection2D::XViewSelection2D():d(new Internal())
@@ -37,6 +41,16 @@ void XViewSelection2D::setPickShader(std::shared_ptr<xshader> shader)
 void XViewSelection2D::setPickFillShader(std::shared_ptr<xshader> shader)
 {
 	d->pickFillShader = shader;
+}
+
+void XViewSelection2D::setScene(std::shared_ptr<DataBaseObject> scene)
+{
+	d->scene = scene;
+}
+
+void XViewSelection2D::setGetMatrixforScreen2Scene(std::function<Eigen::Matrix4f(std::shared_ptr<DataBaseObject>)> fn)
+{
+	d->screenPos2ScenePosFn = fn;
 }
 
 bool XViewSelection2D::create()
@@ -245,7 +259,18 @@ bool XViewSelection2D::renderLayer(std::set<std::shared_ptr<XGraphicsItem>> obje
 			//需要确保填充模式下生效
 			auto old = shape->isFilled();
 			shape->setIsFilled(true);
-			shape->pickFillDraw(d->pickFillShader, m);
+			if (std::dynamic_pointer_cast<XScreenTextItem>(shape)) {
+				Eigen::Matrix4f mat = Eigen::Matrix4f::Identity();
+				auto scene = d->scene.lock();
+				if (scene)
+					mat =d->screenPos2ScenePosFn(scene);
+				shape->pickFillDraw(d->pickFillShader, m * mat);
+
+			}else
+				shape->pickFillDraw(d->pickFillShader, m);
+
+			
+			
 			shape->setIsFilled(old);
 		}
 		d->pickFillShader->unUse();

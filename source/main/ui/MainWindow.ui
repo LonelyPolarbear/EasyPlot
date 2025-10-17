@@ -327,6 +327,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="ActScreenTipVisible"/>
+   <addaction name="ActScreenShot"/>
   </widget>
   <action name="ActCube">
    <property name="icon">
@@ -376,6 +377,9 @@
   <action name="ActCornerRect">
    <property name="checkable">
     <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>false</bool>
    </property>
    <property name="icon">
     <iconset resource="../qrc/easyPlotqrc.qrc">
@@ -599,6 +603,15 @@
    </property>
    <property name="text">
     <string>ScreenTextVisible</string>
+   </property>
+  </action>
+  <action name="ActScreenShot">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/screen_shot.svg</normaloff>:/icon/screen_shot.svg</iconset>
+   </property>
+   <property name="text">
+    <string>screenshot</string>
    </property>
   </action>
  </widget>

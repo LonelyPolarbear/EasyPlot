@@ -36,5 +36,6 @@
         <file>icon/align_top.svg</file>
         <file>icon/align_vcenter.svg</file>
         <file>icon/setting.svg</file>
+        <file>icon/screen_shot.svg</file>
     </qresource>
 </RCC>

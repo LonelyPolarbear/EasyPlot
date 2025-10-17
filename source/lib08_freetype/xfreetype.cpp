@@ -329,12 +329,17 @@ unsigned int xfreetype::getGlyphIndex(wchar_t c)
 
 xfreetype::Character xfreetype::getCharacterNormal(wchar_t c)
 {
+	if (mCharactersList.size() == 0)
+		return Character();
     auto idx = getGlyphIndex(c);
     return mCharactersList[idx];
 }
 
 xfreetype::Character xfreetype::getCharacterSdf(wchar_t c)
 {
+	if (mCharactersListSdf.size() == 0)
+		return Character();
+
 	auto idx = getGlyphIndex(c);
 	return mCharactersListSdf[idx];
 }

@@ -3,6 +3,8 @@
 
 //Õº±Ì¿‡
 class XPolyline; 
+class XTextItem;
+
 class LIB05_SHAPE_API XChartItem :public XGraphicsItem {
 public:
 	
@@ -21,8 +23,10 @@ public:
 
 	void gridSale(float dx, float dy);
 
+	
 private:
 	void createGrid();
+	void updateAxisLabel();
 protected:
 	virtual void updateData();
 	virtual uint32_t computeNumofVertices() override;

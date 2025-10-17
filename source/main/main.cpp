@@ -6,9 +6,13 @@
 #include<libPanle03_OpenGLWidget2/OpenGLWidget2.h>
 #include "mainwindow.h"
 
+#include <QLoggingCategory>
+
 int main(int argc,char** argv) {
 	myUtilty::ShareVar::instance().currentExeDir = std::filesystem::path(argv[0]).parent_path().string();
 	QApplication a(argc, argv);
+
+	QLoggingCategory::setFilterRules("qt.qpa.window.setGeometry=false");
 	
 	MainWindow w(nullptr);
 	w.resize(700,500);

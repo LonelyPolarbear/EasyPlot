@@ -5,12 +5,69 @@
 #include <Eigen/Eigen>
 
 #include <lib04_opengl/XOpenGLEnable.h>
+#include "lib05_shape/XTextItem.h"
+
+std::wstring to_wstring_with_precision(double value, int precision) {
+	std::wstringstream wss;
+	// std::fixed 确保精度是小数部分的位数（而非总有效数字）
+	wss << std::fixed << std::setprecision(precision) << value;
+	return wss.str();
+}
 
 class XChartItem::Internal {
 public:
-	//Eigen::Affine3f transform = Eigen::Affine3f::Identity();		//表示网格坐标系在物体局部坐标系下的位姿
 	std::vector<std::shared_ptr<XGraphicsItem>> m_polylines;	//线段集合
 	std::shared_ptr< XGridItem> m_gridItem;	//网格
+	std::vector<std::shared_ptr<XTextItem>> m_axisx_value;		//文本集合,X轴，先按照固定大小处理
+	std::vector<std::shared_ptr<XTextItem>> m_axisy_value;		//文本集合,X轴，先按照固定大小处理
+	int m_xlabelNum =11;
+	int m_ylabelNum =4;
+
+	bool createAxisText() {
+		if (m_axisx_value.empty()) {
+			for (int i = 0; i < m_xlabelNum; i++) {
+				auto xaxis = makeShareDbObject<XTextItem>();
+				xaxis->initResource();
+				xaxis->setVisible(true);
+				xaxis->setVAlignment(XTextItem::VAlign::Top);
+				if(i+1 == m_xlabelNum)
+					xaxis->setHAlignment(XTextItem::HAlign::Right);
+				else
+					xaxis->setHAlignment(XTextItem::HAlign::Left);
+				double xpos =-1+2.*i/(m_xlabelNum-1);
+				//xaxis->setPosition(0 + (i - 5) * 0.2, 0);
+				xaxis->setPosition(xpos, 0);
+				xaxis->setFontSize(16);
+				xaxis->setPositionType(XGL::PositionType::local_center);
+				xaxis->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+				xaxis->setText(L"0");
+				m_axisx_value.push_back(xaxis);
+			}
+
+			for (int i = 0; i < m_ylabelNum; i++) {
+				auto xaxis = makeShareDbObject<XTextItem>();
+				xaxis->initResource();
+				xaxis->setVisible(true);
+				xaxis->setHAlignment(XTextItem::HAlign::Left);
+				if (i+1 == m_ylabelNum)
+					xaxis->setVAlignment(XTextItem::VAlign::Top);
+				else
+					xaxis->setVAlignment(XTextItem::VAlign::Bottom);
+				double ypos = -1 + 2. * i / (m_ylabelNum - 1);
+				//xaxis->setPosition(0 + (i - 5) * 0.2, 0);
+
+				xaxis->setPosition(0, ypos);
+				xaxis->setFontSize(16);
+				xaxis->setPositionType(XGL::PositionType::local_center);
+				xaxis->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
+				xaxis->setText(L"0");
+				m_axisy_value.push_back(xaxis);
+			}
+
+			return true;
+		}
+		return false;
+	}
 };
 
 XChartItem::XChartItem():XGraphicsItem(),d(new Internal())
@@ -82,10 +139,21 @@ void XChartItem::draw(const Eigen::Matrix4f& m)
 		auto chartTransform = this->getTransform();
 		
 		createGrid();
+		if (d->createAxisText()) {
+			for(auto& text : d->m_axisx_value)
+				addChildItem(text);
+			for (auto& text : d->m_axisy_value)
+				addChildItem(text);
+
+			updateAxisLabel();
+		}
 		auto gridTranform = /*this->getGridTransform();*/d->m_gridItem->getTransform();
 
 		Eigen::Matrix4f parentTransform1 = m * chartTransform.matrix();
 
+		/*for (auto& text : d->m_axisx_value) {
+			text->draw(m);
+		}*/
 		
 		XGraphicsItem::draw(m);
 
@@ -122,6 +190,9 @@ void XChartItem::gridSale(float dx, float dy)
 {
 	createGrid();
 	d->m_gridItem->scale(1./dx, 1./dy);
+
+	d->createAxisText();
+	updateAxisLabel();
 }
 
 void XChartItem::createGrid()
@@ -133,6 +204,32 @@ void XChartItem::createGrid()
 		d->m_gridItem->setIsScreenGrid(false);
 
 		d->m_gridItem->scale(0.01,0.01);
+	}
+}
+
+void XChartItem::updateAxisLabel()
+{
+	//获取网格的变换矩阵
+	auto gridTransform = d->m_gridItem->getTransform();
+	auto data = myUtilty::Matrix::transformDecomposition_TRS(gridTransform);
+
+	for (int i = 0; i < d->m_axisx_value.size(); i++) {
+		auto xaxis = d->m_axisx_value[i];
+
+		auto length = 1. / data.sx;
+		auto step = length / (d->m_xlabelNum - 1);
+		double value = -0.5 * length + i * step;
+
+		xaxis->setText(to_wstring_with_precision(value, 1));
+	}
+
+	for (int i = 0; i < d->m_axisy_value.size(); i++) {
+		auto xaxis = d->m_axisy_value[i];
+		auto length = 1. / data.sy;
+		auto step = length / (d->m_ylabelNum - 1);
+		double value = -0.5 * length + i * step;
+		//double v = (i - 2) * 0.5 * 1. / data.sy;
+		xaxis->setText(to_wstring_with_precision(value, 1));
 	}
 }
 

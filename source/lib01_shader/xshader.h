@@ -85,7 +85,9 @@ class lib01_shader_API xshader:public DataBaseObject{
     //对外高度封装的接口，这些接口对应固定的模板着色器
 public:
 
-    void setModelMatrix(float *data);
+	void setModelMatrix(float* data);
+
+	void setModelSelfMatrix(float* data);
 
     void setViewMatrix(float* data);
 
@@ -120,6 +122,10 @@ public:
     void setfixedLine(bool isFixed);
 
     void setPenStyle(int style);
+
+    void setPositionType(int type);
+
+    void setOrientation(int type);
 
     void setConenctSmoothEnable(bool enable);
 

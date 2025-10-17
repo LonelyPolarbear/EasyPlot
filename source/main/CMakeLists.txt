@@ -82,6 +82,7 @@ SET(LIB_NAMES
 				#OpenGLWidgetCube${DLL_DEBUG_POSTFIX}
 				#MultiPolygonModeCube${DLL_DEBUG_POSTFIX}
 				xeasyplot${DLL_DEBUG_POSTFIX}
+				xpanel${DLL_DEBUG_POSTFIX}
 				
 	)
 

@@ -56,9 +56,68 @@ void XTextItem::draw(const Eigen::Matrix4f& m)
 		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
+
+		//提取平移和旋转，去除缩放
+		Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+		transform.matrix() = m;
+
+		auto data = myUtilty::Matrix::transformDecomposition_TRS(transform);
+		auto tmp = data;
+		tmp.sx = 1;
+		tmp.sy = 1;
+		tmp.sz = 1;
+
+		auto mat = myUtilty::Matrix::computeMatrix(tmp);
+
 		drawFill(m_shaderManger->getTextShader(), m);
 		glEnableObj->restore();
 	}
+}
+
+void XTextItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
+{
+	if (!m_IsVisible)
+		return;
+	updateData();
+	shader->use();
+	shader->setIsInstanceDarw(m_isInstance);
+	shader->setObjectID(getID());
+	shader->setSingleColor(m_singleColor.x, m_singleColor.y, m_singleColor.z, m_singleColor.w);
+	shader->setFillColor(m_fillColor.x, m_fillColor.y, m_fillColor.z, m_fillColor.w);
+	shader->setPositionType((int)getPositionType());
+	shader->setOrientation((int)getOrientation());
+	//Eigen::Matrix4f mat = m * d->m_transform.matrix();
+	//Eigen::Matrix4f mat = Eigen::Matrix4f::Identity();
+	auto ma = m;
+	shader->setModelMatrix(ma.data());
+	shader->setModelSelfMatrix(getTransform().matrix().data());
+
+	m_vao->bind();
+
+	//1.如果是封闭图形，且开启了填充
+	//2.如果是封闭图形，且开启了剪切
+	if ((m_IsFilled && m_IsClosed) || (m_clipEnable && m_IsClosed)) {
+		if (m_indexArray) {
+			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+			auto indexCount = m_indexArray->getNumOfTuple() * m_indexArray->getComponent();
+			if (m_isInstance) {
+				if (m_instacePos) {
+					auto instanceNum = m_instacePos->getNumOfTuple();
+					if (instanceNum > 0)
+						glDrawElementsInstanced((unsigned int)PrimitveType::triangle, indexCount, GL_UNSIGNED_INT, (void*)0, instanceNum);  // 最后一个参数是实例数量
+				}
+				else {
+					//std::cout<<__FILE__ <<" Line:" <<std::dec <<__LINE__ << " m_instacePos is null" << std::endl;
+				}
+			}
+			else {
+				glDrawElements((unsigned int)PrimitveType::triangle, indexCount, GL_UNSIGNED_INT, 0);
+			}
+		}
+	}
+
+	shader->unUse();
+	m_vao->release();
 }
 
 void XTextItem::initResource()
@@ -109,6 +168,8 @@ void XTextItem::updateText()
 
 if(mConfigDataTimeStamp < m_UpdateTime)
 	return;
+
+	mConfigDataTimeStamp.Modified();
 
 	//设置实例化属性
 	m_instacePos = makeShareDbObject<XFloatArray>();

@@ -193,6 +193,11 @@ void xshader::setModelMatrix(float* data)
     setMat4("ModelMat",data);
 }
 
+void xshader::setModelSelfMatrix(float* data)
+{
+    setMat4("ModelMatSelf", data);
+}
+
 void xshader::setViewMatrix(float* data)
 {
     setMat4("ViewMat", data);
@@ -273,6 +278,16 @@ void xshader::setfixedLine(bool isFixed) {
 void xshader::setPenStyle(int style)
 {
     setInt("penStyle",style);
+}
+
+void xshader::setPositionType(int type)
+{
+    setInt("PositionType", type);
+}
+
+void xshader::setOrientation(int type)
+{
+    setInt("Orientation", type);
 }
 
 void xshader::setConenctSmoothEnable(bool enable)

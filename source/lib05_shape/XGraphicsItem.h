@@ -14,6 +14,23 @@ class XOpenGLVertexArrayObject;
 class XOpenGLBuffer;
 class xShaderManger;
 
+namespace XGL {
+	enum class LIB05_SHAPE_API Orientation {
+		left_top,
+		left_bottom,
+		right_top,
+		right_bottom
+	};
+
+	enum class LIB05_SHAPE_API PositionType {
+		local_complete,					//所有的点都在本地坐标系中，包括中心点
+		local_center,						//只有中心点在本地坐标系中
+		sceneScreen_complete,		//场景屏幕坐标系，同时意味着固定大小
+		sceneScreen_center,			//场景屏幕坐标系，只有中心点在屏幕坐标系中
+	};
+};
+
+
 class LIB05_SHAPE_API XGraphicsItem :public DataBaseObject {
 public:
 	enum class PenStyle {
@@ -53,6 +70,8 @@ public:
 	void setPreSelectColor(const myUtilty::Vec4f& color);
 	void setDrawType(PrimitveType type);
 
+	myUtilty::Vec4f getSingleColor() const;
+
 	PrimitveType getDrawType() const;
 
 	void setLineWidth(uint32_t width);
@@ -70,6 +89,13 @@ public:
 	void translate(float dx, float dy);
 
 	void setPosition(float x, float y);
+
+	void setPositionType(XGL::PositionType type);
+
+	XGL::PositionType getPositionType() const;
+
+	void setOrientation(XGL::Orientation orientation);
+	XGL::Orientation getOrientation() const;
 
 	myUtilty::Vec2f getPosition() const;
 
@@ -133,6 +159,7 @@ private:
 
 	public:
 	void addChildItem(std::shared_ptr<XGraphicsItem> item);
+	void addChildItem(std::vector<std::shared_ptr<XGraphicsItem>> items);
 	void removeChildItem(std::shared_ptr<XGraphicsItem> item);
 	void clearChildItems();
 	void setParentItem(std::shared_ptr<XGraphicsItem> item);
@@ -149,6 +176,8 @@ protected:
 	myUtilty::Vec4f m_singleColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	myUtilty::Vec4f m_fillColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	myUtilty::Vec4f m_preSelectColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+	XGL::PositionType m_positionType = XGL::PositionType::local_complete;
+	XGL::Orientation m_orientation = XGL::Orientation::left_top;
 
 	std::shared_ptr<XFloatArray> m_coordArray;																	//顶点坐标数组
 	std::shared_ptr<XFloatArray> m_colorArray;																	//顶点颜色数组

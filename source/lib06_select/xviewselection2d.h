@@ -22,6 +22,10 @@ void setPickShader(std::shared_ptr<xshader> shader);
 
 void setPickFillShader(std::shared_ptr<xshader> shader);
 
+void setScene(std::shared_ptr<DataBaseObject> scene);
+
+void setGetMatrixforScreen2Scene(std::function<Eigen::Matrix4f(std::shared_ptr<DataBaseObject>)> fn);
+
 bool create();
 
 bool updateBufferSize(int width, int height);

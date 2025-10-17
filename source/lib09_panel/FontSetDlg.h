@@ -2,12 +2,14 @@
 #define FONTSETDLG_H
 
 #include <QDialog>
+#include <lib00_utilty/myUtilty.h>
+#include "XPanleApi.h"
 
 namespace Ui {
 class FontSetDlg;
 }
 
-class FontSetDlg : public QDialog
+class lib09_XPANEL_API FontSetDlg : public QDialog
 {
     Q_OBJECT
     public:
@@ -19,6 +21,9 @@ class FontSetDlg : public QDialog
         double y =0;
         bool isFixed =false;
         double fixWidth =0;
+        myUtilty::Vec4f color =myUtilty::Vec4f(1,1,11);
+        int tackMode=0;  //local_complete,	local_center,sceneScreen_complete,sceneScreen_center
+        int refOrigin =0; //left_top,left_bottom,right_top,right_bottom
     };
 public:
     explicit FontSetDlg(const TextSetInfo& info,QWidget *parent = nullptr);

@@ -101,6 +101,9 @@ public slots:
 
 	void slotScreenTextVisible(bool flag);
 
+	//НиЭМ
+	void slotScreenShot();
+
 private:
 	struct Internal;
 	std::unique_ptr<Internal> d;

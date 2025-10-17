@@ -20,6 +20,8 @@
 #include <lib05_shape/xCustomSource.h>
 #include <lib05_shape/xchamferCubeSource.h>
 
+#include <dataBase/XDataArray.h>
+
 #include <Eigen/Eigen>
 #include <lib03_stbImage/stbImage.h>
 
@@ -56,7 +58,7 @@ public:
         uniformBufferFs->setUsagePattern(XOpenGLBuffer::UsagePattern::StaticDraw);
         uniformBufferFs->create();
         uniformBufferFs->bind();
-        uniformBufferFs->allocate(sizeof(Eigen::Vector2f) * 2);
+        uniformBufferFs->allocate(sizeof(Eigen::Vector2f) * 4);
         uniformBufferFs->setBufferBindIdx(2);
         uniformBufferFs->release();
 
@@ -87,7 +89,7 @@ public:
     void writeFS(const Eigen::Vector2f& viewport, const Eigen::Vector2f& mousePos) {
 		uniformBufferFs->bind();
         uniformBufferFs->write(0, viewport.data(), 2);
-        uniformBufferFs->write(2, mousePos.data(), 2);
+		uniformBufferFs->write(2, mousePos.data(), 2);
         uniformBufferFs->release();
     }
 
@@ -185,15 +187,18 @@ public:
 		}
     }
 
-	void createViewSelection2D() {
+	void createViewSelection2D(std::shared_ptr<DataBaseObject> scene,std::function<Eigen::Matrix4f(std::shared_ptr<DataBaseObject>)> f ) {
 		if (!viewSelection2D) {
             viewSelection2D = makeShareDbObject<XViewSelection2D>();
             viewSelection2D->create();
 			viewSelection2D->setPickFillShader(shaderManger->getPickFillShader2D());
 			viewSelection2D->setPickShader(shaderManger->getPickShader2D());
             viewSelection2D->updateBufferSize(getViewportWidth(), getViewportHeight());
+            viewSelection2D->setGetMatrixforScreen2Scene(f);
+            viewSelection2D->setScene(scene);
 		}
 	}
+
     //为了方便把世界坐标系下的点与屏幕坐标系建立联系，使用一个虚拟的世界坐标系，它由当前的相机坐标系变换得到
 	Eigen::Affine3f virtualWorldFrame = Eigen::Affine3f::Identity();
 
@@ -432,7 +437,11 @@ std::vector<XViewSelection::SelectData> XScene::getPointSelection(int x, int y)
 std::vector<XViewSelection2D::SelectData> XScene::getPointSelection2D(int x, int y)
 {
 	makeCurrent();
-    d->createViewSelection2D();
+    d->createViewSelection2D(this->shared_from_this(),&XScene::sceneScreenPos2ScenePosMat);
+    //d->viewSelection2D->setScene(this->shared_from_this());
+    //d->viewSelection2D->setGetMatrixforScreen2Scene(std::bind( static_cast<Eigen::Matrix4f(XScene::*)()>(&XScene::screenPos2ScenePos), this));
+
+
 	d->viewSelection2D->update(d->shapes2D, d->camera, Eigen::Matrix4f::Identity());
 	auto selectData = d->viewSelection2D->getAllPointSelection(x - d->startx, y - d->starty, d->width, d->height);
 	doneCurrent();
@@ -452,7 +461,7 @@ std::vector<std::vector<XViewSelection::SelectData>> XScene::getBoxSelection(int
 std::vector<std::vector<XViewSelection2D::SelectData>> XScene::getBoxSelection2D(int x, int y, int w, int h)
 {
 	makeCurrent();
-	d->createViewSelection2D();
+	d->createViewSelection2D(this->shared_from_this(), &XScene::sceneScreenPos2ScenePosMat);
 	d->viewSelection2D->update(d->shapes2D, d->camera,  Eigen::Matrix4f::Identity());
 	auto r = d->viewSelection2D->getBoxSelection(x, y, w, h, getViewportWidth(), getViewportHeight());
 	doneCurrent();
@@ -704,8 +713,8 @@ void XScene::render2D()
     {
 		for (auto grapicsItem : d->shapes2D) {
             if (auto text = std::dynamic_pointer_cast<XScreenTextItem>(grapicsItem)) {    
-                auto mat = screenPos2ScenePos();        //表示屏幕坐标系在场景坐标系下的位姿
-                auto pos = text->getTextScrrenPos();
+                auto mat = sceneScreenPos2ScenePos();        //表示屏幕坐标系在场景坐标系下的位姿
+                auto pos = text->getTextSceneScreenPos();
                 text->setPosition(pos.x, getViewportHeight() - pos.y);
                 grapicsItem->draw(mat);
             }
@@ -978,18 +987,25 @@ myUtilty::Vec2u XScene::scenePos2ScreenPos(myUtilty::Vec2f pos) const
     return screenPos;
 }
 
-Eigen::Matrix4f XScene::screenPos2ScenePos() const
+Eigen::Matrix4f XScene::sceneScreenPos2ScenePos()
 {
     Eigen::Affine3f transform = Eigen::Affine3f::Identity();
     auto scene_w = getViewportWidth();
     auto scene_h = getViewportHeight();
 
     transform.translate(Eigen::Vector3f(-0.5 * scene_w, -0.5 * scene_h, 0));
-    transform.translate(Eigen::Vector3f(-d->startx, -d->starty, 0));
+   // transform.translate(Eigen::Vector3f(-d->startx, -d->starty, 0));
 
     Eigen::Matrix4f screen2viewPort = transform.matrix();
 
     return d->sceneFrameInVirtualWorld.inverse() * screen2viewPort;
+}
+
+Eigen::Matrix4f XScene::sceneScreenPos2ScenePosMat(std::shared_ptr<DataBaseObject> scene)
+{
+    if (auto s = std::dynamic_pointer_cast<XScene>(scene)) {
+        return s->sceneScreenPos2ScenePos();
+    }
 }
 
 bool XScene::isBelongtoViewPort(int x, int y)
@@ -1046,4 +1062,19 @@ myUtilty::BoundBox  XScene::computeBoundBox() {
         boundBox.zmax = 1;
     }
     return boundBox;
+}
+
+std::shared_ptr<XUCharArray2D> XScene::grabFramebuffer() {
+    //auto viewport = glGetIntegerv(GL_VIEWPORT);
+    //auto width = viewport[2];
+    //auto height = viewport[3];
+    makeCurrent();
+    auto data = makeShareDbObject<XUCharArray2D>();
+    data->setComponent(4);
+    data->setDimensions( getViewportHeight(), getViewportWidth());
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glReadPixels(0, 0, getViewportWidth(), getViewportHeight(), GL_RGBA, GL_UNSIGNED_BYTE, data->data(0,0));
+    doneCurrent();
+    return data;
+    //data->resize(getViewportWidth(), getViewportHeight());
 }
