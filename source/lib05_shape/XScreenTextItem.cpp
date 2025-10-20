@@ -10,6 +10,7 @@
 
 XScreenTextItem::XScreenTextItem():XTextItem()
 {
+	this->setPositionType(XGL::PositionType::sceneScreen_complete);
 }
 
 XScreenTextItem::~XScreenTextItem()
@@ -17,10 +18,5 @@ XScreenTextItem::~XScreenTextItem()
 }
 
 void XScreenTextItem::setTextSceneScreenPos(int x, int y) {
-	m_scene_screenPos = myUtilty::Vec2i(x,y);
-}
 
-myUtilty::Vec2i XScreenTextItem::getTextSceneScreenPos() const
-{
-	return m_scene_screenPos;
 }

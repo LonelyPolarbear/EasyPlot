@@ -47,6 +47,8 @@ void XGridItem::drawBorder(std::shared_ptr<xshader> border_shader, const Eigen::
 	auto shader = m_shaderManger->getGridShader2D();
 	shader->use();
 	shader->setBool("isScreenGrid", m_isScreenGrid);
+	//需要设置网格的原点
+	shader->setVec2("Origin",mOrigin.x,mOrigin.y);
 
 	Eigen::Matrix4f gridMat = getTransform().matrix().inverse();
 	Eigen::Matrix4f parentMat = m;
@@ -72,6 +74,16 @@ void XGridItem::setIsScreenGrid(bool isScreenGrid)
 bool XGridItem::isScreenGrid() const
 {
 	return m_isScreenGrid;
+}
+
+void XGridItem::setOrigin(const myUtilty::Vec2f& origin)
+{
+	mOrigin = origin;
+}
+
+const myUtilty::Vec2f& XGridItem::getOrigin() const
+{
+	return mOrigin;
 }
 
 void XGridItem::updateData()

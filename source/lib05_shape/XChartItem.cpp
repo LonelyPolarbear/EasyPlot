@@ -6,6 +6,7 @@
 
 #include <lib04_opengl/XOpenGLEnable.h>
 #include "lib05_shape/XTextItem.h"
+#include <Eigen/Eigen>
 
 std::wstring to_wstring_with_precision(double value, int precision) {
 	std::wstringstream wss;
@@ -20,8 +21,10 @@ public:
 	std::shared_ptr< XGridItem> m_gridItem;	//网格
 	std::vector<std::shared_ptr<XTextItem>> m_axisx_value;		//文本集合,X轴，先按照固定大小处理
 	std::vector<std::shared_ptr<XTextItem>> m_axisy_value;		//文本集合,X轴，先按照固定大小处理
-	int m_xlabelNum =11;
-	int m_ylabelNum =4;
+	int m_xlabelNum =11;				//X轴标签数量
+	int m_ylabelNum =4;					//Y轴标签数量
+	bool m_isShowGrid = true;			//是否显示网格
+	myUtilty::Vec2f m_gridOrigin = myUtilty::Vec2f(0,0);
 
 	bool createAxisText() {
 		if (m_axisx_value.empty()) {
@@ -36,7 +39,7 @@ public:
 					xaxis->setHAlignment(XTextItem::HAlign::Left);
 				double xpos =-1+2.*i/(m_xlabelNum-1);
 				//xaxis->setPosition(0 + (i - 5) * 0.2, 0);
-				xaxis->setPosition(xpos, 0);
+				xaxis->setPosition(xpos,m_gridOrigin.y);
 				xaxis->setFontSize(16);
 				xaxis->setPositionType(XGL::PositionType::local_center);
 				xaxis->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
@@ -54,9 +57,8 @@ public:
 				else
 					xaxis->setVAlignment(XTextItem::VAlign::Bottom);
 				double ypos = -1 + 2. * i / (m_ylabelNum - 1);
-				//xaxis->setPosition(0 + (i - 5) * 0.2, 0);
 
-				xaxis->setPosition(0, ypos);
+				xaxis->setPosition(m_gridOrigin.x, ypos);
 				xaxis->setFontSize(16);
 				xaxis->setPositionType(XGL::PositionType::local_center);
 				xaxis->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
@@ -99,9 +101,6 @@ XChartItem::XChartItem():XGraphicsItem(),d(new Internal())
 
 	m_isShowGrid = true;
 	m_clipEnable = true;
-
-	//gridTranslate(0.5,0.5);
-	//gridSale(0.01,0.01);
 }
 
 XChartItem::~XChartItem()
@@ -137,7 +136,18 @@ void XChartItem::draw(const Eigen::Matrix4f& m)
 	{
 		//对于自身的绘制，先更新数据
 		auto chartTransform = this->getTransform();
+
+		//此时，XChartItem的大小已经确定，可以根据需要调整原点位置
+		//auto chartTransformData = myUtilty::Matrix::transformDecomposition_TRS(chartTransform);
 		
+		//Eigen::Vector3f leftBottomPos =chartTransform*Eigen::Vector3f(-1,-1,0);
+		//leftBottomPos +=Eigen::Vector3f(18,18,0);
+
+		//leftBottomPos = chartTransform.inverse()* leftBottomPos;
+
+		//d->m_gridOrigin = myUtilty::Vec2f(leftBottomPos.x(), leftBottomPos.y());
+		
+
 		createGrid();
 		if (d->createAxisText()) {
 			for(auto& text : d->m_axisx_value)
@@ -203,7 +213,9 @@ void XChartItem::createGrid()
 		d->m_gridItem->initResource();
 		d->m_gridItem->setIsScreenGrid(false);
 
+		//d->m_gridItem->translate(-0.5, -0.5);
 		d->m_gridItem->scale(0.01,0.01);
+		d->m_gridItem->setOrigin(d->m_gridOrigin);
 	}
 }
 

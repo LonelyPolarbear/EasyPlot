@@ -259,18 +259,7 @@ bool XViewSelection2D::renderLayer(std::set<std::shared_ptr<XGraphicsItem>> obje
 			//需要确保填充模式下生效
 			auto old = shape->isFilled();
 			shape->setIsFilled(true);
-			if (std::dynamic_pointer_cast<XScreenTextItem>(shape)) {
-				Eigen::Matrix4f mat = Eigen::Matrix4f::Identity();
-				auto scene = d->scene.lock();
-				if (scene)
-					mat =d->screenPos2ScenePosFn(scene);
-				shape->pickFillDraw(d->pickFillShader, m * mat);
-
-			}else
-				shape->pickFillDraw(d->pickFillShader, m);
-
-			
-			
+			shape->pickFillDraw(d->pickFillShader, m);
 			shape->setIsFilled(old);
 		}
 		d->pickFillShader->unUse();

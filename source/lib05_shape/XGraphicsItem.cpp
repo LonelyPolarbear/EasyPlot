@@ -113,7 +113,7 @@ void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen:
 		return;
 	updateData();
 	shader->use();
-
+	shader->setIsInstanceDarw(m_isInstance);
 	shader->setBool("isComputeLineLentgh", isComputeLineLentgh);
 	shader->setObjectID(d->m_id);
 	shader->setLineWidth(m_lineWidth);
@@ -129,9 +129,8 @@ void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen:
 
 	bindSSBO();
 
-	Eigen::Matrix4f mat = m * d->m_transform.matrix();
-
-	Eigen::Matrix4f selfMat = Eigen::Matrix4f::Identity();
+	Eigen::Matrix4f mat = m;
+	Eigen::Matrix4f selfMat = d->m_transform.matrix();
 
 	shader->setModelMatrix(mat.data());
 	shader->setModelSelfMatrix(selfMat.data());
@@ -164,9 +163,14 @@ void XGraphicsItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matri
 	shader->setFillColor(m_fillColor.x, m_fillColor.y, m_fillColor.z, m_fillColor.w);
 	shader->setPositionType((int)getPositionType());
 	shader->setOrientation((int)getOrientation());
-	Eigen::Matrix4f mat = m * d->m_transform.matrix();
-	Eigen::Matrix4f selfMat = Eigen::Matrix4f::Identity();
 
+	//Eigen::Matrix4f mat = m * d->m_transform.matrix();
+	//Eigen::Matrix4f selfMat = Eigen::Matrix4f::Identity();
+	//shader->setModelMatrix(mat.data());
+	//shader->setModelSelfMatrix(selfMat.data());
+
+	Eigen::Matrix4f mat = m;
+	Eigen::Matrix4f selfMat = d->m_transform.matrix();
 	shader->setModelMatrix(mat.data());
 	shader->setModelSelfMatrix(selfMat.data());
 
@@ -410,12 +414,24 @@ void XGraphicsItem::translate(float dx, float dy)
 
 void XGraphicsItem::setPosition(float x, float y)
 {
-	d->m_transform.translation()<<x,y,0;
+	if (m_positionType == XGL::PositionType::sceneScreen_center || m_positionType == XGL::PositionType::sceneScreen_complete) {
+		if (m_orientation == XGL::Orientation::left_bottom) {
+			d->m_transform.translation() << x, y, 0;
+		}else if (m_orientation == XGL::Orientation::left_top) {
+			d->m_transform.translation() << x, -y, 0;
+		}else if (m_orientation == XGL::Orientation::right_bottom) {
+			d->m_transform.translation() << -x, y, 0;
+		}else if (m_orientation == XGL::Orientation::right_top) {
+			d->m_transform.translation() << -x, -y, 0;	
+		}
+	}else
+		d->m_transform.translation()<<x,y,0;
 }
 
 void XGraphicsItem::setPositionType(XGL::PositionType type)
 {
 	m_positionType = type;
+	setPosition(getPosition().x, getPosition().y);
 }
 
 XGL::PositionType XGraphicsItem::getPositionType() const
@@ -425,7 +441,10 @@ XGL::PositionType XGraphicsItem::getPositionType() const
 
 void XGraphicsItem::setOrientation(XGL::Orientation orientation)
 {
+	//auto old_orientation = m_orientation;
+	//auto pos = getPositionByOrientation();
 	m_orientation = orientation;
+	//setPosition(pos.x, pos.y);
 }
 
 XGL::Orientation XGraphicsItem::getOrientation() const
@@ -437,6 +456,26 @@ myUtilty::Vec2f XGraphicsItem::getPosition() const
 {
 	Eigen::Vector3f pos= d->m_transform.translation();
 	return myUtilty::Vec2f(pos.x(), pos.y());
+}
+
+myUtilty::Vec2f XGraphicsItem::getPositionByOrientation() const
+{
+	if (m_positionType == XGL::PositionType::sceneScreen_center || m_positionType == XGL::PositionType::sceneScreen_complete) {
+		if (m_orientation == XGL::Orientation::left_bottom) {
+			return myUtilty::Vec2f(d->m_transform.translation().x(), d->m_transform.translation().y());
+		}
+		else if (m_orientation == XGL::Orientation::left_top) {
+			return myUtilty::Vec2f(d->m_transform.translation().x(), -d->m_transform.translation().y());
+		}
+		else if (m_orientation == XGL::Orientation::right_bottom) {
+			return myUtilty::Vec2f(-d->m_transform.translation().x(), d->m_transform.translation().y());
+		}
+		else if (m_orientation == XGL::Orientation::right_top) {
+			return myUtilty::Vec2f(-d->m_transform.translation().x(), -d->m_transform.translation().y());
+		}
+	}
+	
+	return myUtilty::Vec2f(d->m_transform.translation().x(), d->m_transform.translation().y());
 }
 
 void XGraphicsItem::scale(float sx, float sy)

@@ -99,6 +99,8 @@ public:
 
 	myUtilty::Vec2f getPosition() const;
 
+	myUtilty::Vec2f getPositionByOrientation() const;
+
 	void scale(float sx, float sy);
 
 	void resetTransform();
@@ -177,7 +179,7 @@ protected:
 	myUtilty::Vec4f m_fillColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	myUtilty::Vec4f m_preSelectColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	XGL::PositionType m_positionType = XGL::PositionType::local_complete;
-	XGL::Orientation m_orientation = XGL::Orientation::left_top;
+	XGL::Orientation m_orientation = XGL::Orientation::left_bottom;
 
 	std::shared_ptr<XFloatArray> m_coordArray;																	//顶点坐标数组
 	std::shared_ptr<XFloatArray> m_colorArray;																	//顶点颜色数组

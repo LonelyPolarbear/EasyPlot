@@ -712,15 +712,7 @@ void XScene::render2D()
     glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
     {
 		for (auto grapicsItem : d->shapes2D) {
-            if (auto text = std::dynamic_pointer_cast<XScreenTextItem>(grapicsItem)) {    
-                auto mat = sceneScreenPos2ScenePos();        //表示屏幕坐标系在场景坐标系下的位姿
-                auto pos = text->getTextSceneScreenPos();
-                text->setPosition(pos.x, getViewportHeight() - pos.y);
-                grapicsItem->draw(mat);
-            }
-            else {
-                grapicsItem->draw(Eigen::Matrix4f::Identity());
-            }
+             grapicsItem->draw(Eigen::Matrix4f::Identity());
 		}
     }
     

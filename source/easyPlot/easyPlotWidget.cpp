@@ -64,10 +64,10 @@ struct easyPlotWidget::Internal {
 	std::shared_ptr<xShaderManger> shaderManger = makeShareDbObject<xShaderManger>();
 	std::shared_ptr<XScene> scene = makeShareDbObject<XScene>();
 	std::shared_ptr<XGraphicsItem> rect = makeShareDbObject<XRectItem>();		//实时绘制的矩形
-	std::shared_ptr<XScreenTextItem> screenTextItem = makeShareDbObject<XScreenTextItem>();		//实时绘制的矩形
-	std::shared_ptr<XScreenTextItem> screenTextItemLine = makeShareDbObject<XScreenTextItem>();		//实时绘制的矩形
+	std::shared_ptr<XTextItem> screenTextItem = makeShareDbObject<XTextItem>();		//实时绘制的矩形
+	std::shared_ptr<XTextItem> screenTextItemLine = makeShareDbObject<XTextItem>();		//实时绘制的矩形
 
-	std::shared_ptr<XScreenTextItem> screenTextItemMousePos = makeShareDbObject<XScreenTextItem>();		//实时显示鼠标的当前位置
+	std::shared_ptr<XTextItem> screenTextItemMousePos = makeShareDbObject<XTextItem>();		//实时显示鼠标的当前位置
 	
 	//鼠标的位置实时更新
 	QPoint mouseMoveLastTimePos = QPoint(0, 0);							//鼠标实时移动第一个位置
@@ -166,9 +166,11 @@ void easyPlotWidget::initGLResource()
 		auto item = d->screenTextItem;
 		item->initResource();
 		item->setVisible(true);
-		item->setTextSceneScreenPos(250, 0);
+		item->setPosition(250, 0);
 		item->setVAlignment(XTextItem::VAlign::Top);
 		item->setHAlignment(XTextItem::HAlign::Center);
+		item->setPositionType(XGL::PositionType::sceneScreen_complete);
+		item->setOrientation(XGL::Orientation::left_top);
 		item->setFontSize(28);
 		item->setIsFixWidth(true);
 		item->setFixedWidth(500);
@@ -183,8 +185,10 @@ void easyPlotWidget::initGLResource()
 			item->setFontSize(28);
 			item->setIsFixWidth(false);
 			item->setVAlignment(XTextItem::VAlign::Top);
-			item->setHAlignment(XTextItem::HAlign::Right);
-			item->setTextSceneScreenPos(30,0);
+			item->setHAlignment(XTextItem::HAlign::Left);
+			item->setPositionType(XGL::PositionType::sceneScreen_complete);
+			item->setOrientation(XGL::Orientation::left_top);
+			item->setPosition(10,0);
 			item->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
 			d->scene->addGraphicsItem(item);
 		}
@@ -200,7 +204,9 @@ void easyPlotWidget::initGLResource()
 		item->setIsFixWidth(false);
 		item->setVAlignment(XTextItem::VAlign::Top);
 		item->setHAlignment(XTextItem::HAlign::Right);
-		item->setTextSceneScreenPos(0, 0);
+		item->setPositionType(XGL::PositionType::sceneScreen_complete);
+		item->setOrientation(XGL::Orientation::right_top);
+		item->setPosition(0, 0);
 		item->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
 		d->scene->addGraphicsItem(item);
 	}
@@ -343,7 +349,7 @@ void easyPlotWidget::mouseMoveEvent(QMouseEvent* event)
 
 		d->screenTextItemMousePos->setText(tip.toStdWString());
 		if (!d->scene->getGraphicsItem(d->screenTextItemMousePos->getID())) {
-			//d->scene->addGraphicsItem(d->screenTextItemMousePos);
+			d->scene->addGraphicsItem(d->screenTextItemMousePos);
 		}
 	}
 }
@@ -456,7 +462,6 @@ void easyPlotWidget::resizeEvent(QResizeEvent* event)
 	XOpenGLWidget::resizeEvent(event);
 	
 	d->scene->resizeEvent(0, 0, mWidth,  mHeight);
-	d->screenTextItemMousePos->setTextSceneScreenPos(mWidth,0);
 }
 
 void easyPlotWidget::contextMenuEvent(QContextMenuEvent* event)
@@ -716,8 +721,8 @@ void easyPlotWidget::slotSetting()
 			info.content = QString::fromStdWString(text->getText());
 			info.alignH = (int)text->getHAlignment() - 1;
 			info.alignV = (int)text->getVAlignment() - 1;
-			info.x = text->getPosition().x;
-			info.y = text->getPosition().y;
+			info.x = text->getPositionByOrientation().x;
+			info.y = text->getPositionByOrientation().y;
 			info.isFixed = text->isFixWidth();
 			info.fixWidth = text->getFixedWidth();
 			info.color = text->getSingleColor();
@@ -734,12 +739,12 @@ void easyPlotWidget::slotSetting()
 				text->setText(info.content.toStdWString());
 				text->setHAlignment((XTextItem::HAlign)(info.alignH + 1));
 				text->setVAlignment((XTextItem::VAlign)(info.alignV + 1));
-				text->setPosition(info.x, info.y);
 				text->setIsFixWidth(info.isFixed);
 				text->setFixedWidth(info.fixWidth);
 				text->setSingleColor(info.color);
 				text->setPositionType(XGL::PositionType(info.tackMode));
 				text->setOrientation(XGL::Orientation(info.refOrigin));
+				text->setPosition(info.x, info.y);
 				});
 			dlg->raise();
 			dlg->show();
@@ -906,7 +911,7 @@ void easyPlotWidget::slotAddLine2D()
 		auto z =0;
 		curveData->setTuple(i, x, y, z);
 	}
-	item->translate(xoffset, yoffset);
+	item->translate(xoffset, /*yoffset*/0);
 	curveData->Modified();
 	item->setCoordArray(curveData);
 	
@@ -1033,12 +1038,15 @@ void easyPlotWidget::slotAddText()
 		item->setVisible(true);
 		item->setVAlignment(XTextItem::VAlign::Bottom);
 		item->setHAlignment(XTextItem::HAlign::Center);
-		item->setPosition(100,100);
+
+		
 		item->setFontSize(36);
 		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
 		item->setText(L"请输入一段文字");
 		item->setPositionType(XGL::PositionType::sceneScreen_center);
 		item->setOrientation(XGL::Orientation::left_bottom);
+
+		item->setPosition(100, 100);
 		d->scene->addGraphicsItem(item);
 	}
 	doneCurrent();

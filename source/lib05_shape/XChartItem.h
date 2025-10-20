@@ -23,7 +23,6 @@ public:
 
 	void gridSale(float dx, float dy);
 
-	
 private:
 	void createGrid();
 	void updateAxisLabel();
