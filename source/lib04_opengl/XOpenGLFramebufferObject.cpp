@@ -19,6 +19,8 @@ XOpenGLFramebufferObject::XOpenGLFramebufferObject():
 
 XOpenGLFramebufferObject::~XOpenGLFramebufferObject()
 {
+	release();
+	destory();
 }
 
 bool XOpenGLFramebufferObject::create()
@@ -28,14 +30,15 @@ bool XOpenGLFramebufferObject::create()
 	return d->FBO >0;
 }
 
-void XOpenGLFramebufferObject::bind()
+void XOpenGLFramebufferObject::bind(XOpenGL::FrameBufferType type)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, d->FBO);
+	glBindFramebuffer((unsigned int)type, d->FBO);
 }
 
-void XOpenGLFramebufferObject::release()
+void XOpenGLFramebufferObject::release(XOpenGL::FrameBufferType type)
 {
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glBindFramebuffer((unsigned int)type, 0);
 }
 
 void XOpenGLFramebufferObject::destory()
@@ -89,7 +92,7 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		// 创建颜色纹理
 		auto colorTexture = makeShareDbObject<XOpenGLTexture>();
 		colorTexture->setTarget(XOpenGLTexture::Target::Target2D);
-
+		colorTexture->setInternalFormat(internalFormat);
 		colorTexture->create();
 
 		colorTexture->bind();
@@ -97,7 +100,7 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		colorTexture->setMinificationFilter(XOpenGLTexture::Filter::Nearest);
 		colorTexture->setMagnificationFilter(XOpenGLTexture::Filter::Nearest);
 
-		colorTexture->setData(d->width, d->height, 0, internalFormat, inputdataPixelFormat, inputdataPixelType, nullptr);
+		colorTexture->setData(d->width, d->height, 0, /*internalFormat,*/ inputdataPixelFormat, inputdataPixelType, nullptr);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+index, colorTexture->getTarget(), colorTexture->getId(), 0);
 
@@ -107,7 +110,7 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		d->depthStencilAttachment = attachment;
 		d->depthStencilTexture = makeShareDbObject<XOpenGLTexture>();
 		d->depthStencilTexture->setTarget(XOpenGLTexture::Target::Target2D);
-
+		d->depthStencilTexture->setInternalFormat(internalFormat);
 		d->depthStencilTexture->create();
 
 		d->depthStencilTexture->bind();
@@ -120,7 +123,7 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 		
-		d->depthStencilTexture->setData(d->width, d->height, 0, internalFormat, inputdataPixelFormat, inputdataPixelType, nullptr);
+		d->depthStencilTexture->setData(d->width, d->height, 0/*, internalFormat*/, inputdataPixelFormat, inputdataPixelType, nullptr);
 
 		if (attachment == Attachment::Depth) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
@@ -154,7 +157,7 @@ bool XOpenGLFramebufferObject::updateBufferSize(int width, int height)
 		auto dataPixelType = colorTexture->getInputDataPixelType();
 		auto internalFormat = colorTexture->getInternalFormat();
 		colorTexture->bind();
-		colorTexture->setData(d->width, d->height, 0, internalFormat, dataPixelFormat, dataPixelType, nullptr);
+		colorTexture->setData(d->width, d->height, 0, /*internalFormat,*/ dataPixelFormat, dataPixelType, nullptr);
 		
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+index, colorTexture->getTarget(), colorTexture->getId(), 0);
 		colorTexture->release();
@@ -165,7 +168,7 @@ bool XOpenGLFramebufferObject::updateBufferSize(int width, int height)
 		auto dataPixelType = d->depthStencilTexture->getInputDataPixelType();
 		auto internalFormat = d->depthStencilTexture->getInternalFormat();
 		d->depthStencilTexture->bind();
-		d->depthStencilTexture->setData(d->width, d->height, 0, internalFormat, dataPixelFormat, dataPixelType, nullptr);
+		d->depthStencilTexture->setData(d->width, d->height, 0, /*internalFormat,*/ dataPixelFormat, dataPixelType, nullptr);
 		if (d->depthStencilAttachment == Attachment::Depth) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
 		}
@@ -175,8 +178,6 @@ bool XOpenGLFramebufferObject::updateBufferSize(int width, int height)
 		
 		d->depthStencilTexture->release();
 	}
-
-	//glViewport(0, 0, width, height);
 
 	bool flag = isComplete();
 

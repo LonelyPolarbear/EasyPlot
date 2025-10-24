@@ -1,38 +1,65 @@
 #pragma once
 #include "XOpenglApi.h"
-#include <dataBase/dataobject.h>
 
-class XOpenGLBuffer;
-class LIB04_OPENGL_API XOpenGLTexture :DataBaseObject{
-public:
-	enum Target {
-		Target1D = 0x0DE0,									// GL_TEXTURE_1D
-		Target1DArray = 0x8C18,							// GL_TEXTURE_1D_ARRAY
-		Target2D = 0x0DE1,									// GL_TEXTURE_2D
-		Target2DArray = 0x8C1A,							// GL_TEXTURE_2D_ARRAY
-		Target3D = 0x806F,									// GL_TEXTURE_3D
-		TargetCubeMap = 0x8513,							// GL_TEXTURE_CUBE_MAP
-		TargetCubeMapArray = 0x9009,				// GL_TEXTURE_CUBE_MAP_ARRAY
-		Target2DMultisample = 0x9100,				// GL_TEXTURE_2D_MULTISAMPLE
-		Target2DMultisampleArray = 0x9102,		// GL_TEXTURE_2D_MULTISAMPLE_ARRAY
-		TargetRectangle = 0x84F5,						// GL_TEXTURE_RECTANGLE
-		TargetBuffer = 0x8C2A								// GL_TEXTURE_BUFFER
+/// <summary>
+/// opengl相关的宏定义
+/// </summary>
+namespace XOpenGL {
+	enum class LIB04_OPENGL_API FrameBufferType :unsigned int {
+		readBuffer = 0x8CA8,		    //GL_READ_FRAMEBUFFER
+		drawBuffer = 0x8CA9,		    //GL_DRAW_FRAMEBUFFER
+		framebuffer = 0x8D40,		//GL_FRAMEBUFFER
 	};
 
-	enum MipMapGeneration {
-		GenerateMipMaps,
-		DontGenerateMipMaps
+	enum class LIB04_OPENGL_API FrameBufferBindingType :unsigned int {
+		readBufferBinding = 0x8CAA,			    //GL_READ_FRAMEBUFFER_BINDING
+		drawBufferBinding = 0x8CAB,			    //GL_DRAW_FRAMEBUFFER_BINDING
+		framebufferBinding = 0x8CA6,			//GL_FRAMEBUFFER_BINDING
 	};
 
-	enum TextureUnitReset {
-		ResetTextureUnit,
-		DontResetTextureUnit
+	enum class LIB04_OPENGL_API FlagBits :unsigned int {
+		color_buffer_bit = 0x00004000,  //GL_COLOR_BUFFER_BIT
 	};
 
-	//纹理内部格式
-	enum TextureFormat {
+	enum class LIB04_OPENGL_API FilterType :unsigned int {
+		nearest = 0x2600,		//GL_NEAREST
+		linear = 0x2601,		//GL_LINEAR
+	};
+
+	enum class LIB04_OPENGL_API PixelStoreParameter :unsigned int {
+		unpack_swap_bytes = 0x0CF0,	//GL_UNPACK_SWAP_BYTES
+		unpack_lsb_first = 0x0CF1,	//GL_UNPACK_LSB_FIRST
+		unpack_row_length = 0x0CF2,	//GL_UNPACK_ROW_LENGTH
+		unpack_skip_rows = 0x0CF3,	//GL_UNPACK_SKIP_ROWS
+		unpack_skip_pixels = 0x0CF4,	//GL_UNPACK_SKIP_PIXELS
+		unpack_alignment = 0x0CF5,	//GL_UNPACK_ALIGNMENT
+		pack_swap_bytes = 0x0D00,	//GL_PACK_SWAP_BYTES
+		pack_lsb_first = 0x0D01,	//GL_PACK_LSB_FIRST
+		pack_row_length = 0x0D02,	//GL_PACK_ROW_LENGTH
+		pack_skip_rows = 0x0D03,	//GL_PACK_SKIP_ROWS
+		pack_skip_pixels = 0x0D04,	//GL_PACK_SKIP_PIXELS
+		pack_alignment = 0x0D05,	//GL_PACK_ALIGNMENT
+	};
+
+	struct LIB04_OPENGL_API OtherType {
+		static const unsigned int sample_buffers = 0x80A8;//GL_SAMPLE_BUFFERS
+		static const unsigned int samples = 0x80A9;//GL_SAMPLES
+	};
+
+	enum class LIB04_OPENGL_API DataType :unsigned int {
+		unsigned_byte = 0x1401,	//GL_UNSIGNED_BYTE
+		byte = 0x1400,			//GL_BYTE
+		unsigned_short = 0x1403,	//GL_UNSIGNED_SHORT
+		short_ = 0x1402,			//GL_SHORT
+		unsigned_int = 0x1405,	//GL_UNSIGNED_INT
+		int_ = 0x1404,			//GL_INT
+		float_ = 0x1406,			//GL_FLOAT
+		double_ = 0x140A,			//GL_DOUBLE
+		half_float = 0x140B,		//GL_HALF_FLOAT
+	};
+
+	enum class LIB04_OPENGL_API TextureInternalFormat :unsigned int {
 		NoFormat = 0,         // GL_NONE
-
 		// Unsigned normalized formats
 		R8_UNorm = 0x8229,    // GL_R8
 		RG8_UNorm = 0x822B,    // GL_RG8
@@ -178,37 +205,7 @@ public:
 		SRGB_BP_UNorm = 0x8E8D   // GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_ARB
 	};
 
-	enum TextureFormatClass {
-		NoFormatClass,
-		FormatClass_128Bit,
-		FormatClass_96Bit,
-		FormatClass_64Bit,
-		FormatClass_48Bit,
-		FormatClass_32Bit,
-		FormatClass_24Bit,
-		FormatClass_16Bit,
-		FormatClass_8Bit,
-		FormatClass_RGTC1_R,
-		FormatClass_RGTC2_RG,
-		FormatClass_BPTC_Unorm,
-		FormatClass_BPTC_Float,
-		FormatClass_S3TC_DXT1_RGB,
-		FormatClass_S3TC_DXT1_RGBA,
-		FormatClass_S3TC_DXT3_RGBA,
-		FormatClass_S3TC_DXT5_RGBA,
-		FormatClass_Unique
-	};
-
-	enum CubeMapFace {
-		CubeMapPositiveX = 0x8515,  // GL_TEXTURE_CUBE_MAP_POSITIVE_X
-		CubeMapNegativeX = 0x8516,  // GL_TEXTURE_CUBE_MAP_NEGATIVE_X
-		CubeMapPositiveY = 0x8517,  // GL_TEXTURE_CUBE_MAP_POSITIVE_Y
-		CubeMapNegativeY = 0x8518,  // GL_TEXTURE_CUBE_MAP_NEGATIVE_Y
-		CubeMapPositiveZ = 0x8519,  // GL_TEXTURE_CUBE_MAP_POSITIVE_Z
-		CubeMapNegativeZ = 0x851A   // GL_TEXTURE_CUBE_MAP_NEGATIVE_Z
-	};
-
-	enum PixelFormat {
+	enum class LIB04_OPENGL_API TextureExternalFormat:unsigned int {
 		NoSourceFormat = 0,         // GL_NONE
 		Red = 0x1903,    // GL_RED
 		RG = 0x8227,    // GL_RG
@@ -230,143 +227,50 @@ public:
 		LuminanceAlpha = 0x190A     // GL_LUMINANCE_ALPHA
 	};
 
-	enum PixelType {
-		NoPixelType = 0,         // GL_NONE
-		Int8 = 0x1400,    // GL_BYTE
-		UInt8 = 0x1401,    // GL_UNSIGNED_BYTE
-		Int16 = 0x1402,    // GL_SHORT
-		UInt16 = 0x1403,    // GL_UNSIGNED_SHORT
-		Int32 = 0x1404,    // GL_INT
-		UInt32 = 0x1405,    // GL_UNSIGNED_INT
-		Float16 = 0x140B,    // GL_HALF_FLOAT
-		Float16OES = 0x8D61,    // GL_HALF_FLOAT_OES
-		Float32 = 0x1406,    // GL_FLOAT
-		UInt32_RGB9_E5 = 0x8C3E,    // GL_UNSIGNED_INT_5_9_9_9_REV
-		UInt32_RG11B10F = 0x8C3B,    // GL_UNSIGNED_INT_10F_11F_11F_REV
-		UInt8_RG3B2 = 0x8032,    // GL_UNSIGNED_BYTE_3_3_2
-		UInt8_RG3B2_Rev = 0x8362,    // GL_UNSIGNED_BYTE_2_3_3_REV
-		UInt16_RGB5A1 = 0x8034,    // GL_UNSIGNED_SHORT_5_5_5_1
-		UInt16_RGB5A1_Rev = 0x8366,    // GL_UNSIGNED_SHORT_1_5_5_5_REV
-		UInt16_R5G6B5 = 0x8363,    // GL_UNSIGNED_SHORT_5_6_5
-		UInt16_R5G6B5_Rev = 0x8364,    // GL_UNSIGNED_SHORT_5_6_5_REV
-		UInt16_RGBA4 = 0x8033,    // GL_UNSIGNED_SHORT_4_4_4_4
-		UInt16_RGBA4_Rev = 0x8365,    // GL_UNSIGNED_SHORT_4_4_4_4_REV
-		UInt32_RGBA8 = 0x8035,    // GL_UNSIGNED_INT_8_8_8_8
-		UInt32_RGBA8_Rev = 0x8367,    // GL_UNSIGNED_INT_8_8_8_8_REV
-		UInt32_RGB10A2 = 0x8036,    // GL_UNSIGNED_INT_10_10_10_2
-		UInt32_RGB10A2_Rev = 0x8368,    // GL_UNSIGNED_INT_2_10_10_10_REV
-		UInt32_D24S8 = 0x84FA,    // GL_UNSIGNED_INT_24_8
-		Float32_D32_UInt32_S8_X24 = 0x8DAD // GL_FLOAT_32_UNSIGNED_INT_24_8_REV
+	//GLsync相关枚举
+	enum class LIB04_OPENGL_API SyncCondition:unsigned int {
+		SyncGPUCommandsComplete = 0x9117,    // GL_SYNC_GPU_COMMANDS_COMPLETE  当所有在调用 glFenceSync 之前提交到 OpenGL 命令流中的 GPU 命令全部执行完成时，同步对象被触发
 	};
 
-	enum WrapMode {
-		Repeat = 0x2901, // GL_REPEAT
-		MirroredRepeat = 0x8370, // GL_MIRRORED_REPEAT
-		ClampToEdge = 0x812F, // GL_CLAMP_TO_EDGE
-		ClampToBorder = 0x812D  // GL_CLAMP_TO_BORDER
+	enum class LIB04_OPENGL_API SyncFlags:unsigned int {
+		none = 0,
+		//在创建同步对象的同时，隐式执行一次 glFlush()，确保 glFenceSync 之前的所有命令被发送到 GPU（但不等待执行完成）
+		//若不设置该标志，需显式调用 glFlush() 才能保证同步对象的触发条件有效（否则可能因命令未提交而导致同步对象永远不触发）
+		SyncFlushCommandsBit = 0x00000001    // GL_SYNC_FLUSH_COMMANDS_BIT	
 	};
 
-	enum CoordinateDirection {
-		DirectionS = 0x2802, // GL_TEXTURE_WRAP_S
-		DirectionT = 0x2803, // GL_TEXTURE_WRAP_T
-		DirectionR = 0x8072  // GL_TEXTURE_WRAP_R
+	enum class LIB04_OPENGL_API SyncStatus:unsigned int {
+		SyncStatusFailed =	0x911D,								//GL_WAIT_FAILED   等待同步对象失败
+		SyncStatusTimeoutExpired = 0x911B,			//GL_TIMEOUT_EXPIRED	等待超时，同步对象未被触发
+		SyncStatusConditionSatisfied	,							//GL_CONDITION_SATISFIED	同步对象在等待时间触发
+		SyncStatusAlreadySignaled = 0x911A				// GL_ALREADY_SIGNALED		同步对象已经触发
 	};
 
-	enum Filter {
-		Nearest = 0x2600,   // GL_NEAREST
-		Linear = 0x2601,   // GL_LINEAR
-		NearestMipMapNearest = 0x2700,   // GL_NEAREST_MIPMAP_NEAREST
-		NearestMipMapLinear = 0x2702,   // GL_NEAREST_MIPMAP_LINEAR
-		LinearMipMapNearest = 0x2701,   // GL_LINEAR_MIPMAP_NEAREST
-		LinearMipMapLinear = 0x2703    // GL_LINEAR_MIPMAP_LINEAR
+	enum class LIB04_OPENGL_API SyncObjectType:unsigned int {
+		SyncTypeFence = 0x9116,    // GL_SYNC_FENCE
+		SyncTypeSemaphore = 0x9115,    // GL_SYNC_SEMAPHORE
+		SyncTypeEvent = 0x9114    // GL_SYNC_EVENT
 	};
 
-	enum DepthStencilMode {
-		DepthMode = 0x1902,   // GL_DEPTH_COMPONENT
-		StencilMode = 0x1901    // GL_STENCIL_INDEX
+	//内存同步对象相关枚举
+	enum class LIB04_OPENGL_API MemoryBarrierFlag:unsigned int {
+		AllBarrierBits = 0xFFFFFFFF,    // GL_ALL_BARRIER_BITS
+		VertexAttribArrayBarrierBit = 0x00000001,    // GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT
+		ElementArrayBarrierBit = 0x00000002,    // GL_ELEMENT_ARRAY_BARRIER_BIT
+		UniformBarrierBit = 0x00000004,    // GL_UNIFORM_BARRIER_BIT
+		TextureFetchBarrierBit = 0x00000008,    // GL_TEXTURE_FETCH_BARRIER_BIT
+		ShaderImageAccessBarrierBit = 0x00000020,    // GL_SHADER_IMAGE_ACCESS_BARRIER_BIT
+		CommandBarrierBit = 0x00000040,    // GL_COMMAND_BARRIER_BIT
+		PixelBufferBarrierBit = 0x00000080,    // GL_PIXEL_BUFFER_BARRIER_BIT
+		TextureUpdateBarrierBit = 0x00000100,    // GL_TEXTURE_UPDATE_BARRIER_BIT
+		BufferUpdateBarrierBit = 0x00000200,    // GL_BUFFER_UPDATE_BARRIER_BIT
+		FramebufferBarrierBit = 0x00000400,    // GL_FRAMEBUFFER_BARRIER_BIT
+		TransformFeedbackBarrierBit = 0x00000800,    // GL_TRANSFORM_FEEDBACK_BARRIER_BIT
+		AtomicCounterBarrierBit = 0x00001000,    // GL_ATOMIC_COUNTER_BARRIER_BIT
+		AllMemoryBarrierBits = 0xFFFFFFFF    // GL_ALL_BARRIER_BITS	
 	};
 
-	enum ComparisonFunction {
-		CompareLessEqual = 0x0203,   // GL_LEQUAL
-		CompareGreaterEqual = 0x0206,   // GL_GEQUAL
-		CompareLess = 0x0201,   // GL_LESS
-		CompareGreater = 0x0204,   // GL_GREATER
-		CompareEqual = 0x0202,   // GL_EQUAL
-		CommpareNotEqual = 0x0205,   // GL_NOTEQUAL
-		CompareAlways = 0x0207,   // GL_ALWAYS
-		CompareNever = 0x0200    // GL_NEVER
+	struct LIB04_OPENGL_API GlSyncObject {
+		void* ptr;		// GLsync对象指针
 	};
-
-public:
-	XOpenGLTexture();
-	~XOpenGLTexture();
-
-	void setTarget(Target target);
-
-	void setInternalFormat(TextureFormat format);
-
-	Target getTarget() const;
-
-	uint32_t getId() const;
-
-	bool create();
-
-	void destroy();
-
-	void bind();
-	void bindUnit(unsigned int unit, TextureUnitReset reset = DontResetTextureUnit);
-	void release();
-	void releaseUnit(unsigned int unit, TextureUnitReset reset = DontResetTextureUnit);
-
-	void bindBuffer(std::shared_ptr<XOpenGLBuffer> buffer, TextureFormat format);
-
-	//设置放大时的过滤方式
-	void setMagnificationFilter(XOpenGLTexture::Filter filter);
-
-	//设置缩小时的过滤方式
-	void setMinificationFilter(XOpenGLTexture::Filter filter);
-
-	//设置纹理的环绕方式
-	void setWrapMode(XOpenGLTexture::CoordinateDirection direction, XOpenGLTexture::WrapMode mode);
-
-	void setData(
-						int width, 
-						int height, 
-						int level,
-						XOpenGLTexture::PixelFormat dataFormat,
-						XOpenGLTexture::PixelType type,
-						const void* data);
-
-	void setData(
-		int width,
-		int height,
-		int level,
-		XOpenGLTexture::PixelFormat dataFormat,
-		XOpenGLTexture::PixelType type,
-		std::vector< const void*> datas);
-
-	void XOpenGLTexture::setData(
-		CubeMapFace cubeFace,
-		int width,
-		int height,
-		int level,
-		XOpenGLTexture::PixelFormat dataFormat,
-		XOpenGLTexture::PixelType datatype,
-		const void* data);
-
-	void GenerateMipmap();
-
-	XOpenGLTexture::TextureFormat getInternalFormat() const;
-
-	XOpenGLTexture::PixelFormat getInputDataPixelFormat() const;
-
-	XOpenGLTexture::PixelType getInputDataPixelType() const;
-	void* map();
-
-	void unmap();
-
-	static unsigned int getInternalFormatSize(XOpenGLTexture::TextureFormat format);
-protected:
-	class Internal;
-	std::unique_ptr<Internal> d;
-};
+}

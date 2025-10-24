@@ -1,23 +1,32 @@
 #version 430 core
  
  in vec3 fragPos3D;
-
+ flat in vec3 vs_origin;
  out vec4 FragColor;
 
  void main()
-{
+{   
+    vec3 fragPos3D_ = fragPos3D-vs_origin;
+   
     //主网格
     float gridSpace = 4;        //网格间距
     float mainGridDensity = 5*gridSpace;        //网格密度
     float mainGridLineWidth = 1;
-    vec2 mainGridFragpos =vec2(fragPos3D.x/mainGridDensity, fragPos3D.y/mainGridDensity);
+    vec2 mainGridFragpos =vec2(fragPos3D_.x/mainGridDensity, fragPos3D_.y/mainGridDensity);
     vec2 mainGridDerivative = abs(fwidth(mainGridFragpos.xy));
 
     //次网格
     float  subGridDensity = gridSpace;        //网格密度
     float  subGridLineWidth = 1;
-    vec2  subGridFragpos =vec2(fragPos3D.x/subGridDensity, fragPos3D.y/subGridDensity);
+    vec2  subGridFragpos =vec2(fragPos3D_.x/subGridDensity, fragPos3D_.y/subGridDensity);
     vec2  subGridDerivative = fwidth(subGridFragpos.xy);
+
+    /*
+     if(  (fragPos3D_.x <0.0 && abs(fragPos3D_.x)>abs(subGridDerivative.x) )           ||
+           (fragPos3D_.y <0.0 && abs(fragPos3D_.y)>abs(subGridDerivative.y))
+         )
+        discard;
+     */
 
     //当物体距离相机太近，此时导数(变化率)较小,虽然有个数假设
     //x =10.02,距离整数位置=0.02，看着很小，因为导数很小，因此其跨越的屏幕距离是比较大的

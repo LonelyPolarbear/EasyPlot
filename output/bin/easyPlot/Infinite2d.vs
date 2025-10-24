@@ -3,6 +3,8 @@
 layout (location = 0) in vec3 aPos;
 
 out vec3 fragPos3D;
+flat out vec3 vs_origin;
+uniform vec2 Origin;    //网格的原点，用于网格原点不在中心时候的处理
 //计算这几个点在世界坐标系的位置
 layout (std140, binding = 1) uniform Matrices
 {
@@ -46,6 +48,9 @@ void main()
         vec4 gridPos = ObjectMat * objectPos;
         fragPos3D = gridPos.xyz/gridPos.w;
 
-        gl_Position = ProjectionMat*ViewMat*      virtualWorldFrame*     sceneFrameInVirtualWorld* ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        vec4 tmp = ObjectMat* vec4(Origin.x,Origin.y,aPos.z,1);
+        vs_origin = tmp.xyz/tmp.w;
+
+        gl_Position = ProjectionMat*ViewMat*virtualWorldFrame*sceneFrameInVirtualWorld* ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
     }
 }

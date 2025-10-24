@@ -104,6 +104,8 @@ public slots:
 	//НиЭМ
 	void slotScreenShot();
 
+	void slotAxis2D();
+
 private:
 	struct Internal;
 	std::unique_ptr<Internal> d;

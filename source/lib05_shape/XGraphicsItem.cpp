@@ -17,9 +17,9 @@ static std::atomic< uint64_t>  object_id_counter(0);
 class XGraphicsItem::Internal {
 public:
 	Eigen::Affine3f m_transform = Eigen::Affine3f::Identity();
-	//Eigen::Affine3f m_loc2gridTrans = Eigen::Affine3f::Identity();		//局部到网格坐标系的变换，表达的是网格坐标系在局部坐标系的位姿
 	std::mutex m_mutex;
 	uint64_t m_id = ++object_id_counter;
+	bool isInitResource =false;
 };
 
 
@@ -51,27 +51,27 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 		return;
 
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
+	if (isComposite() == false) {
+		//!
+		//! [1] 填充绘制
+		if (m_IsFilled) {
+			glEnableObj->disable(XOpenGLEnable::EnableType::BLEND);
+			glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
+			drawFill(m_shaderManger->getFillShader(), m);
+			glEnableObj->restore();
+		}
 
-	//!
-	//! [1] 填充绘制
-	if (m_IsFilled) {
-		glEnableObj->disable(XOpenGLEnable::EnableType::BLEND);
+		//!
+		//! [2] 边框绘制
+		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
-		drawFill(m_shaderManger->getFillShader(), m);
+		drawBorder(m_shaderManger->getShader2D(getDrawType()), m);
 		glEnableObj->restore();
 	}
-	
-	//!
-	//! [2] 边框绘制
-	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
-	drawBorder(m_shaderManger->getShader2D(getDrawType()),m);
-	glEnableObj->restore();
 
 	//!
 	//! [3] 绘制子类图元
-	
 	//beginClip(m);			//需要知道当前图元的层级，
 
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
@@ -84,7 +84,8 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 
 void XGraphicsItem::pickBorderDraw(std::shared_ptr<xshader> shader,const Eigen::Matrix4f& m)
 {
-	drawBorderImpl(shader, m, true);
+	if(isComposite() == false)
+		drawBorderImpl(shader, m, true);
 
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
 	for (auto item : m_childItems) {
@@ -99,7 +100,8 @@ void XGraphicsItem::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::M
 		item->drawFill(m_shaderManger->getPickFillShader2D(), mat);
 	}
 
-	drawFill(shader, m);
+	if (isComposite() == false)
+		drawFill(shader, m);
 }
 
 void XGraphicsItem::drawBorder(std::shared_ptr<xshader> shader,  const Eigen::Matrix4f& m ){
@@ -239,6 +241,9 @@ void XGraphicsItem::endClip()
 
 void XGraphicsItem::initResource()
 {
+	if(d->isInitResource)
+		return;
+	d->isInitResource = true;
 	m_vao->create();
 	m_vao->bind();
 
@@ -345,6 +350,11 @@ void XGraphicsItem::setDrawType(PrimitveType type)
 	m_drawType = type;
 	}
 
+bool XGraphicsItem::isComposite() const
+{
+	return mIsComposite;
+}
+
 myUtilty::Vec4f XGraphicsItem::getSingleColor() const
 {
 	return m_singleColor;
@@ -363,6 +373,10 @@ void XGraphicsItem::setLineWidth(uint32_t width)
 void XGraphicsItem::setShaderManger(std::shared_ptr<xShaderManger> shaderManger)
 {
 	m_shaderManger = shaderManger;
+	//如果有子类，递归调用
+	for (auto item : m_childItems) {
+		item->setShaderManger(shaderManger);
+	}
 }
 
 std::shared_ptr<xShaderManger> XGraphicsItem::getShaderManger() const
@@ -614,12 +628,15 @@ uint32_t XGraphicsItem::computeNumofVertices() {
 	return m_coordArray->getNumOfTuple();
  }
 
+void XGraphicsItem::setIsComposite(bool enable)
+{
+	mIsComposite = enable;
+}
+
 void XGraphicsItem::addChildItem(std::shared_ptr<XGraphicsItem> item)
 {
 	if (item) {
-		if (!item->getShaderManger()) {
-			item->setShaderManger(m_shaderManger);
-		}
+		item->setShaderManger(m_shaderManger);
 		m_childItems.push_back(item);
 	}
 }

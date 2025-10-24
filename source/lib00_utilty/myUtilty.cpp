@@ -228,7 +228,22 @@ namespace myUtilty {
 		y = other.y;
 	}
 
-    Vec2f operator*(float scalar, const Vec2f& c) {
+	lib00_utilty_API std::wstring to_wstring_with_precision(double value, int precision)
+	{
+		std::wstringstream wss;
+		// std::fixed 确保精度是小数部分的位数（而非总有效数字）
+		wss << std::fixed << std::setprecision(precision) << value;
+		return wss.str();
+	}
+
+	lib00_utilty_API std::string to_string_with_precision(double value, int precision)
+	{
+		std::stringstream wss;
+		wss << std::fixed << std::setprecision(precision) << value;
+		return wss.str();
+	}
+
+	Vec2f operator*(float scalar, const Vec2f& c) {
 		return Vec2f(c.x * scalar, c.y * scalar);
 	}
 

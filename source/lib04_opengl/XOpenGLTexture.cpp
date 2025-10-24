@@ -32,6 +32,11 @@ void XOpenGLTexture::setTarget(Target target)
 	d->target = target;
 }
 
+void XOpenGLTexture::setInternalFormat(TextureFormat format)
+{
+	d->internalFormat = format;
+}
+
 XOpenGLTexture::Target XOpenGLTexture::getTarget() const
 {
 	return d->target;
@@ -123,24 +128,23 @@ void XOpenGLTexture::setData(
 													int width, 
 													int height, 
 													int level, 
-													XOpenGLTexture::TextureFormat internalFormat,
+													/*XOpenGLTexture::TextureFormat internalFormat,*/
 													XOpenGLTexture::PixelFormat dataFormat, 
 													XOpenGLTexture::PixelType datatype,
 													const void* data)
 {
 	d->width = width;
 	d->height = height;
-	d->internalFormat = internalFormat;
 	d->dataFormat = dataFormat;
 	d->datatype = datatype;
-	glTexImage2D(d->target, level/*mimmap层级*/, internalFormat, width, height, 0/*历史遗留问题*/,dataFormat , datatype, data);
+	glTexImage2D(d->target, level/*mimmap层级*/, d->internalFormat, width, height, 0/*历史遗留问题*/,dataFormat , datatype, data);
 }
 
 void XOpenGLTexture::setData(
 										int width, 
 										int height, 
 										int level, 
-										XOpenGLTexture::TextureFormat internalFormat, 
+	
 										XOpenGLTexture::PixelFormat dataFormat, 
 										XOpenGLTexture::PixelType type, 
 										std::vector< const void*> datas)
@@ -150,12 +154,11 @@ void XOpenGLTexture::setData(
 
 	d->width = width;
 	d->height = height;
-	d->internalFormat = internalFormat;
 	d->dataFormat = dataFormat;
 	d->datatype = type;
 	d->layer = datas.size();
 
-	glTexImage3D(d->target, level, internalFormat, width, height, datas.size(), 0, dataFormat, type, nullptr);
+	glTexImage3D(d->target, level, d->internalFormat, width, height, datas.size(), 0, dataFormat, type, nullptr);
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR) {
 		int dddd = 10;
@@ -182,12 +185,11 @@ void XOpenGLTexture::setData(
 										int width, 
 										int height, 
 										int level, 
-										XOpenGLTexture::TextureFormat internalFormat,
 										XOpenGLTexture::PixelFormat dataFormat, 
 										XOpenGLTexture::PixelType datatype, 
 										const void* data)
 {
-	glTexImage2D(cubeFace, level/*mimmap层级*/, internalFormat, width, height, 0/*历史遗留问题*/, dataFormat, datatype, data);
+	glTexImage2D(cubeFace, level/*mimmap层级*/, d->internalFormat, width, height, 0/*历史遗留问题*/, dataFormat, datatype, data);
 }
 
 void XOpenGLTexture::GenerateMipmap()
@@ -229,8 +231,6 @@ void* XOpenGLTexture::map()
 	}
 	
 	bind();
-	std::vector<unsigned int> dd;
-	dd.resize(d->width * d->height*4*4);
 	glGetTexImage(
 		d->target,       // 纹理目标
 		0,                   // mipmap级别
@@ -239,14 +239,9 @@ void* XOpenGLTexture::map()
 		0                    // 偏移量（使用PBO时设为0）
 	);
 
-	//glPixelStorei(GL_PACK_ALIGNMENT, oldAlignment);
-
-	//glReadPixels(0, 0, d->width, d->height, d->dataFormat, d->datatype, 0);
 	void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
 
 	unsigned int* p = (unsigned int*)ptr;
-	//if(p)
-		//memcpy(dd.data(), p, d->width * d->height * 4 * 4);
 
 	return ptr;
 }

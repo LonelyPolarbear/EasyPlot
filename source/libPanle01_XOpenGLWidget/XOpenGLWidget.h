@@ -52,23 +52,11 @@ public:
 	std::shared_ptr<XOpenGLContext> getContext() const;
 
 	//将窗口坐标转换为左下角屏幕坐标系列
-	myUtilty::Vec2u mapToGLScreen(const QPoint& point);
+	myUtilty::Vec2u mapToGLScreen(const QPoint& point) const;
 
-	myUtilty::Vec2f mapToNormGLScreen(const QPoint& point);
-private:
-	bool createTempContext();
-
-
+	myUtilty::Vec2f mapToNormGLScreen(const QPoint& point) const;
 protected:
-	//QOpenGLContext* m_context{nullptr};
-	//QWindow* m_surface{nullptr};
-
-	//平台原生上下文
-	//void* nativeContext = nullptr;
-	//void* nativeDisplay = nullptr;
-
 	bool m_isInit = false;
-
 	int mWidth =0;
 	int mHeight = 0;
 

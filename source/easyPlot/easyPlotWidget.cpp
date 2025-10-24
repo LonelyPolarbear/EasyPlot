@@ -37,6 +37,7 @@
 #include <lib05_shape/XPolyline.h>
 #include <lib05_shape/XTextItem.h>
 #include <lib05_shape/XScreenTextItem.h>
+#include <lib05_shape/XAxisItem.h>
 
 #include <lib06_select/xviewselection.h>
 #include <lib07_scene/xscene.h>
@@ -52,6 +53,7 @@
 #include <qapplication.h>
 #include <QFileDialog>
 #include <lib09_panel/FontSetDlg.h>
+#include <lib09_panel/ScreenShotDlg.h>
 
 using namespace std::chrono_literals;
 enum class CameraAction {
@@ -174,7 +176,6 @@ void easyPlotWidget::initGLResource()
 		item->setFontSize(28);
 		item->setIsFixWidth(true);
 		item->setFixedWidth(500);
-		//item->setText(L"屏幕坐标系下的文字");
 		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
 		d->scene->addGraphicsItem(item);
 
@@ -954,21 +955,6 @@ void easyPlotWidget::slotAddChart()
 
 	d->scene->addGraphicsItem(chart);
 
-	////为X轴增加五个文本标签
-	//for (int i = 0; i < 4; i++) {
-	//	auto xaxis = makeShareDbObject<XTextItem>();
-	//	xaxis->initResource();
-	//	xaxis->setVisible(true);
-	//	xaxis->setVAlignment(XTextItem::VAlign::Top);
-	//	xaxis->setHAlignment(XTextItem::HAlign::Left);
-	//	xaxis->setPosition(0+i*0.25, 0);
-	//	xaxis->setFontSize(0.05);
-	//	xaxis->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-	//	xaxis->setText(QString::number(0+sx*i, 'f', 2).toStdWString());
-	//	chart->addChildItem(xaxis);
-	//}
-	
-
 	doneCurrent();
 }
 
@@ -1088,16 +1074,63 @@ void easyPlotWidget::slotScreenTextVisible(bool flag)
 
 void easyPlotWidget::slotScreenShot()
 {
-	auto fileName = QFileDialog::getSaveFileName(this, tr("Save Image"),
-		qApp->applicationDirPath(),
-		tr("Image Files (*.png *.jpg *.bmp)"));
+	//d->scene->grabFramebuffer();
+	//return;
+	static ScreenShotDlg* dlg = nullptr;
+	if (dlg == nullptr) {
 
-	if (!fileName.isEmpty()) {
-		auto image_data = d->scene->grabFramebuffer();
-		image_data->flip();
-		auto textureWidth = image_data->getCol();
-		auto textureHeight = image_data->getRow();
-		QImage image(image_data->data(0, 0), textureWidth, textureHeight, textureWidth*4/*指定行宽，避免对齐问题*/, QImage::Format_RGBA8888);
-		image.save(fileName);
+		dlg = new ScreenShotDlg(0,0,d->scene->getViewportWidth(),d->scene->getViewportHeight(), 
+		0,0,d->scene->getViewportWidth(),d->scene->getViewportHeight(), this);
+
+		connect(dlg, &ScreenShotDlg::sigScreenShot, this, [this](int src_x, int src_y, int src_w, int src_h, int dst_x, int dst_y, int dst_w, int dst_h, QString fileName){
+			auto image_data = d->scene->grabFramebuffer(src_x, src_y, src_w, src_h, dst_x, dst_y, dst_w, dst_h);
+			image_data->flip();
+			auto textureWidth = image_data->getCol();
+			auto textureHeight = image_data->getRow();
+			QImage image(image_data->data(0, 0), textureWidth, textureHeight, textureWidth * 4/*指定行宽，避免对齐问题*/, QImage::Format_RGBA8888);
+			image.save(fileName);
+		});
 	}
+		
+	dlg->raise();
+	dlg->show();
+}
+
+//创建坐标轴
+void easyPlotWidget::slotAxis2D()
+{
+	makeCurrent();
+	{
+		auto axis = makeShareDbObject<XAxisItem>();
+		axis->initResource();
+		axis->setVisible(true);
+
+		axis->getLine()->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		axis->getLine()->setFixedLine(true);
+		axis->getLine()->setLineWidth(2);
+		axis->getLine()->setPositionType(XGL::PositionType::local_complete);
+		axis->getLine()->setOrientation(XGL::Orientation::left_bottom);
+
+		axis->translate(0,0);
+		axis->scale(100,1);
+		axis->setRange(0,100);
+		d->scene->addGraphicsItem(axis);
+	}
+	//{
+	//	auto axis = makeShareDbObject<XLineItem>();
+	//	axis->initResource();
+	//	axis->setVisible(true);
+
+	//	axis->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+	//	axis->setFixedLine(true);
+	//	axis->setLineWidth(2);
+	//	axis->setPositionType(XGL::PositionType::sceneScreen_complete);
+	//	axis->setOrientation(XGL::Orientation::left_bottom);
+
+	//	axis->translate(0, 300);
+	//	axis->scale(100, 100);
+	//	//axis->setRange(0, 100);
+	//	d->scene->addGraphicsItem(axis);
+	//}
+	doneCurrent();
 }

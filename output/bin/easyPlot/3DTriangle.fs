@@ -9,8 +9,9 @@
 //ubo，存储所有着色器需要的常量，且常量与具体模型无关，如当前鼠标的位置、屏幕大小等
 layout (std140, binding = 2) uniform ubo_fs
 {
-    vec2 screenSize;																				//屏幕大小
+    vec2 screenSize;																									//屏幕大小
     vec2 setRealTimeMousePos;																				//鼠标实时位置，用于预选
+	vec4 sceneRect;																									//场景矩形,当前场景的位置，x y width height
 };
 
 

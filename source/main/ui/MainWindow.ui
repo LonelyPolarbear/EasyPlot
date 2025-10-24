@@ -288,6 +288,7 @@
    <addaction name="ActshowGrid"/>
    <addaction name="ActshowGrid3d"/>
    <addaction name="ActShowAxis"/>
+   <addaction name="Actaxis2d"/>
   </widget>
   <widget class="QToolBar" name="toolBar_5">
    <property name="windowTitle">
@@ -612,6 +613,15 @@
    </property>
    <property name="text">
     <string>screenshot</string>
+   </property>
+  </action>
+  <action name="Actaxis2d">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/axis2d.svg</normaloff>:/icon/axis2d.svg</iconset>
+   </property>
+   <property name="text">
+    <string>axis2d</string>
    </property>
   </action>
  </widget>

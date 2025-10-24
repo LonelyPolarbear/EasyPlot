@@ -4,6 +4,7 @@
 #include "lib04_opengl/XOpenGLContext.h"
 #include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib04_opengl/XOpenGLEnable.h"
+#include "lib04_opengl/XOpenGLFuntion.h"
 #include "lib01_shader/xshader.h"
 #include "lib01_shader/xshaderManger.h"
 #include "lib06_select/xviewselection.h"
@@ -26,6 +27,7 @@
 #include <lib03_stbImage/stbImage.h>
 
 #include <future>
+#include <limits.h>
 
 class SceneUbo:public DataBaseObject{
 protected:
@@ -438,10 +440,6 @@ std::vector<XViewSelection2D::SelectData> XScene::getPointSelection2D(int x, int
 {
 	makeCurrent();
     d->createViewSelection2D(this->shared_from_this(),&XScene::sceneScreenPos2ScenePosMat);
-    //d->viewSelection2D->setScene(this->shared_from_this());
-    //d->viewSelection2D->setGetMatrixforScreen2Scene(std::bind( static_cast<Eigen::Matrix4f(XScene::*)()>(&XScene::screenPos2ScenePos), this));
-
-
 	d->viewSelection2D->update(d->shapes2D, d->camera, Eigen::Matrix4f::Identity());
 	auto selectData = d->viewSelection2D->getAllPointSelection(x - d->startx, y - d->starty, d->width, d->height);
 	doneCurrent();
@@ -493,6 +491,46 @@ void XScene::render()
 {
     render3D();
     render2D();
+}
+
+sptr<XUCharArray2D> XScene::renderFbo()
+{
+    //创建FBO
+    makeCurrent();
+    auto fbo = makeShareDbObject<XOpenGLFramebufferObject>();
+    fbo->create();
+    fbo->bind();
+
+    fbo->setWidth(getViewportWidth());
+    fbo->setHeight(getViewportHeight());
+
+    fbo->addAttachment(
+                                        XOpenGLFramebufferObject::Attachment::Color,                        //附件类型
+                                        XOpenGLTexture::TextureFormat::RGBA8_UNorm,                     //内部格式
+                                        XOpenGLTexture::PixelFormat::RGBA,                                          //外部数据格式
+                                        XOpenGLTexture::PixelType::UInt8                                               //外部数据类型
+                                        );
+
+    auto complete_flag =fbo->isComplete();
+
+    render();
+    makeCurrent();
+    fbo->release();
+
+    //读取纹理数据
+    auto texture = fbo->getColorAttachment();
+    texture->bind();
+    auto *p = texture->map();
+
+	auto data = makeShareDbObject<XUCharArray2D>();
+	data->setComponent(4);
+    data->setDimensions(getViewportHeight(), getViewportWidth());
+    memcpy( data->data(0,0), p, getViewportHeight()*getViewportWidth()*4);
+    texture->unmap();
+    texture->release();
+    doneCurrent();
+    return data;
+
 }
 
 void XScene::render3D()
@@ -610,10 +648,8 @@ void XScene::render3D()
 void XScene::render2D()
 {
     makeCurrent();
-
 	{
         if (!d->fontTexture) {
-           
 			auto texture = makeShareDbObject<XOpenGLTexture>();
 
 			texture->setTarget(XOpenGLTexture::Target::Target2DArray);
@@ -625,7 +661,7 @@ void XScene::render2D()
 			//texture->setWrapMode(XOpenGLTexture::CoordinateDirection::DirectionT, XOpenGLTexture::WrapMode::ClampToEdge);
     
             d->fontTexture = texture;
-
+            d->fontTexture->setInternalFormat(XOpenGLTexture::TextureFormat::RGB8_UNorm);
 			d->fontTexture->bind();
 			d->fontTexture->bindUnit(6);
 			d->fontTexture->release();
@@ -661,7 +697,7 @@ void XScene::render2D()
 				if (d->result_future.valid() &&  d->result_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready) {
 					auto datas = d->result_future.get();
 					d->fontTexture->bind();
-					d->fontTexture->setData(std::get<0>(datas), std::get<1>(datas), 0, XOpenGLTexture::TextureFormat::RGB8_UNorm, XOpenGLTexture::PixelFormat::RGB, XOpenGLTexture::PixelType::UInt8, std::get<2>(datas));
+					d->fontTexture->setData(std::get<0>(datas), std::get<1>(datas), 0, XOpenGLTexture::PixelFormat::RGB, XOpenGLTexture::PixelType::UInt8, std::get<2>(datas));
 					d->fontTexture->release();
 
                     //内存释放
@@ -986,7 +1022,6 @@ Eigen::Matrix4f XScene::sceneScreenPos2ScenePos()
     auto scene_h = getViewportHeight();
 
     transform.translate(Eigen::Vector3f(-0.5 * scene_w, -0.5 * scene_h, 0));
-   // transform.translate(Eigen::Vector3f(-d->startx, -d->starty, 0));
 
     Eigen::Matrix4f screen2viewPort = transform.matrix();
 
@@ -1032,8 +1067,8 @@ void XScene::doneCurrent()
 }
 
 myUtilty::BoundBox  XScene::computeBoundBox() {
-	constexpr double limitMax = std::numeric_limits<double>::max();
-	constexpr double limitMin = std::numeric_limits<double>::lowest();;
+	 constexpr double limitMax = std::numeric_limits<double>::max();
+     constexpr double limitMin = std::numeric_limits<double>::lowest();;
     myUtilty::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
     for (auto& shape : d->shapes) {
         auto shapeBoundBox = shape->getBoundBox();
@@ -1056,17 +1091,119 @@ myUtilty::BoundBox  XScene::computeBoundBox() {
     return boundBox;
 }
 
-std::shared_ptr<XUCharArray2D> XScene::grabFramebuffer() {
-    //auto viewport = glGetIntegerv(GL_VIEWPORT);
-    //auto width = viewport[2];
-    //auto height = viewport[3];
+void workThread(/*GLsync sync*/XOpenGL::GlSyncObject syncObject, 
+        std::shared_ptr<XOpenGLShareContext> context, 
+        std::shared_ptr<XOpenGLBuffer> pbo,
+        int width,
+        int height
+        ) {
+    if (!context->makeCurrent()) {
+        return;
+    }
+
+	auto waitResult = XOpenGLFuntion::xglClientWaitSync(syncObject, XOpenGL::SyncFlags::none, std::numeric_limits<unsigned long long>::max());
+	if (waitResult == XOpenGL::SyncStatus::SyncStatusAlreadySignaled ||
+		waitResult == XOpenGL::SyncStatus::SyncStatusConditionSatisfied)
+	{
+		//glGetIntegerv(GL_PIXEL_PACK_BUFFER_BINDING, &currentPBO);
+		pbo->bind();
+		void* d = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
+		unsigned char* dd = (unsigned char*)d;
+	}
+	else {
+		std::cout << "wait sync failed\n";
+	}
+
+   XOpenGLFuntion::xglDeleteSync(syncObject);
+   
+    context->doneCurrent();
+}
+
+std::shared_ptr<XUCharArray2D> XScene::grabFramebuffer()
+{
+	makeCurrent();
+	auto data = makeShareDbObject<XUCharArray2D>();
+	data->setComponent(4);
+    data->setDimensions(getViewportWidth(), getViewportHeight());
+
+    XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer,0);
+
+    auto pbo =makeShareDbObject< XOpenGLBuffer>();
+    pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+    pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+    pbo->create();
+    pbo->bind();
+    pbo->allocate(getViewportWidth()* getViewportHeight()*4);
+
+    XOpenGLFuntion::xglReadPixels(0, 0, getViewportWidth(), getViewportHeight(),XOpenGL::TextureExternalFormat::BGRA, XOpenGL::DataType::unsigned_byte, nullptr);
+
+    //GLsync sync = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+    auto glSyncObject = XOpenGLFuntion::xglFenceSync(XOpenGL::SyncFlags::SyncFlushCommandsBit);
+
+    std::thread t(std::bind(workThread, glSyncObject,d->context->createOrgetShareContext(),pbo, getViewportWidth(),getViewportHeight()));
+    t.detach();
+
+	doneCurrent();
+	return data;
+}
+
+std::shared_ptr<XUCharArray2D> XScene::grabFramebuffer(
+	int startx,
+	int starty,
+	int width,
+	int height,
+	int dest_x,
+	int dest_y,
+	int dest_width,
+	int dest_height) 
+  {
+
+    return renderFbo();
+ 
     makeCurrent();
     auto data = makeShareDbObject<XUCharArray2D>();
     data->setComponent(4);
-    data->setDimensions( getViewportHeight(), getViewportWidth());
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glReadPixels(0, 0, getViewportWidth(), getViewportHeight(), GL_RGBA, GL_UNSIGNED_BYTE, data->data(0,0));
+    
+    XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer,0);
+	GLint sampleBuffers, samples;
+
+	XOpenGLFuntion::xglGetIntegerv(XOpenGL::OtherType::sample_buffers, sampleBuffers);
+	XOpenGLFuntion::xglGetIntegerv(XOpenGL::OtherType::samples, samples);
+
+	if (sampleBuffers && samples > 1) {
+		auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
+		resoveFbo->create();
+		resoveFbo->bind();
+		resoveFbo->addAttachment(XOpenGLFramebufferObject::Attachment::Color, XOpenGLTexture::TextureFormat::RGBA8_UNorm, XOpenGLTexture::PixelFormat::RGBA, XOpenGLTexture::PixelType::UInt8, 0);
+		bool flag = resoveFbo->isComplete();
+		resoveFbo->release();
+
+		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, 0);
+		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::drawBuffer, resoveFbo->getId());
+
+		XOpenGLFuntion::xglBlitFramebuffer(0, 0,  width, height, 0, 0, width, height,
+			XOpenGL::FlagBits::color_buffer_bit, XOpenGL::FilterType::nearest);
+    }
+
+     width =std::min(width, getViewportWidth() - startx);
+     height = std::min(height , getViewportHeight() - starty);
+
+     //目标区域总大小
+    data->setDimensions(dest_height,dest_width);
+
+	XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, dest_x);
+	XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_rows, dest_y);
+	XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_row_length, dest_width);
+
+    XOpenGLFuntion::xglReadPixels(startx, starty, width, height, XOpenGL::TextureExternalFormat::RGBA, XOpenGL::DataType::unsigned_byte, data->data(0,0));
+
+    //恢复
+    XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, 0);
+    XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_rows, 0);
+    XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_row_length, 0);
+
+    XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer, 0);
     doneCurrent();
     return data;
-    //data->resize(getViewportWidth(), getViewportHeight());
 }

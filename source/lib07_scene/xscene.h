@@ -61,6 +61,9 @@ protected:
 		void createUbo();
 		//交互
 		void  render();
+		
+		//仅仅是为了测试离屏渲染
+		sptr<XUCharArray2D> renderFbo();
 
 		void virtual render3D();
 
@@ -147,6 +150,8 @@ protected:
 		int mousePosy{0};
 
 		std::shared_ptr<XUCharArray2D> grabFramebuffer();
+
+		std::shared_ptr<XUCharArray2D> grabFramebuffer(int startx, int starty, int width, int height,int dest_x, int dest_y, int dest_width, int dest_height);
 		
 private:
 	class Internal;

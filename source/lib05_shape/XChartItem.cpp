@@ -8,12 +8,6 @@
 #include "lib05_shape/XTextItem.h"
 #include <Eigen/Eigen>
 
-std::wstring to_wstring_with_precision(double value, int precision) {
-	std::wstringstream wss;
-	// std::fixed 确保精度是小数部分的位数（而非总有效数字）
-	wss << std::fixed << std::setprecision(precision) << value;
-	return wss.str();
-}
 
 class XChartItem::Internal {
 public:
@@ -21,8 +15,8 @@ public:
 	std::shared_ptr< XGridItem> m_gridItem;	//网格
 	std::vector<std::shared_ptr<XTextItem>> m_axisx_value;		//文本集合,X轴，先按照固定大小处理
 	std::vector<std::shared_ptr<XTextItem>> m_axisy_value;		//文本集合,X轴，先按照固定大小处理
-	int m_xlabelNum =11;				//X轴标签数量
-	int m_ylabelNum =4;					//Y轴标签数量
+	int m_xlabelNum =11;					//X轴标签数量
+	int m_ylabelNum =4;						//Y轴标签数量
 	bool m_isShowGrid = true;			//是否显示网格
 	myUtilty::Vec2f m_gridOrigin = myUtilty::Vec2f(0,0);
 
@@ -232,7 +226,7 @@ void XChartItem::updateAxisLabel()
 		auto step = length / (d->m_xlabelNum - 1);
 		double value = -0.5 * length + i * step;
 
-		xaxis->setText(to_wstring_with_precision(value, 1));
+		xaxis->setText(myUtilty::to_wstring_with_precision(value, 1));
 	}
 
 	for (int i = 0; i < d->m_axisy_value.size(); i++) {
@@ -241,7 +235,7 @@ void XChartItem::updateAxisLabel()
 		auto step = length / (d->m_ylabelNum - 1);
 		double value = -0.5 * length + i * step;
 		//double v = (i - 2) * 0.5 * 1. / data.sy;
-		xaxis->setText(to_wstring_with_precision(value, 1));
+		xaxis->setText(myUtilty::to_wstring_with_precision(value, 1));
 	}
 }
 

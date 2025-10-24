@@ -18,7 +18,7 @@ file(GLOB_RECURSE SOURCES_FILES *.cpp)
 #Qt支持
 #-------------------------------------------------------
 #查找所有的需要moc预处理的文件
-set(MOC_FILES FontSetDlg.h ColorPickButton.h CustomToolButton.h)
+set(MOC_FILES FontSetDlg.h ColorPickButton.h CustomToolButton.h ScreenShotDlg.h)
 
 #GLOB_RECURSE 
 FILE(GLOB UI_FILES "ui/*.ui")
@@ -70,8 +70,6 @@ SET(LIB_NAMES
 				Qt5::Widgets
 				Qt5::Core
 				glew32
-				opengl32
-				xopengl${DLL_DEBUG_POSTFIX}
 				myUtilty${DLL_DEBUG_POSTFIX}
 	)
 

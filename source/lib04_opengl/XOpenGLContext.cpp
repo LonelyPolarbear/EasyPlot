@@ -1,6 +1,99 @@
 #include <glew/glew.h>
 #include<windows.h>
+#include <glew/wglew.h>
+
 #include "XOpenGLContext.h"
+#include <iostream>
+
+HGLRC CreateWindowlessContext(HGLRC shareContext, HWND& tempWindow) {
+	// 使用wglCreateContextAttribsARB创建现代OpenGL上下文
+	HDC tempDC = nullptr;
+	//HWND tempWindow = nullptr;
+	HGLRC tempContext = nullptr;
+	HGLRC finalContext = nullptr;
+
+	do {
+		// 创建临时窗口用于获取DC
+		tempWindow = CreateWindowEx(
+			0, "Static", "Temp", WS_POPUP,
+			0, 0, 1, 1, nullptr, nullptr, GetModuleHandle(nullptr), nullptr);
+		if (!tempWindow) break;
+
+		tempDC = GetDC(tempWindow);
+		if (!tempDC) break;
+
+		// 设置临时的像素格式
+		PIXELFORMATDESCRIPTOR tempPfd = {
+			sizeof(PIXELFORMATDESCRIPTOR), 1,
+			PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+			PFD_TYPE_RGBA, 32, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			24, 8, 0, 0, 0, 0, 0, 0
+		};
+
+		int tempFormat = ChoosePixelFormat(tempDC, &tempPfd);
+		if (!tempFormat) break;
+
+		if (!SetPixelFormat(tempDC, tempFormat, &tempPfd)) break;
+
+		// 创建临时上下文
+		tempContext = wglCreateContext(tempDC);
+		if (!tempContext) break;
+
+		if (!wglMakeCurrent(tempDC, tempContext)) break;
+
+		// 初始化GLEW
+		glewExperimental = GL_TRUE;
+		if (glewInit() != GLEW_OK) {
+			//std::cerr << "无法初始化GLEW" << std::endl;
+			break;
+		}
+
+		// 检查WGL_ARB_create_context扩展
+		if (!WGLEW_ARB_create_context) {
+			//std::cerr << "不支持WGL_ARB_create_context扩展" << std::endl;
+			break;
+		}
+
+		// 使用wglCreateContextAttribsARB创建无窗口上下文
+		// 关键：使用WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB而不是核心配置文件
+		// 这样可以在没有默认帧缓冲区的情况下工作
+		int attribs[] = {
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 6,
+			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_COMPATIBILITY_PROFILE_BIT_ARB,
+			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+			0
+		};
+
+		// 注意：这里使用tempDC，但实际上这个上下文不会与任何窗口关联
+		// 一旦创建，我们可以使其在任何线程中成为当前上下文
+		finalContext = wglCreateContextAttribsARB(tempDC, shareContext, attribs);
+		if (!finalContext) {
+			//std::cout << "无法使用wglCreateContextAttribsARB创建上下文" << std::endl;
+			finalContext = wglCreateContext(tempDC);
+			if (finalContext && shareContext) {
+				if (!wglShareLists(shareContext, finalContext)) {
+					//std::cout << "无法共享上下文列表" << std::endl;
+				}
+			}
+		}
+
+	} while (false);
+
+	// 清理临时资源
+	if (tempContext) {
+		wglMakeCurrent(nullptr, nullptr);
+		wglDeleteContext(tempContext);
+	}
+	if (tempDC && tempWindow) {
+		//ReleaseDC(tempWindow, tempDC);
+	}
+	if (tempWindow) {
+		//DestroyWindow(tempWindow);
+	}
+
+	return finalContext;
+}
 
 XOpenGLContext::XOpenGLContext()
 {
@@ -8,6 +101,7 @@ XOpenGLContext::XOpenGLContext()
 
 XOpenGLContext::~XOpenGLContext()
 {
+	wglMakeCurrent(nullptr, nullptr);
 }
 
 bool XOpenGLContext::makeCurrent()
@@ -50,4 +144,226 @@ void* XOpenGLContext::getNativeDisplay() const
 bool XOpenGLContext::isValid()
 {
 	return nativeDisplay && nativeContext;
+}
+
+bool XOpenGLContext::createTempContext()
+{
+	static bool initialized = false;
+	if (initialized) return true;
+		initialized = true;
+
+	WNDCLASS wc = { 0 };
+	wc.lpfnWndProc = DefWindowProc;
+	wc.hInstance = GetModuleHandle(NULL);
+	wc.lpszClassName = "TempGLWindow";
+
+	if (!RegisterClass(&wc)) return false;
+
+	auto tempHWnd = CreateWindowEx(0, "TempGLWindow", "Temp Window", 0,
+		0, 0, 1, 1, NULL, NULL, GetModuleHandle(NULL), NULL);
+	if (!tempHWnd) return false;
+
+	HDC hdc = GetDC(tempHWnd);
+
+	PIXELFORMATDESCRIPTOR pfd = {
+		sizeof(PIXELFORMATDESCRIPTOR),
+		1,
+		PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
+		PFD_TYPE_RGBA,
+		32, // 颜色深度
+		0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		24, // 深度缓冲
+		8,  // 模板缓冲
+		0,
+		PFD_MAIN_PLANE,
+		0, 0, 0, 0
+	};
+
+
+	int pixelFormat = ChoosePixelFormat(hdc, &pfd);
+	if (!pixelFormat) return false;
+
+	if (!SetPixelFormat(hdc, pixelFormat, &pfd)) return false;
+
+	HGLRC tempContext = wglCreateContext(hdc);
+	if (!tempContext) return false;
+
+	if (!wglMakeCurrent(hdc, tempContext)) return false;
+
+
+	wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
+	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
+
+	// 删除临时上下文
+	wglMakeCurrent(nullptr, nullptr);
+	wglDeleteContext(tempContext);
+
+	ReleaseDC(tempHWnd, hdc);
+	DestroyWindow(tempHWnd);
+	UnregisterClass("TempGLWindow", GetModuleHandle(NULL));
+	return true;
+}
+
+bool XOpenGLContext::create(uint64_t winId)
+{
+	createTempContext();
+
+	HDC hdc = GetDC((HWND)winId);
+	if (!createTempContext()) {
+		return false;
+	}
+
+	// 多重采样像素格式属性列表
+	const int pixelAttribs[] = {
+		// 基础属性
+		WGL_DRAW_TO_WINDOW_ARB, GL_TRUE,						// 可绘制到窗口
+		WGL_SUPPORT_OPENGL_ARB, GL_TRUE,							// 支持OpenGL
+		WGL_DOUBLE_BUFFER_ARB, GL_TRUE,							// 双缓冲
+		WGL_PIXEL_TYPE_ARB, WGL_TYPE_RGBA_ARB,				// RGBA颜色类型
+		WGL_COLOR_BITS_ARB, 32,												// 32位颜色深度
+		WGL_DEPTH_BITS_ARB, 24,												// 24位深度缓冲
+		WGL_STENCIL_BITS_ARB, 8,												 // 8位模板缓冲
+
+		// 多重采样关键属性
+		WGL_SAMPLE_BUFFERS_ARB, GL_TRUE,							// 启用采样缓冲区（必须）
+		WGL_SAMPLES_ARB, 8,														 // 4x MSAA（采样点数，可修改为2、8等）
+		0  // 属性列表结束标记
+	};
+
+	UINT numFormats;
+	int pixelFormat2;
+	if (!wglChoosePixelFormatARB(hdc, pixelAttribs, NULL, 1, &pixelFormat2, &numFormats) || numFormats == 0) {
+		return false;
+	}
+
+	ReleaseDC((HWND)winId, hdc);
+	hdc = GetDC((HWND)winId); // 重新获取HDC
+
+	// 设置像素格式
+	PIXELFORMATDESCRIPTOR pfd2;
+	DescribePixelFormat(hdc, pixelFormat2, sizeof(pfd2), &pfd2);
+	if (!SetPixelFormat(hdc, pixelFormat2, &pfd2)) {
+		return false;
+	}
+
+	const int attribs[] = {
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 4, // OpenGL 4.6
+			WGL_CONTEXT_MINOR_VERSION_ARB, 6,
+			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
+			//WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+			0
+	};
+
+	HGLRC modernContext = wglCreateContextAttribsARB(hdc, 0, attribs);
+
+	// 激活现代上下文
+	wglMakeCurrent(hdc, modernContext);
+
+	// 保存上下文信息
+	//nativeContext = modernContext;
+	//nativeDisplay = hdc;
+
+	setNativeContext(modernContext);
+	setNativeDisplay(hdc);
+
+	// 初始化GLEW
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK) {
+		std::cout << "GLEW Error:" << glewGetErrorString(glewInit())<<std::endl;
+	}
+	std::cout << glGetString(GL_VERSION) << std::endl;
+
+	// 检查实际上下文类型
+	int context_flags;
+	glGetIntegerv(GL_CONTEXT_FLAGS, &context_flags);
+
+	int profile_mask;
+	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile_mask);
+
+	std::cout << "Context flags: 0x" << std::hex << context_flags << "\n";
+	std::cout << "Profile mask: 0x" << profile_mask << "\n";
+
+	// 检查是否核心模式
+	if (profile_mask & GL_CONTEXT_CORE_PROFILE_BIT) {
+		std::cout << "Core Profile Context\n";
+	}
+	else if (profile_mask & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) {
+		std::cout << "Compatibility Profile Context\n";
+	}
+
+	// 检查向前兼容标志
+	if (context_flags & GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT) {
+		std::cout << "Forward Compatible\n";
+	}
+
+	// 检查调试标志
+	if (context_flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
+		std::cout << "Debug Context\n";
+	}
+
+	return true;
+}
+
+std::shared_ptr<XOpenGLShareContext> XOpenGLContext::createOrgetShareContext()
+{
+	if (shareContext) {
+		return shareContext;
+	}
+	HWND window;
+	auto share_Context =CreateWindowlessContext((HGLRC)nativeContext, window);
+	auto dc =GetDC(window);
+
+	if (share_Context) {
+		shareContext = makeShareDbObject<XOpenGLShareContext>();
+		shareContext->setNativeContext(share_Context);
+		shareContext->setNativeDisplay(dc);
+		return shareContext;
+	}
+	else {
+		return nullptr;
+	}
+}
+
+XOpenGLShareContext::XOpenGLShareContext()
+{
+
+}
+
+XOpenGLShareContext::~XOpenGLShareContext()
+{
+	wglDeleteContext((HGLRC)nativeContext);
+	HWND window = WindowFromDC((HDC)nativeDisplay);
+	ReleaseDC(window, (HDC)nativeDisplay);
+	DestroyWindow(window);
+}
+
+bool XOpenGLShareContext::makeCurrent()
+{
+	return wglMakeCurrent((HDC)nativeDisplay, (HGLRC)nativeContext);
+}
+
+void XOpenGLShareContext::doneCurrent()
+{
+	wglMakeCurrent(nullptr, nullptr);
+}
+
+void XOpenGLShareContext::setNativeContext(void* context)
+{
+	nativeContext = context;
+}
+
+void XOpenGLShareContext::setNativeDisplay(void* display)
+{
+	nativeDisplay = display;
+}
+
+void* XOpenGLShareContext::getNativeContext() const
+{
+	return nativeContext;
+}
+
+bool XOpenGLShareContext::isValid()
+{
+	return nativeContext;
 }

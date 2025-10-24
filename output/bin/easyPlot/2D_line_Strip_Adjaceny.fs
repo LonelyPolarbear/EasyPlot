@@ -16,6 +16,7 @@ layout (std140, binding = 2) uniform ubo_fs
 {
     vec2 screenSize;																				//屏幕大小
     vec2 setRealTimeMousePos;																				//鼠标实时位置，用于预选
+    vec4 sceneRect;																									//场景矩形,当前场景的位置，x y width height,暂时不用
 };
 
 const int COLOMODE_SINGLECOLOR = 1;

@@ -2,7 +2,28 @@
 #include "XOpenglApi.h"
 #include <dataBase/dataobject.h>
 
-//class ISResultBaseAPI ISPostObject : public std::enable_shared_from_this<ISPostObject>
+class LIB04_OPENGL_API XOpenGLShareContext :public DataBaseObject {
+protected:
+	XOpenGLShareContext();
+	virtual ~XOpenGLShareContext();
+public:
+	bool makeCurrent();
+
+	void doneCurrent();
+
+	void setNativeContext(void* context);
+
+	void setNativeDisplay(void* display);
+
+	void* getNativeContext() const;
+
+	bool isValid();
+private:
+	//平台原生上下文
+	void* nativeContext = nullptr;
+	void* nativeDisplay = nullptr;
+};
+
 class LIB04_OPENGL_API XOpenGLContext :public DataBaseObject {
 protected:
 	XOpenGLContext();
@@ -14,15 +35,23 @@ public:
 
 	void swapBuffers();
 
-	void setNativeContext(void* context);
-	void setNativeDisplay(void* display);
-
 	void* getNativeContext() const;
+
 	void* getNativeDisplay() const;
 
 	bool isValid();
-private:
+
+	bool create(uint64_t window);
+
+	std::shared_ptr<XOpenGLShareContext> createOrgetShareContext();
+
+protected:
+	bool createTempContext();
+	void setNativeContext(void* context);
+	void setNativeDisplay(void* display);
 	//平台原生上下文
 	void* nativeContext = nullptr;
 	void* nativeDisplay = nullptr;
+
+	std::shared_ptr<XOpenGLShareContext> shareContext;
 };

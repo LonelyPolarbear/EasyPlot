@@ -22,6 +22,11 @@ namespace XGL {
 		right_bottom
 	};
 
+	enum class LIB05_SHAPE_API Layout {
+		horizontal,
+		vertical
+	};
+
 	enum class LIB05_SHAPE_API PositionType {
 		local_complete,					//所有的点都在本地坐标系中，包括中心点
 		local_center,						//只有中心点在本地坐标系中
@@ -69,6 +74,8 @@ public:
 	void setColorMode(ColorMode mode);
 	void setPreSelectColor(const myUtilty::Vec4f& color);
 	void setDrawType(PrimitveType type);
+	
+	bool isComposite() const;
 
 	myUtilty::Vec4f getSingleColor() const;
 
@@ -140,7 +147,7 @@ public:
 
 	ColorMode m_colorMode = ColorMode::SingleColor;
 	PolygonMode m_polygonMode = PolygonMode::line;
-	PrimitveType m_drawType = PrimitveType::line_loop;
+	PrimitveType m_drawType = PrimitveType::line_strip_adjacency;
 
 	PenStyle m_penStyle = PenStyle::Solid;
 	bool m_clipEnable = false;																									//是否开启裁剪
@@ -155,6 +162,8 @@ public:
 	uint32_t m_lineWidth = 1;																									//线宽
 	virtual void updateData();																									//当m_coordArray和m_colorArray更改，更新缓冲
 	virtual uint32_t computeNumofVertices();																		//获取顶点数量
+protected:
+		void setIsComposite(bool enable);
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;
@@ -193,4 +202,6 @@ protected:
 
 	std::shared_ptr<XGraphicsItem> m_parentItem;															//父图元
 	std::vector<std::shared_ptr<XGraphicsItem>> m_childItems;									//子图元
+
+	bool mIsComposite = false;
 };

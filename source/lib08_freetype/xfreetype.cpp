@@ -527,7 +527,6 @@ void xfreetype::LoadGlyphImpl(const QString& dir, std::vector<Character>& charac
 			charactersList[idx].pitch = std::stoi(tokens[9]);
         });
 
-        int iii=0;
 #else        
 	std::ifstream inFile(dir.toStdString());
 	std::regex ws_re("\\s+");  // 匹配一个或多个空白字符

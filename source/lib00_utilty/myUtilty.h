@@ -28,6 +28,11 @@ namespace render {
 }
 
 namespace myUtilty {
+	
+	extern lib00_utilty_API std::wstring to_wstring_with_precision(double value, int precision);
+
+	extern lib00_utilty_API std::string to_string_with_precision(double value, int precision);
+
 	extern lib00_utilty_API double PI;
 	
 	enum class tranformType {

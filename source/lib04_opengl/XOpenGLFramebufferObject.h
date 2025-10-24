@@ -1,7 +1,7 @@
 #pragma once
 #include "XOpenglApi.h"
 #include <dataBase/dataobject.h>
-
+#include "XOpenGLType.h"
 #include "XOpenGLTexture.h"
 
 class LIB04_OPENGL_API XOpenGLFramebufferObject :DataBaseObject {
@@ -24,8 +24,8 @@ protected:
 		~XOpenGLFramebufferObject();
 public:
 	bool create();
-	void bind();
-	void release();
+	void bind(XOpenGL::FrameBufferType type = XOpenGL::FrameBufferType::framebuffer);
+	void release(XOpenGL::FrameBufferType type = XOpenGL::FrameBufferType::framebuffer);
 	void destory();
 	uint32_t getId() const;
 
