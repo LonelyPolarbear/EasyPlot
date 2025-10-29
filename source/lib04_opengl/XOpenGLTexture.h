@@ -337,6 +337,13 @@ public:
 						XOpenGLTexture::PixelType type,
 						const void* data);
 
+	void setMultiSample(
+		int width,
+		int height,
+		int sampleNum,
+		XOpenGLTexture::PixelFormat dataFormat,
+		XOpenGLTexture::PixelType type);
+
 	void setData(
 		int width,
 		int height,
@@ -361,9 +368,12 @@ public:
 	XOpenGLTexture::PixelFormat getInputDataPixelFormat() const;
 
 	XOpenGLTexture::PixelType getInputDataPixelType() const;
-	void* map();
 
-	void unmap();
+	sptr<XOpenGLBuffer> map();
+
+	sptr<XOpenGLBuffer> mapMultiSampleColor(unsigned int fboId);
+
+	sptr<XOpenGLBuffer> mapMultiSampleDepth(unsigned int fboId);
 
 	static unsigned int getInternalFormatSize(XOpenGLTexture::TextureFormat format);
 protected:

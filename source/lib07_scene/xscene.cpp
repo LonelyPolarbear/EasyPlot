@@ -28,7 +28,7 @@
 
 #include <future>
 #include <limits.h>
-
+bool isScreenRender = true;
 class SceneUbo:public DataBaseObject{
 protected:
     SceneUbo(){}
@@ -493,44 +493,119 @@ void XScene::render()
     render2D();
 }
 
-sptr<XUCharArray2D> XScene::renderFbo()
+std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, bool depthEnable, bool multisampleEnable, int samples, int AttachMode)
 {
+    std::vector<sptr<XUCharArray2D>> result;
     //创建FBO
+    fboWidth = getViewportWidth();
+    fboHeight = getViewportHeight();
     makeCurrent();
     auto fbo = makeShareDbObject<XOpenGLFramebufferObject>();
     fbo->create();
     fbo->bind();
 
-    fbo->setWidth(getViewportWidth());
-    fbo->setHeight(getViewportHeight());
+    fbo->setWidth(/*getViewportWidth()*/fboWidth);
+    fbo->setHeight(/*getViewportHeight()*/fboHeight);
 
-    fbo->addAttachment(
-                                        XOpenGLFramebufferObject::Attachment::Color,                        //附件类型
-                                        XOpenGLTexture::TextureFormat::RGBA8_UNorm,                     //内部格式
-                                        XOpenGLTexture::PixelFormat::RGBA,                                          //外部数据格式
-                                        XOpenGLTexture::PixelType::UInt8                                               //外部数据类型
-                                        );
+    if (multisampleEnable) {
+    XOpenGLFuntion::checkGLError();
+        fbo->addAttachmentMSAA(
+			XOpenGLFramebufferObject::Attachment::Color,                        //附件类型
+			XOpenGLTexture::TextureFormat::RGBA8_UNorm,                     //内部格式
+			XOpenGLTexture::PixelFormat::RGBA,                                          //外部数据格式
+			XOpenGLTexture::PixelType::UInt8
+        );
+        XOpenGLFuntion::checkGLError();
+    }
+    else {
+		fbo->addAttachment(
+			XOpenGLFramebufferObject::Attachment::Color,                        //附件类型
+			XOpenGLTexture::TextureFormat::RGBA8_UNorm,                     //内部格式
+			XOpenGLTexture::PixelFormat::RGBA,                                          //外部数据格式
+			XOpenGLTexture::PixelType::UInt8                                               //外部数据类型
+		);
+    }
+
+	if (depthEnable)
+		if (multisampleEnable) {
+			fbo->addAttachmentMSAA(
+				XOpenGLFramebufferObject::Attachment::Depth,
+				XOpenGLTexture::TextureFormat::D32F,
+				XOpenGLTexture::PixelFormat::Depth,
+				XOpenGLTexture::PixelType::Float32);
+		}
+		else {
+			fbo->addAttachment(
+				XOpenGLFramebufferObject::Attachment::Depth,
+				XOpenGLTexture::TextureFormat::D32F,
+				XOpenGLTexture::PixelFormat::Depth,
+				XOpenGLTexture::PixelType::Float32
+			);
+		}
 
     auto complete_flag =fbo->isComplete();
-
+    //isScreenRender = false;
     render();
+   // isScreenRender = true;
     makeCurrent();
     fbo->release();
 
-    //读取纹理数据
-    auto texture = fbo->getColorAttachment();
-    texture->bind();
-    auto *p = texture->map();
+	{
+		//读取颜色纹理数据
+		auto texture = fbo->getColorAttachment();
+		texture->bind();
 
-	auto data = makeShareDbObject<XUCharArray2D>();
-	data->setComponent(4);
-    data->setDimensions(getViewportHeight(), getViewportWidth());
-    memcpy( data->data(0,0), p, getViewportHeight()*getViewportWidth()*4);
-    texture->unmap();
-    texture->release();
+        sptr<XOpenGLBuffer> pbo;
+       
+		if (multisampleEnable) {
+            pbo = texture->mapMultiSampleColor(fbo->getId());
+		}
+		else {
+            pbo = texture->map();
+		}
+
+        void *p = pbo->map(XOpenGLBuffer::Access::ReadOnly);
+		auto data = makeShareDbObject<XUCharArray2D>();
+		data->setComponent(4);
+		//data->setDimensions(getViewportHeight(), getViewportWidth());
+		data->setDimensions(fboHeight, fboWidth);
+		//memcpy(data->data(0, 0), p, getViewportHeight() * getViewportWidth() * 4);
+		memcpy(data->data(0, 0), p, fboWidth*fboHeight * 4);
+		
+		texture->release();
+        result.push_back(data);
+	}
+
+	if (depthEnable)
+	{
+		//读取深度纹理数据
+		auto texture = fbo->getDepthAttachment();
+		texture->bind();
+
+        sptr<XOpenGLBuffer> pbo;
+		if (depthEnable) {
+			if (multisampleEnable == true) {
+                pbo = texture->mapMultiSampleDepth(fbo->getId());
+			}
+			else {
+                pbo = texture->map();
+			}
+		}
+        void* p = pbo->map(XOpenGLBuffer::Access::ReadOnly);
+		auto data = makeShareDbObject<XUCharArray2D>();
+		data->setComponent(1);
+		data->setDimensions(fboHeight,fboWidth);
+
+        for (int i = 0; i < fboHeight * fboWidth; i++) {
+            data->data(0, 0)[i] = ((float*)p)[i]*255;
+        }
+		
+		texture->release();
+		result.push_back(data);
+	}
+    
     doneCurrent();
-    return data;
-
+    return result;
 }
 
 void XScene::render3D()
@@ -544,12 +619,6 @@ void XScene::render3D()
     d->createAxisShape();
 
     {
-        //绘制用户添加的物体
-		std::vector<std::shared_ptr<XShape >> shapes;
-		for (auto& s : d->shapes) {
-			shapes.push_back(s);
-		}
-
 		d->createViewSelection3D();
 
 		d->viewSelection->update(d->shapes, d->camera);
@@ -578,9 +647,12 @@ void XScene::render3D()
 		//绘制之前手动更新视口
 		updateViewport();
 
-		for (auto shape : d->shapes) {
-			shape->draw();
-		}
+        if (isScreenRender) {
+			for (auto shape : d->shapes) {
+				shape->draw();
+			}
+        }
+		
 
 		fbo->getColorAttachment()->release();
 		//glEnableObj->restore();
@@ -648,6 +720,8 @@ void XScene::render3D()
 void XScene::render2D()
 {
     makeCurrent();
+	//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	//glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	{
         if (!d->fontTexture) {
 			auto texture = makeShareDbObject<XOpenGLTexture>();
@@ -1157,10 +1231,7 @@ std::shared_ptr<XUCharArray2D> XScene::grabFramebuffer(
 	int dest_y,
 	int dest_width,
 	int dest_height) 
-  {
-
-    return renderFbo();
- 
+  { 
     makeCurrent();
     auto data = makeShareDbObject<XUCharArray2D>();
     data->setComponent(4);

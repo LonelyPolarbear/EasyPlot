@@ -72,6 +72,7 @@ MainWindow::MainWindow(QWidget* parent) :QMainWindow(parent)
 	connect(ui->ActScreenTipVisible, &QAction::triggered, easyPlot, &easyPlotWidget::slotScreenTextVisible);
 	connect(ui->ActScreenShot, &QAction::triggered, easyPlot, &easyPlotWidget::slotScreenShot);
 	connect(ui->Actaxis2d, &QAction::triggered, easyPlot, &easyPlotWidget::slotAxis2D);
+	connect(ui->ActfboTest, &QAction::triggered, easyPlot, &easyPlotWidget::slotFboTest);
 
 	QActionGroup *actionGroup = new QActionGroup(this);
 	actionGroup->addAction(ui->ActCornerRect);

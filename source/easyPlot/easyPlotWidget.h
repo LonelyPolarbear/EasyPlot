@@ -106,6 +106,8 @@ public slots:
 
 	void slotAxis2D();
 
+	void slotFboTest();
+
 private:
 	struct Internal;
 	std::unique_ptr<Internal> d;

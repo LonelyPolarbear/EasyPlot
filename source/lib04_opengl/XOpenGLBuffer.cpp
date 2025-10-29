@@ -1,10 +1,13 @@
 #include "XOpenGLBuffer.h"
 #include <glew/glew.h>
+#include "XOpenGLFuntion.h"
+
 class XOpenGLBuffer::Internal {
 public:
 	XOpenGLBuffer::Type type;
 	XOpenGLBuffer::UsagePattern usagePattern;
     GLuint bufferId;
+	GLint lastBindBufferId{0};
 	bool isCreated = false;
 };
 
@@ -64,14 +67,20 @@ bool XOpenGLBuffer::read(int offset, void*& data, int count)
 
 void* XOpenGLBuffer::map(XOpenGLBuffer::Access access)
 {	
+	bind();
+	XOpenGLFuntion::checkGLError();
 	void *result = nullptr;
 	result = glMapBuffer(d->type, access);
-	return nullptr;
+	release();
+	return result;
 }
 
 bool XOpenGLBuffer::unmap()
 {
-	return glUnmapBuffer(d->type) == GL_TRUE;
+	bind();
+	bool result = glUnmapBuffer(d->type) == GL_TRUE;
+	release();
+	return result;
 }
 
 void* XOpenGLBuffer::mapRange(int offset, int count, XOpenGLBuffer::RangeAccessFlags access)
@@ -89,15 +98,63 @@ XOpenGLBuffer::UsagePattern XOpenGLBuffer::getUsagePattern() const
 	return d->usagePattern;
 }
 
+XOpenGL::DataBufferBindingType XOpenGLBuffer::getBufferBindType() const
+{
+	switch (d->type)
+	{
+		case Type::VertexBuffer:
+			return XOpenGL::DataBufferBindingType::vertexBufferBinding;
+		case Type::IndexBuffer:
+			return XOpenGL::DataBufferBindingType::elementArrayBufferBinding;
+		case Type::UniformBuffer:
+			return XOpenGL::DataBufferBindingType::uniformBufferBinding;
+		case Type::PixelPackBuffer:
+			return XOpenGL::DataBufferBindingType::pixelPackBufferBinding;
+		case Type::PixelUnpackBuffer:
+			return XOpenGL::DataBufferBindingType::pixelUnpackBufferBinding;
+		case Type::ShaderStorageBuffer:
+			return XOpenGL::DataBufferBindingType::shaderStorageBufferBinding;
+		case Type::TransformFeedbackBuffer:
+			return XOpenGL::DataBufferBindingType::transformFeedbackBufferBinding;
+		default:
+			return XOpenGL::DataBufferBindingType::invalidBinding;
+	}
+}
+
 bool XOpenGLBuffer::bind()
 {
+	//应该记录上次绑定的buffer
+    auto bindingType = getBufferBindType();
+	int tmpLastBindBufferId =0;;
+	XOpenGLFuntion::xglGetBindDataBufferId(bindingType, tmpLastBindBufferId);
+
+	if (tmpLastBindBufferId == d->bufferId) {
+		//当前已经是绑定的状态
+		return true;
+	}
+
+	d->lastBindBufferId = tmpLastBindBufferId;		//记录之前绑定的buffer
+
 	glBindBuffer(d->type, d->bufferId);
+
+	int fffff = 0;
+	XOpenGLFuntion::xglGetBindDataBufferId(bindingType, fffff);
 	return glGetError() == GL_NO_ERROR;
 }
 
 void XOpenGLBuffer::release()
 {
-	glBindBuffer(d->type, 0);
+	int tmpLastBindBufferId = 0;
+	auto bindingType = getBufferBindType();
+	XOpenGLFuntion::xglGetBindDataBufferId(bindingType, tmpLastBindBufferId);
+
+	//如果当前绑定的id不是自己,则不做处理
+	if (tmpLastBindBufferId != d->bufferId) {
+		return;
+	}
+
+	//绑定之前的id
+	glBindBuffer(d->type, d->lastBindBufferId);
 }
 
 void XOpenGLBuffer::destroy()

@@ -12,13 +12,28 @@ namespace XOpenGL {
 	};
 
 	enum class LIB04_OPENGL_API FrameBufferBindingType :unsigned int {
-		readBufferBinding = 0x8CAA,			    //GL_READ_FRAMEBUFFER_BINDING
-		drawBufferBinding = 0x8CAB,			    //GL_DRAW_FRAMEBUFFER_BINDING
-		framebufferBinding = 0x8CA6,			//GL_FRAMEBUFFER_BINDING
+		readBufferBinding = 0x8CAA,									//GL_READ_FRAMEBUFFER_BINDING
+		drawBufferBinding = 0x8CAB,									//GL_DRAW_FRAMEBUFFER_BINDING
+		framebufferBinding = 0x8CA6,									//GL_FRAMEBUFFER_BINDING
+		//GL_NONE
+
+	};
+
+	enum class LIB04_OPENGL_API DataBufferBindingType :unsigned int {
+		invalidBinding = 0,
+		vertexBufferBinding = 0x8894,									//GL_ARRAY_BUFFER_BINDING
+		elementArrayBufferBinding = 0x8895,						//GL_ELEMENT_ARRAY_BUFFER_BINDING
+		pixelPackBufferBinding = 0x88ED,							//GL_PIXEL_PACK_BUFFER_BINDING
+		pixelUnpackBufferBinding = 0x88EF,						//GL_PIXEL_UNPACK_BUFFER_BINDING
+		transformFeedbackBufferBinding = 0x8C8F,			//GL_TRANSFORM_FEEDBACK_BUFFER_BINDING
+		uniformBufferBinding = 0x8A28,								//GL_UNIFORM_BUFFER_BINDING	
+		shaderStorageBufferBinding = 0x90D3,					//GL_SHADER_STORAGE_BUFFER_BINDING
 	};
 
 	enum class LIB04_OPENGL_API FlagBits :unsigned int {
 		color_buffer_bit = 0x00004000,  //GL_COLOR_BUFFER_BIT
+		depth_buffer_bit = 0x00000100,  //GL_DEPTH_BUFFER_BIT
+		stencil_buffer_bit = 0x00000400,  //GL_STENCIL_BUFFER_BIT
 	};
 
 	enum class LIB04_OPENGL_API FilterType :unsigned int {

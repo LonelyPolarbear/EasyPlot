@@ -10,6 +10,7 @@ void XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType targetType, spt
 void XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType targetType, unsigned int frameBuffer)
 {
 	glBindFramebuffer((unsigned int)(targetType), frameBuffer);
+	checkGLError();
 }
 
 void XOpenGLFuntion::xglBlitFramebuffer(int srcX0, int srcY0, int srcW, int srcH, int dstX0, int dstY0, int dstW, int dstH, XOpenGL::FlagBits bit, XOpenGL::FilterType filterType)
@@ -26,6 +27,11 @@ void XOpenGLFuntion::xglGetIntegerv(unsigned int name, int& valaue)
 void XOpenGLFuntion::xglGetBindFrameBufferId(XOpenGL::FrameBufferBindingType bindingType, int& valaue)
 {
 	glGetIntegerv( (unsigned int)(bindingType), &valaue);
+}
+
+void XOpenGLFuntion::xglGetBindDataBufferId(XOpenGL::DataBufferBindingType bufferType, int& bufferId)
+{
+	glGetIntegerv((unsigned int)(bufferType), &bufferId);
 }
 
 void XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter pname, int param)
@@ -61,4 +67,13 @@ XOpenGL::SyncStatus XOpenGLFuntion::xglClientWaitSync(XOpenGL::GlSyncObject sync
 void XOpenGLFuntion::xglDeleteSync(XOpenGL::GlSyncObject sync)
 {
 	glDeleteSync((GLsync)sync.ptr);
+}
+
+bool XOpenGLFuntion::checkGLError()
+{
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR) {
+		return false;
+	}
+	return true;
 }

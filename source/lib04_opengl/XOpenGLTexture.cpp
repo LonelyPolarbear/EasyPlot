@@ -1,7 +1,9 @@
 #include <glew/glew.h>
 #include "XOpenGLTexture.h"
 #include "XOpenGLBuffer.h"
-
+#include "XOpenGLFramebufferObject.h"
+#include "XOpenGLFuntion.h"
+#include <iostream>
 class XOpenGLTexture::Internal {
 public:
 	GLuint textureId{0};
@@ -9,11 +11,12 @@ public:
 	int width{0};
 	int height{0};
 	int layer{0};
+	int samples{0};
 	XOpenGLTexture::TextureFormat internalFormat;
 	XOpenGLTexture::PixelFormat dataFormat;
 	XOpenGLTexture::PixelType datatype;
 
-	std::shared_ptr<XOpenGLBuffer> pbo;	//用于读取纹理数据
+	//std::shared_ptr<XOpenGLBuffer> pbo;	//用于读取纹理数据
 };
 
 
@@ -60,10 +63,6 @@ void XOpenGLTexture::destroy()
 	if (d->textureId != 0) {
 		glDeleteTextures(1, &d->textureId);
 		d->textureId = 0;	
-	}
-
-	if (d->pbo) {
-		d->pbo->destroy();
 	}
 }
 
@@ -140,6 +139,18 @@ void XOpenGLTexture::setData(
 	glTexImage2D(d->target, level/*mimmap层级*/, d->internalFormat, width, height, 0/*历史遗留问题*/,dataFormat , datatype, data);
 }
 
+void XOpenGLTexture::setMultiSample(int width, int height, int sampleNum, XOpenGLTexture::PixelFormat dataFormat, XOpenGLTexture::PixelType type)
+{
+
+	d->width = width;
+	d->height = height;
+	d->dataFormat = dataFormat;
+	d->datatype = type;
+	d->samples = sampleNum;
+
+	glTexImage2DMultisample(d->target, sampleNum, d->internalFormat, width, height, GL_TRUE);
+}
+
 void XOpenGLTexture::setData(
 										int width, 
 										int height, 
@@ -212,45 +223,181 @@ XOpenGLTexture::PixelType XOpenGLTexture::getInputDataPixelType() const
 	return d->datatype;
 }
 
-void* XOpenGLTexture::map()
+sptr<XOpenGLBuffer> XOpenGLTexture::map()
 {
-	if (!d->pbo) {
-		d->pbo = makeShareDbObject<XOpenGLBuffer>();
-		d->pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
-		d->pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
-		d->pbo->create();	
-		d->pbo->bind();
-		d->pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-	}
 
-	d->pbo->bind();
-	auto pboSize = d->pbo->bufferSize();
+		auto pbo = makeShareDbObject<XOpenGLBuffer>();
+		pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+		pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+		pbo->create();
+		pbo->bind();
+		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
 
-	if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat) ) {
-		d->pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+
+	if (Target2DMultisample == d->target) {
+		auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
+		resoveFbo->create();
+		resoveFbo->setHeight(d->height);
+		resoveFbo->setWidth(d->width);
+		resoveFbo->bind();
+		resoveFbo->addAttachment(XOpenGLFramebufferObject::Attachment::Color, d->internalFormat, d->dataFormat, d->datatype, 0);
+		bool flag = resoveFbo->isComplete();
+		resoveFbo->release();
+
+		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, 0);
+		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::drawBuffer, resoveFbo->getId());
+
+		XOpenGLFuntion::xglBlitFramebuffer(0, 0, d->width, d->height, 0, 0, d->width, d->height,
+			XOpenGL::FlagBits::color_buffer_bit, XOpenGL::FilterType::nearest);
+
+		auto texture =resoveFbo->getColorAttachment();
+
+		pbo->bind();
+		auto pboSize = pbo->bufferSize();
+
+		if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
+			pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+		}
+
+		texture->bind();
+		glGetTexImage(
+			texture->getTarget(),			// 纹理目标
+			0,											// mipmap级别
+			d->dataFormat,					// 格式（必须匹配纹理的内部格式）
+			d->datatype,						// 类型（必须匹配纹理的数据类型）
+			0											// 偏移量（使用PBO时设为0）
+		);
+		pbo->release();
+		return pbo;
+
+	}else{
+
+		pbo->bind();
+		auto pboSize = pbo->bufferSize();
+
+		if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
+			pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+		}
+
+		bind();
+		glGetTexImage(
+			d->target,       // 纹理目标
+			0,                   // mipmap级别
+			d->dataFormat,      // 格式（必须匹配纹理的内部格式）
+			d->datatype,             // 类型（必须匹配纹理的数据类型）
+			0                    // 偏移量（使用PBO时设为0）
+		);
+
+		return pbo;
 	}
+}
+
+sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleColor(unsigned int fboId)
+{
 	
-	bind();
+		auto pbo = makeShareDbObject<XOpenGLBuffer>();
+		pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+		pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+		pbo->create();
+		pbo->bind();
+		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+	
+
+		auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
+		resoveFbo->create();
+		resoveFbo->setHeight(d->height);
+		resoveFbo->setWidth(d->width);
+		resoveFbo->bind();
+		resoveFbo->addAttachment(XOpenGLFramebufferObject::Attachment::Color, d->internalFormat, d->dataFormat, d->datatype, 0);
+		bool flag = resoveFbo->isComplete();
+		resoveFbo->release();
+
+		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, fboId);
+		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::drawBuffer, resoveFbo->getId());
+
+		XOpenGLFuntion::xglBlitFramebuffer(0, 0, d->width, d->height, 0, 0, d->width, d->height,
+			XOpenGL::FlagBits::color_buffer_bit, XOpenGL::FilterType::nearest);
+
+		auto texture = resoveFbo->getColorAttachment();
+
+		pbo->bind();
+		auto pboSize = pbo->bufferSize();
+
+		if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
+			pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+		}
+
+		texture->bind();
+		glGetTexImage(
+			texture->getTarget(),			// 纹理目标
+			0,											// mipmap级别
+			d->dataFormat,					// 格式（必须匹配纹理的内部格式）
+			d->datatype,						// 类型（必须匹配纹理的数据类型）
+			0											// 偏移量（使用PBO时设为0）
+		);
+
+		return pbo;
+}
+
+sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleDepth(unsigned int fboId)
+{
+
+		auto pbo = makeShareDbObject<XOpenGLBuffer>();
+		pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+		pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+		pbo->create();
+		pbo->bind();
+		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+
+	{
+		GLenum error = glGetError();
+		if (error != GL_NO_ERROR) {
+			std::cout << "error" << error << std::endl;
+			return false;
+		}
+
+	}
+	auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
+	resoveFbo->create();
+	resoveFbo->setHeight(d->height);
+	resoveFbo->setWidth(d->width);
+	resoveFbo->bind();
+	resoveFbo->addAttachment(XOpenGLFramebufferObject::Attachment::Depth, d->internalFormat, d->dataFormat, d->datatype, 0);
+	//resoveFbo->addAttachmentMSAA(XOpenGLFramebufferObject::Attachment::Color, XOpenGLTexture::TextureFormat::RGBA8_SNorm, XOpenGLTexture::PixelFormat::BGRA, XOpenGLTexture::PixelType::UInt8, 0);
+	bool flag = resoveFbo->isComplete();
+	resoveFbo->release();
+
+	XOpenGLFuntion::checkGLError();
+	//glReadBuffer(GL_NONE);
+	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, fboId);
+	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::drawBuffer, resoveFbo->getId());
+
+	XOpenGLFuntion::checkGLError();
+
+	XOpenGLFuntion::xglBlitFramebuffer(0, 0, d->width, d->height, 0, 0, d->width, d->height,
+		XOpenGL::FlagBits::depth_buffer_bit, XOpenGL::FilterType::nearest);
+	auto texture = resoveFbo->getDepthAttachment();
+
+	//d->pbo->bind();
+	auto pboSize = pbo->bufferSize();
+
+	if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
+		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+	}
+
+	texture->bind();
+	std::vector<float> depthData(d->width * d->height,1);
 	glGetTexImage(
-		d->target,       // 纹理目标
-		0,                   // mipmap级别
-		d->dataFormat,      // 格式（必须匹配纹理的内部格式）
-		d->datatype,             // 类型（必须匹配纹理的数据类型）
-		0                    // 偏移量（使用PBO时设为0）
+		texture->getTarget(),			// 纹理目标
+		0,											// mipmap级别
+		d->dataFormat,					// 格式（必须匹配纹理的内部格式）
+		d->datatype,						// 类型（必须匹配纹理的数据类型）
+		0											// 偏移量（使用PBO时设为0）
 	);
 
-	void* ptr = glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY);
-
-	unsigned int* p = (unsigned int*)ptr;
-
-	return ptr;
+	return pbo;
 }
 
-void XOpenGLTexture::unmap()
-{
-	glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
-	d->pbo->release();
-}
 
 unsigned int XOpenGLTexture::getInternalFormatSize(XOpenGLTexture::TextureFormat format)
 {

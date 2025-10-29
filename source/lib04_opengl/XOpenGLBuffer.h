@@ -1,8 +1,7 @@
 #pragma once
 #include "XOpenglApi.h"
 #include <dataBase/dataobject.h>
-
-//class ISResultBaseAPI ISPostObject : public std::enable_shared_from_this<ISPostObject>
+#include "XOpenGLType.h"
 
 enum class LIB04_OPENGL_API XOpenGLValueType {
 	Int8 = 0x1400,    // GL_BYTE
@@ -41,12 +40,13 @@ public:
 	};
 
 	enum Type {
-		VertexBuffer= 0x8892,					//GL_ARRAY_BUFFER
-		IndexBuffer= 0x8893,					//GL_ELEMENT_ARRAY_BUFFER
-		PixelPackBuffer= 0x88EB,				//GL_PIXEL_PACK_BUFFER
-		PixelUnpackBuffer= 0x88EC,			//GL_PIXEL_UNPACK_BUFFER
-		ShaderStorageBuffer= 0x90D2,		//GL_SHADER_STORAGE_BUFFER
-		UniformBuffer= 0x8A11					//GL_UNIFORM_BUFFER
+		VertexBuffer= 0x8892,							//GL_ARRAY_BUFFER
+		IndexBuffer= 0x8893,							//GL_ELEMENT_ARRAY_BUFFER
+		PixelPackBuffer= 0x88EB,						//GL_PIXEL_PACK_BUFFER
+		PixelUnpackBuffer= 0x88EC,					//GL_PIXEL_UNPACK_BUFFER
+		ShaderStorageBuffer= 0x90D2,				//GL_SHADER_STORAGE_BUFFER
+		UniformBuffer= 0x8A11,						//GL_UNIFORM_BUFFER
+		TransformFeedbackBuffer= 0x8C8E,		//GL_TRANSFORM_FEEDBACK_BUFFER
 		
 	};
 
@@ -122,13 +122,14 @@ public:
 
 	XOpenGLBuffer::UsagePattern getUsagePattern() const;
 
+	XOpenGL::DataBufferBindingType getBufferBindType() const;
 protected:
 	bool allocate(const void* data, int count);
 
 	bool write(int offset, const void* data, int count);
 
 	bool read(int offset, void*& data, int count);
-
+	
 protected:
 	class Internal;
 	std::unique_ptr<Internal> d;

@@ -38,5 +38,6 @@
         <file>icon/setting.svg</file>
         <file>icon/screen_shot.svg</file>
         <file>icon/axis2d.svg</file>
+        <file>icon/test.svg</file>
     </qresource>
 </RCC>

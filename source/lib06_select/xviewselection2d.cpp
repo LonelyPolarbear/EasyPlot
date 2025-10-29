@@ -1,6 +1,7 @@
 #include "xviewselection2d.h"
 #include "lib04_opengl/XOpenGLFramebufferObject.h"
 #include "lib04_opengl/XOpenGLTexture.h"
+#include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib01_shader/xshader.h"
 #include <glew/glew.h>
 #include <lib05_shape/XGraphicsItem.h>
@@ -96,8 +97,9 @@ XViewSelection2D::SelectData XViewSelection2D::getPointSelection(int x, int y, i
 	
 	//读取当前位置的对象ID
 	auto fbo = d->fboPeeling[layer];
-	auto* ptrColorTexture = (unsigned int*)fbo->getColorAttachment()->map();
-	if (ptrColorTexture) {
+
+	auto pbo = fbo->getColorAttachment()->map();
+	if (auto ptrColorTexture = (unsigned int*)pbo->map(XOpenGLBuffer::Access::ReadOnly)) {
 		//采样纹理
 		auto color1 = ptrColorTexture + (y-1) * ViewportWidth * 4 + (x-1) * 4;
 		auto objectId = color1[0];
@@ -106,7 +108,7 @@ XViewSelection2D::SelectData XViewSelection2D::getPointSelection(int x, int y, i
 		result.primitiveId = primitiveId;
 	}
 
-	fbo->getColorAttachment()->unmap();
+	pbo->unmap();
 	return result;
 }
 
@@ -153,8 +155,8 @@ std::vector< std::vector<XViewSelection2D::SelectData>> XViewSelection2D::getBox
 		auto fbo = d->fboPeeling[i];
 		//读取当前位置的对象ID
 		std::vector< SelectData> layerSelect;
-		auto* ptrColorTexture = (unsigned int*)fbo->getColorAttachment()->map();
-		if (ptrColorTexture) {
+		auto pbo = fbo->getColorAttachment()->map();
+		if (auto ptrColorTexture = (unsigned int*)pbo->map(XOpenGLBuffer::Access::ReadOnly)) {
 			//采样纹理
 
 			for (int j = 0; j < height; j++) {
@@ -173,7 +175,7 @@ std::vector< std::vector<XViewSelection2D::SelectData>> XViewSelection2D::getBox
 		}
 		result.push_back(layerSelect);
 
-		fbo->getColorAttachment()->unmap();
+		pbo->unmap();
 	}
 #endif
 	return result;

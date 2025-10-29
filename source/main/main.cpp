@@ -7,6 +7,8 @@
 #include "mainwindow.h"
 
 #include <QLoggingCategory>
+#include <regex>
+
 
 int main(int argc,char** argv) {
 	myUtilty::ShareVar::instance().currentExeDir = std::filesystem::path(argv[0]).parent_path().string();

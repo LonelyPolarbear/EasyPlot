@@ -54,6 +54,7 @@
 #include <QFileDialog>
 #include <lib09_panel/FontSetDlg.h>
 #include <lib09_panel/ScreenShotDlg.h>
+#include <lib09_panel/FboTest.h>
 
 using namespace std::chrono_literals;
 enum class CameraAction {
@@ -1133,4 +1134,31 @@ void easyPlotWidget::slotAxis2D()
 	//	d->scene->addGraphicsItem(axis);
 	//}
 	doneCurrent();
+}
+
+void easyPlotWidget::slotFboTest()
+{
+	static FboTest* dlg = nullptr;
+	if (dlg == nullptr) {
+
+		dlg = new FboTest( this);
+
+		connect(dlg, &FboTest::sigTest, this, [this](int fboWidth, int fboHeight, bool depthEnable, bool multisampleEnable, int samples, int AttachMode) {
+			auto image_datas = d->scene->renderFbo(fboWidth, fboHeight, depthEnable, multisampleEnable, samples, AttachMode);
+			for(auto image_data:image_datas)
+				image_data->flip();
+
+			auto width = image_datas[0]->getCol();
+			auto height = image_datas[0]->getRow();
+			QImage image(image_datas[0]->data(0, 0), width, height, width * 4/*指定行宽，避免对齐问题*/, QImage::Format_RGBA8888);
+			dlg->setColorImage(image);
+			if (image_datas.size() == 2) {
+				QImage image(image_datas[1]->data(0, 0), width, height, width /*指定行宽，避免对齐问题*/, QImage::Format_Grayscale8);
+				dlg->setDepthImage(image);
+			}
+			});
+	}
+
+	dlg->raise();
+	dlg->show();
 }

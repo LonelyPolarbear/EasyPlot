@@ -330,6 +330,18 @@
    <addaction name="ActScreenTipVisible"/>
    <addaction name="ActScreenShot"/>
   </widget>
+  <widget class="QToolBar" name="toolBar_8">
+   <property name="windowTitle">
+    <string>toolBar_8</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="ActfboTest"/>
+  </widget>
   <action name="ActCube">
    <property name="icon">
     <iconset resource="../qrc/easyPlotqrc.qrc">
@@ -622,6 +634,15 @@
    </property>
    <property name="text">
     <string>axis2d</string>
+   </property>
+  </action>
+  <action name="ActfboTest">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/test.svg</normaloff>:/icon/test.svg</iconset>
+   </property>
+   <property name="text">
+    <string>fboTest</string>
    </property>
   </action>
  </widget>

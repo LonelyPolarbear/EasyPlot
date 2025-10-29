@@ -63,7 +63,7 @@ protected:
 		void  render();
 		
 		//仅仅是为了测试离屏渲染
-		sptr<XUCharArray2D> renderFbo();
+		std::vector<sptr<XUCharArray2D>> renderFbo(int fboWidth, int fboHeight, bool depthEnable, bool multisampleEnable, int samples, int AttachMode);
 
 		void virtual render3D();
 

@@ -19,10 +19,14 @@ public:
 	//获取当前绑定的fbo
 	static void xglGetBindFrameBufferId(XOpenGL::FrameBufferBindingType, int& valaue);
 
+	static void xglGetBindDataBufferId(XOpenGL::DataBufferBindingType bufferType, int& bufferId);
+
 	static void xglPixelStorei(XOpenGL::PixelStoreParameter pname, int param);
 	static void xglReadPixels(int startx,int starty, int width, int height, XOpenGL::TextureExternalFormat format, XOpenGL::DataType type, void *data);
 	static void xglFlush();
 	static XOpenGL::GlSyncObject xglFenceSync(XOpenGL::SyncFlags flags, XOpenGL::SyncCondition condition = XOpenGL::SyncCondition::SyncGPUCommandsComplete);
 	static XOpenGL::SyncStatus xglClientWaitSync(XOpenGL::GlSyncObject sync, XOpenGL::SyncFlags flags, unsigned long long timeout/*纳秒*/);
 	static void xglDeleteSync(XOpenGL::GlSyncObject sync);
+
+	static bool checkGLError();
 };

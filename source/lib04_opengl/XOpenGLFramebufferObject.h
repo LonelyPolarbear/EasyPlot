@@ -45,11 +45,19 @@ public:
 				int index =0
 				);
 
+	void addAttachmentMSAA(Attachment attachment,
+		XOpenGLTexture::TextureFormat internalFormat,
+		XOpenGLTexture::PixelFormat inputdataPixelFormat,
+		XOpenGLTexture::PixelType inputdataPixelType,
+		int index = 0
+	);
+
 
 	bool isComplete() const;
 
 	bool updateBufferSize(int width, int height);
 
+	XOpenGL::FrameBufferBindingType getBindingType(XOpenGL::FrameBufferType type) const;
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;
