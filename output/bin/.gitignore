@@ -1,0 +1,25 @@
+# 第一步：忽略所有文件和文件夹
+*
+# 第三步：排除需要保留的文件夹及其内容
+!easyPlot/
+!easyPlot/**/*
+
+!sdf/
+!sdf/**/*
+
+!simsun_ttc/
+!simsun_ttc/**/*
+
+!01triangle/
+!01triangle/**/*
+
+!02cube/
+!02cube/**/*
+
+!05cube/
+!05cube/**/*
+
+!06cube/
+!06cube/**/*
+
+!/.gitignore
