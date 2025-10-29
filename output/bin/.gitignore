@@ -23,4 +23,4 @@
 !06cube/**/*
 
 !/.gitignore
-!/.tip.txt
+!/tip.txt
