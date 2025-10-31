@@ -47,6 +47,7 @@ void XGraphicsItem::bindSSBO()
 
 void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 {
+	initiallize();
 	if (!m_IsVisible || !m_shaderManger)
 		return;
 
@@ -84,6 +85,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 
 void XGraphicsItem::pickBorderDraw(std::shared_ptr<xshader> shader,const Eigen::Matrix4f& m)
 {
+	initiallize();
 	if(isComposite() == false)
 		drawBorderImpl(shader, m, true);
 
@@ -95,6 +97,7 @@ void XGraphicsItem::pickBorderDraw(std::shared_ptr<xshader> shader,const Eigen::
 
 void XGraphicsItem::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
 {
+	initiallize();
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
 	for (auto item : m_childItems) {
 		item->drawFill(m_shaderManger->getPickFillShader2D(), mat);
@@ -105,13 +108,15 @@ void XGraphicsItem::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::M
 }
 
 void XGraphicsItem::drawBorder(std::shared_ptr<xshader> shader,  const Eigen::Matrix4f& m ){
+	initiallize();
 	drawBorderImpl(shader, m, true);
 	drawBorderImpl(shader, m, false);
 }
 
 void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m,bool isComputeLineLentgh)
 {
-	if (!m_IsVisible)
+	initiallize();
+	if (!m_IsVisible || isComposite())
 		return;
 	updateData();
 	shader->use();
@@ -155,7 +160,8 @@ void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen:
 
 void XGraphicsItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
 {
-	if (!m_IsVisible)
+	initiallize();
+	if (!m_IsVisible || isComposite())
 		return;
 	updateData();
 	shader->use();
@@ -206,6 +212,7 @@ void XGraphicsItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matri
 
 void XGraphicsItem::beginClip(const Eigen::Matrix4f& m)
 {
+	initiallize();
 	if(!m_clipEnable)
 		return;
 	auto shader = m_shaderManger->getFillShader();
@@ -241,9 +248,7 @@ void XGraphicsItem::endClip()
 
 void XGraphicsItem::initResource()
 {
-	if(d->isInitResource)
-		return;
-	d->isInitResource = true;
+	
 	m_vao->create();
 	m_vao->bind();
 
@@ -299,6 +304,15 @@ void XGraphicsItem::initResource()
 		m_instanceAttrBufffer->release();
 	}
 
+}
+
+void XGraphicsItem::initiallize()
+{
+	if (d->isInitResource == false) {
+		initResource();
+		d->isInitResource = true;
+	}
+	return;
 }
 
 Eigen::Affine3f XGraphicsItem::getTransform() const {
@@ -383,28 +397,6 @@ std::shared_ptr<xShaderManger> XGraphicsItem::getShaderManger() const
 {
 	return m_shaderManger;
 }
-
-#if 0
-void XGraphicsItem::gridReset()
-{
-	d->m_loc2gridTrans.setIdentity();
-}
-
-void XGraphicsItem::gridTranslate(float dx, float dy)
-{
-	d->m_loc2gridTrans.translate(Eigen::Vector3f(dx, dy, 0));
-}
-
-void XGraphicsItem::gridSale(float dx, float dy)
-{
-	d->m_loc2gridTrans.scale(Eigen::Vector3f(1.0f / dx, 1.0f / dy, 1));
-}
-
-Eigen::Affine3f XGraphicsItem::getGridTransform() const
-{
-	return d->m_loc2gridTrans;
-}
-#endif
 
 uint32_t XGraphicsItem::getLineWidth() const
 {
@@ -592,24 +584,33 @@ float* XGraphicsItem::getMatrix() const
 void XGraphicsItem::updateData()
 {
 	std::lock_guard<std::mutex> lock(d->m_mutex);
-	
+	//当数据更新时，需要更新所有的buffer
+	updateVboCoord();
+
+	updateVboColor();
+
+	updateVboEbo();
+
+	updateVboInstance();
+
+	//数据已更新，刷新时间戳
+	m_UpdateTime.Modified();
+}
+
+void XGraphicsItem::updateVboCoord()
+{
 	//顶点数据已经更新
-	auto m_coord =m_coordArray;
+	auto m_coord = m_coordArray;
 	if (m_coord && m_coord->GetTimeStamp() > m_UpdateTime) {
 
 		m_vbo_coord->bind();
 		m_vbo_coord->allocate(m_coord->data(0), m_coord->size());
 		m_vbo_coord->release();
 	}
+}
 
-	auto m_index = m_indexArray;
-	if (m_index && m_index->GetTimeStamp() > m_UpdateTime) {
-
-		m_ebo->bind();
-		m_ebo->allocate(m_index->data(0), m_index->size());
-		//m_vbo_coord->release();
-	}
-
+void XGraphicsItem::updateVboColor()
+{
 	////顶点颜色数据已经更新
 	auto m_VertexColor = m_colorArray;
 	if (m_VertexColor && m_VertexColor->GetTimeStamp() > m_UpdateTime) {
@@ -619,10 +620,30 @@ void XGraphicsItem::updateData()
 
 		m_vbo_color->release();
 	}
-
-	//数据已更新，刷新时间戳
-	m_UpdateTime.Modified();
 }
+
+void XGraphicsItem::updateVboEbo()
+{
+	auto m_index = m_indexArray;
+	if (m_index && m_index->GetTimeStamp() > m_UpdateTime) {
+
+		m_ebo->bind();
+		m_ebo->allocate(m_index->data(0), m_index->size());
+	}
+}
+
+void XGraphicsItem::updateVboInstance()
+{
+	if (m_instacePos && m_instacePos->GetTimeStamp() > m_UpdateTime) {
+
+		m_instanceAttrBufffer->bind();
+
+		m_instanceAttrBufffer->allocate(m_instacePos->data(0), m_instacePos->size());
+
+		m_instanceAttrBufffer->release();
+	}
+}
+
 
 uint32_t XGraphicsItem::computeNumofVertices() {
 	return m_coordArray->getNumOfTuple();

@@ -34,6 +34,7 @@
 #include <lib05_shape/XLineItem.h>
 #include <lib05_shape/XBarItem.h>
 #include <lib05_shape/XChartItem.h>
+#include <lib05_shape/XChartItem2.h>
 #include <lib05_shape/XPolyline.h>
 #include <lib05_shape/XTextItem.h>
 #include <lib05_shape/XScreenTextItem.h>
@@ -55,6 +56,8 @@
 #include <lib09_panel/FontSetDlg.h>
 #include <lib09_panel/ScreenShotDlg.h>
 #include <lib09_panel/FboTest.h>
+
+#include <lib04_opengl/XOpenGLFuntion.h>
 
 using namespace std::chrono_literals;
 enum class CameraAction {
@@ -160,14 +163,14 @@ void easyPlotWidget::initGLResource()
 		rect->setLineWidth(1);
 		rect->setFixedLine(true);
 		rect->setSingleColor(myUtilty::Vec4f(1, 1,1, 1));
-		rect->initResource();
+		//rect->initiallize();
 		rect->setVisible(false);
 		d->scene->addGraphicsItem(rect);
 	}
 
 	{
 		auto item = d->screenTextItem;
-		item->initResource();
+		//item->initiallize();
 		item->setVisible(true);
 		item->setPosition(250, 0);
 		item->setVAlignment(XTextItem::VAlign::Top);
@@ -182,7 +185,7 @@ void easyPlotWidget::initGLResource()
 
 		{
 			auto item = d->screenTextItemLine;
-			item->initResource();
+			//item->initiallize();
 			item->setVisible(true);
 			item->setFontSize(28);
 			item->setIsFixWidth(false);
@@ -200,7 +203,7 @@ void easyPlotWidget::initGLResource()
 	//鼠标位置显示
 	{
 		auto item = d->screenTextItemMousePos;
-		item->initResource();
+		//item->initiallize();
 		item->setVisible(true);
 		item->setFontSize(20);
 		item->setIsFixWidth(false);
@@ -212,6 +215,31 @@ void easyPlotWidget::initGLResource()
 		item->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
 		d->scene->addGraphicsItem(item);
 	}
+
+	print();
+}
+
+void easyPlotWidget::print()
+{
+	makeCurrent();
+
+	std::cout << "全部纹理单元数量:" <<std::dec<< XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_COMBINED_TEXTURE_IMAGE_UNITS) << std::endl;
+	std::cout << "顶点着色器纹理单元数量:" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_VERTEX_TEXTURE_IMAGE_UNITS) << std::endl;
+	std::cout << "片段着色器纹理单元数量:" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_TEXTURE_IMAGE_UNITS) << std::endl;
+	std::cout << "几何着色器纹理单元数量:" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS) << std::endl;
+	std::cout << "曲面细分控制着色器最大纹理单元:" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS) << std::endl;
+	std::cout << "曲面细分计算着色器最大纹理单元:" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS) << std::endl;
+	std::cout << "计算着色器最大纹理单元:" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS) << std::endl;
+
+
+	std::cout << "顶点着色器支持的uniform组件数量：" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_VERTEX_UNIFORM_COMPONENTS) << std::endl;
+	std::cout << "片段着色器支持的uniform组件数量：" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_FRAGMENT_UNIFORM_COMPONENTS) << std::endl;
+	std::cout << "几何着色器支持的uniform组件数量：" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_GEOMETRY_UNIFORM_COMPONENTS) << std::endl;
+
+
+	std::cout << "顶点着色器中uniform块的最大数量：" << std::dec << XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType::XGL_MAX_VERTEX_UNIFORM_BLOCKS) << std::endl;
+
+	doneCurrent();
 }
 
 void easyPlotWidget::buildUI()
@@ -542,7 +570,7 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 		item->setLineWidth(1);
 		item->setSingleColor(myUtilty::Vec4f(0, 1, 1, 1));
 		item->setFillColor(myUtilty::Vec4f(0, 0, 0, 1));
-		item->initResource();
+		//item->initiallize();
 		item->setVisible(true);
 		item->setIsFilled(false);
 
@@ -556,7 +584,7 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 
 
 		auto textItem = makeShareDbObject<XTextItem>();
-		textItem->initResource();
+		//textItem->initiallize();
 		textItem->setSingleColor(myUtilty::Vec4f(1, 1, 1, 1));
 		textItem->setFontSize(20);
 		textItem->setText(L"测试一下文字");
@@ -579,7 +607,7 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 		item->setLineWidth(2);
 		item->setPenStyle(XGraphicsItem::PenStyle::Solid);
 		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-		item->initResource();
+		//item->initiallize();
 		item->setVisible(true);
 
 		item->setVisible(false);
@@ -891,7 +919,7 @@ void easyPlotWidget::slotAddLine2D()
 	auto g = myUtilty::math::randon_color();
 	auto b= myUtilty::math::randon_color();
 	item->setSingleColor(myUtilty::Vec4f(r,g, b, 1));
-	item->initResource();
+	//item->initiallize();
 	item->setVisible(true);
 
 	//数据
@@ -921,7 +949,7 @@ void easyPlotWidget::slotAddLine2D()
 	auto selectId = d->select2dObject.begin();
 	if (selectId != d->select2dObject.end()) {
 		auto selectIem = d->scene->getGraphicsItem(*selectId);
-		if (auto chart = std::dynamic_pointer_cast<XChartItem>(selectIem)) {
+		if (auto chart = std::dynamic_pointer_cast<XChartItem2>(selectIem)) {
 			chart->addPolyline(item);
 			flag = false;
 		}
@@ -938,8 +966,8 @@ void easyPlotWidget::slotAddChart()
 {
 	makeCurrent();
 
-	auto chart = makeShareDbObject<XChartItem>();
-	chart->initResource();
+	auto chart = makeShareDbObject<XChartItem2>();
+	//chart->initiallize();
 	chart->setVisible(true);
 	
 	auto tx = myUtilty::math::randon<double>(-200, 200);
@@ -973,7 +1001,7 @@ void easyPlotWidget::slotAddBar()
 	auto b = myUtilty::math::randon_color();
 	item->setSingleColor(myUtilty::Vec4f(r, g, b, 1));
 	item->setFillColor(myUtilty::Vec4f(r, g, b, 1));
-	item->initResource();
+	//item->initiallize();
 	item->setVisible(true);
 
 	//数据
@@ -1021,7 +1049,7 @@ void easyPlotWidget::slotAddText()
 	makeCurrent();
 	{
 		auto item = makeShareDbObject<XTextItem>();
-		item->initResource();
+		//item->initiallize();
 		item->setVisible(true);
 		item->setVAlignment(XTextItem::VAlign::Bottom);
 		item->setHAlignment(XTextItem::HAlign::Center);
@@ -1103,7 +1131,7 @@ void easyPlotWidget::slotAxis2D()
 	makeCurrent();
 	{
 		auto axis = makeShareDbObject<XAxisItem>();
-		axis->initResource();
+
 		axis->setVisible(true);
 
 		axis->getLine()->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
@@ -1111,9 +1139,11 @@ void easyPlotWidget::slotAxis2D()
 		axis->getLine()->setLineWidth(2);
 		axis->getLine()->setPositionType(XGL::PositionType::local_complete);
 		axis->getLine()->setOrientation(XGL::Orientation::left_bottom);
+		axis->getLine()->translate(100,100);
+		axis->getLine()->scale(100,1);
 
-		axis->translate(0,0);
-		axis->scale(100,1);
+		//axis->translate(0,100);
+		//axis->scale(100,1);
 		axis->setRange(0,100);
 		d->scene->addGraphicsItem(axis);
 	}

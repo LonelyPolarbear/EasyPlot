@@ -21,10 +21,8 @@ XPolyline::~XPolyline()
 {
 }
 
-void XPolyline::updateData()
+void XPolyline::updateVboCoord()
 {
-	//std::lock_guard<std::mutex> lock(d->m_mutex);
-
 	//顶点数据已经更新
 	auto m_coord = m_coordArray;
 	if (m_coord && m_coord->GetTimeStamp() > m_UpdateTime) {
@@ -40,9 +38,9 @@ void XPolyline::updateData()
 			// 1 2 3 4
 			// 4 1 2 3 4 1 2
 			addAdjacency->setNumOfTuple(oldNum + 2);
-			
-			myUtilty::Vec2f p1 = myUtilty::Vec2f(m_coord->data(0)[0],  m_coord->data(0)[1]);
-			myUtilty::Vec2f p2 = myUtilty::Vec2f(m_coord->data(1)[oldNum-1],  m_coord->data(1)[1]);
+
+			myUtilty::Vec2f p1 = myUtilty::Vec2f(m_coord->data(0)[0], m_coord->data(0)[1]);
+			myUtilty::Vec2f p2 = myUtilty::Vec2f(m_coord->data(1)[oldNum - 1], m_coord->data(1)[1]);
 
 
 			//设置第一个点
@@ -52,28 +50,28 @@ void XPolyline::updateData()
 
 			//拷贝原始数据
 
-			memcpy(addAdjacency->data(1), m_coord->data(0), oldNum * 3* sizeof(float));
+			memcpy(addAdjacency->data(1), m_coord->data(0), oldNum * 3 * sizeof(float));
 
 			//最后一个点
-			addAdjacency->data(oldNum+1)[0] = p2.x;
-			addAdjacency->data(oldNum+1)[1] = p2.y;
-			addAdjacency->data(oldNum+1)[2] = 0;
+			addAdjacency->data(oldNum + 1)[0] = p2.x;
+			addAdjacency->data(oldNum + 1)[1] = p2.y;
+			addAdjacency->data(oldNum + 1)[2] = 0;
 
 			m_vbo_coord->allocate(addAdjacency->data(0), addAdjacency->size());
 
 			//oldNum个有效点 存储oldnum段数据
 			auto lens = makeShareDbObject<XFloatArray>();
 			lens->setNumOfTuple(oldNum);
-			lens->setTuple(0,0);
-			for (int i = 1; i < oldNum ; i++) {
+			lens->setTuple(0, 0);
+			for (int i = 1; i < oldNum; i++) {
 				auto lastPoint = addAdjacency->data(i + 1);		//跳过第一个点
 				auto curPoint = addAdjacency->data(i + 2);		//跳过第一个点
 
 				Eigen::Vector2f v1(lastPoint[0], lastPoint[1]);
 				Eigen::Vector2f v2(curPoint[0], curPoint[1]);
-				Eigen::Vector2f v3 = v2 - v1;	
+				Eigen::Vector2f v3 = v2 - v1;
 				float len = v3.norm();
-				lens->setTuple(i, len + *lens->data(i-1));
+				lens->setTuple(i, len + *lens->data(i - 1));
 			}
 			m_ssbo_len->bind();
 			m_ssbo_len->allocate(lens->data(0), lens->size());
@@ -102,19 +100,6 @@ void XPolyline::updateData()
 
 		m_vbo_coord->release();
 	}
-
-	////顶点颜色数据已经更新
-	auto m_VertexColor = m_colorArray;
-	if (m_VertexColor && m_VertexColor->GetTimeStamp() > m_UpdateTime) {
-		m_vbo_color->bind();
-
-		m_vbo_color->allocate(m_VertexColor->data(0), m_VertexColor->size());
-
-		m_vbo_color->release();
-	}
-
-	//数据已更新，刷新时间戳
-	m_UpdateTime.Modified();
 }
 
 uint32_t XPolyline::computeNumofVertices()

@@ -1,6 +1,7 @@
 #pragma once
 #include "XOpenglApi.h"
 #include <dataBase/dataobject.h>
+#include "XOpenGLType.h"
 
 class XOpenGLBuffer;
 class LIB04_OPENGL_API XOpenGLTexture :DataBaseObject{
@@ -314,9 +315,9 @@ public:
 	void destroy();
 
 	void bind();
-	void bindUnit(unsigned int unit, TextureUnitReset reset = DontResetTextureUnit);
+	void bindUnit(unsigned int unit);
 	void release();
-	void releaseUnit(unsigned int unit, TextureUnitReset reset = DontResetTextureUnit);
+	void releaseUnit(unsigned int unit);
 
 	void bindBuffer(std::shared_ptr<XOpenGLBuffer> buffer, TextureFormat format);
 
@@ -336,7 +337,7 @@ public:
 						XOpenGLTexture::PixelFormat dataFormat,
 						XOpenGLTexture::PixelType type,
 						const void* data);
-
+	
 	void setMultiSample(
 		int width,
 		int height,
@@ -376,6 +377,8 @@ public:
 	sptr<XOpenGLBuffer> mapMultiSampleDepth(unsigned int fboId);
 
 	static unsigned int getInternalFormatSize(XOpenGLTexture::TextureFormat format);
+
+	XOpenGL::TextureBindingType getTextureBindType() const;
 protected:
 	class Internal;
 	std::unique_ptr<Internal> d;

@@ -12,7 +12,7 @@ public:
 	virtual void drawFill(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m);
 	virtual uint32_t computeNumofVertices() override;
 
+protected:
 	virtual void initResource();
-
 	std::shared_ptr< XFloatArray> m_data;
 };

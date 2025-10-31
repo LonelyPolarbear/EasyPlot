@@ -26,8 +26,8 @@ XTextItem::XTextItem() :XGraphicsItem()
 	auto index = makeShareDbObject<XUIntArray>();
 	index->setComponent(3);
 	index->setNumOfTuple(2);
-	index->setTuple(0, 1, 2, 3);
-	index->setTuple(1, 1, 3, 4);
+	index->setTuple(0, 0, 1, 2);
+	index->setTuple(1, 0, 2, 3);
 
 	this->setIndexArray(index);
 
@@ -45,6 +45,7 @@ XTextItem::~XTextItem()
 
 void XTextItem::draw(const Eigen::Matrix4f& m)
 {
+	initiallize();
 	if (!m_IsVisible || !m_shaderManger)
 		return;
 
@@ -259,25 +260,11 @@ void XTextItem::updateData()
 {
 	updateText();
 	//顶点数据已经更新
-	auto m_coord = m_coordArray;
-	if (m_coord && m_coord->GetTimeStamp() > m_UpdateTime) {
+	updateVboCoord();
 
-		m_vbo_coord->bind();
+	updateVboColor();
 
-		m_vbo_coord->allocate(m_coord->data(0), m_coord->size());
-		m_indexArray->setTuple(0, 0, 1, 2);
-		m_indexArray->setTuple(1, 0, 2, 3);
-		m_indexArray->Modified();
-
-		m_vbo_coord->release();
-	}
-
-	auto m_index = m_indexArray;
-	if (m_index && m_index->GetTimeStamp() > m_UpdateTime) {
-
-		m_ebo->bind();
-		m_ebo->allocate(m_index->data(0), m_index->size());
-	}
+	updateVboEbo();
 
 
 	if (m_textureArray && m_textureArray->GetTimeStamp() > m_UpdateTime) {
@@ -293,17 +280,6 @@ void XTextItem::updateData()
 		m_instanceAttrBufffer->release();
 	}
 
-	////顶点颜色数据已经更新
-	auto m_VertexColor = m_colorArray;
-	if (m_VertexColor && m_VertexColor->GetTimeStamp() > m_UpdateTime) {
-		m_vbo_color->bind();
-
-		m_vbo_color->allocate(m_VertexColor->data(0), m_VertexColor->size());
-
-		m_vbo_color->release();
-	}
-
-	//数据已更新，刷新时间戳
 	m_UpdateTime.Modified();
 }
 

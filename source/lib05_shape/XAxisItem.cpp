@@ -5,6 +5,17 @@
 XAxisItem::XAxisItem() :XGraphicsItem()
 {
 	setIsComposite(true);
+	m_line = makeShareDbObject<XLineItem>();
+
+	if (mLayout == XGL::Layout::horizontal) {
+		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(1, 0));
+	}
+	else {
+		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(0, 1));
+	}
+	addChildItem(m_line);
+
+	setLabelNum(5);
 }
 
 XAxisItem::~XAxisItem()
@@ -16,54 +27,6 @@ void XAxisItem::updateData()
 	m_line->updateData();
 }
 
-void XAxisItem::initResource()
-{
-	m_line = makeShareDbObject<XLineItem>();
-	m_line->initResource();
-	if (mLayout == XGL::Layout::horizontal) {
-		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(1, 0));
-	}
-	else {
-		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(0, 1));
-	}
-
-	addChildItem(m_line);
-
-	for (int i = 0; i < mLabelNum; i++) {
-		auto text = makeShareDbObject<XTextItem>();
-		text->initResource();
-		text->setText(myUtilty::to_wstring_with_precision(i, 2));
-
-		text->setVisible(true);
-
-		if (mLayout == XGL::Layout::horizontal) {
-			text->setVAlignment(XTextItem::VAlign::Top);
-			if (i + 1 == mLabelNum)
-				text->setHAlignment(XTextItem::HAlign::Right);
-			else
-				text->setHAlignment(XTextItem::HAlign::Left);
-
-			double xpos = (double)i / (mLabelNum - 1);
-			text->setPosition(xpos, 0);
-		}
-		else {
-			text->setHAlignment(XTextItem::HAlign::Left);
-			if (i + 1 == mLabelNum)
-				text->setVAlignment(XTextItem::VAlign::Top);
-			else
-				text->setVAlignment(XTextItem::VAlign::Bottom);
-			double ypos = i / (mLabelNum - 1);
-		}
-
-		text->setFontSize(16);
-		text->setPositionType(XGL::PositionType::local_center);
-		text->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-		text->setText(L"0");
-
-		m_texts.push_back(text);
-		m_line->addChildItem(text);
-	}
-}
 
 
 void XAxisItem::setRange(double minVal, double maxVal)
@@ -74,5 +37,69 @@ void XAxisItem::setRange(double minVal, double maxVal)
 		auto step = length / (mLabelNum - 1);
 		double value = minVal + i * step;
 		text->setText(myUtilty::to_wstring_with_precision(value, 1));
+	}
+}
+
+void XAxisItem::updateTextPos() {
+	double len = m_line->getLength();
+	auto startPos =m_line->getStart();
+	for (int i = 0; i < mLabelNum; i++) {
+		auto text = m_texts[i];
+		//text->setText(myUtilty::to_wstring_with_precision(i, 2));
+
+		if (mLayout == XGL::Layout::horizontal) {
+			text->setVAlignment(XTextItem::VAlign::Top);
+			if (i + 1 == mLabelNum)
+				text->setHAlignment(XTextItem::HAlign::Right);
+			else
+				text->setHAlignment(XTextItem::HAlign::Left);
+
+			double xpos = startPos.x +(double)i * len / (mLabelNum - 1);
+			text->setPosition(xpos, startPos.y);
+		}
+		else {
+			text->setHAlignment(XTextItem::HAlign::Left);
+			if (i + 1 == mLabelNum)
+				text->setVAlignment(XTextItem::VAlign::Top);
+			else
+				text->setVAlignment(XTextItem::VAlign::Bottom);
+			double ypos = startPos.y + (double)i * len / (mLabelNum - 1);
+			text->setPosition(startPos.x, ypos);
+		}
+	}
+}
+
+void XAxisItem::setLabelNum(int num)
+{
+	//先清空旧的
+	for (auto text : m_texts)
+		m_line->removeChildItem(text);
+	m_texts.clear();
+
+	mLabelNum = num;
+
+	for (int i = 0; i < mLabelNum; i++) {
+		auto text = makeShareDbObject<XTextItem>();
+		text->setVisible(true);
+		text->setFontSize(16);
+		text->setPositionType(XGL::PositionType::local_center);		//或者sceneScreen_center
+		text->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		text->setText(L"0");
+
+		m_texts.push_back(text);
+		m_line->addChildItem(text);
+	}
+
+	updateTextPos();
+}
+
+void XAxisItem::setLayout(XGL::Layout layout)
+{
+	mLayout = layout;
+	if (mLayout == XGL::Layout::horizontal) {
+		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(1, 0));
+	}
+	else {
+		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(0, 1));
 	}
 }

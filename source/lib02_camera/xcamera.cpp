@@ -252,24 +252,41 @@ void xcamera::transformTrackball(Eigen::Vector2f curPoint, Eigen::Vector2f lastP
     Eigen::Vector3f _last = ComputeDisplayToCamera(start);
     Eigen::Vector3f _start = ComputeDisplayToCamera(last);
     Eigen::Vector3f space = _start - _last;
+
+	auto yangle = curPoint.x() - lastPoint.x();
+	auto xangle = curPoint.y() - lastPoint.y();
+
     if (isRotate == true) {
         space[0] = 0;
         space[1] = 0;
         space[2] = 0;
+
+		if (abs(xangle) > abs(yangle)) {
+			yangle = 0;
+		}
+		else
+		{
+			xangle = 0;
+		}
+		yangle *= 0.02;
+		xangle *= 0.02;
     }
     else {
         rotateAngle = 0;
+        xangle = 0;
+        yangle = 0;
     }
 
     //相机绕着自身坐标系运动,旋转顺序Z->X->Y
     Eigen::Vector3f self2Center = m_transform.inverse() * rotate_center;
     m_transform
         .translate(self2Center)
+		//.rotate(Eigen::AngleAxisf(xangle, Eigen::Vector3f::UnitX()))
+		//.rotate(Eigen::AngleAxisf(-yangle, Eigen::Vector3f::UnitY()))
         .rotate(Eigen::AngleAxisf(rotateAngle, rotateDir))
         .scale(Eigen::Vector3f(1, 1, 1))
         .translate(-self2Center)
         .translate(space);
-
 }
 
 Eigen::Vector3f xcamera::billboard(float screenw, float screenh, float posx, float posy, float zInCamera, oriention orien )

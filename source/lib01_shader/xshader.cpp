@@ -299,6 +299,23 @@ void xshader::setIsInstanceDarw(bool isInstance) {
     setBool("isInstance",isInstance);
 }
 
+void xshader::textureBinding( const std::string& name, int bindingPoint)
+{
+    setInt(name,bindingPoint);
+}
+
+void xshader::uboBinding( const std::string& name, int bindingPoint)
+{
+	GLuint uboIndex = glGetUniformBlockIndex(ID, name.c_str());
+	glUniformBlockBinding(ID, uboIndex, bindingPoint);
+}
+
+void xshader::ssboBinding(const std::string& name,int bindingPoint )
+{
+	GLuint ssboIndex = glGetProgramResourceIndex(ID, GL_SHADER_STORAGE_BLOCK, name.c_str());
+	glShaderStorageBlockBinding(ID, ssboIndex, bindingPoint);
+}
+
 void xshader::checkCompileErrors(unsigned int shader, unsigned int type)
 {
     std::map<GLuint, std::string> map{

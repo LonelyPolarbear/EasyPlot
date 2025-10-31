@@ -19,11 +19,8 @@ XLineItem::~XLineItem()
 {
 }
 
-void XLineItem::updateData()
+void XLineItem::updateVboCoord()
 {
-	//std::lock_guard<std::mutex> lock(d->m_mutex);
-
-	//顶点数据已经更新
 	auto m_coord = m_coordArray;
 	if (m_coord && m_coord->GetTimeStamp() > m_UpdateTime) {
 
@@ -38,12 +35,12 @@ void XLineItem::updateData()
 			// 1 2 3 4
 			// 4 1 2 3 4 1 2
 			addAdjacency->setNumOfTuple(oldNum + 2);
-			
-			myUtilty::Vec2f p1 = myUtilty::Vec2f(m_coord->data(0)[0],  m_coord->data(0)[1]);
-			myUtilty::Vec2f p2 = myUtilty::Vec2f(m_coord->data(1)[0],  m_coord->data(1)[1]);
 
-			auto pre =2.0f*p1 - p2;
-			auto next = 2.0f*p2 - p1;
+			myUtilty::Vec2f p1 = myUtilty::Vec2f(m_coord->data(0)[0], m_coord->data(0)[1]);
+			myUtilty::Vec2f p2 = myUtilty::Vec2f(m_coord->data(1)[0], m_coord->data(1)[1]);
+
+			auto pre = 2.0f * p1 - p2;
+			auto next = 2.0f * p2 - p1;
 
 			//设置第一个点
 			addAdjacency->data(0)[0] = p1.x;
@@ -72,19 +69,6 @@ void XLineItem::updateData()
 
 		m_vbo_coord->release();
 	}
-
-	////顶点颜色数据已经更新
-	auto m_VertexColor = m_colorArray;
-	if (m_VertexColor && m_VertexColor->GetTimeStamp() > m_UpdateTime) {
-		m_vbo_color->bind();
-
-		m_vbo_color->allocate(m_VertexColor->data(0), m_VertexColor->size());
-
-		m_vbo_color->release();
-	}
-
-	//数据已更新，刷新时间戳
-	m_UpdateTime.Modified();
 }
 
 void XLineItem::setLine(const myUtilty::Vec2f& start, const myUtilty::Vec2f& end)
@@ -92,6 +76,22 @@ void XLineItem::setLine(const myUtilty::Vec2f& start, const myUtilty::Vec2f& end
 	m_coordArray->setTuple(0, start.x, start.y, 0);
 	m_coordArray->setTuple(1, end.x, end.y, 0);
 	m_coordArray->Modified();
+}
+
+myUtilty::Vec2f XLineItem::getStart() const
+{
+ 	return myUtilty::Vec2f(m_coordArray->data(0)[0], m_coordArray->data(0)[1]);
+}
+
+myUtilty::Vec2f XLineItem::getEnd() const
+{
+	return myUtilty::Vec2f(m_coordArray->data(1)[0], m_coordArray->data(1)[1]);
+}
+
+double XLineItem::getLength() const
+{
+	auto tmp =getEnd() - getStart();
+	return sqrtf(tmp.x*tmp.x + tmp.y*tmp.y );
 }
 
 uint32_t XLineItem::computeNumofVertices()

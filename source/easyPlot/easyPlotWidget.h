@@ -40,6 +40,8 @@ public:
 
 	void virtual initGLResource();
 
+	void print();
+
 	void buildUI();
 
 	void attachSignalSlot();

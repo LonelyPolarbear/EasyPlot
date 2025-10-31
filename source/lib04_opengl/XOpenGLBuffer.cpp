@@ -136,9 +136,6 @@ bool XOpenGLBuffer::bind()
 	d->lastBindBufferId = tmpLastBindBufferId;		//记录之前绑定的buffer
 
 	glBindBuffer(d->type, d->bufferId);
-
-	int fffff = 0;
-	XOpenGLFuntion::xglGetBindDataBufferId(bindingType, fffff);
 	return glGetError() == GL_NO_ERROR;
 }
 

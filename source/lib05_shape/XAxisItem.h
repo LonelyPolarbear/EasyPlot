@@ -8,9 +8,17 @@ public:
 	XAxisItem();
 	virtual ~XAxisItem();
 	virtual void updateData();
-	virtual void initResource();
+	
 	void setRange(double minVal,double maxVal);
-	std::shared_ptr<XLineItem> getLine() const { return m_line; }
+	std::shared_ptr<XLineItem> getLine() const {
+		return m_line; 
+	}
+
+	void updateTextPos();
+
+	void setLabelNum(int num);
+
+	void setLayout(XGL::Layout layout);
 protected:
 	std::shared_ptr<XLineItem> m_line;
 	std::vector<std::shared_ptr<XTextItem>> m_texts;

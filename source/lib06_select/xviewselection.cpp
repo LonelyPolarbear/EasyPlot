@@ -209,8 +209,6 @@ bool XViewSelection::renderLayer(std::set<std::shared_ptr<XShape>> objects, std:
 	//查询
 	glBeginQuery(GL_SAMPLES_PASSED, d->queryHandles[layer]);
 
-	//d->pickShader->setViewMatrix(camera->getViewMatrix());
-	//d->pickShader->setProjectionMatrix(camera->projectionMatrix());
 
 	for (auto shape : objects) {
 		shape->setPolygonMode(PolygonMode::fill);
@@ -221,31 +219,7 @@ bool XViewSelection::renderLayer(std::set<std::shared_ptr<XShape>> objects, std:
 
 	GLuint fragmentCount = 0;
 	glGetQueryObjectuiv(d->queryHandles[layer], GL_QUERY_RESULT, &fragmentCount);
-	//auto* ptrColorTexture = (unsigned int*)fbo->getColorAttachment()->map();
-	//if (ptrColorTexture) {
-		//采样纹理
-		//auto color1 = ptrColorTexture[0];
-	//}
 
-	//fbo->getColorAttachment()->unmap();
-
-
-	//auto* ptrDepthTexture = (float*)fbo->getDepthAttachment()->map();
-	//if (ptrDepthTexture)
-		//auto d1 = ptrDepthTexture[0];
-	//fbo->getDepthAttachment()->unmap();
-
-	//std::vector<float>depthValue;
-	//depthValue.resize(fbo->getWidth()*fbo->getHeight()*4);
-	//fbo->getDepthAttachment()->bind();
-	//glGetTexImage(
-	//	GL_TEXTURE_2D,
-	//	0,
-	//	GL_DEPTH_COMPONENT,
-	//	GL_FLOAT,
-	//	depthValue.data()
-	//);
-	//fbo->getDepthAttachment()->release();
 	if (layer > 0) {
 		d->fboPeeling[layer - 1]->getDepthAttachment()->releaseUnit(3);
 	}

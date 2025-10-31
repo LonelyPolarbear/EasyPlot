@@ -30,6 +30,25 @@ namespace XOpenGL {
 		shaderStorageBufferBinding = 0x90D3,					//GL_SHADER_STORAGE_BUFFER_BINDING
 	};
 
+	enum class LIB04_OPENGL_API TextureBindingType :unsigned int {
+		XGL_TEXTURE_BINDING_1D = 0x8068,
+		XGL_TEXTURE_BINDING_1D_ARRAY = 0x8C18,
+
+		XGL_TEXTURE_BINDING_2D = 0x8069,
+		XGL_TEXTURE_BINDING_2D_ARRAY = 0x8C1D,
+
+		XGL_TEXTURE_BINDING_3D = 0x806A,
+
+		XGL_TEXTURE_BINDING_CUBE_MAP = 0x8514,
+		XGL_TEXTURE_BINDING_CUBE_MAP_ARRAY = 0x900A,
+
+		XGL_TEXTURE_BINDING_2D_MULTISAMPLE = 0x9104,
+		XGL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY = 0x9105,
+
+		XGL_TEXTURE_BINDING_RECTANGLE = 0x84F6,
+		XGL_TEXTURE_BINDING_BUFFER = 0x8C2C,
+	};
+
 	enum class LIB04_OPENGL_API FlagBits :unsigned int {
 		color_buffer_bit = 0x00004000,  //GL_COLOR_BUFFER_BIT
 		depth_buffer_bit = 0x00000100,  //GL_DEPTH_BUFFER_BIT
@@ -287,5 +306,44 @@ namespace XOpenGL {
 
 	struct LIB04_OPENGL_API GlSyncObject {
 		void* ptr;		// GLsync对象指针
+	};
+
+	/// 顶点 细分控制 细分计算 几何 片段 计算一共6个着色器阶段
+	enum class LIB04_OPENGL_API ShaderComponentType :unsigned int {
+		//Uniform 组件限制
+		XGL_MAX_VERTEX_UNIFORM_COMPONENTS = 0x8B4A,									//顶点着色器中uniform的最大组件数
+		XGL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS = 0x8E7F,						//细分控制着色器的最大组件数
+		XGL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS = 0x8E80,					//细分计算着色器的最大组件数
+		XGL_MAX_GEOMETRY_UNIFORM_COMPONENTS = 0x8DDF,								//几何着色器中uniform的最大组件数
+		XGL_MAX_FRAGMENT_UNIFORM_COMPONENTS = 0x8B49,								//片段着色器中uniform的最大组件数
+		XGL_MAX_COMPUTE_UNIFORM_BLOCKS = 0x91BB,											//计算着色器中uniform块的最大数量
+		XGL_MAX_COMBINED_UNIFORM_BLOCKS = 0x8A33,											//所有着色器阶段中uniform块的最大数量
+
+		//纹理数量限制
+		XGL_MAX_VERTEX_TEXTURE_IMAGE_UNITS = 0x8B4C,									//顶点着色器中最多可声明的采样器数量
+		XGL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS = 0x8E81,						//曲面细分控制着色器最大纹理单元
+		XGL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS = 0x8E82,					//曲面细分计算着色器最大纹理单元
+		XGL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS = 0x8C29,								//几何着色器中最多可声明的采样器数量
+		XGL_MAX_TEXTURE_IMAGE_UNITS = 0x8872,													//片段着色器中最多可声明的采样器数量
+		XGL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS = 0x91BC,									//计算着色器最大纹理单元
+		XGL_MAX_COMBINED_TEXTURE_IMAGE_UNITS = 0x8B4D,								//所有着色器阶段总共可用的纹理单元数量
+
+		//Uniform 块数量限制
+		XGL_MAX_VERTEX_UNIFORM_BLOCKS = 0x8A2B,												//顶点着色器中uniform块的最大数量
+		XGL_MAX_TESS_CONTROL_UNIFORM_BLOCKS = 0x8E85,									//细分控制着色器中uniform块的最大数量
+		XGL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS = 0x8E86,							//细分计算着色器中uniform块的最大数量
+		XGL_MAX_GEOMETRY_UNIFORM_BLOCKS = 0x8A2C,										//几何着色器中uniform块的最大数量
+		XGL_MAX_FRAGMENT_UNIFORM_BLOCKS = 0x8A2D,										//片段着色器中uniform块的最大数量
+		XGL_MAX_COMPUTE_UNIFORM_COMPONENTS = 0x8266,								//计算着色器中uniform的最大数量
+		XGL_MAX_COMBINED_UNIFORM_COMPONENTS = 0x8B4A,								//所有着色器阶段中uniform的最大数量
+
+		//着色器存储缓冲区限制
+		XGL_MAX_VERTEX_SHADER_STORAGE_BLOCKS = 0x90D6,									//顶点着色器中最大的存储缓冲区数量
+		XGL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS = 0x90D8,						//细分控制着色器中最大的存储缓冲区数量
+		XGL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS = 0x90D9,				//细分计算着色器中最大的存储缓冲区数量
+		XGL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS = 0x90D7,								//几何着色器中最大的存储缓冲区数量
+		XGL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS = 0x90DA,								//片段着色器中最大的存储缓冲区数量
+		XGL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS = 0x90DB,								//计算着色器中最大的存储缓冲区数量
+		XGL_MAX_COMBINED_SHADER_STORAGE_BLOCKS = 0x90DC,								//所有着色器阶段中最大的存储缓冲区数量
 	};
 }

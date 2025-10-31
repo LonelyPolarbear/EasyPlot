@@ -5,11 +5,11 @@
 class XPolyline; 
 class XTextItem;
 
-class LIB05_SHAPE_API XChartItem :public XGraphicsItem {
+class LIB05_SHAPE_API XChartItem2 :public XGraphicsItem {
 public:
 	
-	XChartItem();
-	virtual ~XChartItem();
+	XChartItem2();
+	virtual ~XChartItem2();
 
 	void setRect(float x, float y, float w, float h);
 	void addPolyline(std::shared_ptr<XGraphicsItem> polyline);

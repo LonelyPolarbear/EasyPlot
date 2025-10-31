@@ -13,16 +13,14 @@ public:
 	int layer{0};
 	int samples{0};
 	XOpenGLTexture::TextureFormat internalFormat;
-	XOpenGLTexture::PixelFormat dataFormat;
-	XOpenGLTexture::PixelType datatype;
+	XOpenGLTexture::PixelFormat dataFormat;				//对于MSAA，该值不起作用
+	XOpenGLTexture::PixelType datatype;						//对于MSAA，该值不起作用
 
-	//std::shared_ptr<XOpenGLBuffer> pbo;	//用于读取纹理数据
+	int lastUnitBindTexture{0};										//当前指定的纹理单元绑定的纹理ID
 };
-
 
 XOpenGLTexture::XOpenGLTexture():d(new Internal)
 {
-
 }
 
 XOpenGLTexture::~XOpenGLTexture()
@@ -71,18 +69,27 @@ void XOpenGLTexture::bind()
 	glBindTexture(d->target, d->textureId);
 }
 
-void XOpenGLTexture::bindUnit(unsigned int unit, TextureUnitReset reset)
+void XOpenGLTexture::bindUnit(unsigned int unit)
 {
-	GLint oldTextureUnit = 0;
-	if (reset == XOpenGLTexture::ResetTextureUnit)
-		 glGetIntegerv(GL_ACTIVE_TEXTURE, &oldTextureUnit);
+	auto bindType = getTextureBindType();
 
-	glBindTextureUnit(unit, d->textureId);
-	//glActiveTexture(GL_TEXTURE0 + unit);
-	//glBindTexture(d->target, d->textureId);
+	//获取当前纹理单元绑定的纹理对象
+	auto curBindTextureId = XOpenGLFuntion::xglGetTextureUnitBindTexture(unit,bindType);
+	if(curBindTextureId == d->textureId)
+		return;
 
-	if (reset == XOpenGLTexture::ResetTextureUnit)
-		glActiveTexture(GL_TEXTURE0 + oldTextureUnit);
+	d->lastUnitBindTexture = curBindTextureId;
+
+	//glBindTextureUnit(unit, d->textureId);  //glBindTextureUnit 是 OpenGL 4.5 版本 中引入的核心函数
+
+	//先获取之前激活的纹理单元
+	auto prevActiveUnit = XOpenGLFuntion::xglGetActiveTexture();
+
+	glActiveTexture(GL_TEXTURE0 + unit);
+	glBindTexture(d->target, d->textureId);
+
+	//恢复之前绑定的纹理对象
+	glActiveTexture(GL_TEXTURE0+ prevActiveUnit);
 }
 
 void XOpenGLTexture::release()
@@ -90,17 +97,22 @@ void XOpenGLTexture::release()
 	glBindTexture(d->target, 0);
 }
 
-void XOpenGLTexture::releaseUnit(unsigned int unit, TextureUnitReset reset)
+void XOpenGLTexture::releaseUnit(unsigned int unit)
 {
-	GLint oldTextureUnit = 0;
-	if (reset == XOpenGLTexture::ResetTextureUnit)
-		glGetIntegerv(GL_ACTIVE_TEXTURE, &oldTextureUnit);
+	auto bindType = getTextureBindType();
+	//获取当前纹理单元绑定的纹理对象
+	auto curBindTextureId = XOpenGLFuntion::xglGetTextureUnitBindTexture(unit, bindType);
+
+	if(curBindTextureId != d->textureId)
+		return;
+
+	auto prevActiveUnit = XOpenGLFuntion::xglGetActiveTexture();
 
 	glActiveTexture(GL_TEXTURE0 + unit);
-	glBindTexture(d->target, 0);
+	glBindTexture(d->target, d->lastUnitBindTexture);
 
-	if (reset == XOpenGLTexture::ResetTextureUnit)
-		glActiveTexture(GL_TEXTURE0 + oldTextureUnit);
+	//恢复之前绑定的纹理对象
+	glActiveTexture(GL_TEXTURE0 + prevActiveUnit);
 }
 
 void XOpenGLTexture::bindBuffer(std::shared_ptr<XOpenGLBuffer> buffer, TextureFormat format)
@@ -188,7 +200,7 @@ void XOpenGLTexture::setData(
 			int dddd = 10;
 		}
 	}
-		;
+	;
 }
 
 void XOpenGLTexture::setData(
@@ -225,150 +237,97 @@ XOpenGLTexture::PixelType XOpenGLTexture::getInputDataPixelType() const
 
 sptr<XOpenGLBuffer> XOpenGLTexture::map()
 {
+	auto pbo = makeShareDbObject<XOpenGLBuffer>();
+	pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+	pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+	pbo->create();
+	pbo->bind();
+	pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+	pbo->bind();
+	auto pboSize = pbo->bufferSize();
 
-		auto pbo = makeShareDbObject<XOpenGLBuffer>();
-		pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
-		pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
-		pbo->create();
-		pbo->bind();
+	if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
 		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-
-
-	if (Target2DMultisample == d->target) {
-		auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
-		resoveFbo->create();
-		resoveFbo->setHeight(d->height);
-		resoveFbo->setWidth(d->width);
-		resoveFbo->bind();
-		resoveFbo->addAttachment(XOpenGLFramebufferObject::Attachment::Color, d->internalFormat, d->dataFormat, d->datatype, 0);
-		bool flag = resoveFbo->isComplete();
-		resoveFbo->release();
-
-		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, 0);
-		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::drawBuffer, resoveFbo->getId());
-
-		XOpenGLFuntion::xglBlitFramebuffer(0, 0, d->width, d->height, 0, 0, d->width, d->height,
-			XOpenGL::FlagBits::color_buffer_bit, XOpenGL::FilterType::nearest);
-
-		auto texture =resoveFbo->getColorAttachment();
-
-		pbo->bind();
-		auto pboSize = pbo->bufferSize();
-
-		if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
-			pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-		}
-
-		texture->bind();
-		glGetTexImage(
-			texture->getTarget(),			// 纹理目标
-			0,											// mipmap级别
-			d->dataFormat,					// 格式（必须匹配纹理的内部格式）
-			d->datatype,						// 类型（必须匹配纹理的数据类型）
-			0											// 偏移量（使用PBO时设为0）
-		);
-		pbo->release();
-		return pbo;
-
-	}else{
-
-		pbo->bind();
-		auto pboSize = pbo->bufferSize();
-
-		if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
-			pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-		}
-
-		bind();
-		glGetTexImage(
-			d->target,       // 纹理目标
-			0,                   // mipmap级别
-			d->dataFormat,      // 格式（必须匹配纹理的内部格式）
-			d->datatype,             // 类型（必须匹配纹理的数据类型）
-			0                    // 偏移量（使用PBO时设为0）
-		);
-
-		return pbo;
 	}
+
+	bind();
+	glGetTexImage(
+		d->target,							// 纹理目标
+		0,											// mipmap级别
+		d->dataFormat,					// 格式（必须匹配纹理的内部格式）
+		d->datatype,						// 类型（必须匹配纹理的数据类型）
+		0											// 偏移量（使用PBO时设为0）
+	);
+
+	release();
+	return pbo;
 }
 
 sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleColor(unsigned int fboId)
 {
-	
-		auto pbo = makeShareDbObject<XOpenGLBuffer>();
-		pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
-		pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
-		pbo->create();
-		pbo->bind();
+	auto pbo = makeShareDbObject<XOpenGLBuffer>();
+	pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+	pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+	pbo->create();
+	pbo->bind();
+	pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+
+
+	auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
+	resoveFbo->create();
+	resoveFbo->setHeight(d->height);
+	resoveFbo->setWidth(d->width);
+	resoveFbo->bind();
+	resoveFbo->addAttachment(XOpenGLFramebufferObject::Attachment::Color, d->internalFormat, d->dataFormat, d->datatype, 0);
+	bool flag = resoveFbo->isComplete();
+	resoveFbo->release();
+
+	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, fboId);
+	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::drawBuffer, resoveFbo->getId());
+
+	XOpenGLFuntion::xglBlitFramebuffer(0, 0, d->width, d->height, 0, 0, d->width, d->height,
+		XOpenGL::FlagBits::color_buffer_bit, XOpenGL::FilterType::nearest);
+
+	auto texture = resoveFbo->getColorAttachment();
+
+	pbo->bind();
+	auto pboSize = pbo->bufferSize();
+
+	if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
 		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-	
+	}
 
-		auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
-		resoveFbo->create();
-		resoveFbo->setHeight(d->height);
-		resoveFbo->setWidth(d->width);
-		resoveFbo->bind();
-		resoveFbo->addAttachment(XOpenGLFramebufferObject::Attachment::Color, d->internalFormat, d->dataFormat, d->datatype, 0);
-		bool flag = resoveFbo->isComplete();
-		resoveFbo->release();
-
-		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, fboId);
-		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::drawBuffer, resoveFbo->getId());
-
-		XOpenGLFuntion::xglBlitFramebuffer(0, 0, d->width, d->height, 0, 0, d->width, d->height,
-			XOpenGL::FlagBits::color_buffer_bit, XOpenGL::FilterType::nearest);
-
-		auto texture = resoveFbo->getColorAttachment();
-
-		pbo->bind();
-		auto pboSize = pbo->bufferSize();
-
-		if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
-			pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-		}
-
-		texture->bind();
-		glGetTexImage(
-			texture->getTarget(),			// 纹理目标
-			0,											// mipmap级别
-			d->dataFormat,					// 格式（必须匹配纹理的内部格式）
-			d->datatype,						// 类型（必须匹配纹理的数据类型）
-			0											// 偏移量（使用PBO时设为0）
-		);
-
-		return pbo;
+	texture->bind();
+	glGetTexImage(
+		texture->getTarget(),			// 纹理目标
+		0,											// mipmap级别
+		d->dataFormat,					// 格式（必须匹配纹理的内部格式）
+		d->datatype,						// 类型（必须匹配纹理的数据类型）
+		0											// 偏移量（使用PBO时设为0）
+	);
+	return pbo;
 }
 
 sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleDepth(unsigned int fboId)
 {
+	auto pbo = makeShareDbObject<XOpenGLBuffer>();
+	pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+	pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+	pbo->create();
+	pbo->bind();
+	pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
 
-		auto pbo = makeShareDbObject<XOpenGLBuffer>();
-		pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
-		pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
-		pbo->create();
-		pbo->bind();
-		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-
-	{
-		GLenum error = glGetError();
-		if (error != GL_NO_ERROR) {
-			std::cout << "error" << error << std::endl;
-			return false;
-		}
-
-	}
 	auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
 	resoveFbo->create();
 	resoveFbo->setHeight(d->height);
 	resoveFbo->setWidth(d->width);
 	resoveFbo->bind();
 	resoveFbo->addAttachment(XOpenGLFramebufferObject::Attachment::Depth, d->internalFormat, d->dataFormat, d->datatype, 0);
-	//resoveFbo->addAttachmentMSAA(XOpenGLFramebufferObject::Attachment::Color, XOpenGLTexture::TextureFormat::RGBA8_SNorm, XOpenGLTexture::PixelFormat::BGRA, XOpenGLTexture::PixelType::UInt8, 0);
 	bool flag = resoveFbo->isComplete();
 	resoveFbo->release();
 
 	XOpenGLFuntion::checkGLError();
-	//glReadBuffer(GL_NONE);
+
 	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, fboId);
 	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::drawBuffer, resoveFbo->getId());
 
@@ -386,7 +345,7 @@ sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleDepth(unsigned int fboId)
 	}
 
 	texture->bind();
-	std::vector<float> depthData(d->width * d->height,1);
+	std::vector<float> depthData(d->width * d->height, 1);
 	glGetTexImage(
 		texture->getTarget(),			// 纹理目标
 		0,											// mipmap级别
@@ -647,4 +606,35 @@ unsigned int XOpenGLTexture::getInternalFormatSize(XOpenGLTexture::TextureFormat
 		break;
 	}
 	return 0;
+}
+
+XOpenGL::TextureBindingType XOpenGLTexture::getTextureBindType() const
+{
+	switch (d->target)
+	{
+	default:
+		break;
+	case XOpenGLTexture::Target::Target1D:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_1D;
+	case XOpenGLTexture::Target::Target1DArray:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_1D_ARRAY;
+	case XOpenGLTexture::Target::Target2D:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_2D;
+	case XOpenGLTexture::Target::Target2DArray:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_2D_ARRAY;
+	case XOpenGLTexture::Target::Target3D:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_3D;
+	case XOpenGLTexture::Target::TargetCubeMap:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_CUBE_MAP;
+	case XOpenGLTexture::Target::TargetCubeMapArray:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_CUBE_MAP_ARRAY;
+	case XOpenGLTexture::Target::TargetRectangle:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_RECTANGLE;
+	case XOpenGLTexture::Target::TargetBuffer:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_BUFFER;
+	case XOpenGLTexture::Target::Target2DMultisample:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_2D_MULTISAMPLE;
+	case XOpenGLTexture::Target::Target2DMultisampleArray:
+		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
+	}
 }

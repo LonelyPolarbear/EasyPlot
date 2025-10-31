@@ -131,6 +131,12 @@ public:
 
     void setIsInstanceDarw(bool isInstance);
 
+    void textureBinding(const std::string& name, int bindingPoint);
+
+	void uboBinding(const std::string& name, int bindingPoint);
+
+	void ssboBinding(const std::string& name, int bindingPoint);
+
     //void setLightPos(float x, float y, float z);
 
     //void setLightColor(float r, float g, float b);

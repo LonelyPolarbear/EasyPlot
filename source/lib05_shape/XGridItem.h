@@ -18,7 +18,6 @@ public:
 	void setOrigin(const myUtilty::Vec2f& origin);
 	const myUtilty::Vec2f& getOrigin() const;
 protected:
-	virtual void updateData();
 	virtual uint32_t computeNumofVertices() override;
 private:
 	bool m_isScreenGrid = true;	//true:屏幕坐标系，false:局部坐标系

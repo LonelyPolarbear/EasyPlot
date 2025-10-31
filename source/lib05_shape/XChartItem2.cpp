@@ -1,4 +1,4 @@
-#include "XChartItem.h"
+#include "XChartItem2.h"
 #include "XGridItem.h"
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include "lib05_shape/XPolyline.h"
@@ -6,67 +6,42 @@
 
 #include <lib04_opengl/XOpenGLEnable.h>
 #include "lib05_shape/XTextItem.h"
+#include "lib05_shape/XAxisItem.h"
+#include "lib05_shape/XLineItem.h"
 #include <Eigen/Eigen>
 
 
-class XChartItem::Internal {
+class XChartItem2::Internal {
 public:
 	std::vector<std::shared_ptr<XGraphicsItem>> m_polylines;	//线段集合
 	std::shared_ptr< XGridItem> m_gridItem;	//网格
-	std::vector<std::shared_ptr<XTextItem>> m_axisx_value;		//文本集合,X轴，先按照固定大小处理
-	std::vector<std::shared_ptr<XTextItem>> m_axisy_value;		//文本集合,X轴，先按照固定大小处理
+	sptr<XAxisItem> m_axisx;	//X轴
+	sptr<XAxisItem> m_axisy;	//Y轴
+
 	int m_xlabelNum =11;					//X轴标签数量
 	int m_ylabelNum =4;						//Y轴标签数量
 	bool m_isShowGrid = true;			//是否显示网格
 	myUtilty::Vec2f m_gridOrigin = myUtilty::Vec2f(0,0);
 
 	bool createAxisText() {
-		if (m_axisx_value.empty()) {
-			for (int i = 0; i < m_xlabelNum; i++) {
-				auto xaxis = makeShareDbObject<XTextItem>();
-				//xaxis->initiallize();
-				xaxis->setVisible(true);
-				xaxis->setVAlignment(XTextItem::VAlign::Top);
-				if(i+1 == m_xlabelNum)
-					xaxis->setHAlignment(XTextItem::HAlign::Right);
-				else
-					xaxis->setHAlignment(XTextItem::HAlign::Left);
-				double xpos =-1+2.*i/(m_xlabelNum-1);
-				//xaxis->setPosition(0 + (i - 5) * 0.2, 0);
-				xaxis->setPosition(xpos,m_gridOrigin.y);
-				xaxis->setFontSize(16);
-				xaxis->setPositionType(XGL::PositionType::local_center);
-				xaxis->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-				xaxis->setText(L"0");
-				m_axisx_value.push_back(xaxis);
-			}
+		if (m_axisx == nullptr || m_axisy == nullptr) {
+			m_axisy = makeShareDbObject<XAxisItem>();
+			m_axisy->setLayout(XGL::Layout::vertical);
+			m_axisy->updateTextPos();
 
-			for (int i = 0; i < m_ylabelNum; i++) {
-				auto xaxis = makeShareDbObject<XTextItem>();
-				//xaxis->initiallize();
-				xaxis->setVisible(true);
-				xaxis->setHAlignment(XTextItem::HAlign::Left);
-				if (i+1 == m_ylabelNum)
-					xaxis->setVAlignment(XTextItem::VAlign::Top);
-				else
-					xaxis->setVAlignment(XTextItem::VAlign::Bottom);
-				double ypos = -1 + 2. * i / (m_ylabelNum - 1);
+			m_axisx = makeShareDbObject<XAxisItem>();
+			m_axisx->setLayout(XGL::Layout::horizontal);
+			m_axisx->updateTextPos();
 
-				xaxis->setPosition(m_gridOrigin.x, ypos);
-				xaxis->setFontSize(16);
-				xaxis->setPositionType(XGL::PositionType::local_center);
-				xaxis->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
-				xaxis->setText(L"0");
-				m_axisy_value.push_back(xaxis);
-			}
-
+			m_axisx->getLine()->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+			m_axisy->getLine()->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
 			return true;
 		}
 		return false;
 	}
 };
 
-XChartItem::XChartItem():XGraphicsItem(),d(new Internal())
+XChartItem2::XChartItem2():XGraphicsItem(),d(new Internal())
 {
 	this->setDrawType(PrimitveType::line_strip_adjacency);
 	auto coord = makeShareDbObject<XFloatArray>();
@@ -97,11 +72,11 @@ XChartItem::XChartItem():XGraphicsItem(),d(new Internal())
 	m_clipEnable = true;
 }
 
-XChartItem::~XChartItem()
+XChartItem2::~XChartItem2()
 {
 }
 
-void XChartItem::setRect(float x, float y, float w, float h)
+void XChartItem2::setRect(float x, float y, float w, float h)
 {
 	m_coordArray->setTuple(0, x,y, 0);
 	m_coordArray->setTuple(1, x+w,y, 0);
@@ -110,7 +85,7 @@ void XChartItem::setRect(float x, float y, float w, float h)
 	m_coordArray->Modified();
 }
 
-void XChartItem::addPolyline(std::shared_ptr<XGraphicsItem> polyline)
+void XChartItem2::addPolyline(std::shared_ptr<XGraphicsItem> polyline)
 {
 	if (polyline) {
 		if (!polyline->getShaderManger()) {
@@ -120,12 +95,12 @@ void XChartItem::addPolyline(std::shared_ptr<XGraphicsItem> polyline)
 	}
 }
 
-void XChartItem::clearPolylines()
+void XChartItem2::clearPolylines()
 {
 	m_childItems.clear();
 }
 
-void XChartItem::draw(const Eigen::Matrix4f& m)
+void XChartItem2::draw(const Eigen::Matrix4f& m)
 {
 	initiallize();
 	{
@@ -135,23 +110,44 @@ void XChartItem::draw(const Eigen::Matrix4f& m)
 		//此时，XChartItem的大小已经确定，可以根据需要调整原点位置
 		//auto chartTransformData = myUtilty::Matrix::transformDecomposition_TRS(chartTransform);
 		
-		//Eigen::Vector3f leftBottomPos =chartTransform*Eigen::Vector3f(-1,-1,0);
-		//leftBottomPos +=Eigen::Vector3f(18,18,0);
+		Eigen::Vector3f leftBot = chartTransform * Eigen::Vector3f(-1, -1, 0);
+		Eigen::Vector3f rightBot = chartTransform * Eigen::Vector3f(1, -1, 0);
+		Eigen::Vector3f leftTop = chartTransform * Eigen::Vector3f(-1, 1, 0);
+		Eigen::Vector3f rightTop = chartTransform * Eigen::Vector3f(1, 1, 0);
 
-		//leftBottomPos = chartTransform.inverse()* leftBottomPos;
+
+		leftBot += Eigen::Vector3f(18, 18, 0);
+		rightBot += Eigen::Vector3f(-18, 18, 0);
+
+		leftTop += Eigen::Vector3f(18, -18, 0);
+
+		leftBot = chartTransform.inverse() * leftBot;
+		rightBot = chartTransform.inverse() * rightBot;
+		leftTop = chartTransform.inverse() * leftTop;
 
 		//d->m_gridOrigin = myUtilty::Vec2f(leftBottomPos.x(), leftBottomPos.y());
 		
 
 		createGrid();
 		if (d->createAxisText()) {
-			for(auto& text : d->m_axisx_value)
+			d->m_axisx->setRange(0,100);
+			d->m_axisy->setRange(10,80);
+			addChildItem(d->m_axisx);
+			addChildItem(d->m_axisy);
+			/*for(auto& text : d->m_axisx_value)
 				addChildItem(text);
 			for (auto& text : d->m_axisy_value)
-				addChildItem(text);
+				addChildItem(text);*/
 
-			updateAxisLabel();
+			//updateAxisLabel();
 		}
+
+		d->m_axisx->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(rightBot.x(), rightBot.y()));
+
+		d->m_axisy->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(leftTop.x(), leftTop.y()));
+
+		d->m_axisx->updateTextPos();
+		d->m_axisy->updateTextPos();
 		auto gridTranform = /*this->getGridTransform();*/d->m_gridItem->getTransform();
 
 		Eigen::Matrix4f parentTransform1 = m * chartTransform.matrix();
@@ -163,6 +159,9 @@ void XChartItem::draw(const Eigen::Matrix4f& m)
 		XGraphicsItem::draw(m);
 
 		beginClip(m);
+
+		//d->m_axisx->draw(m);
+		//d->m_axisy->draw(m);
 
 		Eigen::Matrix4f parentTransform = m * chartTransform.matrix() * gridTranform.matrix();
 		for (auto polyline : d->m_polylines) {
@@ -176,22 +175,22 @@ void XChartItem::draw(const Eigen::Matrix4f& m)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
 
-		d->m_gridItem->draw(parentTransform1);
+		//d->m_gridItem->draw(parentTransform1);
 		glEnableObj->restore();
 	}
 }
 
-void XChartItem::setBackgroundColor(const myUtilty::Vec4f& color)
+void XChartItem2::setBackgroundColor(const myUtilty::Vec4f& color)
 {
 	m_fillColor = color;
 }
 
-void XChartItem::gridTranslate(float dx, float dy)
+void XChartItem2::gridTranslate(float dx, float dy)
 {
 	createGrid();
 }
 
-void XChartItem::gridSale(float dx, float dy)
+void XChartItem2::gridSale(float dx, float dy)
 {
 	createGrid();
 	d->m_gridItem->scale(1./dx, 1./dy);
@@ -200,7 +199,7 @@ void XChartItem::gridSale(float dx, float dy)
 	updateAxisLabel();
 }
 
-void XChartItem::createGrid()
+void XChartItem2::createGrid()
 {
 	if (!d->m_gridItem) {
 		d->m_gridItem = std::make_shared<XGridItem>();
@@ -214,8 +213,9 @@ void XChartItem::createGrid()
 	}
 }
 
-void XChartItem::updateAxisLabel()
+void XChartItem2::updateAxisLabel()
 {
+#if 0
 	//获取网格的变换矩阵
 	auto gridTransform = d->m_gridItem->getTransform();
 	auto data = myUtilty::Matrix::transformDecomposition_TRS(gridTransform);
@@ -238,9 +238,10 @@ void XChartItem::updateAxisLabel()
 		//double v = (i - 2) * 0.5 * 1. / data.sy;
 		xaxis->setText(myUtilty::to_wstring_with_precision(value, 1));
 	}
+	#endif
 }
 
-void XChartItem::updateVboCoord()
+void XChartItem2::updateVboCoord()
 {
 	//顶点数据已经更新
 	auto m_coord = m_coordArray;
@@ -290,7 +291,7 @@ void XChartItem::updateVboCoord()
 	}
 }
 
-uint32_t XChartItem::computeNumofVertices()
+uint32_t XChartItem2::computeNumofVertices()
 {
 	if(m_drawType == PrimitveType::line_strip_adjacency)
 		return m_coordArray->getNumOfTuple()+3;

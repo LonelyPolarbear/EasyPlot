@@ -18,7 +18,7 @@ public:
 	void setRect(myUtilty::Vec2f pos1,myUtilty::Vec2f pos2);
 
 protected:
-	virtual void updateData();
+	 void updateVboCoord()override;
 	virtual uint32_t computeNumofVertices() override;
 private:
 	RectType m_rectType = RectType::diagonal_rect;

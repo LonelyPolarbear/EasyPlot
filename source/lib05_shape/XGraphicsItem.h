@@ -60,9 +60,10 @@ protected:
 
 	void beginClip(const Eigen::Matrix4f& m);
 	void endClip();
-public:
-
 	virtual void initResource();
+	virtual void initiallize();
+public:
+	
 	Eigen::Affine3f getTransform() const;
 
 	void setCoordArray(std::shared_ptr<XFloatArray> coordArray);
@@ -161,6 +162,11 @@ public:
 	bool m_isInstance = false;
 	uint32_t m_lineWidth = 1;																									//线宽
 	virtual void updateData();																									//当m_coordArray和m_colorArray更改，更新缓冲
+	virtual void updateVboCoord();
+	virtual void updateVboColor();
+	virtual void updateVboEbo();
+	virtual void updateVboInstance();
+
 	virtual uint32_t computeNumofVertices();																		//获取顶点数量
 protected:
 		void setIsComposite(bool enable);
@@ -181,7 +187,7 @@ protected:
 	std::shared_ptr<XOpenGLBuffer> m_vbo_coord;																//顶点坐标，二维的坐标是屏幕坐标，原点是中心，X轴向右 Y向上
 	std::shared_ptr<XOpenGLBuffer> m_vbo_color;																//顶点颜色
 	std::shared_ptr<XOpenGLBuffer> m_ebo;																			//用于内部填充
-	std::shared_ptr<XOpenGLBuffer> m_ssbo_len;																//每个片元(线段)的长度
+	std::shared_ptr<XOpenGLBuffer> m_ssbo_len;																//每个片元(线段)的长度,主要用于多段线
 	std::shared_ptr<XOpenGLBuffer> m_instanceAttrBufffer; //实例化属性的buffer
 
 	myUtilty::Vec4f m_singleColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);

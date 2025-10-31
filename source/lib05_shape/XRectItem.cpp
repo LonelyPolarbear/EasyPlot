@@ -63,10 +63,8 @@ void XRectItem::setRect(myUtilty::Vec2f pos1, myUtilty::Vec2f pos2)
 	}
 }
 
-void XRectItem::updateData()
+void XRectItem::updateVboCoord()
 {
-	//std::lock_guard<std::mutex> lock(d->m_mutex);
-
 	//顶点数据已经更新
 	auto m_coord = m_coordArray;
 	if (m_coord && m_coord->GetTimeStamp() > m_UpdateTime) {
@@ -107,33 +105,12 @@ void XRectItem::updateData()
 		else {
 			m_vbo_coord->allocate(m_coord->data(0), m_coord->size());
 			m_indexArray->setTuple(0, 0, 1, 2);
-			m_indexArray->setTuple(1, 0, 2,3);
+			m_indexArray->setTuple(1, 0, 2, 3);
 			m_indexArray->Modified();
 		}
 
 		m_vbo_coord->release();
 	}
-
-	auto m_index = m_indexArray;
-	if (m_index && m_index->GetTimeStamp() > m_UpdateTime) {
-
-		m_ebo->bind();
-		m_ebo->allocate(m_index->data(0), m_index->size());
-		//m_vbo_coord->release();
-	}
-
-	////顶点颜色数据已经更新
-	auto m_VertexColor = m_colorArray;
-	if (m_VertexColor && m_VertexColor->GetTimeStamp() > m_UpdateTime) {
-		m_vbo_color->bind();
-
-		m_vbo_color->allocate(m_VertexColor->data(0), m_VertexColor->size());
-
-		m_vbo_color->release();
-	}
-
-	//数据已更新，刷新时间戳
-	m_UpdateTime.Modified();
 }
 
 uint32_t XRectItem::computeNumofVertices()

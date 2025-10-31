@@ -162,7 +162,7 @@ public:
 	void createGrid2d() {
 		if (!gridShape2d) {            
             auto grid = makeShareDbObject<XGridItem>();
-            grid->initResource();
+            //grid->initiallize();
             gridShape2d = grid;
             gridShape2d->setShaderManger(shaderManger);
 		}
@@ -490,7 +490,8 @@ void XScene::createUbo()
 void XScene::render()
 {
     render3D();
-    render2D();
+    if(isScreenRender)
+        render2D();
 }
 
 std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, bool depthEnable, bool multisampleEnable, int samples, int AttachMode)
@@ -544,9 +545,9 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
 		}
 
     auto complete_flag =fbo->isComplete();
-    //isScreenRender = false;
+    isScreenRender = false;
     render();
-   // isScreenRender = true;
+    isScreenRender = true;
     makeCurrent();
     fbo->release();
 
@@ -567,9 +568,7 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
         void *p = pbo->map(XOpenGLBuffer::Access::ReadOnly);
 		auto data = makeShareDbObject<XUCharArray2D>();
 		data->setComponent(4);
-		//data->setDimensions(getViewportHeight(), getViewportWidth());
 		data->setDimensions(fboHeight, fboWidth);
-		//memcpy(data->data(0, 0), p, getViewportHeight() * getViewportWidth() * 4);
 		memcpy(data->data(0, 0), p, fboWidth*fboHeight * 4);
 		
 		texture->release();
@@ -596,8 +595,10 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
 		data->setComponent(1);
 		data->setDimensions(fboHeight,fboWidth);
 
+        std::vector<float> depthData(fboWidth*fboHeight);
         for (int i = 0; i < fboHeight * fboWidth; i++) {
             data->data(0, 0)[i] = ((float*)p)[i]*255;
+            depthData[i] = ((float*)p)[i];
         }
 		
 		texture->release();
@@ -647,12 +648,12 @@ void XScene::render3D()
 		//绘制之前手动更新视口
 		updateViewport();
 
-        if (isScreenRender) {
-			for (auto shape : d->shapes) {
-				shape->draw();
-			}
-        }
-		
+
+		for (auto shape : d->shapes) {
+			shape->draw();
+		}
+
+
 
 		fbo->getColorAttachment()->release();
 		//glEnableObj->restore();
@@ -680,7 +681,9 @@ void XScene::render3D()
 
         glEnableObj->restore();
     }
-    #endif
+#endif
+
+if(isScreenRender)
     {
 		auto shape = d->axisShape;
         d->viewSelection->update({ shape }, d->camera);
@@ -713,6 +716,7 @@ void XScene::render3D()
 
         glEnableObj->restore();
     }
+
     
 	doneCurrent();
 }

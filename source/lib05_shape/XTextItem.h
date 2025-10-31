@@ -16,7 +16,6 @@ public:
 	XTextItem();
 	virtual ~XTextItem();
 	void draw(const Eigen::Matrix4f& m) override;
-	 void initResource() override;
 	 void setText(const std::wstring& text);
 	 void setFontSize(double size);
 	 double getFontSize() const;
@@ -38,6 +37,7 @@ public:
 	 }
 protected:
 	virtual uint32_t computeNumofVertices() override;
+	virtual void initResource();
 private:
 	void configDataModified();
 	void adjustHAligment(int instanceStartIdx,int instanceEndIdx,int curRowLen);

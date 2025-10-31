@@ -6,7 +6,6 @@ class LIB05_SHAPE_API XPolyline :public XGraphicsItem {
 public:
 	XPolyline();
 	virtual ~XPolyline();
-	virtual void updateData();
-
+	void updateVboCoord() override;
 	virtual uint32_t computeNumofVertices() override;
 };
