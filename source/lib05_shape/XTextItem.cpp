@@ -88,10 +88,10 @@ void XTextItem::initResource()
 
 	m_textureBuffer->create();
 
-	m_vao->addBuffer(5, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3 * 0, true);
-	m_vao->addBuffer(6, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3 * 1, true);
-	m_vao->addBuffer(7, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3 * 2, true);
-	m_vao->addBuffer(8, m_textureBuffer, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 12, sizeof(float) * 3 * 3, true);
+	m_vao->addBuffer(5, m_textureBuffer, 3, XOpenGL::DataType::float_, sizeof(float) * 12, sizeof(float) * 3 * 0, true);
+	m_vao->addBuffer(6, m_textureBuffer, 3, XOpenGL::DataType::float_, sizeof(float) * 12, sizeof(float) * 3 * 1, true);
+	m_vao->addBuffer(7, m_textureBuffer, 3, XOpenGL::DataType::float_, sizeof(float) * 12, sizeof(float) * 3 * 2, true);
+	m_vao->addBuffer(8, m_textureBuffer, 3, XOpenGL::DataType::float_, sizeof(float) * 12, sizeof(float) * 3 * 3, true);
 
 	m_vao->release();
 }

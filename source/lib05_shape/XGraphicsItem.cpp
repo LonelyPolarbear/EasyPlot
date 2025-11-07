@@ -277,7 +277,7 @@ void XGraphicsItem::initResource()
 	m_ebo->bind();			//用于填充时候绘制，填充目前只支持三角形填充
 
 	//设置顶点属性
-	m_vao->addBuffer(0, m_vbo_coord, 3, (unsigned int)XOpenGLValueType::Float32, sizeof(myUtilty::Vec3f), 0);
+	m_vao->addBuffer(0, m_vbo_coord, 3, XOpenGL::DataType::float_, sizeof(myUtilty::Vec3f), 0);
 
 	m_vbo_coord->release();
 
@@ -295,10 +295,10 @@ void XGraphicsItem::initResource()
 		//设置顶点属性 每个顶点对应一个矩形 对应一个变换矩阵
 		if (m_isInstance) {
 			// AI：如果VBO最后没有分配内存，则不应该设置顶点属性，即使该属性在着色器中没有使用到
-			m_vao->addBuffer(1, m_instanceAttrBufffer, 4, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 16, 0, true);
-			m_vao->addBuffer(2, m_instanceAttrBufffer, 4, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 16, sizeof(float) * 4, true);
-			m_vao->addBuffer(3, m_instanceAttrBufffer, 4, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 16, sizeof(float) * 8, true);
-			m_vao->addBuffer(4, m_instanceAttrBufffer, 4, (unsigned int)XOpenGLValueType::Float32, sizeof(float) * 16, sizeof(float) * 12, true);
+			m_vao->addBuffer(1, m_instanceAttrBufffer, 4, XOpenGL::DataType::float_, sizeof(float) * 16, 0, true);
+			m_vao->addBuffer(2, m_instanceAttrBufffer, 4, XOpenGL::DataType::float_, sizeof(float) * 16, sizeof(float) * 4, true);
+			m_vao->addBuffer(3, m_instanceAttrBufffer, 4, XOpenGL::DataType::float_, sizeof(float) * 16, sizeof(float) * 8, true);
+			m_vao->addBuffer(4, m_instanceAttrBufffer, 4, XOpenGL::DataType::float_, sizeof(float) * 16, sizeof(float) * 12, true);
 		}
 
 		m_instanceAttrBufffer->release();
@@ -317,6 +317,24 @@ void XGraphicsItem::initiallize()
 
 Eigen::Affine3f XGraphicsItem::getTransform() const {
 	return d->m_transform;
+}
+
+Eigen::Affine3f XGraphicsItem::getParentAccumulateTransform() const
+{
+	Eigen::Affine3f transform = Eigen::Affine3f::Identity();
+	auto parent = m_parentItem;
+	while (parent)
+	{
+		transform = parent->getTransform() * transform;
+		parent = parent->getParent();
+	}
+	
+	return transform;
+}
+
+sptr<XGraphicsItem> XGraphicsItem::getParent() const
+{
+	return m_parentItem;
 }
 
 void XGraphicsItem::setCoordArray(std::shared_ptr<XFloatArray> coordArray)
@@ -488,6 +506,15 @@ void XGraphicsItem::scale(float sx, float sy)
 {
 	d->m_transform.scale(Eigen::Vector3f(sx, sy, 1));
 }
+
+void XGraphicsItem::setScale(float sx, float sy)
+{
+	auto data = myUtilty::Matrix::transformDecomposition_TRS(d->m_transform);
+	data.sx = sx;
+	data.sy = sy;
+	d->m_transform.matrix() = myUtilty::Matrix::computeMatrix(data);
+}
+
 
 void XGraphicsItem::resetTransform()
 {

@@ -48,7 +48,7 @@ void main()
         vec4 gridPos = ObjectMat * objectPos;
         fragPos3D = gridPos.xyz/gridPos.w;
 
-        vec4 tmp = ObjectMat* vec4(Origin.x,Origin.y,aPos.z,1);
+        vec4 tmp = vec4(Origin.x,Origin.y,aPos.z,1);
         vs_origin = tmp.xyz/tmp.w;
 
         gl_Position = ProjectionMat*ViewMat*virtualWorldFrame*sceneFrameInVirtualWorld* ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);

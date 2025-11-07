@@ -21,7 +21,10 @@ public:
 	int m_xlabelNum =11;					//X轴标签数量
 	int m_ylabelNum =4;						//Y轴标签数量
 	bool m_isShowGrid = true;			//是否显示网格
-	myUtilty::Vec2f m_gridOrigin = myUtilty::Vec2f(0,0);
+
+	myUtilty::Vec2f mXRange = myUtilty::Vec2f(-1, 1);
+	myUtilty::Vec2f mYRange = myUtilty::Vec2f(-1, 1);
+
 
 	bool createAxisText() {
 		if (m_axisx == nullptr || m_axisy == nullptr) {
@@ -35,6 +38,12 @@ public:
 
 			m_axisx->getLine()->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
 			m_axisy->getLine()->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
+
+			m_axisx->getLine()->setFixedLine(true);
+			m_axisy->getLine()->setFixedLine(true);
+
+			m_axisx->getLine()->setLineWidth(3);
+			m_axisy->getLine()->setLineWidth(3);
 			return true;
 		}
 		return false;
@@ -107,39 +116,44 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 		//对于自身的绘制，先更新数据
 		auto chartTransform = this->getTransform();
 
-		//此时，XChartItem的大小已经确定，可以根据需要调整原点位置
-		//auto chartTransformData = myUtilty::Matrix::transformDecomposition_TRS(chartTransform);
-		
 		Eigen::Vector3f leftBot = chartTransform * Eigen::Vector3f(-1, -1, 0);
 		Eigen::Vector3f rightBot = chartTransform * Eigen::Vector3f(1, -1, 0);
 		Eigen::Vector3f leftTop = chartTransform * Eigen::Vector3f(-1, 1, 0);
 		Eigen::Vector3f rightTop = chartTransform * Eigen::Vector3f(1, 1, 0);
 
+		Eigen::Vector3f dir_x =(rightBot - leftBot).normalized();
+		Eigen::Vector3f dir_y = (leftTop - leftBot).normalized();
 
-		leftBot += Eigen::Vector3f(18, 18, 0);
-		rightBot += Eigen::Vector3f(-18, 18, 0);
-
-		leftTop += Eigen::Vector3f(18, -18, 0);
+		leftBot += 18*dir_x;
+		rightBot -= 18 * dir_x;
+		leftTop += 18 * dir_x;
 
 		leftBot = chartTransform.inverse() * leftBot;
 		rightBot = chartTransform.inverse() * rightBot;
 		leftTop = chartTransform.inverse() * leftTop;
 
-		//d->m_gridOrigin = myUtilty::Vec2f(leftBottomPos.x(), leftBottomPos.y());
-		
+		auto lengthx = abs(rightBot.x() - leftBot.x());
+		auto lengthy = abs(leftTop.y() - leftBot.y());
+		Eigen::Vector3f  center = (leftTop+rightBot)*0.5;
 
+	
 		createGrid();
 		if (d->createAxisText()) {
-			d->m_axisx->setRange(0,100);
-			d->m_axisy->setRange(10,80);
+			d->m_axisx->setRange(-40,100);
+			d->m_axisy->setRange(-20,80);
+
+			d->m_axisx->setRange(d->mXRange.x, d->mXRange.y);
+			d->m_axisy->setRange(d->mYRange.x, d->mYRange.y);
+
 			addChildItem(d->m_axisx);
 			addChildItem(d->m_axisy);
-			/*for(auto& text : d->m_axisx_value)
-				addChildItem(text);
-			for (auto& text : d->m_axisy_value)
-				addChildItem(text);*/
+			updateGridFrame();
+		}
 
-			//updateAxisLabel();
+		{
+			d->m_gridItem->resetTransform();
+			d->m_gridItem->translate(center.x(), center.y());
+			d->m_gridItem->scale(0.5 * lengthx, 0.5 * lengthy);
 		}
 
 		d->m_axisx->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(rightBot.x(), rightBot.y()));
@@ -147,25 +161,17 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 		d->m_axisy->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(leftTop.x(), leftTop.y()));
 
 		d->m_axisx->updateTextPos();
+
 		d->m_axisy->updateTextPos();
-		auto gridTranform = /*this->getGridTransform();*/d->m_gridItem->getTransform();
 
-		Eigen::Matrix4f parentTransform1 = m * chartTransform.matrix();
-
-		/*for (auto& text : d->m_axisx_value) {
-			text->draw(m);
-		}*/
-		
 		XGraphicsItem::draw(m);
 
-		beginClip(m);
+		auto clipTransform = chartTransform * d->m_gridItem->getTransform() * chartTransform.inverse();
+		beginClip(m*clipTransform.matrix());
 
-		//d->m_axisx->draw(m);
-		//d->m_axisy->draw(m);
-
-		Eigen::Matrix4f parentTransform = m * chartTransform.matrix() * gridTranform.matrix();
+		Eigen::Matrix4f lineParentTransform = m * chartTransform.matrix() *d->m_gridItem->getTransform().matrix()* d->m_gridItem->getGridTransform().matrix();
 		for (auto polyline : d->m_polylines) {
-			polyline->draw(parentTransform);
+			polyline->draw(lineParentTransform);
 		}
 
 		endClip();
@@ -175,8 +181,21 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
 
-		//d->m_gridItem->draw(parentTransform1);
+		Eigen::Matrix4f parentTransform = m * chartTransform.matrix();
+		d->m_gridItem->draw(parentTransform);
 		glEnableObj->restore();
+	}
+}
+
+void XChartItem2::fitView()
+{
+	for(auto line : d->m_polylines){
+		auto box = line->getBoundBox();
+		d->mXRange.x = std::min(d->mXRange.x,box.xmin);
+		d->mXRange.y = std::max(d->mXRange.y, box.xmax);
+
+		d->mYRange.x = std::min(d->mYRange.x, box.ymin);
+		d->mYRange.y = std::max(d->mYRange.y, box.ymax);
 	}
 }
 
@@ -185,17 +204,78 @@ void XChartItem2::setBackgroundColor(const myUtilty::Vec4f& color)
 	m_fillColor = color;
 }
 
-void XChartItem2::gridTranslate(float dx, float dy)
+void XChartItem2::chartTranslate(const myUtilty::Vec2f& lastPos_, const myUtilty::Vec2f& curPos_)
 {
+	auto parentTran = getParentAccumulateTransform();
+	
+	//表达的是网格坐标中的点到场景坐标系的变换
+	auto ssss = d->m_gridItem->getGridTransform();
+	auto chartTransform =getTransform()*d->m_gridItem->getTransform()*d->m_gridItem->getGridTransform();
+
+	Eigen::Affine3f scene2Chart = chartTransform.inverse();
+	Eigen::Vector3f curPos = scene2Chart * Eigen::Vector3f(curPos_.x, curPos_.y, 0);
+	Eigen::Vector3f lasPos = scene2Chart * Eigen::Vector3f(lastPos_.x, lastPos_.y, 0);
+
+	auto dx = curPos.x() - lasPos.x();
+	auto dy = curPos.y() - lasPos.y();
 	createGrid();
+	d->createAxisText();
+	auto range =d->m_axisx->getRange();
+	range.x -= dx;
+	range.y -=dx;
+	d->m_axisx->setRange(range.x, range.y);
+
+	{
+		auto range = d->m_axisy->getRange();
+		range.x -= dy;
+		range.y -= dy;
+		d->m_axisy->setRange(range.x, range.y);
+	}
+	
+	updateGridFrame();
 }
 
-void XChartItem2::gridSale(float dx, float dy)
+void XChartItem2::chartSale(float dx, float dy)
 {
 	createGrid();
-	d->m_gridItem->scale(1./dx, 1./dy);
+	{
+		dx = dx > 1 ? 0.1 : -0.1;
+		dy = dy > 1 ? 0.1 : -0.1;
 
+		auto range = d->m_axisx->getRange();
+		auto len = range.y - range.x;
+		range.x -= dx * len;
+		range.y += dy * len;
+		d->m_axisx->setRange(range.x, range.y);
+	}
+	{
+		auto range = d->m_axisy->getRange();
+		auto len = range.y - range.x;
+		range.x -= dy * len;
+		range.y += dx * len;
+		d->m_axisy->setRange(range.x, range.y);
+	}
+	
 	d->createAxisText();
+	updateGridFrame();
+}
+
+myUtilty::Vec2d XChartItem2::getOrigin() const
+{
+	return myUtilty::Vec2d(d->m_axisx->getRange().x, d->m_axisy->getRange().x);
+}
+
+void XChartItem2::updateGridFrame()
+{
+	//当轴的范围变化时，需要更新网格坐标系
+	createGrid();
+	auto sx = d->m_axisx->getRange().y - d->m_axisx->getRange().x;
+	auto sy = d->m_axisy->getRange().y - d->m_axisy->getRange().x;
+	d->m_gridItem->gridReset();
+	d->m_gridItem->gridSetSale(sx, sy);
+	auto origin = myUtilty::Vec2d(d->m_axisx->getRange().x, d->m_axisy->getRange().x);
+	d->m_gridItem->setOrigin(origin);
+
 	updateAxisLabel();
 }
 
@@ -204,12 +284,7 @@ void XChartItem2::createGrid()
 	if (!d->m_gridItem) {
 		d->m_gridItem = std::make_shared<XGridItem>();
 		d->m_gridItem->setShaderManger(this->getShaderManger());
-		//d->m_gridItem->initiallize();
 		d->m_gridItem->setIsScreenGrid(false);
-
-		//d->m_gridItem->translate(-0.5, -0.5);
-		d->m_gridItem->scale(0.01,0.01);
-		d->m_gridItem->setOrigin(d->m_gridOrigin);
 	}
 }
 

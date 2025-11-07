@@ -29,8 +29,6 @@ enum class LIB05_SHAPE_API  PolygonMode {
 	line_fill =4
 };
 
-
-
 /// <summary>
 /// XShape是所有自定义图形的基类，它提供了一些基本的接口，包括初始化资源、绘制、修改标志位等。
 /// </summary>
@@ -51,7 +49,6 @@ public:
 	virtual void draw();
 
 	virtual void drawInstance() {};
-
 
     virtual void initResource();
 

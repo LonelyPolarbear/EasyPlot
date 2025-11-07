@@ -31,6 +31,9 @@ void XAxisItem::updateData()
 
 void XAxisItem::setRange(double minVal, double maxVal)
 {
+	mRange.x = minVal;
+	mRange.y = maxVal;
+
 	auto length = maxVal - minVal;
 	for (int i = 0; i < mLabelNum; i++) {
 		auto text = m_texts[i];
@@ -45,8 +48,6 @@ void XAxisItem::updateTextPos() {
 	auto startPos =m_line->getStart();
 	for (int i = 0; i < mLabelNum; i++) {
 		auto text = m_texts[i];
-		//text->setText(myUtilty::to_wstring_with_precision(i, 2));
-
 		if (mLayout == XGL::Layout::horizontal) {
 			text->setVAlignment(XTextItem::VAlign::Top);
 			if (i + 1 == mLabelNum)

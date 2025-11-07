@@ -13,6 +13,9 @@ public:
 	std::shared_ptr<XLineItem> getLine() const {
 		return m_line; 
 	}
+	myUtilty::Vec2d getRange() const {
+		return mRange;
+	}
 
 	void updateTextPos();
 
@@ -24,5 +27,5 @@ protected:
 	std::vector<std::shared_ptr<XTextItem>> m_texts;
 	int mLabelNum = 5;
 	XGL::Layout mLayout = XGL::Layout::horizontal;
-	myUtilty::Vec2d mRange;		//ÖáµÄ·¶Î§
+	myUtilty::Vec2d mRange = myUtilty::Vec2d(-1, 1);		//ÖáµÄ·¶Î§
 };

@@ -16,13 +16,23 @@ public:
 	void clearPolylines();
 
 	 void draw(const Eigen::Matrix4f& m) override ;
-	//virtual void drawGrid(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m);
+
+	 void fitView();
+	
 	void setBackgroundColor(const myUtilty::Vec4f &color);
 
-	void gridTranslate(float dx, float dy);
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="lastPos">上一次鼠标在场景中的位置</param>
+	/// <param name="curPos">当前鼠标在场景中的位置</param>
+	void chartTranslate(const myUtilty::Vec2f& lastPos,const myUtilty::Vec2f& curPos);
 
-	void gridSale(float dx, float dy);
+	void chartSale(float dx, float dy);
 
+	myUtilty::Vec2d getOrigin() const;
+
+	void updateGridFrame();
 private:
 	void createGrid();
 	void updateAxisLabel();

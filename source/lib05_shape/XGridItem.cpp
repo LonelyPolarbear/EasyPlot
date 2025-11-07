@@ -49,11 +49,17 @@ void XGridItem::drawBorder(std::shared_ptr<xshader> border_shader, const Eigen::
 	auto shader = m_shaderManger->getGridShader2D();
 	shader->use();
 	shader->setBool("isScreenGrid", m_isScreenGrid);
-	//需要设置网格的原点
-	shader->setVec2("Origin",mOrigin.x,mOrigin.y);
 
-	Eigen::Matrix4f gridMat = getTransform().matrix().inverse();
-	Eigen::Matrix4f parentMat = m;
+	shader->setFloat("gridSpace", m_gridSpace);
+	shader->setInt("gridNum", m_gridNum);
+	//需要设置网格的原点
+	//shader->setVec2("Origin", mOrigin.x, mOrigin.y);
+	shader->setVec2("Origin", 0, 0);
+
+	//Eigen::Matrix4f gridMat = getTransform().matrix().inverse();
+	//Eigen::Matrix4f gridMat = m_gridTransform.matrix().inverse();
+	Eigen::Matrix4f gridMat = getGridTransform().inverse().matrix();
+	Eigen::Matrix4f parentMat = m* getTransform().matrix();
 	shader->setModelMatrix(parentMat.data());
 	shader->setMat4("ObjectMat", gridMat.data());
 
@@ -86,6 +92,66 @@ void XGridItem::setOrigin(const myUtilty::Vec2f& origin)
 const myUtilty::Vec2f& XGridItem::getOrigin() const
 {
 	return mOrigin;
+}
+
+void XGridItem::gridReset()
+{
+	m_gridTransform = Eigen::Affine3f::Identity();
+	m_gridTransform.translate(Eigen::Vector3f( - 1, -1, 0));
+}
+
+void XGridItem::gridTranslate(float dx, float dy)
+{
+	m_gridTransform.translate(Eigen::Vector3f( dx,dy,0));
+}
+
+void XGridItem::gridSale(float dx, float dy)
+{
+	m_gridTransform.scale (Eigen::Vector3f( 1. / dx, 1. / dy,1));
+}
+
+void XGridItem::gridSetSale(float sx, float sy)
+{
+	auto data = myUtilty::Matrix::transformDecomposition_TRS(m_gridTransform);
+	data.sx = 2./sx;
+	data.sy = 2./sy;
+	m_gridTransform.matrix() = myUtilty::Matrix::computeMatrix(data);
+}
+
+myUtilty::Vec2f XGridItem::gridGetSale() const
+{
+	auto data = myUtilty::Matrix::transformDecomposition_TRS(m_gridTransform);
+
+	return myUtilty::Vec2f( 2./data.sx, 2./data.sy);
+}
+
+void XGridItem::setGridNum(int num)
+{
+	m_gridNum = num;
+}
+
+int XGridItem::getGridNum() const
+{
+	return m_gridNum;
+}
+
+void XGridItem::setGridSpace(double space)
+{
+	m_gridSpace = space;
+}
+
+double XGridItem::getGridSpace() const
+{
+	return m_gridSpace;
+}
+
+Eigen::Affine3f XGridItem::getGridTransform() const
+{
+	//物体位姿 *M = 网格姿态；
+	//return M;
+	auto t =m_gridTransform;
+	t.translate(Eigen::Vector3f(-mOrigin.x, -mOrigin.y, 0));
+	return t;
 }
 
 uint32_t XGridItem::computeNumofVertices()

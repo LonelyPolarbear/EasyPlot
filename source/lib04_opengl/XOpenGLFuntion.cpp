@@ -6,6 +6,7 @@
 void XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType targetType, sptr<XOpenGLFramebufferObject> frameBuffer)
 {
 	glBindFramebuffer((unsigned int)(targetType), frameBuffer->getId());
+	checkGLError();
 }
 
 void XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType targetType, unsigned int frameBuffer)
@@ -17,37 +18,44 @@ void XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType targetType, uns
 void XOpenGLFuntion::xglBlitFramebuffer(int srcX0, int srcY0, int srcW, int srcH, int dstX0, int dstY0, int dstW, int dstH, XOpenGL::FlagBits bit, XOpenGL::FilterType filterType)
 {
 	glBlitFramebuffer(srcX0,srcY0,srcW,srcH,dstX0,dstY0,dstW,dstH,(unsigned int)(bit), (unsigned int)(filterType));
+	checkGLError();
 }
 
 void XOpenGLFuntion::xglGetIntegerv(unsigned int name, int& valaue)
 {
 	glGetIntegerv(name, &valaue);
+	checkGLError();
 }
 
 
 void XOpenGLFuntion::xglGetBindFrameBufferId(XOpenGL::FrameBufferBindingType bindingType, int& valaue)
 {
 	glGetIntegerv( (unsigned int)(bindingType), &valaue);
+	checkGLError();
 }
 
 void XOpenGLFuntion::xglGetBindDataBufferId(XOpenGL::DataBufferBindingType bufferType, int& bufferId)
 {
 	glGetIntegerv((unsigned int)(bufferType), &bufferId);
+	checkGLError();
 }
 
 void XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter pname, int param)
 {
 	glPixelStorei( (unsigned int)(pname), param);
+	checkGLError();
 }
 
 void XOpenGLFuntion::xglReadPixels(int startx, int starty, int width, int height, XOpenGL::TextureExternalFormat format, XOpenGL::DataType type, void* data)
 {
 	glReadPixels(startx, starty, width, height, (unsigned int)(format), (unsigned int)(type), data);
+	checkGLError();
 }
 
 void XOpenGLFuntion::xglFlush()
 {
 	glFlush();
+	checkGLError();
 }
 
 XOpenGL::GlSyncObject XOpenGLFuntion::xglFenceSync(XOpenGL::SyncFlags flags, XOpenGL::SyncCondition condition)
@@ -55,6 +63,7 @@ XOpenGL::GlSyncObject XOpenGLFuntion::xglFenceSync(XOpenGL::SyncFlags flags, XOp
 	auto sync = glFenceSync( (unsigned int)(condition), (unsigned int)(flags) );
 	XOpenGL::GlSyncObject ret;
 	ret.ptr = sync;
+	checkGLError();
 	return ret;
 }
 
@@ -62,12 +71,14 @@ XOpenGL::SyncStatus XOpenGLFuntion::xglClientWaitSync(XOpenGL::GlSyncObject sync
 {
 	GLsync glSync = (GLsync)sync.ptr;
 	auto ret = glClientWaitSync(glSync, (unsigned int)(flags), timeout);
+	checkGLError();
 	return (XOpenGL::SyncStatus)ret;
 }
 
 void XOpenGLFuntion::xglDeleteSync(XOpenGL::GlSyncObject sync)
 {
 	glDeleteSync((GLsync)sync.ptr);
+	checkGLError();
 }
 
 void XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType type, int& value)
@@ -80,6 +91,7 @@ int XOpenGLFuntion::xglGetMaxShaderComponentTypeNum(XOpenGL::ShaderComponentType
 {
 	int value =0;
 	xglGetMaxShaderComponentTypeNum(type,value);
+	checkGLError();
 	return value;
 }
 
@@ -87,6 +99,7 @@ int XOpenGLFuntion::xglGetTextureUnitBindTexture(int textureUint, XOpenGL::Textu
 {
 	int textureId =0;
 	glGetIntegeri_v((unsigned int)(type), textureUint, &textureId);
+	checkGLError();
 	return textureId;
 }
 
@@ -96,12 +109,15 @@ int XOpenGLFuntion::xglGetActiveTexture()
 	// 查询当前激活的纹理单元枚举值（如GL_TEXTURE0、GL_TEXTURE1等）
 	glGetIntegerv(GL_ACTIVE_TEXTURE, &activeTextureEnum);
 
+	checkGLError();
 	return activeTextureEnum - GL_TEXTURE0;
 }
 
 std::string XOpenGLFuntion::glVersion()
 {
 	auto p=(char*)glGetString(GL_VERSION);
+
+	checkGLError();
 	std::string version(p);
 
 	std::regex pattern( R"(^(\d+)\.(\d+))");
@@ -129,4 +145,58 @@ bool XOpenGLFuntion::checkGLError()
 		return false;
 	}
 	return true;
+}
+
+void XOpenGLFuntion::xglColorMask(bool red, bool green, bool blue, bool alpha)
+{
+	glColorMask(red, green, blue, alpha);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglDepthMask(bool flag)
+{
+	glDepthMask(flag);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglStencilMask(unsigned int mask)
+{
+	glStencilMask(mask);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglStencilMaskFront(unsigned int mask)
+{
+	glStencilMaskSeparate(GL_FRONT, mask);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglStencilMaskBack(unsigned int mask)
+{
+	glStencilMaskSeparate(GL_BACK, mask);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglClear(unsigned int bits)
+{
+	glClear(bits);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglClearColor(float red, float green, float blue, float alpha)
+{
+	glClearColor(red, green, blue, alpha);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglClearDepth(float depth)
+{
+	glClearDepth(depth);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglClearStencil(int s)
+{
+	glClearStencil(s);
+	checkGLError();
 }

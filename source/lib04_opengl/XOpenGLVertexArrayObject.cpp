@@ -44,7 +44,7 @@ void XOpenGLVertexArrayObject::release()
 void XOpenGLVertexArrayObject::addBuffer(unsigned int index, 
 std::shared_ptr<XOpenGLBuffer> buffer, 
 unsigned int size, 
-unsigned int type, 
+XOpenGL::DataType type,
 unsigned int stride, 
 unsigned int offset,
  bool isInstance)
@@ -52,7 +52,7 @@ unsigned int offset,
     bind();
     buffer->bind();
     glEnableVertexAttribArray(index);
-    glVertexAttribPointer(index, size, type, GL_FALSE, stride, (void*)offset);
+    glVertexAttribPointer(index, size, (unsigned int)type, GL_FALSE, stride, (void*)offset);
     if (isInstance) {
         glVertexAttribDivisor(index, 1);
     }

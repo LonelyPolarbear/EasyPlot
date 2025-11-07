@@ -49,10 +49,31 @@ namespace XOpenGL {
 		XGL_TEXTURE_BINDING_BUFFER = 0x8C2C,
 	};
 
+	/// <summary>
+	/// opengl的以_BIT结尾的宏
+	/// </summary>
 	enum class LIB04_OPENGL_API FlagBits :unsigned int {
 		color_buffer_bit = 0x00004000,  //GL_COLOR_BUFFER_BIT
 		depth_buffer_bit = 0x00000100,  //GL_DEPTH_BUFFER_BIT
 		stencil_buffer_bit = 0x00000400,  //GL_STENCIL_BUFFER_BIT
+	};
+
+	enum class LIB04_OPENGL_API BufferBits :unsigned int {
+		color_buffer_bit = 0x00004000,  //GL_COLOR_BUFFER_BIT
+		depth_buffer_bit = 0x00000100,  //GL_DEPTH_BUFFER_BIT
+		stencil_buffer_bit = 0x00000400,  //GL_STENCIL_BUFFER_BIT
+	};
+
+	//GL_SCISSOR_TEST
+	enum class LIB04_OPENGL_API EnableType :unsigned int {
+		XGL_MULTISAMPLE = 0x809D,											//GL_MULTISAMPLE
+		XGL_SCISSOR_TEST = 0x0C11,											//GL_SCISSOR_TEST
+		XGL_DEPTH_TEST = 0x0B71,												//GL_DEPTH_TEST
+		XGL_STENCIL_TEST = 0x0B90,											//GL_STENCIL_TEST
+		XGL_CULL_FACE = 0x0B44,												//GL_CULL_FACE
+		XGL_BLEND = 0x0BE2,														//GL_BLEND
+		XGL_PROGRAM_POINT_SIZE = 0x8642,							//GL_PROGRAM_POINT_SIZE
+
 	};
 
 	enum class LIB04_OPENGL_API FilterType :unsigned int {

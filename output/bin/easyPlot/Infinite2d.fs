@@ -3,14 +3,15 @@
  in vec3 fragPos3D;
  flat in vec3 vs_origin;
  out vec4 FragColor;
-
+ uniform float  gridSpace;
+uniform  int  gridNum;
  void main()
 {   
-    vec3 fragPos3D_ = fragPos3D-vs_origin;
+    vec3 fragPos3D_ = fragPos3D+vs_origin;
    
     //主网格
-    float gridSpace = 4;        //网格间距
-    float mainGridDensity = 5*gridSpace;        //网格密度
+    //float gridSpace = 4;        //网格间距
+    float mainGridDensity = gridNum*gridSpace;        //网格密度
     float mainGridLineWidth = 1;
     vec2 mainGridFragpos =vec2(fragPos3D_.x/mainGridDensity, fragPos3D_.y/mainGridDensity);
     vec2 mainGridDerivative = abs(fwidth(mainGridFragpos.xy));

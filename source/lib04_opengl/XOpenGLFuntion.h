@@ -27,6 +27,7 @@ public:
 	static void xglPixelStorei(XOpenGL::PixelStoreParameter pname, int param);
 
 	static void xglReadPixels(int startx,int starty, int width, int height, XOpenGL::TextureExternalFormat format, XOpenGL::DataType type, void *data);
+
 	static void xglFlush();
 
 	static XOpenGL::GlSyncObject xglFenceSync(XOpenGL::SyncFlags flags, XOpenGL::SyncCondition condition = XOpenGL::SyncCondition::SyncGPUCommandsComplete);
@@ -42,9 +43,69 @@ public:
 	//获取指定的纹理单元绑定的纹理对象的id
 	static int xglGetTextureUnitBindTexture(int textureUint,XOpenGL::TextureBindingType type);
 
+	/// <summary>
+	/// 获取当前激活的纹理单元
+	/// </summary>
 	static int xglGetActiveTexture();
 
+	/// <summary>
+	/// 获取当前使用的opengl版本号，返回格式为"major.minor"
+	/// </summary>
 	static std::string glVersion();
 
+	/// <summary>
+	/// 检测opengl接口调用是否出错，true表示没有错误，false表示有错误
+	/// </summary>
 	static bool checkGLError();
+
+	/// <summary>
+	///  控制颜色缓冲区各个颜色分量的写入
+	/// </summary>
+	/// <param name="red">red通道是否允许写入，true表示允许写入，false表示禁止写入</param>
+	/// <param name="green">green通道是否允许写入，true表示允许写入，false表示禁止写入</param>
+	/// <param name="blue">blue通道是否允许写入，true表示允许写入，false表示禁止写入</param>
+	/// <param name="alpha">alpha通道是否允许写入，true表示允许写入，false表示禁止写入</param>
+	static void xglColorMask(bool red, bool green, bool blue, bool alpha);
+
+	/// <summary>
+	/// 控制深度缓冲区的写入，当禁用深度写入时，深度缓冲区不会更新，但深度测试仍然有效（如果启用的了的话）
+	/// </summary>
+	/// <param name="flag">true表示允许写入，false表示禁止写入</param>
+	static void xglDepthMask(bool flag);
+
+	/// <summary>
+	/// 控制模板值写入时的位掩码 位1 表示该位置允许写入，位0表示禁止写入
+	/// </summary>
+	static void xglStencilMask(unsigned int mask);
+
+	/// <summary>
+	/// 正面的模板写入掩码
+	/// </summary>
+	static void xglStencilMaskFront(unsigned int mask);
+
+	/// <summary>
+	/// 背面的模板写入掩码
+	/// </summary>
+	static void xglStencilMaskBack(unsigned int mask);
+
+	/// <summary>
+	/// 清除当前绑定的FBO的缓冲区
+	/// </summary>
+	/// <param name="bits"> 要清除的缓冲区类型，可以取或</param>
+	static void xglClear(/*XOpenGL::BufferBits*/ unsigned int bits);
+
+	/// <summary>
+	/// 设置当前绑定的FBO的颜色缓冲清除值
+	/// </summary>
+	static void xglClearColor(float red, float green, float blue, float alpha);
+
+	/// <summary>
+	/// 设置当前绑定的FBO的深度缓冲清除值[0-1],超出范围的值会被钳制到 [0.0, 1.0]
+	/// </summary>
+	static void xglClearDepth(float depth);
+
+	/// <summary>
+	/// 设置当前绑定的FBO的模板缓冲清除值[0-255]
+	/// </summary>
+	static void xglClearStencil(int s);
 };

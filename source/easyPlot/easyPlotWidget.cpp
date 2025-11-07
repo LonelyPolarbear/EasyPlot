@@ -39,6 +39,7 @@
 #include <lib05_shape/XTextItem.h>
 #include <lib05_shape/XScreenTextItem.h>
 #include <lib05_shape/XAxisItem.h>
+#include <lib05_shape/XGridItem.h>
 
 #include <lib06_select/xviewselection.h>
 #include <lib07_scene/xscene.h>
@@ -56,6 +57,7 @@
 #include <lib09_panel/FontSetDlg.h>
 #include <lib09_panel/ScreenShotDlg.h>
 #include <lib09_panel/FboTest.h>
+#include <lib09_panel/GridSetDlg.h>
 
 #include <lib04_opengl/XOpenGLFuntion.h>
 
@@ -351,17 +353,20 @@ void easyPlotWidget::mouseMoveEvent(QMouseEvent* event)
 			auto selectId = d->select2dObject.begin();
 			if (selectId != d->select2dObject.end()) {
 				auto selectIem = d->scene->getGraphicsItem(*selectId);
-				if (auto chart = std::dynamic_pointer_cast<XChartItem>(selectIem)) {
+				if (auto chart = std::dynamic_pointer_cast<XChartItem2>(selectIem)) {
 					auto s1 = d->scene->screenPos2ScenePos(mapToGLScreen(event->pos()));
-					auto s2 = d->scene->screenPos2ScenePos(mapToGLScreen(d->mousePressPos));
-					chart->setPosition(s1.x, s1.y);
+					auto s2 = d->scene->screenPos2ScenePos(mapToGLScreen(d->mouseMoveLastTimePos));
+					
+					chart->chartTranslate(s2,s1);
+					//chart->setPosition(s1.x, s1.y);
 					flag = false;
 				}
 			}
 		}
-		if(flag)
-		d->scene->translate(mapToGLScreen(d->mouseMoveRealTimePos), mapToGLScreen(d->mouseMoveLastTimePos));
-
+		if (flag) {
+			d->scene->translate(mapToGLScreen(d->mouseMoveRealTimePos), mapToGLScreen(d->mouseMoveLastTimePos));
+		}
+		
 		d->mouseMoveLastTimePos = d->mouseMoveRealTimePos;
 	}
 
@@ -466,7 +471,7 @@ void easyPlotWidget::wheelEvent(QWheelEvent* event)
 		auto selectId = d->select2dObject.begin();
 		if (selectId != d->select2dObject.end()) {
 			auto selectIem = d->scene->getGraphicsItem(*selectId);
-			if (auto chart = std::dynamic_pointer_cast<XChartItem>(selectIem)) {
+			if (auto chart = std::dynamic_pointer_cast<XChartItem2>(selectIem)) {
 				double factor = 1;
 				float t = angle;
 				if (std::signbit(t)) {
@@ -476,7 +481,7 @@ void easyPlotWidget::wheelEvent(QWheelEvent* event)
 					factor = 1. / 1.1;
 				}
 
-				chart->gridSale(factor, factor);
+				chart->chartSale(factor, factor);
 				return;
 			}
 		}
@@ -779,6 +784,39 @@ void easyPlotWidget::slotSetting()
 			dlg->raise();
 			dlg->show();
 		}
+
+		if (auto item = std::dynamic_pointer_cast<XGridItem>(shape)) {
+			GridSetParam info;
+			info.gridNum = item->getGridNum();
+			info.gridSpace = item->getGridSpace();
+			info.rangex_min = item->getOrigin().x;
+			auto scales =item->gridGetSale();
+			auto origin = item->getOrigin();
+
+			info.rangex_min = origin.x;
+			info.rangex_max = origin.x + scales.x;
+
+			info.rangey_min = origin.y;
+			info.rangey_max = origin.y + scales.y;
+
+			static GridSetDlg* dlg = nullptr;
+			if (dlg == nullptr) {
+				dlg = new GridSetDlg(info, this);
+				connect(dlg,&GridSetDlg::sigGridSetParam,this,[item](const GridSetParam& parm){
+					auto sx =parm.rangex_max - parm.rangex_min;
+					auto sy =parm.rangey_max - parm.rangey_min;
+					item->setOrigin(myUtilty::Vec2f(parm.rangex_min, parm.rangey_min));
+					item->gridSetSale(sx,sy);
+					item->setGridNum( parm.gridNum);
+					item->setGridSpace(parm.gridSpace);
+				});
+			}
+			else
+				dlg->setGridSetParam(info);
+
+			dlg->raise();
+			dlg->show();
+		}
 	}
 }
 
@@ -951,6 +989,7 @@ void easyPlotWidget::slotAddLine2D()
 		auto selectIem = d->scene->getGraphicsItem(*selectId);
 		if (auto chart = std::dynamic_pointer_cast<XChartItem2>(selectIem)) {
 			chart->addPolyline(item);
+			chart->fitView();
 			flag = false;
 		}
 	}
@@ -965,24 +1004,40 @@ void easyPlotWidget::slotAddLine2D()
 void easyPlotWidget::slotAddChart()
 {
 	makeCurrent();
+	#if 1
+	{
+		auto chart = makeShareDbObject<XChartItem2>();
+		chart->setVisible(true);
 
-	auto chart = makeShareDbObject<XChartItem2>();
-	//chart->initiallize();
-	chart->setVisible(true);
-	
-	auto tx = myUtilty::math::randon<double>(-200, 200);
-	auto ty = myUtilty::math::randon<double>(-200, 200);
-	auto sx = myUtilty::math::randon<double>(400, 500);
-	auto sy = myUtilty::math::randon<double>(100, 300);
+		auto tx = myUtilty::math::randon<double>(-200, 200);
+		auto ty = myUtilty::math::randon<double>(-200, 200);
+		auto sx = myUtilty::math::randon<double>(400, 500);
+		auto sy = myUtilty::math::randon<double>(100, 300);
 
-	chart->translate(tx, ty);
-	
-	auto angle = myUtilty::math::randon<double>(-90, 90);
-	//chart->rotate(angle);
+		chart->translate(tx, ty);
 
-	chart->scale(sx, sy);
+		auto angle = myUtilty::math::randon<double>(-90, 90);
+		chart->rotate(angle);
 
-	d->scene->addGraphicsItem(chart);
+		chart->scale(sx, sy);
+
+		d->scene->addGraphicsItem(chart);
+	}
+	#else
+	{
+		auto grid = makeShareDbObject<XGridItem>();
+		grid->gridTranslate(-1,-1);
+		grid->gridSetSale(200,100);
+		grid->setIsScreenGrid(false);
+		grid->setOrigin(myUtilty::Vec2f(-20,-20));
+
+		//网格的大小
+		grid->scale(100, 50);
+
+		d->scene->addGraphicsItem(grid);
+
+	}
+	#endif
 
 	doneCurrent();
 }

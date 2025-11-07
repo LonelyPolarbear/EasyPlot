@@ -1,5 +1,6 @@
 #include "xshape.h"
 #include <lib04_opengl/XOpenGLBuffer.h>
+#include <lib04_opengl/XOpenGLType.h>
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
 
 #include <Eigen/Eigen>
@@ -104,7 +105,8 @@ void XShape::initResource()
 	m_ssbo_color->bind();
 
 	//设置顶点属性
-	m_vao->addBuffer(0, m_vbo_coord, 3, 0x1406, sizeof(myUtilty::Vec3f), 0);
+	
+	m_vao->addBuffer(0, m_vbo_coord, 3, XOpenGL::DataType::float_, sizeof(myUtilty::Vec3f), 0);
 
 	m_ebo->setBufferType(XOpenGLBuffer::IndexBuffer);
 
@@ -254,9 +256,6 @@ uint64_t XShape::colorToUInt(myUtilty::Vec4f color)
 	uint64_t b = (uint64_t)(color.y * 255.0f);
 	uint64_t g = (uint64_t)(color.z * 255.0f);
 	uint64_t r = (uint64_t)(color.w * 255.0f);
-
-	a=1;
-
 	return (r << 24) | (g << 16) | (b << 8) | a;
 }
 
@@ -327,6 +326,8 @@ void XShape::updateData()
 		m_ebo->allocate(m_indexs->data(0), m_indexs->size());
 
 		m_vao->release();
+
+		m_ebo->release();
 	}
 
 	//法向量数据已经更新

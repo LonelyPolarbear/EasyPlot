@@ -58,13 +58,18 @@ protected:
 	virtual void drawBorderImpl(std::shared_ptr<xshader> border_shader, const Eigen::Matrix4f& m,bool);
 	virtual void drawFill(std::shared_ptr<xshader> fill_shader, const Eigen::Matrix4f& m);
 
-	void beginClip(const Eigen::Matrix4f& m);
-	void endClip();
+	/*void beginClip(const Eigen::Matrix4f& m);
+	void endClip();*/
 	virtual void initResource();
 	virtual void initiallize();
 public:
-	
+	void beginClip(const Eigen::Matrix4f& m);
+	void endClip();
 	Eigen::Affine3f getTransform() const;
+
+	Eigen::Affine3f getParentAccumulateTransform() const;
+
+	sptr<XGraphicsItem> getParent() const;
 
 	void setCoordArray(std::shared_ptr<XFloatArray> coordArray);
 	void setIndexArray(std::shared_ptr<XUIntArray> coordArray);
@@ -110,6 +115,8 @@ public:
 	myUtilty::Vec2f getPositionByOrientation() const;
 
 	void scale(float sx, float sy);
+
+	void setScale(float sx, float sy);
 
 	void resetTransform();
 
