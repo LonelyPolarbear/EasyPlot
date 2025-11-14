@@ -40,6 +40,8 @@
 #include <lib05_shape/XScreenTextItem.h>
 #include <lib05_shape/XAxisItem.h>
 #include <lib05_shape/XGridItem.h>
+#include <lib05_shape/XCheckBoxItem.h>
+#include <lib05_shape/XLegendRowItem.h>
 
 #include <lib06_select/xviewselection.h>
 #include <lib07_scene/xscene.h>
@@ -60,6 +62,7 @@
 #include <lib09_panel/GridSetDlg.h>
 
 #include <lib04_opengl/XOpenGLFuntion.h>
+#include <QMessageBox>
 
 using namespace std::chrono_literals;
 enum class CameraAction {
@@ -134,8 +137,6 @@ easyPlotWidget::easyPlotWidget(QWidget* parent) :XOpenGLWidget(parent),d(std::ma
 
 
 	d->mFutureWatcherVoid->setFuture(future);
-
-	//xfreetype::Instance()->printFaceInfo();
 }
 
 easyPlotWidget::~easyPlotWidget()
@@ -575,7 +576,6 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 		item->setLineWidth(1);
 		item->setSingleColor(myUtilty::Vec4f(0, 1, 1, 1));
 		item->setFillColor(myUtilty::Vec4f(0, 0, 0, 1));
-		//item->initiallize();
 		item->setVisible(true);
 		item->setIsFilled(false);
 
@@ -589,7 +589,6 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 
 
 		auto textItem = makeShareDbObject<XTextItem>();
-		//textItem->initiallize();
 		textItem->setSingleColor(myUtilty::Vec4f(1, 1, 1, 1));
 		textItem->setFontSize(20);
 		textItem->setText(L"测试一下文字");
@@ -612,7 +611,6 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 		item->setLineWidth(2);
 		item->setPenStyle(XGraphicsItem::PenStyle::Solid);
 		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-		//item->initiallize();
 		item->setVisible(true);
 
 		item->setVisible(false);
@@ -785,7 +783,7 @@ void easyPlotWidget::slotSetting()
 			dlg->show();
 		}
 
-		if (auto item = std::dynamic_pointer_cast<XGridItem>(shape)) {
+		else if (auto item = std::dynamic_pointer_cast<XGridItem>(shape)) {
 			GridSetParam info;
 			info.gridNum = item->getGridNum();
 			info.gridSpace = item->getGridSpace();
@@ -816,6 +814,10 @@ void easyPlotWidget::slotSetting()
 
 			dlg->raise();
 			dlg->show();
+		}
+
+		else {
+			QMessageBox::warning(this, "Warning", "No support for this item.");
 		}
 	}
 }
@@ -868,8 +870,6 @@ void easyPlotWidget::slotAnyTaskFinished()
 	for(auto s:lineNumber)
 		maxWidth = std::max(maxWidth, xfreetype::Instance()->computeLineStrWidth(s.toStdWString(), d->screenTextItemLine->getFontSize()));
 
-	//auto contentPos =	d->screenTextItem->getTextSceneScreenPos();
-	//d->screenTextItemLine->setTextSceneScreenPos(contentPos.x - maxWidth-3, contentPos.y);
 	auto mergeStr = lineNumber.join('\n');
 
 	d->screenTextItemLine->setText(mergeStr.toStdWString());
@@ -944,13 +944,14 @@ void easyPlotWidget::slotShowAxis3D(bool flag)
 	d->scene->setAxis3dVisible(flag);
 }
 
-void easyPlotWidget::slotAddLine2D()
+void easyPlotWidget::slotAddLine2D(int curveType)
 {
+	//1 正弦波 2 三角波 3 矩形波
 	//创建一条曲线
 	makeCurrent();
 	auto item = makeShareDbObject<XPolyline>();
 	item->setLineWidth(2);
-	item->setPenStyle(XGraphicsItem::PenStyle::Dash);
+	item->setPenStyle(XGraphicsItem::PenStyle::Solid);
 
 	//生成随机颜色
 	auto r =myUtilty::math::randon_color();
@@ -960,27 +961,56 @@ void easyPlotWidget::slotAddLine2D()
 	//item->initiallize();
 	item->setVisible(true);
 
-	//数据
-	auto curveData =makeShareDbObject<XFloatArray>();
-	curveData->setComponent(3);
 	
+	auto curveData = makeShareDbObject<XFloatArray>();
+	curveData->setComponent(3);
+
+	//生成正弦波
 	auto xoffset = myUtilty::math::randon<float>(-200, 200);
 	auto yoffset = myUtilty::math::randon<float>(10, 50);
-	auto fre = myUtilty::math::randon<float>(0.05, 0.1);
-	int num = 200;
-	curveData->setNumOfTuple(num);
-	//x随机偏移
-	//y随机偏移
-	//std::vector<int> x{ 2500,-2500,-2500,-500,-500,-1500,-1500,1500,1500,500,500,2500,2500 };
-	//std::vector<int> y{ 5000,5000,4000,4000,1000,1000,0,0,1000,1000,4000,4000,5000 };
-	for (int i = 0; i < num; i++) {
-		auto x = i;
-		auto y = 100*sin(fre *x);
-		auto z =0;
-		curveData->setTuple(i, x, y, z);
+
+	if (curveType == 1) {
+		
+		auto fre = myUtilty::math::randon<float>(0.05, 0.1);
+		int num = 200;
+		curveData->setNumOfTuple(num);
+		//x随机偏移
+		//y随机偏移
+		//std::vector<int> x{ 2500,-2500,-2500,-500,-500,-1500,-1500,1500,1500,500,500,2500,2500 };
+		//std::vector<int> y{ 5000,5000,4000,4000,1000,1000,0,0,1000,1000,4000,4000,5000 };
+		for (int i = 0; i < num; i++) {
+			auto x = i;
+			auto y = 100 * sin(fre * x);
+			auto z = 0;
+			curveData->setTuple(i, x, y, z);
+		}
 	}
-	item->translate(xoffset, /*yoffset*/0);
+	//生成三角波
+	if (curveType == 2) {
+		//设周期T
+		double T =30;	
+		auto fre = myUtilty::math::randon<float>(0.05, 0.1);
+		int num = 50; //表示周期
+
+		//三角波
+		double peak_y = 30;
+		double peak_x = 0.5*T;
+		curveData->setNumOfTuple(num*2);
+		for (int i = 0; i < num; i++) {
+			auto x0 = i*T-0.5*num*T;
+			auto y0 =0;
+
+			auto x1 = x0 + peak_x;
+			auto y1 = peak_y;
+
+			curveData->setTuple(2*i+0, x0, y0, 0);
+			curveData->setTuple(2*i+1, x1, y1, 0);
+		}
+	}
+	//item->translate(xoffset, yoffset);
 	curveData->Modified();
+
+
 	item->setCoordArray(curveData);
 	
 	bool flag = true;
@@ -1012,12 +1042,12 @@ void easyPlotWidget::slotAddChart()
 		auto tx = myUtilty::math::randon<double>(-200, 200);
 		auto ty = myUtilty::math::randon<double>(-200, 200);
 		auto sx = myUtilty::math::randon<double>(400, 500);
-		auto sy = myUtilty::math::randon<double>(100, 300);
+		auto sy = myUtilty::math::randon<double>(300, 400);
 
 		chart->translate(tx, ty);
 
 		auto angle = myUtilty::math::randon<double>(-90, 90);
-		chart->rotate(angle);
+		//chart->rotate(angle);
 
 		chart->scale(sx, sy);
 
@@ -1046,6 +1076,7 @@ void easyPlotWidget::slotAddBar()
 {
 	//创建一条曲线
 	makeCurrent();
+	#if 0
 	auto item = makeShareDbObject<XBarItem>();
 	item->setLineWidth(1);
 	item->setPenStyle(XGraphicsItem::PenStyle::Dash);
@@ -1095,6 +1126,19 @@ void easyPlotWidget::slotAddBar()
 	if (flag) {
 		d->scene->addGraphicsItem(item);
 	}
+	#endif
+
+	for (int i = 0; i < 5; i++) {
+		auto item = makeShareDbObject<XLegendRowItem>();
+		item->setSingleColor(myUtilty::Vec4f( 0,0,0,0));
+		item->setVisible(true);
+		item->setChecked(true);
+		item->translate(0,30*i+10);
+		//item->scale(200, 30);
+		d->scene->addGraphicsItem(item);
+	}
+	
+
 
 	doneCurrent();
 }

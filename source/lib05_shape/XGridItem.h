@@ -35,6 +35,10 @@ public:
 	void setGridSpace(double space);
 	double getGridSpace() const;
 
+	void setShowAxis(bool isShowGrid);
+
+	bool isShowAxis() const;
+
 	Eigen::Affine3f getGridTransform() const;
 protected:
 	virtual uint32_t computeNumofVertices() override;
@@ -42,7 +46,7 @@ protected:
 private:
 	bool m_isScreenGrid = true;	//true:屏幕坐标系，false:局部坐标系
 	myUtilty::Vec2f mOrigin = myUtilty::Vec2f(0,0);
-
+	bool m_isShowAxis = true;
 	//主网格间距
 	int  m_gridNum = 5;		//每间隔几个次网格绘制一次主网格
 	double  m_gridSpace = 4;

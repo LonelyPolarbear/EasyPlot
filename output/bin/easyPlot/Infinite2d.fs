@@ -5,6 +5,7 @@
  out vec4 FragColor;
  uniform float  gridSpace;
 uniform  int  gridNum;
+uniform bool showAxis;
  void main()
 {   
     vec3 fragPos3D_ = fragPos3D+vs_origin;
@@ -15,12 +16,14 @@ uniform  int  gridNum;
     float mainGridLineWidth = 1;
     vec2 mainGridFragpos =vec2(fragPos3D_.x/mainGridDensity, fragPos3D_.y/mainGridDensity);
     vec2 mainGridDerivative = abs(fwidth(mainGridFragpos.xy));
+    //vec2 mainGridDerivative = abs(fwidth(  fract(mainGridFragpos.xy - 0.5) - 0.5  ));
 
     //次网格
     float  subGridDensity = gridSpace;        //网格密度
     float  subGridLineWidth = 1;
     vec2  subGridFragpos =vec2(fragPos3D_.x/subGridDensity, fragPos3D_.y/subGridDensity);
     vec2  subGridDerivative = fwidth(subGridFragpos.xy);
+    //vec2  subGridDerivative = abs(fwidth( fract(subGridFragpos.xy - 0.5) - 0.5 ));
 
     /*
      if(  (fragPos3D_.x <0.0 && abs(fragPos3D_.x)>abs(subGridDerivative.x) )           ||
@@ -70,27 +73,38 @@ uniform  int  gridNum;
             }
         }
     }
-    #else
+#else
 
-    float xaxisAlpha = 1.0 - smoothstep(0.5, 1.0, abs(centerDist.x));
-    float yaxisAlpha = 1.0 - smoothstep(0.5, 1.0, abs(centerDist.y));
+    float xaxisAlpha = 1.0 - smoothstep(0.4, 1.0, abs(centerDist.x));
+    float yaxisAlpha = 1.0 - smoothstep(0.4, 1.0, abs(centerDist.y));
 
-     if(centerAlpha >0){
-        FragColor = vec4(0, 0, 1, centerAlpha);
-     }else{
-        if(mainGridAlpha<0.01){
-            //绘制次网格
-            FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.1*subGridAlpha);
-        }else{
-             if(yaxisAlpha >0.01){
-                FragColor = vec4(1, 0, 0, yaxisAlpha);  //会出现锯齿
-            }else if(xaxisAlpha >0.01){
-                FragColor = vec4(0, 1, 0, xaxisAlpha); //会出现锯齿
+    if(showAxis){
+        if(centerAlpha >0){
+            FragColor = vec4(0, 0, 1, centerAlpha);
+         }else{
+            if(mainGridAlpha<0.01){
+                //绘制次网格
+                FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.1*subGridAlpha);
+            }else{
+
+                if(yaxisAlpha >0.001){
+                    FragColor = vec4(1, 0, 0, yaxisAlpha);  //会出现锯齿
+                }else if(xaxisAlpha >0.001){
+                    FragColor = vec4(0, 1, 0, xaxisAlpha); //会出现锯齿
+                }else{
+                    FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.3*mainGridAlpha);
+                }
+            }
+        }
+    }
+    else
+        {
+            if(mainGridAlpha<0.01){
+                //绘制次网格
+                FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.1*subGridAlpha);
             }else{
                 FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.3*mainGridAlpha);
             }
         }
-    }
-
-    #endif
+#endif
 }

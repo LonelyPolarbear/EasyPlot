@@ -2,9 +2,9 @@
 #include "XLineItem.h"
 #include "XTextItem.h"
 
-XAxisItem::XAxisItem() :XGraphicsItem()
+XAxisItem::XAxisItem(std::shared_ptr<XGraphicsItem> parent) :XCompositeItem(parent)
 {
-	setIsComposite(true);
+	//setIsComposite(true);
 	m_line = makeShareDbObject<XLineItem>();
 
 	if (mLayout == XGL::Layout::horizontal) {

@@ -352,6 +352,8 @@ namespace myUtilty {
 		double ymax;
 		double zmax;
 	};
+
+
 	namespace chrono {
 		/// <summary>
 		/// 时钟计时器，用于精确统计时间间隔

@@ -52,6 +52,7 @@ void XGridItem::drawBorder(std::shared_ptr<xshader> border_shader, const Eigen::
 
 	shader->setFloat("gridSpace", m_gridSpace);
 	shader->setInt("gridNum", m_gridNum);
+	shader->setBool("showAxis", m_isShowAxis);
 	//需要设置网格的原点
 	//shader->setVec2("Origin", mOrigin.x, mOrigin.y);
 	shader->setVec2("Origin", 0, 0);
@@ -143,6 +144,16 @@ void XGridItem::setGridSpace(double space)
 double XGridItem::getGridSpace() const
 {
 	return m_gridSpace;
+}
+
+void XGridItem::setShowAxis(bool isShowaxis)
+{
+	m_isShowAxis = isShowaxis;
+}
+
+bool XGridItem::isShowAxis() const
+{
+	return m_isShowAxis;
 }
 
 Eigen::Affine3f XGridItem::getGridTransform() const

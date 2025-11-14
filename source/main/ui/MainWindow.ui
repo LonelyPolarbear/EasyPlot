@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>709</width>
-    <height>486</height>
+    <width>768</width>
+    <height>502</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -224,7 +224,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>709</width>
+     <width>768</width>
      <height>23</height>
     </rect>
    </property>
@@ -301,7 +301,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="Actchart"/>
-   <addaction name="Actcurve"/>
    <addaction name="ActBar"/>
   </widget>
   <widget class="QToolBar" name="toolBar_6">
@@ -643,6 +642,33 @@
    </property>
    <property name="text">
     <string>fboTest</string>
+   </property>
+  </action>
+  <action name="ActWaveSin">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/sine_wave.svg</normaloff>:/icon/sine_wave.svg</iconset>
+   </property>
+   <property name="text">
+    <string>wave_sin</string>
+   </property>
+  </action>
+  <action name="ActWaveSquare">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/square_wave.svg</normaloff>:/icon/square_wave.svg</iconset>
+   </property>
+   <property name="text">
+    <string>waveSquare</string>
+   </property>
+  </action>
+  <action name="ActWaveTri">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/triangle_wave.svg</normaloff>:/icon/triangle_wave.svg</iconset>
+   </property>
+   <property name="text">
+    <string>waveTriangle</string>
    </property>
   </action>
  </widget>

@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget* parent) :QMainWindow(parent)
 	connect(ui->ActshowGrid, &QAction::triggered, easyPlot, &easyPlotWidget::slotShowGrid2D);
 	connect(ui->ActshowGrid3d, &QAction::triggered, easyPlot, &easyPlotWidget::slotShowGrid3D);
 	connect(ui->ActShowAxis, &QAction::triggered, easyPlot, &easyPlotWidget::slotShowAxis3D);
-	connect(ui->Actcurve, &QAction::triggered, easyPlot, &easyPlotWidget::slotAddLine2D);
+	//connect(ui->Actcurve, &QAction::triggered, easyPlot, &easyPlotWidget::slotAddLine2D);
 	connect(ui->Actchart, &QAction::triggered, easyPlot, &easyPlotWidget::slotAddChart);
 	connect(ui->ActBar, &QAction::triggered, easyPlot, &easyPlotWidget::slotAddBar);
 	connect(ui->ActFontBmp, &QAction::triggered, easyPlot, &easyPlotWidget::slotGenerateFontTextures);
@@ -74,6 +74,10 @@ MainWindow::MainWindow(QWidget* parent) :QMainWindow(parent)
 	connect(ui->Actaxis2d, &QAction::triggered, easyPlot, &easyPlotWidget::slotAxis2D);
 	connect(ui->ActfboTest, &QAction::triggered, easyPlot, &easyPlotWidget::slotFboTest);
 
+	connect(ui->ActWaveSin, &QAction::triggered, [&]() {easyPlot->slotAddLine2D(1); });
+	connect(ui->ActWaveTri, &QAction::triggered, [&]() {easyPlot->slotAddLine2D(2); });
+	connect(ui->ActWaveSquare, &QAction::triggered, [&]() {easyPlot->slotAddLine2D(3); });
+
 	QActionGroup *actionGroup = new QActionGroup(this);
 	actionGroup->addAction(ui->ActCornerRect);
 	actionGroup->addAction(ui->ActCenterRect);
@@ -83,43 +87,74 @@ MainWindow::MainWindow(QWidget* parent) :QMainWindow(parent)
 	actionGroup->setExclusive(true);
 	actionGroup->setExclusionPolicy(QActionGroup::ExclusionPolicy::ExclusiveOptional);
 
-	auto btn = new CustomToolButton(this);
-	btn->setCheckable(true);
-	ui->toolBar_3->addWidget(btn);
+	{
+		auto btn = new CustomToolButton(this);
+		btn->setCheckable(true);
+		ui->toolBar_3->addWidget(btn);
 
-	btn->setIcon(QIcon(":/icon/rect.svg"));
+		btn->setIcon(QIcon(":/icon/rect.svg"));
 
-	QMenu* menu = new QMenu(this);
-
-	menu->setStyleSheet(R"(
-    /* 强制显示勾选标记图标 */
-    QMenu::item:checked {
-        background-color: #e0e0e0;
-        /* 手动指定勾选图标（如果系统默认不显示） */
-        background-image: url(:/icons/check.png); /* 可自行添加一个√图标 */
-        background-repeat: no-repeat;
-        background-position: left center; /* 图标左对齐 */
-        background-origin: content-box;
-    }
-  )");
-	menu->addAction(ui->ActCornerRect);
-	menu->addAction(ui->ActCenterRect);
-
-
-	connect(actionGroup, &QActionGroup::triggered, this, [=](QAction* action) {
-		if(action->isChecked()){
-			if(action == ui->ActCornerRect || action == ui->ActCenterRect)
-				btn->setChecked(true);
-			else
-				btn->setChecked(false);
-		}else{
-			btn->setChecked(false);
+		QMenu* menu = new QMenu(this);
+		menu->setStyleSheet(R"(
+		/* 强制显示勾选标记图标 */
+		QMenu::item:checked {
+			background-color: #e0e0e0;
+			/* 手动指定勾选图标（如果系统默认不显示） */
+			background-image: url(:/icons/check.png); /* 可自行添加一个√图标 */
+			background-repeat: no-repeat;
+			background-position: left center; /* 图标左对齐 */
+			background-origin: content-box;
 		}
-	});
+		 )");
+		menu->addAction(ui->ActCornerRect);
+		menu->addAction(ui->ActCenterRect);
 
 
-	btn->setMenu(menu);
-	btn->setPopupMode(QToolButton::MenuButtonPopup);
+		connect(actionGroup, &QActionGroup::triggered, this, [=](QAction* action) {
+			if (action->isChecked()) {
+				if (action == ui->ActCornerRect || action == ui->ActCenterRect)
+					btn->setChecked(true);
+				else
+					btn->setChecked(false);
+			}
+			else {
+				btn->setChecked(false);
+			}
+			});
+
+
+		btn->setMenu(menu);
+		btn->setPopupMode(QToolButton::MenuButtonPopup);
+
+	}
+	{
+	
+		auto btn = new CustomToolButton(this);
+		btn->setCheckable(false);
+		ui->toolBar_4->addWidget(btn);
+
+		btn->setIcon(QIcon(":/icon/curve.svg"));
+
+		QMenu* menu = new QMenu(this);
+		menu->setStyleSheet(R"(
+		/* 强制显示勾选标记图标 */
+		QMenu::item:checked {
+			background-color: #e0e0e0;
+			/* 手动指定勾选图标（如果系统默认不显示） */
+			background-image: url(:/icons/check.png); /* 可自行添加一个√图标 */
+			background-repeat: no-repeat;
+			background-position: left center; /* 图标左对齐 */
+			background-origin: content-box;
+		}
+		 )");
+		menu->addAction(ui->ActWaveSin);
+		menu->addAction(ui->ActWaveSquare);
+		menu->addAction(ui->ActWaveTri);
+
+		btn->setMenu(menu);
+		btn->setPopupMode(QToolButton::MenuButtonPopup);
+	}
+	
 }
 
 MainWindow::~MainWindow()

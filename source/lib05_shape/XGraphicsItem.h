@@ -22,6 +22,18 @@ namespace XGL {
 		right_bottom
 	};
 
+	enum class LIB05_SHAPE_API VAlignment {
+		Top,
+		Middle,
+		Bottom
+	};
+
+	enum class LIB05_SHAPE_API HAlignment {
+		Left,
+		Middle,
+		Right
+	};
+
 	enum class LIB05_SHAPE_API Layout {
 		horizontal,
 		vertical
@@ -35,6 +47,123 @@ namespace XGL {
 	};
 };
 
+//假设有一个正方形 边长为2，原点位于中心，假设有个变换矩阵M，作用在该矩形，现在需要根据变换后的一个位置，反算出原始的点
+struct LIB05_SHAPE_API LocalCoordCompute {
+	Eigen::Affine3f m_transform;
+	LocalCoordCompute(const Eigen::Matrix4f& transform) {
+		m_transform.matrix() = transform;
+		leftBot = m_transform * Eigen::Vector3f(-1, -1, 0);
+		rightBot = m_transform * Eigen::Vector3f(1, -1, 0);
+		leftTop = m_transform * Eigen::Vector3f(-1, 1, 0);
+		rightTop = m_transform * Eigen::Vector3f(1, 1, 0);
+		center = m_transform * Eigen::Vector3f(0, 0, 0);
+		dir_x = (rightBot - leftBot).normalized();
+		dir_y = (leftTop - leftBot).normalized();
+		scalex = (rightBot - leftBot).norm() / 2;
+		scaley = (leftTop - leftBot).norm() / 2;
+	}
+
+	Eigen::Vector3f compute(XGL::Orientation orientation, float disx, float disy) {
+		Eigen::Vector3f result = Eigen::Vector3f(0, 0, 0);
+		switch (orientation) {
+		case XGL::Orientation::left_bottom:
+		{
+			result = leftBot;
+			result += disx * dir_x;
+			result += disy * dir_y;
+			break;
+		}case XGL::Orientation::right_bottom:
+		{
+			result = rightBot;
+			result -= disx * dir_x;
+			result += disy * dir_y;
+			break;
+		}case XGL::Orientation::left_top:
+		{
+			result = leftTop;
+			result += disx * dir_x;
+			result -= disy * dir_y;
+			break;
+		}case XGL::Orientation::right_top:
+		{
+			result = rightTop;
+			result -= disx * dir_x;
+			result -= disy * dir_y;
+			break;
+		}
+		default:
+			break;
+		}
+		return m_transform.inverse() * result;
+	}
+
+	Eigen::Vector3f compute(XGL::VAlignment alignment, float disx, float disy) {
+		//原点在中心, 向右为x轴正方向, 向上为y轴正方向
+		Eigen::Vector3f result = Eigen::Vector3f(0, 0, 0);
+		switch (alignment) {
+		case XGL::VAlignment::Middle: {
+			result = center;
+			result += disx * dir_x;
+			result += disy * dir_y;
+			break;
+		}
+		case XGL::VAlignment::Top: {
+
+			result = 0.5 * (leftTop + rightTop);
+			result += disx * dir_x;
+			result -= disy * dir_y;
+			break;
+		}
+		case XGL::VAlignment::Bottom: {
+			result = 0.5 * (leftBot + rightBot);
+			result += disx * dir_x;
+			result += disy * dir_y;
+			break;
+		}
+		}
+
+		return m_transform.inverse() * result;
+	}
+
+	Eigen::Vector3f compute(XGL::HAlignment alignment, float disx, float disy) {
+		//原点在中心, 向右为x轴正方向, 向上为y轴正方向
+		Eigen::Vector3f result = Eigen::Vector3f(0, 0, 0);
+		switch (alignment) {
+		case XGL::HAlignment::Middle: {
+			result = center;
+			result += disx * dir_x;
+			result += disy * dir_y;
+			break;
+		}
+		case XGL::HAlignment::Left: {
+
+			result = 0.5 * (leftBot + leftTop);
+			result += disx * dir_x;
+			result += disy * dir_y;
+			break;
+		}
+		case XGL::HAlignment::Right: {
+			result = 0.5 * (rightTop + rightBot);
+			result -= disx * dir_x;
+			result += disy * dir_y;
+			break;
+		}
+		}
+
+		return m_transform.inverse() * result;
+	}
+
+	Eigen::Vector3f leftBot = Eigen::Vector3f(-1, -1, 0);
+	Eigen::Vector3f rightBot = Eigen::Vector3f(1, -1, 0);
+	Eigen::Vector3f leftTop = Eigen::Vector3f(-1, 1, 0);
+	Eigen::Vector3f rightTop = Eigen::Vector3f(1, 1, 0);
+	Eigen::Vector3f center = Eigen::Vector3f(0, 0, 0);
+	Eigen::Vector3f dir_x = Eigen::Vector3f::UnitX();
+	Eigen::Vector3f dir_y = Eigen::Vector3f::UnitY();
+
+	double scalex = 1;		//X轴缩放比例
+	double scaley =1;		//Y轴缩放比例
+};
 
 class LIB05_SHAPE_API XGraphicsItem :public DataBaseObject {
 public:
@@ -57,9 +186,8 @@ protected:
 	virtual void drawBorder(std::shared_ptr<xshader> border_shader, const Eigen::Matrix4f& m);
 	virtual void drawBorderImpl(std::shared_ptr<xshader> border_shader, const Eigen::Matrix4f& m,bool);
 	virtual void drawFill(std::shared_ptr<xshader> fill_shader, const Eigen::Matrix4f& m);
+	virtual void updateChildPosition(const Eigen::Matrix4f& ){}
 
-	/*void beginClip(const Eigen::Matrix4f& m);
-	void endClip();*/
 	virtual void initResource();
 	virtual void initiallize();
 public:
@@ -80,8 +208,6 @@ public:
 	void setColorMode(ColorMode mode);
 	void setPreSelectColor(const myUtilty::Vec4f& color);
 	void setDrawType(PrimitveType type);
-	
-	bool isComposite() const;
 
 	myUtilty::Vec4f getSingleColor() const;
 
@@ -174,9 +300,13 @@ public:
 	virtual void updateVboEbo();
 	virtual void updateVboInstance();
 
+	void setSceneMatrix(const Eigen::Matrix4f& m);
+
+	Eigen::Matrix4f getSceneMatrix() const;
+
 	virtual uint32_t computeNumofVertices();																		//获取顶点数量
 protected:
-		void setIsComposite(bool enable);
+		//void setIsComposite(bool enable);
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;
@@ -215,6 +345,4 @@ protected:
 
 	std::shared_ptr<XGraphicsItem> m_parentItem;															//父图元
 	std::vector<std::shared_ptr<XGraphicsItem>> m_childItems;									//子图元
-
-	bool mIsComposite = false;
 };

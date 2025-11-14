@@ -15,18 +15,31 @@ class XChartItem2::Internal {
 public:
 	std::vector<std::shared_ptr<XGraphicsItem>> m_polylines;	//线段集合
 	std::shared_ptr< XGridItem> m_gridItem;	//网格
-	sptr<XAxisItem> m_axisx;	//X轴
-	sptr<XAxisItem> m_axisy;	//Y轴
+
+	sptr<XAxisItem> m_axisx;				//X轴
+	sptr<XAxisItem> m_axisy;				//Y轴
+	sptr<XTextItem> m_title;				//标题
 
 	int m_xlabelNum =11;					//X轴标签数量
 	int m_ylabelNum =4;						//Y轴标签数量
 	bool m_isShowGrid = true;			//是否显示网格
 
 	myUtilty::Vec2f mXRange = myUtilty::Vec2f(-1, 1);
+
 	myUtilty::Vec2f mYRange = myUtilty::Vec2f(-1, 1);
 
+	bool createGrid(sptr<xShaderManger> shaderManger) {
+		if (!m_gridItem) {
+			m_gridItem = std::make_shared<XGridItem>();
+			m_gridItem->setShaderManger(shaderManger);
+			m_gridItem->setIsScreenGrid(false);
+			m_gridItem->setShowAxis(false);
+			return true;
+		}
+		return false;
+	}
 
-	bool createAxisText() {
+	bool createAxis(sptr<xShaderManger> shaderManger) {
 		if (m_axisx == nullptr || m_axisy == nullptr) {
 			m_axisy = makeShareDbObject<XAxisItem>();
 			m_axisy->setLayout(XGL::Layout::vertical);
@@ -48,9 +61,24 @@ public:
 		}
 		return false;
 	}
+
+	bool createTitle(sptr<xShaderManger> shaderManger) {
+		if (!m_title) {
+			m_title = makeShareDbObject<XTextItem>();	
+			m_title->setHAlignment(XTextItem::HAlign::Center);
+			m_title->setVAlignment(XTextItem::VAlign::Middle);
+			m_title->setPositionType(XGL::PositionType::local_center);
+			m_title->setShaderManger(shaderManger);
+			m_title->setSingleColor(myUtilty::Vec4f(1, 1, 0, 1));
+			m_title->setText(L"标题测试");
+			m_title->setFontSize(20);
+			return true;
+		}
+		return false;
+	}
 };
 
-XChartItem2::XChartItem2():XGraphicsItem(),d(new Internal())
+XChartItem2::XChartItem2(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(parent),d(new Internal())
 {
 	this->setDrawType(PrimitveType::line_strip_adjacency);
 	auto coord = makeShareDbObject<XFloatArray>();
@@ -73,9 +101,11 @@ XChartItem2::XChartItem2():XGraphicsItem(),d(new Internal())
 
 	this->setIndexArray(index);
 
+	this->setLineWidth(2);
+
 	this->setIsFilled(false);
 
-	this->setBackgroundColor(myUtilty::Vec4f(	0.f, 0.f, 0.f, 1.0f));
+	this->setBackgroundColor(myUtilty::Vec4f(1.f, 1.f, 0.f, 1.0f));
 
 	m_isShowGrid = true;
 	m_clipEnable = true;
@@ -114,31 +144,29 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 	initiallize();
 	{
 		//对于自身的绘制，先更新数据
-		auto chartTransform = this->getTransform();
+		auto selfTransform = this->getTransform();
 
-		Eigen::Vector3f leftBot = chartTransform * Eigen::Vector3f(-1, -1, 0);
-		Eigen::Vector3f rightBot = chartTransform * Eigen::Vector3f(1, -1, 0);
-		Eigen::Vector3f leftTop = chartTransform * Eigen::Vector3f(-1, 1, 0);
-		Eigen::Vector3f rightTop = chartTransform * Eigen::Vector3f(1, 1, 0);
-
-		Eigen::Vector3f dir_x =(rightBot - leftBot).normalized();
-		Eigen::Vector3f dir_y = (leftTop - leftBot).normalized();
-
-		leftBot += 18*dir_x;
-		rightBot -= 18 * dir_x;
-		leftTop += 18 * dir_x;
-
-		leftBot = chartTransform.inverse() * leftBot;
-		rightBot = chartTransform.inverse() * rightBot;
-		leftTop = chartTransform.inverse() * leftTop;
-
+		LocalCoordCompute localCoord(m*selfTransform.matrix());
+		
+		Eigen::Vector3f leftBot = localCoord.compute(XGL::Orientation::left_bottom, 18, 18);
+		Eigen::Vector3f rightBot = localCoord.compute(XGL::Orientation::right_bottom, 18, 18);
+		Eigen::Vector3f leftTop = localCoord.compute(XGL::Orientation::left_top, 18, 18);
+		Eigen::Vector3f titlePos = localCoord.compute(XGL::VAlignment::Top, 0, 50);
+		
+		
 		auto lengthx = abs(rightBot.x() - leftBot.x());
 		auto lengthy = abs(leftTop.y() - leftBot.y());
 		Eigen::Vector3f  center = (leftTop+rightBot)*0.5;
 
-	
-		createGrid();
-		if (d->createAxisText()) {
+		if (d->createTitle(getShaderManger())) {
+			addChildItem(d->m_title);
+		}
+
+		d->m_title->setPosition(titlePos.x(), titlePos.y());
+
+		d->createGrid(getShaderManger());
+
+		if (d->createAxis(this->getShaderManger())) {
 			d->m_axisx->setRange(-40,100);
 			d->m_axisy->setRange(-20,80);
 
@@ -166,10 +194,10 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 
 		XGraphicsItem::draw(m);
 
-		auto clipTransform = chartTransform * d->m_gridItem->getTransform() * chartTransform.inverse();
+		auto clipTransform = selfTransform * d->m_gridItem->getTransform() * selfTransform.inverse();
 		beginClip(m*clipTransform.matrix());
 
-		Eigen::Matrix4f lineParentTransform = m * chartTransform.matrix() *d->m_gridItem->getTransform().matrix()* d->m_gridItem->getGridTransform().matrix();
+		Eigen::Matrix4f lineParentTransform = m * selfTransform.matrix() *d->m_gridItem->getTransform().matrix()* d->m_gridItem->getGridTransform().matrix();
 		for (auto polyline : d->m_polylines) {
 			polyline->draw(lineParentTransform);
 		}
@@ -181,7 +209,7 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
 
-		Eigen::Matrix4f parentTransform = m * chartTransform.matrix();
+		Eigen::Matrix4f parentTransform = m * selfTransform.matrix();
 		d->m_gridItem->draw(parentTransform);
 		glEnableObj->restore();
 	}
@@ -218,8 +246,8 @@ void XChartItem2::chartTranslate(const myUtilty::Vec2f& lastPos_, const myUtilty
 
 	auto dx = curPos.x() - lasPos.x();
 	auto dy = curPos.y() - lasPos.y();
-	createGrid();
-	d->createAxisText();
+	d->createGrid(getShaderManger());
+	d->createAxis(this->getShaderManger());
 	auto range =d->m_axisx->getRange();
 	range.x -= dx;
 	range.y -=dx;
@@ -237,7 +265,7 @@ void XChartItem2::chartTranslate(const myUtilty::Vec2f& lastPos_, const myUtilty
 
 void XChartItem2::chartSale(float dx, float dy)
 {
-	createGrid();
+	d->createGrid(getShaderManger());
 	{
 		dx = dx > 1 ? 0.1 : -0.1;
 		dy = dy > 1 ? 0.1 : -0.1;
@@ -256,65 +284,22 @@ void XChartItem2::chartSale(float dx, float dy)
 		d->m_axisy->setRange(range.x, range.y);
 	}
 	
-	d->createAxisText();
+	d->createAxis(this->getShaderManger());
 	updateGridFrame();
-}
-
-myUtilty::Vec2d XChartItem2::getOrigin() const
-{
-	return myUtilty::Vec2d(d->m_axisx->getRange().x, d->m_axisy->getRange().x);
 }
 
 void XChartItem2::updateGridFrame()
 {
 	//当轴的范围变化时，需要更新网格坐标系
-	createGrid();
+	d->createGrid(getShaderManger());
 	auto sx = d->m_axisx->getRange().y - d->m_axisx->getRange().x;
 	auto sy = d->m_axisy->getRange().y - d->m_axisy->getRange().x;
 	d->m_gridItem->gridReset();
 	d->m_gridItem->gridSetSale(sx, sy);
 	auto origin = myUtilty::Vec2d(d->m_axisx->getRange().x, d->m_axisy->getRange().x);
 	d->m_gridItem->setOrigin(origin);
-
-	updateAxisLabel();
 }
 
-void XChartItem2::createGrid()
-{
-	if (!d->m_gridItem) {
-		d->m_gridItem = std::make_shared<XGridItem>();
-		d->m_gridItem->setShaderManger(this->getShaderManger());
-		d->m_gridItem->setIsScreenGrid(false);
-	}
-}
-
-void XChartItem2::updateAxisLabel()
-{
-#if 0
-	//获取网格的变换矩阵
-	auto gridTransform = d->m_gridItem->getTransform();
-	auto data = myUtilty::Matrix::transformDecomposition_TRS(gridTransform);
-
-	for (int i = 0; i < d->m_axisx_value.size(); i++) {
-		auto xaxis = d->m_axisx_value[i];
-
-		auto length = 1. / data.sx;
-		auto step = length / (d->m_xlabelNum - 1);
-		double value = -0.5 * length + i * step;
-
-		xaxis->setText(myUtilty::to_wstring_with_precision(value, 1));
-	}
-
-	for (int i = 0; i < d->m_axisy_value.size(); i++) {
-		auto xaxis = d->m_axisy_value[i];
-		auto length = 1. / data.sy;
-		auto step = length / (d->m_ylabelNum - 1);
-		double value = -0.5 * length + i * step;
-		//double v = (i - 2) * 0.5 * 1. / data.sy;
-		xaxis->setText(myUtilty::to_wstring_with_precision(value, 1));
-	}
-	#endif
-}
 
 void XChartItem2::updateVboCoord()
 {

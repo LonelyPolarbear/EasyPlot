@@ -1,11 +1,11 @@
 #pragma once
-#include "XGraphicsItem.h"
+#include "XCompositeItem.h"
 
 class XLineItem;
 class XTextItem;
-class LIB05_SHAPE_API XAxisItem :public XGraphicsItem {
+class LIB05_SHAPE_API XAxisItem :public XCompositeItem {
 public:
-	XAxisItem();
+	XAxisItem(std::shared_ptr<XGraphicsItem> parent = nullptr);
 	virtual ~XAxisItem();
 	virtual void updateData();
 	

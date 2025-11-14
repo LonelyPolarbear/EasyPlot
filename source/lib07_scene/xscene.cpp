@@ -826,6 +826,7 @@ void XScene::render2D()
     glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
     {
 		for (auto grapicsItem : d->shapes2D) {
+             grapicsItem->setSceneMatrix(d->sceneFrameInVirtualWorld.matrix());
              grapicsItem->draw(Eigen::Matrix4f::Identity());
 		}
     }

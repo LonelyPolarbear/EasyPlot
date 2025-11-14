@@ -19,6 +19,8 @@ public:
 	Eigen::Affine3f m_transform = Eigen::Affine3f::Identity();
 	std::mutex m_mutex;
 	uint64_t m_id = ++object_id_counter;
+
+	Eigen::Matrix4f m_sceneMat = Eigen::Matrix4f::Identity();
 	bool isInitResource =false;
 };
 
@@ -52,7 +54,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 		return;
 
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
-	if (isComposite() == false) {
+	 {
 		//!
 		//! [1] 填充绘制
 		if (m_IsFilled) {
@@ -75,6 +77,9 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 	//! [3] 绘制子类图元
 	//beginClip(m);			//需要知道当前图元的层级，
 
+	//在绘制子类图元之前，可能会根据父图元的当前位置，调整子类图元位置
+	updateChildPosition(m);
+
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
 	for (auto item : m_childItems) {
 		item->draw(mat);
@@ -86,7 +91,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 void XGraphicsItem::pickBorderDraw(std::shared_ptr<xshader> shader,const Eigen::Matrix4f& m)
 {
 	initiallize();
-	if(isComposite() == false)
+	/*if(isComposite() == false)*/
 		drawBorderImpl(shader, m, true);
 
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
@@ -103,7 +108,7 @@ void XGraphicsItem::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::M
 		item->drawFill(m_shaderManger->getPickFillShader2D(), mat);
 	}
 
-	if (isComposite() == false)
+	/*if (isComposite() == false)*/
 		drawFill(shader, m);
 }
 
@@ -116,7 +121,7 @@ void XGraphicsItem::drawBorder(std::shared_ptr<xshader> shader,  const Eigen::Ma
 void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m,bool isComputeLineLentgh)
 {
 	initiallize();
-	if (!m_IsVisible || isComposite())
+	if (!m_IsVisible /*|| isComposite()*/)
 		return;
 	updateData();
 	shader->use();
@@ -161,7 +166,7 @@ void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen:
 void XGraphicsItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
 {
 	initiallize();
-	if (!m_IsVisible || isComposite())
+	if (!m_IsVisible /*|| isComposite()*/)
 		return;
 	updateData();
 	shader->use();
@@ -382,10 +387,10 @@ void XGraphicsItem::setDrawType(PrimitveType type)
 	m_drawType = type;
 	}
 
-bool XGraphicsItem::isComposite() const
-{
-	return mIsComposite;
-}
+//bool XGraphicsItem::isComposite() const
+//{
+//	return mIsComposite;
+//}
 
 myUtilty::Vec4f XGraphicsItem::getSingleColor() const
 {
@@ -671,15 +676,28 @@ void XGraphicsItem::updateVboInstance()
 	}
 }
 
+void XGraphicsItem::setSceneMatrix(const Eigen::Matrix4f& m)
+{
+	d->m_sceneMat = m;
+	for (auto item : m_childItems) {
+		item->setSceneMatrix(m);
+	}
+}
+
+Eigen::Matrix4f XGraphicsItem::getSceneMatrix() const
+{
+	return d->m_sceneMat;
+}
+
 
 uint32_t XGraphicsItem::computeNumofVertices() {
 	return m_coordArray->getNumOfTuple();
  }
 
-void XGraphicsItem::setIsComposite(bool enable)
-{
-	mIsComposite = enable;
-}
+//void XGraphicsItem::setIsComposite(bool enable)
+//{
+//	mIsComposite = enable;
+//}
 
 void XGraphicsItem::addChildItem(std::shared_ptr<XGraphicsItem> item)
 {

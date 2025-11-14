@@ -39,5 +39,8 @@
         <file>icon/screen_shot.svg</file>
         <file>icon/axis2d.svg</file>
         <file>icon/test.svg</file>
+        <file>icon/triangle_wave.svg</file>
+        <file>icon/square_wave.svg</file>
+        <file>icon/sine_wave.svg</file>
     </qresource>
 </RCC>

@@ -9,7 +9,7 @@ public:
 		corner_rect,		// 矩形任意两个顶点
 		diagonal_rect		// 矩形任意两个对角顶点
 	};
-	XRectItem();
+	XRectItem(std::shared_ptr<XGraphicsItem> parent = nullptr);
 	virtual ~XRectItem();
 
 	void setRectType(RectType rectType);

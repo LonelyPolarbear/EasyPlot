@@ -16,8 +16,7 @@ class QWheelEvent;
 class QTimerEvent;
 class QContextMenuEvent;
 
-//class XGraphicsItem;
-//class XFloatArray;
+
 class XGraphicsItem;
 struct DarwItemData {
 	std::shared_ptr<XGraphicsItem> item;
@@ -89,7 +88,7 @@ public slots:
 	void slotShowGrid3D(bool flag);
 	void slotShowAxis3D(bool flag);
 
-	void slotAddLine2D();
+	void slotAddLine2D(int curveType);
 
 	void slotAddChart();
 

@@ -152,8 +152,10 @@ void main()
          float distancey = abs(texCoord.y - 0.5);
          if(SCalelineWidthInGs <=1.001){
             //线宽太小，不用AA
-            //alpha = 1.0 - smoothstep(uHalfWidth-uAARadius, uHalfWidth+uAARadius*2, distancey);
             alpha =1;
+            //alpha = 1.0 - smoothstep(uHalfWidth-uAARadius, uHalfWidth+uAARadius*2, distancey);
+            //alpha = 1.0 - smoothstep(0.4, 0.6, distancey);
+            
          }
          else
             alpha = 1.0 - smoothstep(uHalfWidth-uAARadius, uHalfWidth+uAARadius*0.3, distancey);

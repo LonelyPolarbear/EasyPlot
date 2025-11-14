@@ -1,7 +1,7 @@
 #include "XRectItem.h"
 #include <lib04_opengl/XOpenGLBuffer.h>
 
-XRectItem::XRectItem():XGraphicsItem()
+XRectItem::XRectItem(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(parent)
 {
 	this->setDrawType(PrimitveType::line_strip_adjacency);
 	auto coord = makeShareDbObject<XFloatArray>();

@@ -8,7 +8,7 @@ class XTextItem;
 class LIB05_SHAPE_API XChartItem2 :public XGraphicsItem {
 public:
 	
-	XChartItem2();
+	XChartItem2(std::shared_ptr<XGraphicsItem> parent = nullptr);
 	virtual ~XChartItem2();
 
 	void setRect(float x, float y, float w, float h);
@@ -30,12 +30,7 @@ public:
 
 	void chartSale(float dx, float dy);
 
-	myUtilty::Vec2d getOrigin() const;
-
 	void updateGridFrame();
-private:
-	void createGrid();
-	void updateAxisLabel();
 protected:
 	virtual void updateVboCoord();
 
