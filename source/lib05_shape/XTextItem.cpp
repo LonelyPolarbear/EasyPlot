@@ -98,6 +98,10 @@ void XTextItem::initResource()
 
 void XTextItem::setText(const std::wstring& text)
 {
+	if (text == m_text)
+	{
+		return;
+	}
 	m_text = text;
 	//updateText();
 	configDataModified();

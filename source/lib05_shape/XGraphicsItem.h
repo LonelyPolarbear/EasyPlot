@@ -318,6 +318,10 @@ private:
 	void clearChildItems();
 	void setParentItem(std::shared_ptr<XGraphicsItem> item);
 	std::shared_ptr<XGraphicsItem> getParentItem() const;
+	bool addAttribute(const std::wstring& key, const std::wstring& value);
+	bool removeAttribute(const std::wstring& key);
+	std::wstring getAttribute(const std::wstring& key) const;
+	std::map<std::wstring, std::wstring> getAttributes() const;
 protected:
 	//GPU端对象
 	std::shared_ptr<XOpenGLVertexArrayObject> m_vao;														//VAO
@@ -345,4 +349,6 @@ protected:
 
 	std::shared_ptr<XGraphicsItem> m_parentItem;															//父图元
 	std::vector<std::shared_ptr<XGraphicsItem>> m_childItems;									//子图元
+
+	std::map<std::wstring,std::wstring> m_attributes;													   //属性映射表
 };

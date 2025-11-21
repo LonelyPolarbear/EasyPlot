@@ -737,3 +737,37 @@ std::shared_ptr<XGraphicsItem> XGraphicsItem::getParentItem() const
 {
 	return m_parentItem;
 }
+
+bool XGraphicsItem::addAttribute(const std::wstring& key, const std::wstring& value)
+{
+	if(key.empty() || value.empty())
+		return false;
+	if (m_attributes.find(key) != m_attributes.end()) {
+		return false;
+	}
+	m_attributes[key] = value;
+	return true;
+}
+
+bool XGraphicsItem::removeAttribute(const std::wstring& key)
+{
+	if (m_attributes.find(key) != m_attributes.end()) {
+		m_attributes.erase(key);
+		return true;
+	}
+	return false;
+}
+
+std::wstring XGraphicsItem::getAttribute(const std::wstring& key) const
+{
+	auto it = m_attributes.find(key);
+	if (it != m_attributes.end()) {
+		return it->second;
+	}
+	return std::wstring();
+}
+
+std::map<std::wstring, std::wstring> XGraphicsItem::getAttributes() const
+{
+	return m_attributes;
+}

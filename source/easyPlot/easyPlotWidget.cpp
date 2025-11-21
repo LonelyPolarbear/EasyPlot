@@ -1027,6 +1027,18 @@ void easyPlotWidget::slotAddLine2D(int curveType)
 	if (flag) {
 		d->scene->addGraphicsItem(item);
 	}
+
+	{
+		auto itemLegend = makeShareDbObject<XLegendRowItem>();
+		itemLegend->setSingleColor(myUtilty::Vec4f(1, 0, 0, 0));
+		itemLegend->setVisible(true);
+		itemLegend->setChecked(true);
+		//item->translate(0, 30 * i + 10);
+		//item->scale(200, 30);
+		item->addAttribute(L"Name",L"ÇúÏß1");
+		d->scene->addGraphicsItem(itemLegend);
+		itemLegend->setCurve(item);
+	}
 	
 	doneCurrent();
 }
@@ -1128,9 +1140,9 @@ void easyPlotWidget::slotAddBar()
 	}
 	#endif
 
-	for (int i = 0; i < 5; i++) {
+	for (int i = 0; i < 1; i++) {
 		auto item = makeShareDbObject<XLegendRowItem>();
-		item->setSingleColor(myUtilty::Vec4f( 0,0,0,0));
+		item->setSingleColor(myUtilty::Vec4f( 1,0,0,0));
 		item->setVisible(true);
 		item->setChecked(true);
 		item->translate(0,30*i+10);

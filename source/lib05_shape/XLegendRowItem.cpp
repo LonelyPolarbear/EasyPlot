@@ -1,5 +1,6 @@
 #include "XLegendRowItem.h"
 #include <lib04_opengl/XOpenGLBuffer.h>
+#include <lib08_freetype/xfreetype.h>
 #include "XTextItem.h"
 #include "XRectItem.h"
 #include "XCheckBoxItem.h"
@@ -32,6 +33,8 @@ public:
 	std::shared_ptr<XTextItem> textItem;
 	std::shared_ptr<XCheckBoxItem> checkboxItem;
 	std::shared_ptr<XRectItem> backGrounditem;
+
+	std::shared_ptr< XGraphicsItem> assoiateItem;		//关联的曲线
 	bool checked = false;
 	std::wstring plotText =L"测试曲线";
 
@@ -45,6 +48,16 @@ public:
 
 	double textSize = 20;
 
+	double spacer = 5;
+
+	double computeWidth() {
+		auto textWidth = xfreetype::Instance()->computeLineStrWidth(plotText, textSize);
+		return spacer + checkboxWidth + spacer + bacgroundWidth + spacer + textWidth + spacer;
+	}
+
+	double computeHeight() {
+		return bacgroundHeight+2;
+	}
 };
 XLegendRowItem::XLegendRowItem(std::shared_ptr<XGraphicsItem> parent):XRectItem(parent), m_internal(new Internal)
 {
@@ -74,6 +87,23 @@ bool XLegendRowItem::isChecked() const
 	return m_internal->checked;
 }
 
+void XLegendRowItem::setCurve(const std::shared_ptr<XGraphicsItem>& curve)
+{
+	m_internal->assoiateItem = curve;
+}
+
+void XLegendRowItem::draw(const Eigen::Matrix4f& m)
+{
+	auto curve = m_internal->assoiateItem;
+	if (curve) {
+		m_internal->backGrounditem->setFillColor(curve->getSingleColor());
+		auto curveName = curve->getAttribute(L"Name");
+		m_internal->plotText = curveName;
+		m_internal->textItem->setText(curveName);
+	}
+	return XRectItem::draw(m);
+}
+
 void XLegendRowItem::updateChildPosition(const Eigen::Matrix4f& m)
 {
 	auto selfTransform = this->getTransform();
@@ -83,8 +113,20 @@ void XLegendRowItem::updateChildPosition(const Eigen::Matrix4f& m)
 	auto sx =localCoord.scalex;
 	auto sy =localCoord.scaley;
 
+	{
+		LocalCoordCompute localCoord(scenFrameInVirtual * m );
+		auto sx = localCoord.scalex;
+		auto sy = localCoord.scaley;
+		auto totalWidth = m_internal->computeWidth();
+		auto totalHeight = m_internal->computeHeight();
+	
+		auto this_sx = totalWidth * 0.5 / sx;
+		auto this_sy = totalHeight * 0.5 / sy;
+		this->setScale(this_sx, this_sy);
+	}
+
 	//sx * x =20*0.5
-	double spacer = 5;
+	double spacer = m_internal->spacer;
 
 	//先计算复选框
 	auto checkbox_sx = m_internal->checkboxWidth * 0.5 / sx;
