@@ -50,7 +50,7 @@ void XGraphicsItem::bindSSBO()
 void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 {
 	initiallize();
-	if (!m_IsVisible || !m_shaderManger)
+	if (!m_IsVisible || !getShaderManger())
 		return;
 
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
@@ -60,7 +60,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 		if (m_IsFilled) {
 			glEnableObj->disable(XOpenGLEnable::EnableType::BLEND);
 			glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
-			drawFill(m_shaderManger->getFillShader(), m);
+			drawFill(getShaderManger()->getFillShader(), m);
 			glEnableObj->restore();
 		}
 
@@ -69,7 +69,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
-		drawBorder(m_shaderManger->getShader2D(getDrawType()), m);
+		drawBorder(getShaderManger()->getShader2D(getDrawType()), m);
 		glEnableObj->restore();
 	}
 
@@ -96,7 +96,7 @@ void XGraphicsItem::pickBorderDraw(std::shared_ptr<xshader> shader,const Eigen::
 
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
 	for (auto item : m_childItems) {
-		item->drawBorderImpl(m_shaderManger->getShader2D(getDrawType()),mat,true);
+		item->drawBorderImpl(getShaderManger()->getShader2D(getDrawType()),mat,true);
 	}
 }
 
@@ -105,7 +105,7 @@ void XGraphicsItem::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::M
 	initiallize();
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
 	for (auto item : m_childItems) {
-		item->drawFill(m_shaderManger->getPickFillShader2D(), mat);
+		item->drawFill(getShaderManger()->getPickFillShader2D(), mat);
 	}
 
 	/*if (isComposite() == false)*/
@@ -220,7 +220,7 @@ void XGraphicsItem::beginClip(const Eigen::Matrix4f& m)
 	initiallize();
 	if(!m_clipEnable)
 		return;
-	auto shader = m_shaderManger->getFillShader();
+	auto shader = getShaderManger()->getFillShader();
 	shader->use();
 	//在绘制之前，需要利用模板缓冲，避免图表外的曲线点被渲染
 	//开启模板测试
@@ -418,7 +418,14 @@ void XGraphicsItem::setShaderManger(std::shared_ptr<xShaderManger> shaderManger)
 
 std::shared_ptr<xShaderManger> XGraphicsItem::getShaderManger() const
 {
-	return m_shaderManger;
+	if(m_shaderManger)
+		return m_shaderManger;
+	else{
+		if (m_parentItem)
+			return m_parentItem->getShaderManger();
+		else
+			return nullptr;
+	}
 }
 
 uint32_t XGraphicsItem::getLineWidth() const
@@ -702,7 +709,7 @@ uint32_t XGraphicsItem::computeNumofVertices() {
 void XGraphicsItem::addChildItem(std::shared_ptr<XGraphicsItem> item)
 {
 	if (item) {
-		item->setShaderManger(m_shaderManger);
+		item->setShaderManger(getShaderManger());
 		m_childItems.push_back(item);
 	}
 }
@@ -770,4 +777,34 @@ std::wstring XGraphicsItem::getAttribute(const std::wstring& key) const
 std::map<std::wstring, std::wstring> XGraphicsItem::getAttributes() const
 {
 	return m_attributes;
+}
+
+LocalCoordCompute::LocalCoordCompute(const Eigen::Matrix4f& transform)
+{
+	m_transform.matrix() = transform;
+	leftBot = m_transform * Eigen::Vector3f(-1, -1, 0);
+	rightBot = m_transform * Eigen::Vector3f(1, -1, 0);
+	leftTop = m_transform * Eigen::Vector3f(-1, 1, 0);
+	rightTop = m_transform * Eigen::Vector3f(1, 1, 0);
+	center = m_transform * Eigen::Vector3f(0, 0, 0);
+
+#if 0
+	dir_x = (rightBot - leftBot).normalized();
+	dir_y = (leftTop - leftBot).normalized();
+	scalex = (rightBot - leftBot).norm() / 2;
+	scaley = (leftTop - leftBot).norm() / 2;
+	{
+		Eigen::Vector3f dir_x = m_transform.linear() * Eigen::Vector3f::UnitX();
+		Eigen::Vector3f dir_y = m_transform.linear() * Eigen::Vector3f::UnitY();
+		auto scalex = dir_x.norm();
+		auto scaley = dir_y.norm();
+	}
+#else
+	dir_x = m_transform.linear() * Eigen::Vector3f::UnitX();
+	dir_y = m_transform.linear() * Eigen::Vector3f::UnitY();
+	scalex = dir_x.norm();
+	scaley = dir_y.norm();
+	dir_x.normalize();
+	dir_y.normalize();
+#endif
 }

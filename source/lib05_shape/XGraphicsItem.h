@@ -50,18 +50,7 @@ namespace XGL {
 //假设有一个正方形 边长为2，原点位于中心，假设有个变换矩阵M，作用在该矩形，现在需要根据变换后的一个位置，反算出原始的点
 struct LIB05_SHAPE_API LocalCoordCompute {
 	Eigen::Affine3f m_transform;
-	LocalCoordCompute(const Eigen::Matrix4f& transform) {
-		m_transform.matrix() = transform;
-		leftBot = m_transform * Eigen::Vector3f(-1, -1, 0);
-		rightBot = m_transform * Eigen::Vector3f(1, -1, 0);
-		leftTop = m_transform * Eigen::Vector3f(-1, 1, 0);
-		rightTop = m_transform * Eigen::Vector3f(1, 1, 0);
-		center = m_transform * Eigen::Vector3f(0, 0, 0);
-		dir_x = (rightBot - leftBot).normalized();
-		dir_y = (leftTop - leftBot).normalized();
-		scalex = (rightBot - leftBot).norm() / 2;
-		scaley = (leftTop - leftBot).norm() / 2;
-	}
+	LocalCoordCompute(const Eigen::Matrix4f& transform);
 
 	Eigen::Vector3f compute(XGL::Orientation orientation, float disx, float disy) {
 		Eigen::Vector3f result = Eigen::Vector3f(0, 0, 0);

@@ -17,7 +17,7 @@ int main(int argc,char** argv) {
 	QLoggingCategory::setFilterRules("qt.qpa.window.setGeometry=false");
 	
 	MainWindow w(nullptr);
-	w.resize(700,500);
+	w.resize(900,700);
 	w.show();
 
 	return a.exec();

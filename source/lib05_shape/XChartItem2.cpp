@@ -8,6 +8,7 @@
 #include "lib05_shape/XTextItem.h"
 #include "lib05_shape/XAxisItem.h"
 #include "lib05_shape/XLineItem.h"
+#include "lib05_shape/XLegendItem.h"
 #include <Eigen/Eigen>
 
 
@@ -15,6 +16,7 @@ class XChartItem2::Internal {
 public:
 	std::vector<std::shared_ptr<XGraphicsItem>> m_polylines;	//线段集合
 	std::shared_ptr< XGridItem> m_gridItem;	//网格
+	std::shared_ptr< XLegendItem> m_legend = makeShareDbObject<XLegendItem>();	//图例
 
 	sptr<XAxisItem> m_axisx;				//X轴
 	sptr<XAxisItem> m_axisy;				//Y轴
@@ -27,20 +29,19 @@ public:
 	myUtilty::Vec2f mXRange = myUtilty::Vec2f(-1, 1);
 
 	myUtilty::Vec2f mYRange = myUtilty::Vec2f(-1, 1);
-
-	bool createGrid(sptr<xShaderManger> shaderManger) {
-		if (!m_gridItem) {
-			m_gridItem = std::make_shared<XGridItem>();
-			m_gridItem->setShaderManger(shaderManger);
-			m_gridItem->setIsScreenGrid(false);
-			m_gridItem->setShowAxis(false);
-			return true;
+	
+	Internal() {
+		//创建默认的图元
+		{
+			m_title = makeShareDbObject<XTextItem>();
+			m_title->setHAlignment(XTextItem::HAlign::Center);
+			m_title->setVAlignment(XTextItem::VAlign::Middle);
+			m_title->setPositionType(XGL::PositionType::local_center);
+			m_title->setSingleColor(myUtilty::Vec4f(1, 1, 0, 1));
+			m_title->setText(L"标题测试");
+			m_title->setFontSize(20);
 		}
-		return false;
-	}
-
-	bool createAxis(sptr<xShaderManger> shaderManger) {
-		if (m_axisx == nullptr || m_axisy == nullptr) {
+		{
 			m_axisy = makeShareDbObject<XAxisItem>();
 			m_axisy->setLayout(XGL::Layout::vertical);
 			m_axisy->updateTextPos();
@@ -57,24 +58,15 @@ public:
 
 			m_axisx->getLine()->setLineWidth(3);
 			m_axisy->getLine()->setLineWidth(3);
-			return true;
-		}
-		return false;
-	}
 
-	bool createTitle(sptr<xShaderManger> shaderManger) {
-		if (!m_title) {
-			m_title = makeShareDbObject<XTextItem>();	
-			m_title->setHAlignment(XTextItem::HAlign::Center);
-			m_title->setVAlignment(XTextItem::VAlign::Middle);
-			m_title->setPositionType(XGL::PositionType::local_center);
-			m_title->setShaderManger(shaderManger);
-			m_title->setSingleColor(myUtilty::Vec4f(1, 1, 0, 1));
-			m_title->setText(L"标题测试");
-			m_title->setFontSize(20);
-			return true;
+			m_axisx->setRange(mXRange.x, mXRange.y);
+			m_axisy->setRange(mYRange.x, mYRange.y);
 		}
-		return false;
+		{
+			m_gridItem = std::make_shared<XGridItem>();
+			m_gridItem->setIsScreenGrid(false);
+			m_gridItem->setShowAxis(false);
+		}
 	}
 };
 
@@ -109,6 +101,12 @@ XChartItem2::XChartItem2(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(pa
 
 	m_isShowGrid = true;
 	m_clipEnable = true;
+
+	addChildItem(d->m_legend);
+	addChildItem(d->m_title);
+	addChildItem(d->m_axisx);
+	addChildItem(d->m_axisy);
+	updateGridFrame();
 }
 
 XChartItem2::~XChartItem2()
@@ -131,6 +129,7 @@ void XChartItem2::addPolyline(std::shared_ptr<XGraphicsItem> polyline)
 			polyline->setShaderManger(this->getShaderManger());
 		}
 		d->m_polylines.push_back(polyline);
+		d->m_legend->addCurve(polyline);
 	}
 }
 
@@ -143,57 +142,12 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 {
 	initiallize();
 	{
-		//对于自身的绘制，先更新数据
-		auto selfTransform = this->getTransform();
-
-		LocalCoordCompute localCoord(m*selfTransform.matrix());
-		
-		Eigen::Vector3f leftBot = localCoord.compute(XGL::Orientation::left_bottom, 18, 18);
-		Eigen::Vector3f rightBot = localCoord.compute(XGL::Orientation::right_bottom, 18, 18);
-		Eigen::Vector3f leftTop = localCoord.compute(XGL::Orientation::left_top, 18, 18);
-		Eigen::Vector3f titlePos = localCoord.compute(XGL::VAlignment::Top, 0, 50);
-		
-		
-		auto lengthx = abs(rightBot.x() - leftBot.x());
-		auto lengthy = abs(leftTop.y() - leftBot.y());
-		Eigen::Vector3f  center = (leftTop+rightBot)*0.5;
-
-		if (d->createTitle(getShaderManger())) {
-			addChildItem(d->m_title);
-		}
-
-		d->m_title->setPosition(titlePos.x(), titlePos.y());
-
-		d->createGrid(getShaderManger());
-
-		if (d->createAxis(this->getShaderManger())) {
-			d->m_axisx->setRange(-40,100);
-			d->m_axisy->setRange(-20,80);
-
-			d->m_axisx->setRange(d->mXRange.x, d->mXRange.y);
-			d->m_axisy->setRange(d->mYRange.x, d->mYRange.y);
-
-			addChildItem(d->m_axisx);
-			addChildItem(d->m_axisy);
-			updateGridFrame();
-		}
-
-		{
-			d->m_gridItem->resetTransform();
-			d->m_gridItem->translate(center.x(), center.y());
-			d->m_gridItem->scale(0.5 * lengthx, 0.5 * lengthy);
-		}
-
-		d->m_axisx->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(rightBot.x(), rightBot.y()));
-
-		d->m_axisy->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(leftTop.x(), leftTop.y()));
-
 		d->m_axisx->updateTextPos();
-
 		d->m_axisy->updateTextPos();
 
 		XGraphicsItem::draw(m);
 
+		auto selfTransform = this->getTransform();
 		auto clipTransform = selfTransform * d->m_gridItem->getTransform() * selfTransform.inverse();
 		beginClip(m*clipTransform.matrix());
 
@@ -232,6 +186,11 @@ void XChartItem2::setBackgroundColor(const myUtilty::Vec4f& color)
 	m_fillColor = color;
 }
 
+void XChartItem2::setTtitle(const std::wstring& title)
+{
+	d->m_title->setText(title);
+}
+
 void XChartItem2::chartTranslate(const myUtilty::Vec2f& lastPos_, const myUtilty::Vec2f& curPos_)
 {
 	auto parentTran = getParentAccumulateTransform();
@@ -246,8 +205,7 @@ void XChartItem2::chartTranslate(const myUtilty::Vec2f& lastPos_, const myUtilty
 
 	auto dx = curPos.x() - lasPos.x();
 	auto dy = curPos.y() - lasPos.y();
-	d->createGrid(getShaderManger());
-	d->createAxis(this->getShaderManger());
+
 	auto range =d->m_axisx->getRange();
 	range.x -= dx;
 	range.y -=dx;
@@ -265,7 +223,6 @@ void XChartItem2::chartTranslate(const myUtilty::Vec2f& lastPos_, const myUtilty
 
 void XChartItem2::chartSale(float dx, float dy)
 {
-	d->createGrid(getShaderManger());
 	{
 		dx = dx > 1 ? 0.1 : -0.1;
 		dy = dy > 1 ? 0.1 : -0.1;
@@ -284,20 +241,69 @@ void XChartItem2::chartSale(float dx, float dy)
 		d->m_axisy->setRange(range.x, range.y);
 	}
 	
-	d->createAxis(this->getShaderManger());
 	updateGridFrame();
 }
 
 void XChartItem2::updateGridFrame()
 {
 	//当轴的范围变化时，需要更新网格坐标系
-	d->createGrid(getShaderManger());
 	auto sx = d->m_axisx->getRange().y - d->m_axisx->getRange().x;
 	auto sy = d->m_axisy->getRange().y - d->m_axisy->getRange().x;
 	d->m_gridItem->gridReset();
 	d->m_gridItem->gridSetSale(sx, sy);
 	auto origin = myUtilty::Vec2d(d->m_axisx->getRange().x, d->m_axisy->getRange().x);
 	d->m_gridItem->setOrigin(origin);
+}
+
+void XChartItem2::updateChildPosition(const Eigen::Matrix4f& m)
+{
+	//对于自身的绘制，先更新数据
+	auto selfTransform = this->getTransform();
+	auto scenFrameInVirtual = getSceneMatrix();
+
+	LocalCoordCompute localCoord(scenFrameInVirtual * m * selfTransform.matrix());
+
+	Eigen::Vector3f leftBot = localCoord.compute(XGL::Orientation::left_bottom, 18, 18);
+	Eigen::Vector3f rightBot = localCoord.compute(XGL::Orientation::right_bottom, 18, 18);
+	Eigen::Vector3f leftTop = localCoord.compute(XGL::Orientation::left_top, 18, 18);
+	Eigen::Vector3f titlePos = localCoord.compute(XGL::VAlignment::Top, 0, 50);
+
+	auto lengthx = abs(rightBot.x() - leftBot.x());
+	auto lengthy = abs(leftTop.y() - leftBot.y());
+	Eigen::Vector3f  center = (leftTop + rightBot) * 0.5;
+
+
+	d->m_title->setPosition(titlePos.x(), titlePos.y());
+
+	{
+		d->m_gridItem->setShaderManger(getShaderManger());
+		d->m_gridItem->resetTransform();
+		d->m_gridItem->translate(center.x(), center.y());
+		d->m_gridItem->scale(0.5 * lengthx, 0.5 * lengthy);
+	}
+
+	d->m_axisx->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(rightBot.x(), rightBot.y()));
+	d->m_axisy->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(leftTop.x(), leftTop.y()));
+
+
+	//图例位置的更新
+	{
+		auto scenFrameInVirtual = getSceneMatrix();
+		LocalCoordCompute localCoord(scenFrameInVirtual * m * selfTransform.matrix());
+		auto w = d->m_legend->getWidth();
+		auto h = d->m_legend->getHeight();
+
+		auto space = 25;
+		//中心点距离左侧的距离是 0.5*w + 间隔
+		Eigen::Vector3f center = localCoord.compute(XGL::Orientation::right_top, 0.5 * w + space, 0.5 * h + space);
+		auto sx = localCoord.scalex;
+		auto sy = localCoord.scaley;
+		auto this_sx = w * 0.5 / sx;
+		auto this_sy = h * 0.5 / sy;
+		d->m_legend->resetTransform();
+		d->m_legend->translate(center.x(), center.y());
+		d->m_legend->setScale(this_sx, this_sy);
+	}
 }
 
 

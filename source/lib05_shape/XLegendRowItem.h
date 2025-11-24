@@ -11,6 +11,8 @@ public:
 	bool isChecked() const;
 	void setCurve(const std::shared_ptr<XGraphicsItem>& curve);
 	void draw(const Eigen::Matrix4f& m) override;
+	double getWidth() const ;
+	double getHeight() const ;
 protected:
 	void updateChildPosition(const Eigen::Matrix4f& m) override;
 protected:

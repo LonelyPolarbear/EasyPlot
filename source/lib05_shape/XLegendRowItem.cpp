@@ -43,7 +43,7 @@ public:
 	double checkboxWidth = 20;
 	double checkboxHeight = 20;
 
-	double bacgroundWidth = 200;
+	double bacgroundWidth = 40;
 	double bacgroundHeight = 20;
 
 	double textSize = 20;
@@ -73,13 +73,13 @@ XLegendRowItem::~XLegendRowItem()
 
 void XLegendRowItem::setChecked(bool checked)
 {
-	/*m_internal->checked = checked;
+	m_internal->checked = checked;
 	if (checked) {
 		m_internal->textItem->setText(L"¡Ì");
 	}
 	else {
 		m_internal->textItem->setText(L" ");
-	}*/
+	}
 }
 
 bool XLegendRowItem::isChecked() const
@@ -104,6 +104,16 @@ void XLegendRowItem::draw(const Eigen::Matrix4f& m)
 	return XRectItem::draw(m);
 }
 
+double XLegendRowItem::getWidth() const
+{
+	return m_internal->computeWidth();
+}
+
+double XLegendRowItem::getHeight() const
+{
+	return m_internal->computeHeight();
+}
+
 void XLegendRowItem::updateChildPosition(const Eigen::Matrix4f& m)
 {
 	auto selfTransform = this->getTransform();
@@ -112,18 +122,6 @@ void XLegendRowItem::updateChildPosition(const Eigen::Matrix4f& m)
 	LocalCoordCompute localCoord(scenFrameInVirtual * m * selfTransform.matrix());
 	auto sx =localCoord.scalex;
 	auto sy =localCoord.scaley;
-
-	{
-		LocalCoordCompute localCoord(scenFrameInVirtual * m );
-		auto sx = localCoord.scalex;
-		auto sy = localCoord.scaley;
-		auto totalWidth = m_internal->computeWidth();
-		auto totalHeight = m_internal->computeHeight();
-	
-		auto this_sx = totalWidth * 0.5 / sx;
-		auto this_sy = totalHeight * 0.5 / sy;
-		this->setScale(this_sx, this_sy);
-	}
 
 	//sx * x =20*0.5
 	double spacer = m_internal->spacer;

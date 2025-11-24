@@ -42,6 +42,7 @@
 #include <lib05_shape/XGridItem.h>
 #include <lib05_shape/XCheckBoxItem.h>
 #include <lib05_shape/XLegendRowItem.h>
+#include <lib05_shape/XLegendItem.h>
 
 #include <lib06_select/xviewselection.h>
 #include <lib07_scene/xscene.h>
@@ -201,7 +202,6 @@ void easyPlotWidget::initGLResource()
 			d->scene->addGraphicsItem(item);
 		}
 	}
-
 
 	//鼠标位置显示
 	{
@@ -950,6 +950,9 @@ void easyPlotWidget::slotAddLine2D(int curveType)
 	//创建一条曲线
 	makeCurrent();
 	auto item = makeShareDbObject<XPolyline>();
+	std::wstring name = L"曲线";
+	name.append(std::to_wstring(myUtilty::math::randon<int>(0, 100)));
+	item->addAttribute(L"Name", name);
 	item->setLineWidth(2);
 	item->setPenStyle(XGraphicsItem::PenStyle::Solid);
 
@@ -1028,18 +1031,6 @@ void easyPlotWidget::slotAddLine2D(int curveType)
 		d->scene->addGraphicsItem(item);
 	}
 
-	{
-		auto itemLegend = makeShareDbObject<XLegendRowItem>();
-		itemLegend->setSingleColor(myUtilty::Vec4f(1, 0, 0, 0));
-		itemLegend->setVisible(true);
-		itemLegend->setChecked(true);
-		//item->translate(0, 30 * i + 10);
-		//item->scale(200, 30);
-		item->addAttribute(L"Name",L"曲线1");
-		d->scene->addGraphicsItem(itemLegend);
-		itemLegend->setCurve(item);
-	}
-	
 	doneCurrent();
 }
 
@@ -1062,6 +1053,8 @@ void easyPlotWidget::slotAddChart()
 		//chart->rotate(angle);
 
 		chart->scale(sx, sy);
+
+		chart->setTtitle(L"图表标题测试" );
 
 		d->scene->addGraphicsItem(chart);
 	}
@@ -1088,7 +1081,7 @@ void easyPlotWidget::slotAddBar()
 {
 	//创建一条曲线
 	makeCurrent();
-	#if 0
+	#if 1
 	auto item = makeShareDbObject<XBarItem>();
 	item->setLineWidth(1);
 	item->setPenStyle(XGraphicsItem::PenStyle::Dash);
@@ -1140,17 +1133,15 @@ void easyPlotWidget::slotAddBar()
 	}
 	#endif
 
-	for (int i = 0; i < 1; i++) {
-		auto item = makeShareDbObject<XLegendRowItem>();
-		item->setSingleColor(myUtilty::Vec4f( 1,0,0,0));
-		item->setVisible(true);
-		item->setChecked(true);
-		item->translate(0,30*i+10);
-		//item->scale(200, 30);
-		d->scene->addGraphicsItem(item);
-	}
-	
-
+	//for (int i = 0; i < 1; i++) {
+	//	auto item = makeShareDbObject<XLegendRowItem>();
+	//	item->setSingleColor(myUtilty::Vec4f( 1,0,0,0));
+	//	item->setVisible(true);
+	//	item->setChecked(true);
+	//	item->translate(0,30*i+10);
+	//	//item->scale(200, 30);
+	//	d->scene->addGraphicsItem(item);
+	//}
 
 	doneCurrent();
 }

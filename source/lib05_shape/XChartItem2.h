@@ -21,6 +21,8 @@ public:
 	
 	void setBackgroundColor(const myUtilty::Vec4f &color);
 
+	void setTtitle(const std::wstring& title);
+
 	/// <summary>
 	/// 
 	/// </summary>
@@ -31,6 +33,8 @@ public:
 	void chartSale(float dx, float dy);
 
 	void updateGridFrame();
+
+	void updateChildPosition(const Eigen::Matrix4f&) override;
 protected:
 	virtual void updateVboCoord();
 

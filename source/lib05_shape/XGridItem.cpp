@@ -3,7 +3,7 @@
 #include <lib01_shader/xshaderManger.h>
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
 
-XGridItem::XGridItem():XGraphicsItem()
+XGridItem::XGridItem(std::shared_ptr< XGraphicsItem> parent):XGraphicsItem(parent)
 {
 	this->setDrawType(PrimitveType::line_strip_adjacency);
 	auto coord = makeShareDbObject<XFloatArray>();
@@ -34,19 +34,19 @@ XGridItem::~XGridItem()
 void XGridItem::draw(const Eigen::Matrix4f& m)
 {
 	initiallize();
-	auto shader = m_shaderManger->getGridShader2D();
+	auto shader = getShaderManger()->getGridShader2D();
 	drawBorder(shader,m);
 }
 
 void XGridItem::drawBorder(std::shared_ptr<xshader> border_shader, const Eigen::Matrix4f& m)
 {
 	initiallize();
-	if(!m_shaderManger || !m_IsVisible)
+	if(!getShaderManger() || !m_IsVisible)
 		return;
 
 	updateData();
 	
-	auto shader = m_shaderManger->getGridShader2D();
+	auto shader = getShaderManger()->getGridShader2D();
 	shader->use();
 	shader->setBool("isScreenGrid", m_isScreenGrid);
 

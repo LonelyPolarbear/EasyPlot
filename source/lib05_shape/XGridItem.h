@@ -9,7 +9,7 @@ public:
 enum class GridType {
 };
 public:
-	XGridItem();
+	XGridItem(std::shared_ptr< XGraphicsItem> parent = nullptr );
 	virtual ~XGridItem();
 
 	virtual void draw(const Eigen::Matrix4f& m) override;
