@@ -75,6 +75,16 @@ void XTextItem::draw(const Eigen::Matrix4f& m)
 	}
 }
 
+void XTextItem::pickBorderDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
+{
+	return XGraphicsItem::pickBorderDraw(shader, m);
+}
+
+void XTextItem::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
+{
+	return XGraphicsItem::pickFillDraw(shader, m);
+}
+
 void XTextItem::initResource()
 {
 	XGraphicsItem::initResource();

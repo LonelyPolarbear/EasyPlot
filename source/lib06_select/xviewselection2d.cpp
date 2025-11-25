@@ -17,7 +17,7 @@ public:
 
 	bool isNearToFar = true;
 	float depthPeelingEpsilon = 0.0001;
-	bool isPeeling = true;
+	bool isPeeling = false;
 	int PeelLayerNum = 10;
 	int currentPass = 1;		//当前的有效层数
 	std::vector<unsigned int> queryHandles;
@@ -106,7 +106,19 @@ XViewSelection2D::SelectData XViewSelection2D::getPointSelection(int x, int y, i
 		auto primitiveId = color1[1];
 		result.objectId = objectId;
 		result.primitiveId = primitiveId;
+
+		std::vector<unsigned int> fff;
+		fff.resize(ViewportWidth*ViewportHeight);
+		for (int x = 0; x < ViewportWidth; x++) {
+			for (int y = 0; y < ViewportHeight; y++) {
+				auto color1 = ptrColorTexture + y * ViewportWidth * 4 + x * 4;
+				auto objectId = color1[0];
+				fff[y*ViewportWidth+x] = objectId;
+			}
+		}
 	}
+
+	
 
 	pbo->unmap();
 	return result;
@@ -215,9 +227,9 @@ bool XViewSelection2D::renderLayer(std::set<std::shared_ptr<XGraphicsItem>> obje
 
 	glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_DEPTH_TEST);
 
-	glDepthFunc(GL_LESS);
+	//glDepthFunc(GL_LESS);
 
 	glDisable(GL_MULTISAMPLE);
 

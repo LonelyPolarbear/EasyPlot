@@ -1160,7 +1160,7 @@ void easyPlotWidget::slotAddText()
 		item->setFontSize(36);
 		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
 		item->setText(L"ÇëÊäÈëÒ»¶ÎÎÄ×Ö");
-		item->setPositionType(XGL::PositionType::sceneScreen_center);
+		item->setPositionType(XGL::PositionType::local_center);
 		item->setOrientation(XGL::Orientation::left_bottom);
 
 		item->setPosition(100, 100);
@@ -1237,7 +1237,7 @@ void easyPlotWidget::slotAxis2D()
 		axis->setVisible(true);
 
 		axis->getLine()->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-		axis->getLine()->setFixedLine(true);
+		axis->getLine()->setFixedLine(false);
 		axis->getLine()->setLineWidth(2);
 		axis->getLine()->setPositionType(XGL::PositionType::local_complete);
 		axis->getLine()->setOrientation(XGL::Orientation::left_bottom);

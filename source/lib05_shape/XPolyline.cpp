@@ -106,3 +106,13 @@ uint32_t XPolyline::computeNumofVertices()
 {
 	return m_coordArray->getNumOfTuple()+2;
 }
+
+void XPolyline::pickBorderDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
+{
+	return XGraphicsItem::pickBorderDraw(shader,m);
+}
+
+void XPolyline::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
+{
+	//return XGraphicsItem::pickFillDraw(shader, m);
+}

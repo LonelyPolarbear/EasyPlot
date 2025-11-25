@@ -245,8 +245,8 @@ public:
 
 	std::shared_ptr<XGraphicsItem> getShape2d(uint64_t id) {
 		for (auto& shape : shapes2D) {
-			if (shape->getID() == id) {
-				return shape;
+			if (auto ret =shape->getChildByID(id)) {
+				return ret;
 			}
 		}
 		return nullptr;

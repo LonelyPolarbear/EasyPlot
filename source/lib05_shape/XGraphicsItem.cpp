@@ -41,6 +41,23 @@ XGraphicsItem::~XGraphicsItem()
 int64_t XGraphicsItem::getID() const {
 	return d->m_id;
 }
+sptr<XGraphicsItem> XGraphicsItem::getChildByID(int64_t id) const
+{
+	if (getID() == id) {
+		sptr<DataBaseObject> ss = std::const_pointer_cast<DataBaseObject>( shared_from_this());
+		return std::dynamic_pointer_cast<XGraphicsItem>(ss);
+	}
+	for (auto item : m_childItems) {
+		if (item->getID() == id) {
+			return item;
+		}
+		else {
+			if(auto ret = item->getChildByID(id))
+				return ret;
+		}
+	}
+	return nullptr;
+}
 void XGraphicsItem::bindSSBO()
 {
 	m_ssbo_len->bind();
@@ -73,10 +90,6 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 		glEnableObj->restore();
 	}
 
-	//!
-	//! [3] 绘制子类图元
-	//beginClip(m);			//需要知道当前图元的层级，
-
 	//在绘制子类图元之前，可能会根据父图元的当前位置，调整子类图元位置
 	updateChildPosition(m);
 
@@ -84,32 +97,31 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 	for (auto item : m_childItems) {
 		item->draw(mat);
 	}
-
-	//endClip();
 }
 
 void XGraphicsItem::pickBorderDraw(std::shared_ptr<xshader> shader,const Eigen::Matrix4f& m)
 {
 	initiallize();
-	/*if(isComposite() == false)*/
-		drawBorderImpl(shader, m, true);
+	
+	drawBorderImpl(shader, m, true);
+	drawBorderImpl(shader, m, false);
 
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
 	for (auto item : m_childItems) {
-		item->drawBorderImpl(getShaderManger()->getShader2D(getDrawType()),mat,true);
+		item->pickBorderDraw(/*getShaderManger()->getShader2D(getDrawType())*/shader,mat);
 	}
 }
 
 void XGraphicsItem::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
 {
 	initiallize();
+
+	drawFill(shader, m);
+
 	Eigen::Matrix4f mat = m * d->m_transform.matrix();	//叠加父类的变换
 	for (auto item : m_childItems) {
-		item->drawFill(getShaderManger()->getPickFillShader2D(), mat);
-	}
-
-	/*if (isComposite() == false)*/
-		drawFill(shader, m);
+		item->pickFillDraw(/*getShaderManger()->getPickFillShader2D()*/shader, mat);
+	}	
 }
 
 void XGraphicsItem::drawBorder(std::shared_ptr<xshader> shader,  const Eigen::Matrix4f& m ){
@@ -251,6 +263,11 @@ void XGraphicsItem::endClip()
 	glDisable(GL_STENCIL_TEST);
 }
 
+void XGraphicsItem::setTransform(const Eigen::Matrix4f& m)
+{
+	d->m_transform.matrix() = m;
+}
+
 void XGraphicsItem::initResource()
 {
 	
@@ -340,6 +357,11 @@ Eigen::Affine3f XGraphicsItem::getParentAccumulateTransform() const
 sptr<XGraphicsItem> XGraphicsItem::getParent() const
 {
 	return m_parentItem;
+}
+
+void XGraphicsItem::setParent(std::shared_ptr<XGraphicsItem> parent)
+{
+	m_parentItem = parent;
 }
 
 void XGraphicsItem::setCoordArray(std::shared_ptr<XFloatArray> coordArray)

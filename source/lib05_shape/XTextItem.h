@@ -16,6 +16,10 @@ public:
 	XTextItem();
 	virtual ~XTextItem();
 	void draw(const Eigen::Matrix4f& m) override;
+
+	 void pickBorderDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m) override;
+	 void pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m) override;
+
 	 void setText(const std::wstring& text);
 	 void setFontSize(double size);
 	 double getFontSize() const;

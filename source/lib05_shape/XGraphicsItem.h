@@ -167,6 +167,7 @@ public:
 	virtual ~XGraphicsItem();
 
 	int64_t getID() const;
+	sptr< XGraphicsItem> getChildByID(int64_t id) const;
 	void bindSSBO();
 	virtual void draw(const Eigen::Matrix4f& m = Eigen::Matrix4f::Identity());
 	virtual void pickBorderDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m);
@@ -182,11 +183,16 @@ protected:
 public:
 	void beginClip(const Eigen::Matrix4f& m);
 	void endClip();
+
+	void setTransform(const Eigen::Matrix4f& m);
+
 	Eigen::Affine3f getTransform() const;
 
 	Eigen::Affine3f getParentAccumulateTransform() const;
 
 	sptr<XGraphicsItem> getParent() const;
+
+	void setParent(std::shared_ptr<XGraphicsItem> parent);
 
 	void setCoordArray(std::shared_ptr<XFloatArray> coordArray);
 	void setIndexArray(std::shared_ptr<XUIntArray> coordArray);

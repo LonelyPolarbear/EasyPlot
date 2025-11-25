@@ -12,7 +12,9 @@ public:
 	virtual ~XChartItem2();
 
 	void setRect(float x, float y, float w, float h);
+
 	void addPolyline(std::shared_ptr<XGraphicsItem> polyline);
+
 	void clearPolylines();
 
 	 void draw(const Eigen::Matrix4f& m) override ;

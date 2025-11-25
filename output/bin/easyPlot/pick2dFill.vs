@@ -107,13 +107,13 @@ void main()
 			mat =virtualWorldFrame*   sceneFrameInVirtualWorld* ModelMat*ModelMatSelf*mat;
 		}
 	else if(PositionType == local_center){
-			mat4 localToWorld =   sceneFrameInVirtualWorld*ModelMat;
-			mat4 removeScale_sceneFrameInVirtualWorld =removeScale(localToWorld);
-			mat4  posture= removeScale_sceneFrameInVirtualWorld ;
-			mat4  pos=  localToWorld;
-			mat4 pos_posture =mat4(posture[0],posture[1],posture[2],pos[3]);
+		mat4 localToWorld =   sceneFrameInVirtualWorld*ModelMat*ModelMatSelf;
+		mat4 removeScale_sceneFrameInVirtualWorld =removeScale(localToWorld);
+		mat4  posture= removeScale_sceneFrameInVirtualWorld ;
+		mat4  pos=  localToWorld;
+		mat4 pos_posture =mat4(posture[0],posture[1],posture[2],pos[3]);
 
-			mat =virtualWorldFrame* pos_posture*ModelMatSelf*mat;
+		mat =virtualWorldFrame* pos_posture*/*ModelMatSelf**/mat;
 		}
 	else if(PositionType == sceneScreen_center){
 			mat4  posture= sceneFrameInVirtualWorld *ModelMat*ModelMatSelf;

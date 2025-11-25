@@ -63,7 +63,7 @@ public:
 			m_axisy->setRange(mYRange.x, mYRange.y);
 		}
 		{
-			m_gridItem = std::make_shared<XGridItem>();
+			m_gridItem =makeShareDbObject<XGridItem>();
 			m_gridItem->setIsScreenGrid(false);
 			m_gridItem->setShowAxis(false);
 		}
@@ -100,8 +100,7 @@ XChartItem2::XChartItem2(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(pa
 	this->setBackgroundColor(myUtilty::Vec4f(1.f, 1.f, 0.f, 1.0f));
 
 	m_isShowGrid = true;
-	m_clipEnable = true;
-
+	addChildItem(d->m_gridItem);
 	addChildItem(d->m_legend);
 	addChildItem(d->m_title);
 	addChildItem(d->m_axisx);
@@ -130,12 +129,13 @@ void XChartItem2::addPolyline(std::shared_ptr<XGraphicsItem> polyline)
 		}
 		d->m_polylines.push_back(polyline);
 		d->m_legend->addCurve(polyline);
+		d->m_gridItem->addLine(polyline);
 	}
 }
 
 void XChartItem2::clearPolylines()
 {
-	m_childItems.clear();
+	d->m_polylines.clear();
 }
 
 void XChartItem2::draw(const Eigen::Matrix4f& m)
@@ -145,8 +145,19 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 		d->m_axisx->updateTextPos();
 		d->m_axisy->updateTextPos();
 
-		XGraphicsItem::draw(m);
+		/*auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
+		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
 
+		if (!d->m_gridItem->getShaderManger()) {
+			d->m_gridItem->setShaderManger(getShaderManger());
+		}
+		d->m_gridItem->draw(m * getTransform().matrix());
+		glEnableObj->restore();*/
+
+		XGraphicsItem::draw(m);
+#if 0
 		auto selfTransform = this->getTransform();
 		auto clipTransform = selfTransform * d->m_gridItem->getTransform() * selfTransform.inverse();
 		beginClip(m*clipTransform.matrix());
@@ -157,15 +168,7 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 		}
 
 		endClip();
-
-		auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
-		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
-		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
-
-		Eigen::Matrix4f parentTransform = m * selfTransform.matrix();
-		d->m_gridItem->draw(parentTransform);
-		glEnableObj->restore();
+#endif
 	}
 }
 
