@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <Eigen/Eigen>
 #include <lib01_shader/xshader.h>
+#include <lib01_shader/XComputeShader.h>
 #include <lib01_shader/xshaderManger.h>
 #include <lib02_camera/xcamera.h>
 #include <lib00_utilty/myUtilty.h>
@@ -18,6 +19,7 @@
 
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <lib04_opengl/XOpenGLTexture.h>
+#include <lib04_opengl/XOpenGLContext.h>
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
 #include <lib04_opengl/XOpenGLFramebufferObject.h>
 
@@ -953,7 +955,8 @@ void easyPlotWidget::slotAddLine2D(int curveType)
 	std::wstring name = L"曲线";
 	name.append(std::to_wstring(myUtilty::math::randon<int>(0, 100)));
 	item->addAttribute(L"Name", name);
-	item->setLineWidth(2);
+	item->setLineWidth(3);
+	item->setFixedLine(true);
 	item->setPenStyle(XGraphicsItem::PenStyle::Solid);
 
 	//生成随机颜色
@@ -1237,7 +1240,7 @@ void easyPlotWidget::slotAxis2D()
 		axis->setVisible(true);
 
 		axis->getLine()->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-		axis->getLine()->setFixedLine(false);
+		axis->getLine()->setFixedLine(true);
 		axis->getLine()->setLineWidth(2);
 		axis->getLine()->setPositionType(XGL::PositionType::local_complete);
 		axis->getLine()->setOrientation(XGL::Orientation::left_bottom);
@@ -1249,22 +1252,6 @@ void easyPlotWidget::slotAxis2D()
 		axis->setRange(0,100);
 		d->scene->addGraphicsItem(axis);
 	}
-	//{
-	//	auto axis = makeShareDbObject<XLineItem>();
-	//	axis->initResource();
-	//	axis->setVisible(true);
-
-	//	axis->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-	//	axis->setFixedLine(true);
-	//	axis->setLineWidth(2);
-	//	axis->setPositionType(XGL::PositionType::sceneScreen_complete);
-	//	axis->setOrientation(XGL::Orientation::left_bottom);
-
-	//	axis->translate(0, 300);
-	//	axis->scale(100, 100);
-	//	//axis->setRange(0, 100);
-	//	d->scene->addGraphicsItem(axis);
-	//}
 	doneCurrent();
 }
 
@@ -1293,4 +1280,72 @@ void easyPlotWidget::slotFboTest()
 
 	dlg->raise();
 	dlg->show();
+}
+
+void easyPlotWidget::slotComputeShaderTest()
+{
+	makeCurrent();
+	auto computeShader = makeShareDbObject<XComputeShader>();
+	computeShader->loadComputeShader(myUtilty::ShareVar::instance().currentExeDir + "/easyPlot/" + "compute.cs");
+	
+	computeShader->use();
+	//准备数据，创建一个SSBO，并分配数据
+	auto ssbo = makeShareDbObject<XOpenGLBuffer>();
+	
+	ssbo->setBufferType(XOpenGLBuffer::ShaderStorageBuffer);
+	ssbo->setUsagePattern(XOpenGLBuffer::StaticDraw);
+	ssbo->create();
+	ssbo->bind();
+
+	auto d =makeShareDbObject<XFloatArray>();
+	d->setNumOfTuple(256);
+
+	for (int i = 0; i < 256; i++) {
+		d->setTuple(i,i);
+	}
+
+	ssbo->allocate( d->data(0), 256);
+
+	ssbo->setBufferBindIdx(1);
+
+	ssbo->release();
+
+	//派发任务
+	computeShader->dispatchCompute(1, 1, 1);
+	//glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	//异步等待GPU执行结束
+	auto glSyncObject = XOpenGLFuntion::xglFenceSync(XOpenGL::SyncFlags::none);
+	auto  shareContext = getContext()->createOrgetShareContext();
+	std::thread t([shareContext, glSyncObject, computeShader, ssbo](){
+		if (!shareContext->makeCurrent()) {
+			return;
+		}
+
+		auto waitResult = XOpenGLFuntion::xglClientWaitSync(glSyncObject, XOpenGL::SyncFlags::none, std::numeric_limits<unsigned long long>::max());
+		if (waitResult == XOpenGL::SyncStatus::SyncStatusAlreadySignaled ||
+			waitResult == XOpenGL::SyncStatus::SyncStatusConditionSatisfied)
+		{
+			std::cout<<"compute finished!\n";
+			//读取SSBO数据
+			auto ptr = (float*)ssbo->map(XOpenGLBuffer::ReadOnly);
+
+			auto d = makeShareDbObject<XFloatArray>();
+			d->setNumOfTuple(256);
+			
+			for (int i = 0; i < 256; i++) {
+				d->setTuple(i,ptr[i]);
+			}
+			//
+		}
+		else {
+			std::cout << "wait sync failed\n";
+		}
+
+		XOpenGLFuntion::xglDeleteSync(glSyncObject);
+
+		shareContext->doneCurrent();
+	});
+	t.detach();
+
+	doneCurrent();
 }

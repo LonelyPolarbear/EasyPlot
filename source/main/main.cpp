@@ -7,7 +7,6 @@
 #include "mainwindow.h"
 
 #include <QLoggingCategory>
-#include <regex>
 
 
 int main(int argc,char** argv) {

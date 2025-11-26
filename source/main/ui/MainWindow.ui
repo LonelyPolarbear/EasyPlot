@@ -340,6 +340,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="ActfboTest"/>
+   <addaction name="ActComputeTest"/>
   </widget>
   <action name="ActCube">
    <property name="icon">
@@ -669,6 +670,15 @@
    </property>
    <property name="text">
     <string>waveTriangle</string>
+   </property>
+  </action>
+  <action name="ActComputeTest">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/parallel_compute.svg</normaloff>:/icon/parallel_compute.svg</iconset>
+   </property>
+   <property name="text">
+    <string>compute</string>
    </property>
   </action>
  </widget>

@@ -42,5 +42,6 @@
         <file>icon/triangle_wave.svg</file>
         <file>icon/square_wave.svg</file>
         <file>icon/sine_wave.svg</file>
+        <file>icon/parallel_compute.svg</file>
     </qresource>
 </RCC>

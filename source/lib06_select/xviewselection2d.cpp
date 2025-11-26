@@ -250,10 +250,10 @@ bool XViewSelection2D::renderLayer(std::set<std::shared_ptr<XGraphicsItem>> obje
 		d->pickShader->setFloat("depthPeelingEpsilon", 0.0001);
 
 
-		for (auto shape : objects) {
+		/*for (auto shape : objects) {
 			shape->setPolygonMode(PolygonMode::line);
 			shape->pickBorderDraw(d->pickShader, m);
-		}
+		}*/
 
 		d->pickShader->unUse();
 	}
@@ -267,16 +267,29 @@ bool XViewSelection2D::renderLayer(std::set<std::shared_ptr<XGraphicsItem>> obje
 		d->pickFillShader->setBool("isNearToFar", d->isNearToFar);
 		d->pickFillShader->setFloat("depthPeelingEpsilon", 0.0001);
 
-		d->pickFillShader->setViewMatrix(camera->getViewMatrix());
-		d->pickFillShader->setProjectionMatrix(camera->projectionMatrix());
+
+		//for (auto shape : objects) {
+		//	//需要确保填充模式下生效
+		//	auto old = shape->isFilled();
+		//	shape->setIsFilled(true);
+		//	shape->pickFillDraw(d->pickFillShader, m);
+		//	shape->setIsFilled(old);
+		//}
+		d->pickFillShader->unUse();
+	}
+
+	{
 		for (auto shape : objects) {
 			//需要确保填充模式下生效
+
 			auto old = shape->isFilled();
 			shape->setIsFilled(true);
 			shape->pickFillDraw(d->pickFillShader, m);
 			shape->setIsFilled(old);
+
+			shape->setPolygonMode(PolygonMode::line);
+			shape->pickBorderDraw(d->pickShader, m);
 		}
-		d->pickFillShader->unUse();
 	}
 
 	GLuint fragmentCount = 0;

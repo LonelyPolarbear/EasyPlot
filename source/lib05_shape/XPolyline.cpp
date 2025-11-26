@@ -114,5 +114,5 @@ void XPolyline::pickBorderDraw(std::shared_ptr<xshader> shader, const Eigen::Mat
 
 void XPolyline::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
 {
-	//return XGraphicsItem::pickFillDraw(shader, m);
+	return XGraphicsItem::pickFillDraw(shader, m);
 }

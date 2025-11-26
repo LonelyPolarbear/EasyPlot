@@ -109,6 +109,9 @@ public slots:
 
 	void slotFboTest();
 
+	//¼ÆËã×ÅÉ«Æ÷²âÊÔ
+	void slotComputeShaderTest();
+
 private:
 	struct Internal;
 	std::unique_ptr<Internal> d;

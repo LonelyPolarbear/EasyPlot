@@ -78,6 +78,8 @@ MainWindow::MainWindow(QWidget* parent) :QMainWindow(parent)
 	connect(ui->ActWaveTri, &QAction::triggered, [&]() {easyPlot->slotAddLine2D(2); });
 	connect(ui->ActWaveSquare, &QAction::triggered, [&]() {easyPlot->slotAddLine2D(3); });
 
+	connect(ui->ActComputeTest, &QAction::triggered, [&]() {easyPlot->slotComputeShaderTest(); });
+
 	QActionGroup *actionGroup = new QActionGroup(this);
 	actionGroup->addAction(ui->ActCornerRect);
 	actionGroup->addAction(ui->ActCenterRect);

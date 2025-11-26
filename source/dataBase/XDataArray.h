@@ -194,6 +194,7 @@ extern  template class database_API XDataArray<char>;
 extern  template class database_API XDataArray2D<unsigned char>;
 extern  template class database_API XDataArray2D<float>;
 extern  template class database_API XDataArray2D<double>;
+extern  template class database_API XDataArray2D<unsigned int>;
 
 using XIntArray = XDataArray<int>;
 using XUIntArray = XDataArray<unsigned int>;
@@ -202,6 +203,7 @@ using XDoubleArray = XDataArray<double>;
 using XUCharArray = XDataArray<unsigned char>;
 using XCharArray = XDataArray<char>;
 using XUCharArray2D = XDataArray2D<unsigned char>;
+using XUIntArray2D = XDataArray2D<unsigned int>;
 using XFloatArray2D = XDataArray2D<float>;
 using XDoubleArray2D = XDataArray2D<double>;
 using XCharArray2D = XDataArray2D<char>;

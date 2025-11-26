@@ -1,3 +1,4 @@
+//顶点着色器
 #version 430 core
 layout (lines_adjacency) in;
 layout (triangle_strip, max_vertices = 100) out;
@@ -8,6 +9,12 @@ layout (std140, binding = 3) uniform ubo_gs
 	uniform float sceneScale;															//当前场景的缩放比例
 };
 
+ layout(std430, binding = 1) buffer MySSBO_Block2  {
+    int size; // 动态大小数组
+    float data[]; // 动态大小数组
+}MySSBO_Len;        //记录每一个图元的长度
+
+uniform bool isComputeLineLentgh;
 uniform bool connectSmoothEnable;												//连接处是否平滑
 uniform bool isFixedLine;																//是否固定线宽,固定线宽时，lineWidth为固定值，不受缩放影响
 uniform uint lineWidth;																	//属于每个图元
@@ -119,6 +126,11 @@ void emitLineSegment(vec4 pos0 ,vec4 pos1,vec4 pos2,vec4 pos3,vec2 screenSize_,f
 		SCalelineWidth = realLineWidth;
 		SCalelineWidthInGs = lineWidth_;
 		gs_lineLength = length(screen_p2 - screen_p1);
+		MySSBO_Len.data[gl_PrimitiveIDIn] = gs_lineLength;
+
+		if(isComputeLineLentgh){
+			return;
+		}
 		EmitVertex();
 
 		gl_Position = quad[2];
@@ -142,14 +154,49 @@ void emitLineSegment(vec4 pos0 ,vec4 pos1,vec4 pos2,vec4 pos3,vec2 screenSize_,f
 		EndPrimitive();
 }
 
+#if 0
+void emitVertexJoin(vec4 centerPos, vec4 neighbor1, vec4 neighbor2,float lineWidth) {
+    vec2 center = clip2screen(centerPos, screenSize);
+    vec2 dir1 = normalize(clip2screen(neighbor1, screenSize) - center);
+    vec2 dir2 = normalize(clip2screen(neighbor2, screenSize) - center);
+    
+    // 计算两个方向之间的角度
+    float angle1 = atan(dir1.y, dir1.x);
+    float angle2 = atan(dir2.y, dir2.x);
+    
+    // 确保角度顺序正确
+    if (angle2 < angle1) angle2 += 2 * 3.14159;
+    
+    // 生成圆角的采样点
+    int segments = 8; // 圆角的细分段数，越多越平滑
+    float step = (angle2 - angle1) / segments;
+    
+    // 输出圆角三角形带
+    gl_Position = screen2clip(center, centerPos);
+    EmitVertex();
+    
+    for (int i = 0; i <= segments; i++) {
+        float angle = angle1 + step * i;
+        vec2 offset = vec2(cos(angle), sin(angle)) * lineWidth * 0.5;
+        gl_Position = screen2clip(center + offset, centerPos);
+        EmitVertex();
+    }
+    
+    EndPrimitive();
+}
+
+#endif
+
 void main()
 {	
 	float sceneScale_ = sceneScale;
+
+	//如果是固定线框，则不受缩放影响，sceneScale_固定为1
 	if(isFixedLine){
 		sceneScale_ = 1;
 	}
 	
-	float minLineWidth =2;
+	float minLineWidth =1;
 	float lineWidth_ = max(lineWidth*sceneScale_,minLineWidth);					//是为了保证 lineWidth_ >= 2，避免出现线条粗细不一致的情况
 	float realLineWidth = max( lineWidth,minLineWidth) * sceneScale_;			//真实线宽，用于FSAA,当线持续缩放时，线宽不变，但是会调整透明度，所以需要记录真实线宽
 	emitLineSegment(gl_in[0].gl_Position,

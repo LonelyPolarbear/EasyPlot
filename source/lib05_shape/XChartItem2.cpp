@@ -172,6 +172,16 @@ void XChartItem2::draw(const Eigen::Matrix4f& m)
 	}
 }
 
+void XChartItem2::pickBorderDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
+{
+	return XGraphicsItem::pickBorderDraw(shader, m);
+}
+
+void XChartItem2::pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m)
+{
+	return XGraphicsItem::pickFillDraw(shader, m);
+}
+
 void XChartItem2::fitView()
 {
 	for(auto line : d->m_polylines){
@@ -308,7 +318,6 @@ void XChartItem2::updateChildPosition(const Eigen::Matrix4f& m)
 		d->m_legend->setScale(this_sx, this_sy);
 	}
 }
-
 
 void XChartItem2::updateVboCoord()
 {

@@ -19,6 +19,10 @@ public:
 
 	 void draw(const Eigen::Matrix4f& m) override ;
 
+	 virtual void pickBorderDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m);
+
+	 virtual void pickFillDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m);
+
 	 void fitView();
 	
 	void setBackgroundColor(const myUtilty::Vec4f &color);

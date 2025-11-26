@@ -16,7 +16,7 @@ public:
 	void clearPolylines();
 
 	 void draw(const Eigen::Matrix4f& m) override ;
-	//virtual void drawGrid(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m);
+	//virtual void drawGrid(std::shared_ptr<XBaseShader> shader, const Eigen::Matrix4f& m);
 	void setBackgroundColor(const myUtilty::Vec4f &color);
 
 	void gridTranslate(float dx, float dy);
