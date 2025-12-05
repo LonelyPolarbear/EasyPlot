@@ -163,7 +163,7 @@ public:
 		DashDot,
 		DashDotDot
 	};
-	XGraphicsItem(std::shared_ptr<XGraphicsItem> parent = nullptr);
+	XGraphicsItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XGraphicsItem();
 
 	int64_t getID() const;

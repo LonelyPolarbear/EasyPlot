@@ -13,6 +13,7 @@
 #include <chrono>
 #include <random>
 #include <future>
+#include <any>
 namespace render {
 	enum  class lib00_utilty_API graphicsItemType{
 		none,
@@ -28,11 +29,183 @@ namespace render {
 }
 
 namespace myUtilty {
-	
-	extern lib00_utilty_API std::wstring to_wstring_with_precision(double value, int precision);
+	// 前置声明友元函数模板
+	template<unsigned int N, typename T>
+	struct Vector {
+		T data[N]{ 0 };
 
-	extern lib00_utilty_API std::string to_string_with_precision(double value, int precision);
+		Vector() {}
+		template<typename... Args, typename = std::enable_if_t<
+			//XTraits::conjunction_v<std::decay_t<Args>...>
+			std::conjunction_v<std::is_arithmetic<std::decay_t<Args>>...>
+			>>
+			Vector(Args&&... args) {
+			setValues(std::forward<Args>(args)...);
+		}
 
+		T x() const{ return data[0]; }
+		T y() const{ return data[1]; }
+		T z() const{ return data[2]; }
+		T w()const { return data[3]; }
+
+		T& x() { return data[0]; }
+		T& y() { return data[1]; }
+		T& z() { return data[2]; }
+		T& w() { return data[3]; }
+
+		template<typename... Args, typename = std::enable_if_t<
+			std::conjunction_v<std::is_arithmetic<std::decay_t<Args>>...>
+			>>
+			void setValues(Args&&... args) {
+			setTuple(std::forward_as_tuple(std::forward<Args>(args)...));
+		}
+
+		template< typename Tuple>
+		void setTuple(Tuple&& args) {
+			constexpr int num = std::tuple_size_v<Tuple>;
+			if constexpr (N >= num) {
+				setValuesImpl(std::make_index_sequence<num>{}, std::forward<Tuple>(args));
+			}
+			else {
+				setValuesImpl(std::make_index_sequence<N>{}, std::forward<Tuple>(args));
+			}
+		}
+
+		template<size_t...Is, typename Tuple>
+		void setValuesImpl(std::index_sequence<Is...>, Tuple&& args) {
+			((data[Is] = std::get<Is>(std::forward<Tuple>(args))), ...);
+		}
+
+		template<size_t...Is, typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		void setValuesImpl(std::index_sequence<Is...>, const U* ptr) {
+			((data[Is] = ptr[Is]), ...);
+		}
+
+		T& operator[](unsigned int i) {
+			return data[i];
+		}
+
+		const T& operator[](unsigned int i)const {
+			return data[i];
+		}
+
+		template<unsigned int N2, typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		Vector(const Vector<N2, U>& v) {
+			constexpr int num = std::min(N, N2);
+			setValuesImpl(std::make_index_sequence<num>{}, v.data);
+		}
+
+		template<unsigned int N2, typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		Vector<N, T>& operator=(const Vector<N2, U>& v) {
+			constexpr int num = std::min(N, N2);
+			setValuesImpl(std::make_index_sequence<num>{}, v.data)
+				return *this;
+		}
+
+		template<typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		Vector<N, T>& operator+=(const Vector<N, U>& v) {
+			for (int i = 0; i < N; i++) {
+				data[i] += v[i];
+			}
+			return *this;
+		}
+
+		template<typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		Vector<N, T> operator+(const Vector<N, U>& v) {
+			for (int i = 0; i < N; i++) {
+				data[i] += v[i];
+			}
+			return *this;
+		}
+
+		template<typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		Vector& operator-=(const Vector<N, U>& v) {
+			auto tmp = *this;
+			for (int i = 0; i < N; i++) {
+				tmp.data[i] -= v[i];
+			}
+			return tmp;
+		}
+
+		template<typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		Vector& operator-(const Vector<N, U>& v) {
+			auto tmp = *this;
+			for (int i = 0; i < N; i++) {
+				tmp.data[i] -= v[i];
+			}
+			return tmp;
+		}
+
+		template<typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		Vector& operator*=(U scalar) {
+			for (int i = 0; i < N; i++) {
+				data[i] *= scalar;
+			}
+			return *this;
+		}
+
+		template<typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+		Vector& operator/=(U scalar) {
+			for (int i = 0; i < N; i++) {
+				data[i] /= scalar;
+			}
+			return *this;
+		}
+
+		template<typename U>
+		friend Vector<N, T> operator*(U scalar, const Vector<N, T>& c);
+
+		template<typename U>
+		friend Vector<N, T> operator*(const Vector<N, T>& c, U scalar);
+	};
+
+
+	template<unsigned int N, typename T, typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+	Vector<N, T> operator*(U scalar, const Vector<N, T>& c) {
+		Vector<N, T> res = c;
+		res *= scalar;
+		return res;
+	}
+
+	template<unsigned int N, typename T, typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
+	Vector<N, T> operator*( const Vector<N, T>& c, U scalar) {
+		Vector<N, T> res = c;
+		res *= scalar;
+		return res;
+	}
+
+	extern template class lib00_utilty_API Vector<2, float>;
+	extern template class lib00_utilty_API Vector<2, double>;
+	extern template class lib00_utilty_API Vector<2, int>;
+	extern template class lib00_utilty_API Vector<2, unsigned int>;
+
+	extern template class lib00_utilty_API Vector<3, float>;
+	extern template class lib00_utilty_API Vector<3, double>;
+	extern template class lib00_utilty_API Vector<3, int>;
+	extern template class lib00_utilty_API Vector<3, unsigned int>;
+
+	extern template class lib00_utilty_API Vector<4, float>;
+	extern template class lib00_utilty_API Vector<4, double>;
+	extern template class lib00_utilty_API Vector<4, int>;
+	extern template class lib00_utilty_API Vector<4, unsigned int>;
+
+	using Vec2f = Vector<2, float>;
+	using Vec2d = Vector<2, double>;
+	using Vec2i = Vector<2, int>;
+	using Vec2u = Vector<2, unsigned int>;
+
+	using Vec3f = Vector<3, float>;
+	using Vec3d = Vector<3, double>;
+	using Vec3i = Vector<3, int>;
+	using Vec3u = Vector<3, unsigned int>;
+
+	using Vec4f = Vector<4, float>;
+	using Vec4d = Vector<4, double>;
+	using Vec4i = Vector<4, int>;
+	using Vec4u = Vector<4, unsigned int>;
+}
+
+namespace myUtilty {
 	extern lib00_utilty_API double PI;
 	
 	enum class tranformType {
@@ -236,114 +409,6 @@ namespace myUtilty {
 		std::string currentExeDir;
 	};
 	
-	class Vec2i;
-	class Vec2f;
-	class Vec2u;
-	class Vec2d;
-
-	class Vec3f;
-	class Vec3d;
-	class Vec3u;
-	class Vec3i;
-
-	class Vec4f;
-	class Vec4d;
-	class Vec4u;
-	class Vec4i;
-
-
-	struct lib00_utilty_API Vec2i {
-		int x, y;
-		Vec2i(int x = 0, int y = 0) :x(x), y(y) {}
-		Vec2i(const Vec2u& other);
-		Vec2i(const Vec2f& other);
-		Vec2i(const Vec2d& other);
-	};
-
-	struct lib00_utilty_API Vec2u {
-		unsigned x, y;
-		Vec2u(unsigned int x = 0, unsigned int y = 0) :x(x), y(y) {}
-		Vec2u(const Vec2i& other);
-		Vec2u(const Vec2f& other);
-		Vec2u(const Vec2d& other);
-	};
-
-	//定义一些基本数学类型
-	struct lib00_utilty_API Vec2f {
-		double x, y;
-		Vec2f(double x = 0, double y = 0) :x(x), y(y) {}
-		Vec2f(const Vec2i& other);
-		Vec2f(const Vec2u& other);
-		Vec2f(const Vec2d& other);
-
-		Vec2f operator+(const Vec2f& other) const {
-			return Vec2f(x + other.x, y + other.y);
-		}
-
-		Vec2f operator-(const Vec2f& other) const {
-			return Vec2f(x - other.x, y - other.y);
-		}
-
-		Vec2f operator*(const float& other) const {
-			return Vec2f(x * other, y * other);
-		}
-
-
-		friend lib00_utilty_API Vec2f operator*(float scalar, const Vec2f& c);
-	};
-
-	struct lib00_utilty_API Vec2d {
-		double x, y;
-		Vec2d(double x = 0, double y = 0) :x(x), y(y) {}
-		Vec2d(const Vec2i& other);
-		Vec2d(const Vec2u& other);
-		Vec2d(const Vec2f& other);
-	};
-
-	struct lib00_utilty_API Vec3f {
-		float x, y,z;
-		Vec3f(float x = 0, float y = 0, float z = 0) :x(x), y(y), z(z) {}
-	};
-
-	struct lib00_utilty_API Vec3d {
-		double x, y, z;
-		Vec3d(double x = 0, double y = 0, double z = 0) :x(x), y(y), z(z) {}
-	};
-
-	struct lib00_utilty_API Vec3u {
-		unsigned int x, y, z;
-		Vec3u(unsigned int x = 0, unsigned int y = 0, unsigned int z = 0) :x(x), y(y), z(z) {}
-	};
-
-	struct lib00_utilty_API Vec3i {
-		 int x, y, z;
-		 Vec3i(int x = 0, int y = 0, int z = 0) :x(x), y(y), z(z) {}
-	};
-
-	//
-	struct lib00_utilty_API Vec4f {
-		float x, y, z,w;
-		Vec4f(float x = 0, float y = 0, float z = 0,float w=0) :x(x), y(y), z(z),w(w) {}
-	};
-
-	struct lib00_utilty_API Vec4d {
-		double x, y, z,w;
-		Vec4d(double x = 0, double y = 0, double z = 0, double w = 0) :x(x), y(y), z(z), w(w) {}
-		
-	};
-
-	struct lib00_utilty_API Vec4u {
-		unsigned int x, y, z,w;
-		Vec4u(unsigned int x = 0, unsigned int y = 0, unsigned int z = 0, unsigned int w = 0) :x(x), y(y), z(z), w(w) {}
-	};
-
-	
-
-	struct lib00_utilty_API Vec4i {
-		int x, y, z,w;
-		Vec4i(int x = 0, int y = 0, int z = 0, int w = 0) :x(x), y(y), z(z), w(w) {}
-	};
-
 	struct lib00_utilty_API BoundBox {
 		double xmin;
 		double ymin;
@@ -448,6 +513,72 @@ namespace myUtilty {
 				static_assert("true", "myUtilty::randon(T) 类型错误");
 			}
 		}
+	}
+}
+
+namespace myUtilty {
+	extern lib00_utilty_API std::wstring to_wstring_with_precision(double value, int precision);
+
+	extern lib00_utilty_API std::string to_string_with_precision(double value, int precision);
+
+	template< bool isReverse,size_t... Is, typename Tuple>
+	auto printTupleImpl(std::ostream& os, std::index_sequence<Is...>, Tuple&& args) {
+		constexpr int N = std::tuple_size_v<std::remove_reference_t<Tuple>>-1;
+		if constexpr (isReverse) {
+			(..., (os << std::get<N - Is>(args) << " "));
+		}
+		else {
+			(..., (os << std::get<Is>(args) << " "));
+		}
+		os<<std::endl;
+	}
+
+	template<typename Tuple>
+	auto printTuple(Tuple&& args,bool isReverse = false) {
+		if (isReverse) {
+			printTupleImpl<true>(std::cout, std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>>>(), std::forward<Tuple>(args));
+		}
+		else {
+			printTupleImpl<false>(std::cout, std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>>>(), std::forward<Tuple>(args));
+		}
+	}
+
+	template<typename ... Args>
+	std::ostream& print(Args&& ... args) {
+		//折叠表达式，展开参数
+		//一元左折叠
+		//(pack op ...)  -> (((pack1 op pack2) op pack3) op ...)
+		//pack =osm << std::forward<Args>(args)
+		//op = ,
+
+		/*constexpr int N = sizeof...(Args);
+		((osm << std::forward<Args>(args) << " "), ...);
+		osm << std::endl;*/
+
+		auto all_args = std::forward_as_tuple(std::forward<Args>(args)... );
+		printTuple(all_args, true);
+		printTuple(all_args, false);
+
+		//osm<<std::get<0>(std::forward<decltype(all_args)>(all_args));
+
+		//(..., (osm << std::get<N- sizeof...(Args)>(all_args) << " "));
+
+
+		// 然后对剩余参数使用二元折叠
+		//if constexpr (sizeof...(args) > 0) {
+		//	osm <<std::get<0>(std::forward<Args>(args)...);
+		//	//((osm << " " << std::forward<Args>(args)), ...);
+		//}
+
+		//一元右折叠
+		// (... op pack) ->( ... op (packN-1 op packN) )
+		//pack = osm << std::forward<Args>(args)
+		//op = ,
+		/*osm<<std::endl;
+		(... , (osm<<"**" << std::forward<Args>(args)));*/
+		
+		//二元折叠
+		return osm;
 	}
 }
 

@@ -4,7 +4,7 @@
 
 class LIB05_SHAPE_API XPolyline :public XGraphicsItem {
 public:
-	XPolyline();
+	XPolyline(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XPolyline();
 	void updateVboCoord() override;
 	virtual uint32_t computeNumofVertices() override;

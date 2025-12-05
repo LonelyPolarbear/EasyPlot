@@ -80,7 +80,7 @@ FontSetDlg::FontSetDlg(const TextSetInfo& info,QWidget *parent)
 	}
 
     
-    ui->btnColorSet->setCurrentColor(QColor(255*info.color.x, 255*info.color.y, 255*info.color.z,255*info.color.w));
+    ui->btnColorSet->setCurrentColor(QColor(255*info.color.x(), 255 * info.color.y(), 255 * info.color.z(), 255 * info.color.w()));
 }
 
 FontSetDlg::~FontSetDlg()
@@ -188,7 +188,7 @@ void  FontSetDlg::setTexInfo(const TextSetInfo& info) {
 
 	ui->isFixWidth->setChecked(info.isFixed);
 	ui->fixWidth->setValue(info.fixWidth);
-    ui->btnColorSet->setCurrentColor(QColor(255 * info.color.x, 255 * info.color.y, 255 * info.color.z, 255 * info.color.w));
+    ui->btnColorSet->setCurrentColor(QColor(255 * info.color.x(), 255 * info.color.y(), 255 * info.color.z(), 255 * info.color.w()));
 
 	if (info.tackMode == 0) {
 		ui->Local_complete->setChecked(true);

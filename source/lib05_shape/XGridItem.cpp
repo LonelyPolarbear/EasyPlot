@@ -101,7 +101,7 @@ void XGridItem::setOrigin(const myUtilty::Vec2f& origin)
 {
 	mOrigin = origin;
 	//m_gridTransform.translate(Eigen::Vector3f(-mOrigin.x, -mOrigin.y, 0));
-	m_transformItem->translate(-mOrigin.x, -mOrigin.y);
+	m_transformItem->translate(-mOrigin.x(), -mOrigin.y());
 }
 
 const myUtilty::Vec2f& XGridItem::getOrigin() const

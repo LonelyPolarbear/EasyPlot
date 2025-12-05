@@ -23,7 +23,7 @@ public:
 	bool createAxisText() {
 		if (m_axisx_value.empty()) {
 			for (int i = 0; i < m_xlabelNum; i++) {
-				auto xaxis = makeShareDbObject<XTextItem>();
+				auto xaxis = makeShareDbObject<XTextItem>(nullptr);
 				//xaxis->initiallize();
 				xaxis->setVisible(true);
 				xaxis->setVAlignment(XTextItem::VAlign::Top);
@@ -33,7 +33,7 @@ public:
 					xaxis->setHAlignment(XTextItem::HAlign::Left);
 				double xpos =-1+2.*i/(m_xlabelNum-1);
 				//xaxis->setPosition(0 + (i - 5) * 0.2, 0);
-				xaxis->setPosition(xpos,m_gridOrigin.y);
+				xaxis->setPosition(xpos,m_gridOrigin.y());
 				xaxis->setFontSize(16);
 				xaxis->setPositionType(XGL::PositionType::local_center);
 				xaxis->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
@@ -42,7 +42,7 @@ public:
 			}
 
 			for (int i = 0; i < m_ylabelNum; i++) {
-				auto xaxis = makeShareDbObject<XTextItem>();
+				auto xaxis = makeShareDbObject<XTextItem>(nullptr);
 				//xaxis->initiallize();
 				xaxis->setVisible(true);
 				xaxis->setHAlignment(XTextItem::HAlign::Left);
@@ -52,7 +52,7 @@ public:
 					xaxis->setVAlignment(XTextItem::VAlign::Bottom);
 				double ypos = -1 + 2. * i / (m_ylabelNum - 1);
 
-				xaxis->setPosition(m_gridOrigin.x, ypos);
+				xaxis->setPosition(m_gridOrigin.x(), ypos);
 				xaxis->setFontSize(16);
 				xaxis->setPositionType(XGL::PositionType::local_center);
 				xaxis->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
@@ -66,7 +66,7 @@ public:
 	}
 };
 
-XChartItem::XChartItem():XGraphicsItem(),d(new Internal())
+XChartItem::XChartItem(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(parent),d(new Internal())
 {
 	this->setDrawType(PrimitveType::line_strip_adjacency);
 	auto coord = makeShareDbObject<XFloatArray>();

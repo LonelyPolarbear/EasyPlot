@@ -4,7 +4,7 @@
 
 class LIB05_SHAPE_API XLineItem :public XGraphicsItem {
 public:
-	XLineItem();
+	XLineItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XLineItem();
 	void updateVboCoord() override;
 	void setLine(const myUtilty::Vec2f& start, const myUtilty::Vec2f& end);

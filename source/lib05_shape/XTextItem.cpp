@@ -6,7 +6,7 @@
 #include <lib08_freetype/xfreetype.h>
 #include <Eigen/Eigen>
 
-XTextItem::XTextItem() :XGraphicsItem()
+XTextItem::XTextItem(std::shared_ptr<XGraphicsItem> parent) :XGraphicsItem(parent)
 {
 	m_textureBuffer = makeShareDbObject<XOpenGLBuffer>();
 

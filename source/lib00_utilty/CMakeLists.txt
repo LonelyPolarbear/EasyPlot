@@ -4,8 +4,14 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 
 #递归目录获取所有c文件
 #file(GLOB_RECURSE SOURCES  *.cpp *.c *.h *.hpp)
-SET(HERDERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/myUtilty.h)
-SET(SOURECS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/myUtilty.cpp)
+#SET(HERDERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/myUtilty.h)
+#SET(SOURECS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/myUtilty.cpp)
+
+file(GLOB HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.h 
+																${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
+															${CMAKE_CURRENT_SOURCE_DIR}/gp/*.hpp
+																)
+file(GLOB SOURECS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 #-------------------------------------------------------
 #设置依赖的动态库头文件目录
@@ -27,7 +33,7 @@ set(LIB_DIRECTORIES
 														
 #生成动态库
 add_library(${proName}  SHARED)
-target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HERDERS_FILES})
+target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HEADERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB00_UTILTY_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "myUtilty")

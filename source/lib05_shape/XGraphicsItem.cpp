@@ -145,10 +145,10 @@ void XGraphicsItem::drawBorderImpl(std::shared_ptr<xshader> shader, const Eigen:
 	shader->setPositionType((int)getPositionType());
 	shader->setOrientation((int)getOrientation());
 	shader->setConenctSmoothEnable(m_connectSmoothEnable);
-	shader->setPreSelectColor(m_preSelectColor.x, m_preSelectColor.y, m_preSelectColor.z, m_preSelectColor.w);
+	shader->setPreSelectColor(m_preSelectColor.x(), m_preSelectColor.y(), m_preSelectColor.z(), m_preSelectColor.w());
 	shader->setColorMode((int)m_colorMode);
 	shader->setPolygonMode((int)m_polygonMode);
-	shader->setSingleColor(m_singleColor.x, m_singleColor.y, m_singleColor.z, m_singleColor.w);
+	shader->setSingleColor(m_singleColor.x(), m_singleColor.y(), m_singleColor.z(), m_singleColor.w());
 	shader->setfixedLine(m_IsFixedLine);
 
 	bindSSBO();
@@ -184,8 +184,8 @@ void XGraphicsItem::drawFill(std::shared_ptr<xshader> shader, const Eigen::Matri
 	shader->use();
 	shader->setIsInstanceDarw(m_isInstance);
 	shader->setObjectID(d->m_id);
-	shader->setSingleColor(m_singleColor.x, m_singleColor.y, m_singleColor.z, m_singleColor.w);
-	shader->setFillColor(m_fillColor.x, m_fillColor.y, m_fillColor.z, m_fillColor.w);
+	shader->setSingleColor(m_singleColor.x(), m_singleColor.y(), m_singleColor.z(), m_singleColor.w());
+	shader->setFillColor(m_fillColor.x(), m_fillColor.y(), m_fillColor.z(), m_fillColor.w());
 	shader->setPositionType((int)getPositionType());
 	shader->setOrientation((int)getOrientation());
 
@@ -489,7 +489,7 @@ void XGraphicsItem::setPosition(float x, float y)
 void XGraphicsItem::setPositionType(XGL::PositionType type)
 {
 	m_positionType = type;
-	setPosition(getPosition().x, getPosition().y);
+	setPosition(getPosition().x(), getPosition().y());
 }
 
 XGL::PositionType XGraphicsItem::getPositionType() const
@@ -623,7 +623,7 @@ myUtilty::BoundBox XGraphicsItem::getBoundBox()
 	myUtilty::Vec3d maxBound = myUtilty::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_coordArray->size() == 0)
-		return myUtilty::BoundBox{ minBound.x, minBound.y, minBound.z, maxBound.x, maxBound.y, maxBound.z };
+		return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
 	float* pData = m_coordArray->data(0);
 	for (int i = 0; i < m_coordArray->getNumOfTuple(); i++) {
@@ -631,10 +631,10 @@ myUtilty::BoundBox XGraphicsItem::getBoundBox()
 		Eigen::Vector3f pos = Eigen::Vector3f(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
 		pos = d->m_transform * pos;
 
-		minBound = myUtilty::Vec3d(std::min<double>(minBound.x, pos.x()), std::min<double>(minBound.y, pos.y()), pData[i * 3 + 2]);
-		maxBound = myUtilty::Vec3d(std::max<double>(maxBound.x, pos.x()), std::max<double>(maxBound.y, pos.y()), pData[i * 3 + 2]);
+		minBound = myUtilty::Vec3d(std::min<double>(minBound.x(), pos.x()), std::min<double>(minBound.y(), pos.y()), pData[i * 3 + 2]);
+		maxBound = myUtilty::Vec3d(std::max<double>(maxBound.x(), pos.x()), std::max<double>(maxBound.y(), pos.y()), pData[i * 3 + 2]);
 	}
-	return myUtilty::BoundBox{ minBound.x, minBound.y, minBound.z, maxBound.x, maxBound.y, maxBound.z };
+	return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 }
 
 float* XGraphicsItem::getMatrix() const

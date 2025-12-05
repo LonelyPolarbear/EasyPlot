@@ -60,16 +60,16 @@ myUtilty::BoundBox XShapeSource::getBoundBox()
 	myUtilty::Vec3d maxBound = myUtilty::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_coord->size() == 0)
-		return myUtilty::BoundBox{ minBound.x, maxBound.y, minBound.z, maxBound.x, maxBound.y, maxBound.z };
+		return myUtilty::BoundBox{ minBound.x(), maxBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
 	float* pData = m_coord->data(0);
 	for (int i = 0; i < m_coord->getNumOfTuple(); i++) {
 
 		myUtilty::Vec3d pos = myUtilty::Vec3d(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
-		minBound = myUtilty::Vec3d(std::min(minBound.x, pos.x), std::min(minBound.y, pos.y), std::min(minBound.z, pos.z));
-		maxBound = myUtilty::Vec3d(std::max(maxBound.x, pos.x), std::max(maxBound.y, pos.y), std::max(maxBound.z, pos.z));
+		minBound = myUtilty::Vec3d(std::min(minBound.x(), pos.x()), std::min(minBound.y(), pos.y()), std::min(minBound.z(), pos.z()));
+		maxBound = myUtilty::Vec3d(std::max(maxBound.x(), pos.x()), std::max(maxBound.y(), pos.y()), std::max(maxBound.z(), pos.z()));
 	}
-	return myUtilty::BoundBox{ minBound.x, minBound.y, minBound.z, maxBound.x, maxBound.y, maxBound.z };
+	return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 }
 
 myUtilty::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
@@ -80,7 +80,7 @@ myUtilty::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 	myUtilty::Vec3d maxBound = myUtilty::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_coord->size() == 0)
-		return myUtilty::BoundBox{ minBound.x, minBound.y, minBound.z, maxBound.x, maxBound.y, maxBound.z };
+		return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
 	float* pData = m_coord->data(0);
 	for (int i = 0; i < m_coord->getNumOfTuple(); i++) {
@@ -88,10 +88,10 @@ myUtilty::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 		Eigen::Vector3f pos = Eigen::Vector3f(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
 		pos = mat * pos;
 
-		minBound = myUtilty::Vec3d(std::min<double>(minBound.x, pos.x()), std::min<double>(minBound.y, pos.y()), std::min<double>(minBound.z, pos.z()));
-		maxBound = myUtilty::Vec3d(std::max<double>(maxBound.x, pos.x()), std::max<double>(maxBound.y, pos.y()), std::max<double>(maxBound.z, pos.z()));
+		minBound = myUtilty::Vec3d(std::min<double>(minBound.x(), pos.x()), std::min<double>(minBound.y(), pos.y()), std::min<double>(minBound.z(), pos.z()));
+		maxBound = myUtilty::Vec3d(std::max<double>(maxBound.x(), pos.x()), std::max<double>(maxBound.y(), pos.y()), std::max<double>(maxBound.z(), pos.z()));
 	}
-	return myUtilty::BoundBox{ minBound.x, minBound.y, minBound.z, maxBound.x, maxBound.y, maxBound.z };
+	return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 }
 
 void XShapeSource::writeToFile(const std::string& filename)

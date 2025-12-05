@@ -3,7 +3,7 @@
 #include <dataBase/dataobject.h>
 #include <glew/glew.h>
 
-class LIB04_OPENGL_API XOpenGLEnable :DataBaseObject {
+class LIB04_OPENGL_API XOpenGLEnable :public DataBaseObject {
 public:
 enum class EnableType:unsigned int {
 	DEPTH_TEST = 0x0B71,							//GL_DEPTH_TEST

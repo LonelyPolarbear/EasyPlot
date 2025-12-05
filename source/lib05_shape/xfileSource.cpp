@@ -434,8 +434,8 @@ void XFileSource::transform()
 					//j j+1
 					auto fisrt = myUtilty::Vec3u(oldEbo[j], newEbo[j], oldEbo[(j + 1)%3]);
 					auto second = myUtilty::Vec3u(oldEbo[(j+1)%3], newEbo[j], newEbo[(j+1)%3]);
-					ebo->setTuple(idx++, fisrt.x, fisrt.y, fisrt.z);
-					ebo->setTuple(idx++, second.x, second.y, second.z);
+					ebo->setTuple(idx++, fisrt.x(), fisrt.y(), fisrt.z());
+					ebo->setTuple(idx++, second.x(), second.y(), second.z());
 				}
 			}
 

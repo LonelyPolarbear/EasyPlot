@@ -10,7 +10,7 @@ template<typename T>
 class XDataArray : public DataBaseObject
 {
  protected:
-    XDataArray(){}
+    XDataArray():DataBaseObject(){}
     ~XDataArray(){}
 public:
      T* data(int tupleIdx)  {

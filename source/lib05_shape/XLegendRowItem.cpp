@@ -7,7 +7,7 @@
 class XLegendRowItem::Internal {
 public:
 	Internal() {
-		textItem = makeShareDbObject<XTextItem>();
+		textItem = makeShareDbObject<XTextItem>(nullptr);
 		checkboxItem = makeShareDbObject<XCheckBoxItem>();
 		backGrounditem = makeShareDbObject<XRectItem>();
 

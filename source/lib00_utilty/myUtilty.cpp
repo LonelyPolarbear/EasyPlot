@@ -197,93 +197,20 @@ namespace myUtilty {
 		return transform.matrix();
 	}
 
-	Vec2i::Vec2i(const Vec2u& other) {
-		x = other.x;
-		y = other.y;
-	}
+	template class lib00_utilty_API Vector<2, float>;
+	template class lib00_utilty_API Vector<2, double>;
+	template class lib00_utilty_API Vector<2, int>;
+	template class lib00_utilty_API Vector<2, unsigned int>;
 
-	Vec2i::Vec2i(const Vec2f& other) {
-		x = (int)other.x;
-		y = (int)other.y;
-	}
+	template class lib00_utilty_API Vector<3, float>;
+	template class lib00_utilty_API Vector<3, double>;
+	template class lib00_utilty_API Vector<3, int>;
+	template class lib00_utilty_API Vector<3, unsigned int>;
 
-	Vec2i::Vec2i(const Vec2d& other) {
-		x = (int)other.x;
-		y = (int)other.y;	
-	}
-	
-
-	Vec2f::Vec2f(const Vec2i& other) {
-		x = other.x;
-		y = other.y;
-	}
-	
-	Vec2f::Vec2f(const Vec2u& other) {
-		x = (float)other.x;
-		y = (float)other.y;
-	}
-
-	Vec2f::Vec2f(const Vec2d& other) {
-		x = other.x;
-		y = other.y;
-	}
-
-	lib00_utilty_API std::wstring to_wstring_with_precision(double value, int precision)
-	{
-		std::wstringstream wss;
-		// std::fixed 确保精度是小数部分的位数（而非总有效数字）
-		wss << std::fixed << std::setprecision(precision) << value;
-		return wss.str();
-	}
-
-	lib00_utilty_API std::string to_string_with_precision(double value, int precision)
-	{
-		std::stringstream wss;
-		wss << std::fixed << std::setprecision(precision) << value;
-		return wss.str();
-	}
-
-	Vec2f operator*(float scalar, const Vec2f& c) {
-		return Vec2f(c.x * scalar, c.y * scalar);
-	}
-
-
-	Vec2u::Vec2u(const Vec2i& other)
-	{
-		x = other.x;
-		y = other.y;
-	}
-
-	Vec2u::Vec2u(const Vec2f& other)
-	{
-		x = (unsigned int)other.x;
-		y = (unsigned int)other.y;
-	}
-
-	Vec2u::Vec2u(const Vec2d& other)
-	{
-		x = (unsigned int)other.x;
-		y = (unsigned int)other.y;
-	}
-
-	Vec2d::Vec2d(const Vec2i& other)
-	{
-		x = other.x;
-		y = other.y;
-	}
-
-	Vec2d::Vec2d(const Vec2u& other)
-	{
-		x = other.x;
-		y = other.y;
-	}
-
-	Vec2d::Vec2d(const Vec2f& other)
-	{
-		x = other.x;
-		y = other.y;
-	}
-
+	template class lib00_utilty_API Vector<4, float>;
+	template class lib00_utilty_API Vector<4, double>;
+	template class lib00_utilty_API Vector<4, int>;
+	template class lib00_utilty_API Vector<4, unsigned int>;
 }
 
 namespace myUtilty::chrono {
@@ -330,8 +257,8 @@ namespace myUtilty::math{
 				angleTemp = angle;
 			}
 			myUtilty::Vec2f v;
-			v.x = std::cos(Matrix::radian(angleTemp));
-			v.y = std::sin(Matrix::radian(angleTemp));
+			v.x() = std::cos(Matrix::radian(angleTemp));
+			v.y() = std::sin(Matrix::radian(angleTemp));
 			ret.push_back(v);
 			angleTemp += deltaAngle;
 		}
@@ -340,11 +267,11 @@ namespace myUtilty::math{
 
 	std::vector<myUtilty::Vec2f>lib00_utilty_API getRectCorner(myUtilty::Vec2f corner1, myUtilty::Vec2f corner2)
 	{
-		auto  w =  std::abs(corner2.x - corner1.x);
-		auto  h =  std::abs(corner2.y - corner1.y);
+		auto  w =  std::abs(corner2.x() - corner1.x());
+		auto  h =  std::abs(corner2.y() - corner1.y());
 
-		auto x =std::min(corner1.x, corner2.x);
-		auto y = std::min(corner1.y, corner2.y);
+		auto x =std::min(corner1.x(), corner2.x());
+		auto y = std::min(corner1.y(), corner2.y());
 
 		auto p1 = myUtilty::Vec2f(x, y);
 		auto p2 = myUtilty::Vec2f(x + w, y);
@@ -354,3 +281,20 @@ namespace myUtilty::math{
 		return { p1,p2,p3,p4 };
 	}
 } 
+
+namespace myUtilty {
+	lib00_utilty_API std::wstring to_wstring_with_precision(double value, int precision)
+	{
+		std::wstringstream wss;
+		// std::fixed 确保精度是小数部分的位数（而非总有效数字）
+		wss << std::fixed << std::setprecision(precision) << value;
+		return wss.str();
+	}
+
+	lib00_utilty_API std::string to_string_with_precision(double value, int precision)
+	{
+		std::stringstream wss;
+		wss << std::fixed << std::setprecision(precision) << value;
+		return wss.str();
+	}
+}

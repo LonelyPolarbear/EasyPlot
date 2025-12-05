@@ -5,7 +5,7 @@
 XAxisItem::XAxisItem(std::shared_ptr<XGraphicsItem> parent) :XCompositeItem(parent)
 {
 	//setIsComposite(true);
-	m_line = makeShareDbObject<XLineItem>();
+	m_line = makeShareDbObject<XLineItem>(nullptr);
 
 	if (mLayout == XGL::Layout::horizontal) {
 		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(1, 0));
@@ -31,8 +31,8 @@ void XAxisItem::updateData()
 
 void XAxisItem::setRange(double minVal, double maxVal)
 {
-	mRange.x = minVal;
-	mRange.y = maxVal;
+	mRange.x() = minVal;
+	mRange.y() = maxVal;
 
 	auto length = maxVal - minVal;
 	for (int i = 0; i < mLabelNum; i++) {
@@ -55,8 +55,8 @@ void XAxisItem::updateTextPos() {
 			else
 				text->setHAlignment(XTextItem::HAlign::Left);
 
-			double xpos = startPos.x +(double)i * len / (mLabelNum - 1);
-			text->setPosition(xpos, startPos.y);
+			double xpos = startPos.x() + (double)i * len / (mLabelNum - 1);
+			text->setPosition(xpos, startPos.y());
 		}
 		else {
 			text->setHAlignment(XTextItem::HAlign::Left);
@@ -64,8 +64,8 @@ void XAxisItem::updateTextPos() {
 				text->setVAlignment(XTextItem::VAlign::Top);
 			else
 				text->setVAlignment(XTextItem::VAlign::Bottom);
-			double ypos = startPos.y + (double)i * len / (mLabelNum - 1);
-			text->setPosition(startPos.x, ypos);
+			double ypos = startPos.y() + (double)i * len / (mLabelNum - 1);
+			text->setPosition(startPos.x(), ypos);
 		}
 	}
 }
@@ -80,7 +80,7 @@ void XAxisItem::setLabelNum(int num)
 	mLabelNum = num;
 
 	for (int i = 0; i < mLabelNum; i++) {
-		auto text = makeShareDbObject<XTextItem>();
+		auto text = makeShareDbObject<XTextItem>(m_line);
 		text->setVisible(true);
 		text->setFontSize(16);
 		text->setPositionType(XGL::PositionType::local_center);		//ªÚ’ﬂsceneScreen_center

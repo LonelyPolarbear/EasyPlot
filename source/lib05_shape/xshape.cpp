@@ -48,11 +48,11 @@ void XShape::draw(std::shared_ptr<xshader> shader)
 
 	shader->setModelMatrix(this->getMatrix());
 	shader->setObjectID(d->m_id);
-	shader->setPreSelectColor(m_preSelectColor.x, m_preSelectColor.y, m_preSelectColor.z, m_preSelectColor.w);
+	shader->setPreSelectColor(m_preSelectColor.x(), m_preSelectColor.y(), m_preSelectColor.z(), m_preSelectColor.w());
 	shader->setColorMode((int)m_colorMode);
 	shader->setPolygonMode((int)m_polygonMode);
-	shader->setSingleColor(m_singleColor.x, m_singleColor.y, m_singleColor.z, m_singleColor.w);
-	shader->setSelectTestColor(m_selectTestColor.x, m_selectTestColor.y, m_selectTestColor.z, m_selectTestColor.w);
+	shader->setSingleColor(m_singleColor.x(), m_singleColor.y(), m_singleColor.z(), m_singleColor.w());
+	shader->setSelectTestColor(m_selectTestColor.x(), m_selectTestColor.y(), m_selectTestColor.z(), m_selectTestColor.w());
 
 	bindSSBO();
 
@@ -158,7 +158,7 @@ void XShape::setScale(float x, float y, float z)
 
 void XShape::rotate(float angle, myUtilty::Vec3f dir)
 {
-	Eigen::Vector3f axis = Eigen::Vector3f(dir.x, dir.y, dir.z);
+	Eigen::Vector3f axis = Eigen::Vector3f(dir.x(), dir.y(), dir.z());
 	axis.normalize();
 	d->m_transform.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(angle), axis));
 }
@@ -252,10 +252,10 @@ myUtilty::Vec4f XShape::computeSelectTestColor()
 
 uint64_t XShape::colorToUInt(myUtilty::Vec4f color)
 {
-	uint64_t a = (uint64_t)(color.x * 255.0f);
-	uint64_t b = (uint64_t)(color.y * 255.0f);
-	uint64_t g = (uint64_t)(color.z * 255.0f);
-	uint64_t r = (uint64_t)(color.w * 255.0f);
+	uint64_t a = (uint64_t)(color.x() * 255.0f);
+	uint64_t b = (uint64_t)(color.y() * 255.0f);
+	uint64_t g = (uint64_t)(color.z() * 255.0f);
+	uint64_t r = (uint64_t)(color.w() * 255.0f);
 	return (r << 24) | (g << 16) | (b << 8) | a;
 }
 

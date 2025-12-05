@@ -222,10 +222,10 @@ public:
 		//6个点 四个三角形 (0 1 3),(0,2,4),(0,1,5),(0,2,6)  
 		myUtilty::Vec3f center = myUtilty::Vec3f(0, 0, 0);
 		//点的判断
-		if (centerTop.z * centerBottom.z < 0) {
+		if (centerTop.z() * centerBottom.z() < 0) {
 			center = myUtilty::Vec3f(0, 0, 0);
 		}
-		else if (centerTop.z > 0) {
+		else if (centerTop.z() > 0) {
 			//说明都在上面
 			center = centerBottom;
 		}

@@ -42,7 +42,7 @@ std::shared_ptr<XFloatArray> computeWidth(std::shared_ptr<XFloatArray> input) {
 	}
 	return width;
 }
-XBarItem::XBarItem():XGraphicsItem()
+XBarItem::XBarItem(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(parent)
 {
 	this->setDrawType(PrimitveType::line_strip_adjacency);
 	auto coord = makeShareDbObject<XFloatArray>();

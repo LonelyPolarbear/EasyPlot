@@ -171,7 +171,7 @@ void xcamera::setEyeDir(const myUtilty::Vec3f& dir) {
     auto data =  myUtilty::Matrix::transformDecomposition_TRS(m_transform);
 
     Eigen::Matrix4f rotate = Eigen::Matrix4f::Identity();
-    Eigen::Vector3f zdir =Eigen::Vector3f(dir.x, dir.y, dir.z);
+    Eigen::Vector3f zdir =Eigen::Vector3f(dir.x(), dir.y(), dir.z());
     auto cos = zdir.dot(Eigen::Vector3f::UnitY());
 
     Eigen::Vector3f xdir = Eigen::Vector3f::UnitX();

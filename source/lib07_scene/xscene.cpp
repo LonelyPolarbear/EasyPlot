@@ -942,9 +942,9 @@ void XScene::wheelEvent(int angle,int x,int y)
 
     auto transform_data = myUtilty::Matrix::transformDecomposition_TRS(d->sceneFrameInVirtualWorld);
     if (transform_data.sx*factor > 0.1 && transform_data.sx *factor <50) {
-        d->sceneFrameInVirtualWorld.translate(Eigen::Vector3f(center.x, center.y, 0));
+        d->sceneFrameInVirtualWorld.translate(Eigen::Vector3f(center.x(), center.y(), 0));
         d->sceneFrameInVirtualWorld.scale(Eigen::Vector3f(factor, factor, 1));
-        d->sceneFrameInVirtualWorld.translate(Eigen::Vector3f(-center.x, -center.y, 0));
+        d->sceneFrameInVirtualWorld.translate(Eigen::Vector3f(-center.x(), -center.y(), 0));
     }
 }
 
@@ -1014,7 +1014,7 @@ void XScene::rotate(int x1,int y1,int x2,int y2)
 
 void XScene::rotate(myUtilty::Vec2u curpos, myUtilty::Vec2u lastpos)
 {
-    return rotate(curpos.x, curpos.y, lastpos.x, lastpos.y);
+    return rotate(curpos.x(), curpos.y(), lastpos.x(), lastpos.y());
 }
 
 void XScene::translate(int x1, int y1, int x2, int y2)
@@ -1028,34 +1028,34 @@ void XScene::translate(int x1, int y1, int x2, int y2)
     //场景坐标系下的平移
 	auto cur_scenePos = screenPos2ScenePos(myUtilty::Vec2u(x1, y1));
 	auto last_scenePos = screenPos2ScenePos(myUtilty::Vec2u(x2, y2));
-    d->sceneFrameInVirtualWorld.translate(Eigen::Vector3f(cur_scenePos.x- last_scenePos.x, cur_scenePos.y- last_scenePos.y, 0));
+    d->sceneFrameInVirtualWorld.translate(Eigen::Vector3f(cur_scenePos.x() - last_scenePos.x(), cur_scenePos.y() - last_scenePos.y(), 0));
 }
 
 void XScene::translate(myUtilty::Vec2u curpos, myUtilty::Vec2u lastpos)
 {
-    translate(curpos.x, curpos.y, lastpos.x, lastpos.y);
+    translate(curpos.x(), curpos.y(), lastpos.x(), lastpos.y());
 }
 
 myUtilty::Vec2i XScene::screenPos2ViewportPos(myUtilty::Vec2u pos) const
 {
     myUtilty ::Vec2i result;
-    result.x = pos.x - d->startx;
-    result.y = pos.y - d->starty;
+    result.x() = pos.x() - d->startx;
+    result.y() = pos.y() - d->starty;
     return result;
 }
 
 myUtilty::Vec2u XScene::viewportPos2ScreenPos(myUtilty::Vec2i pos) const
 {
     myUtilty::Vec2u result;
-    result.x = pos.x + d->startx;
-    result.y = pos.y + d->starty;
+    result.x() = pos.x() + d->startx;
+    result.y() = pos.y() + d->starty;
     return result;
 }
 
 //场景坐标系下的点转化到场景视口坐标系下的点
 myUtilty::Vec2i XScene::scenePos2ViewportPos(myUtilty::Vec2f pos) const
 {
-    Eigen::Vector3f posInVirtualWorld = d->sceneFrameInVirtualWorld*Eigen::Vector3f(pos.x, pos.y, 0);
+    Eigen::Vector3f posInVirtualWorld = d->sceneFrameInVirtualWorld*Eigen::Vector3f(pos.x(), pos.y(), 0);
 	auto x = posInVirtualWorld.x();
 	auto y = posInVirtualWorld.y();
 
@@ -1065,10 +1065,10 @@ myUtilty::Vec2i XScene::scenePos2ViewportPos(myUtilty::Vec2f pos) const
 //视口坐标系在左下角
 myUtilty::Vec2f XScene::viewportPos2ScenePos(myUtilty::Vec2i pos) const
 {
-    pos.x -= 0.5*getViewportWidth();
-    pos.y -= 0.5*getViewportHeight();
+    pos.x() -= 0.5 * getViewportWidth();
+    pos.y() -= 0.5 * getViewportHeight();
 
-    Eigen::Vector3f posInSceneFrmae = d->sceneFrameInVirtualWorld.inverse()*Eigen::Vector3f(pos.x, pos.y, 0);
+    Eigen::Vector3f posInSceneFrmae = d->sceneFrameInVirtualWorld.inverse()*Eigen::Vector3f(pos.x(), pos.y(), 0);
 
     return myUtilty::Vec2f(posInSceneFrmae.x(), posInSceneFrmae.y());
 }

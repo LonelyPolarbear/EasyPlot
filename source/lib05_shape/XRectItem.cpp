@@ -43,10 +43,10 @@ void XRectItem::setRect(myUtilty::Vec2f pos1, myUtilty::Vec2f pos2)
 {
 	if (m_rectType == XRectItem::RectType::diagonal_rect) {
 		auto points = myUtilty::math::getRectCorner(pos1, pos2);
-		m_coordArray->setTuple(0, points[0].x, points[0].y, 0);
-		m_coordArray->setTuple(1, points[1].x, points[1].y, 0);
-		m_coordArray->setTuple(2, points[2].x, points[2].y, 0);
-		m_coordArray->setTuple(3, points[3].x, points[3].y, 0);
+		m_coordArray->setTuple(0, points[0].x(), points[0].y(), 0);
+		m_coordArray->setTuple(1, points[1].x(), points[1].y(), 0);
+		m_coordArray->setTuple(2, points[2].x(), points[2].y(), 0);
+		m_coordArray->setTuple(3, points[3].x(), points[3].y(), 0);
 		m_coordArray->Modified();
 	}
 	else if (m_rectType == XRectItem::RectType::center_rect) {
@@ -54,10 +54,10 @@ void XRectItem::setRect(myUtilty::Vec2f pos1, myUtilty::Vec2f pos2)
 		myUtilty::Vec2f corner2  = 2.f*pos1 - pos2;
 
 		auto points = myUtilty::math::getRectCorner(corner1, corner2);
-		m_coordArray->setTuple(0, points[0].x, points[0].y, 0);
-		m_coordArray->setTuple(1, points[1].x, points[1].y, 0);
-		m_coordArray->setTuple(2, points[2].x, points[2].y, 0);
-		m_coordArray->setTuple(3, points[3].x, points[3].y, 0);
+		m_coordArray->setTuple(0, points[0].x(), points[0].y(), 0);
+		m_coordArray->setTuple(1, points[1].x(), points[1].y(), 0);
+		m_coordArray->setTuple(2, points[2].x(), points[2].y(), 0);
+		m_coordArray->setTuple(3, points[3].x(), points[3].y(), 0);
 		m_coordArray->Modified();
 	
 	}

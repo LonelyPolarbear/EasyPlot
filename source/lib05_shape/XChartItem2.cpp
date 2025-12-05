@@ -33,7 +33,7 @@ public:
 	Internal() {
 		//创建默认的图元
 		{
-			m_title = makeShareDbObject<XTextItem>();
+			m_title = makeShareDbObject<XTextItem>(nullptr);
 			m_title->setHAlignment(XTextItem::HAlign::Center);
 			m_title->setVAlignment(XTextItem::VAlign::Middle);
 			m_title->setPositionType(XGL::PositionType::local_center);
@@ -59,8 +59,8 @@ public:
 			m_axisx->getLine()->setLineWidth(3);
 			m_axisy->getLine()->setLineWidth(3);
 
-			m_axisx->setRange(mXRange.x, mXRange.y);
-			m_axisy->setRange(mYRange.x, mYRange.y);
+			m_axisx->setRange(mXRange.x(), mXRange.y());
+			m_axisy->setRange(mYRange.x(), mYRange.y());
 		}
 		{
 			m_gridItem =makeShareDbObject<XGridItem>();
@@ -186,11 +186,11 @@ void XChartItem2::fitView()
 {
 	for(auto line : d->m_polylines){
 		auto box = line->getBoundBox();
-		d->mXRange.x = std::min(d->mXRange.x,box.xmin);
-		d->mXRange.y = std::max(d->mXRange.y, box.xmax);
+		d->mXRange.x() = std::min<float>(d->mXRange.x(), box.xmin);
+		d->mXRange.y() = std::max<float>(d->mXRange.y(), box.xmax);
 
-		d->mYRange.x = std::min(d->mYRange.x, box.ymin);
-		d->mYRange.y = std::max(d->mYRange.y, box.ymax);
+		d->mYRange.x() = std::min<float>(d->mYRange.x(), box.ymin);
+		d->mYRange.y() = std::max<float>(d->mYRange.y(), box.ymax);
 	}
 }
 
@@ -213,22 +213,22 @@ void XChartItem2::chartTranslate(const myUtilty::Vec2f& lastPos_, const myUtilty
 	auto chartTransform =getTransform()*d->m_gridItem->getTransform()*d->m_gridItem->getGridTransform();
 
 	Eigen::Affine3f scene2Chart = chartTransform.inverse();
-	Eigen::Vector3f curPos = scene2Chart * Eigen::Vector3f(curPos_.x, curPos_.y, 0);
-	Eigen::Vector3f lasPos = scene2Chart * Eigen::Vector3f(lastPos_.x, lastPos_.y, 0);
+	Eigen::Vector3f curPos = scene2Chart * Eigen::Vector3f(curPos_.x(), curPos_.y(), 0);
+	Eigen::Vector3f lasPos = scene2Chart * Eigen::Vector3f(lastPos_.x(), lastPos_.y(), 0);
 
 	auto dx = curPos.x() - lasPos.x();
 	auto dy = curPos.y() - lasPos.y();
 
 	auto range =d->m_axisx->getRange();
-	range.x -= dx;
-	range.y -=dx;
-	d->m_axisx->setRange(range.x, range.y);
+	range.x() -= dx;
+	range.y() -= dx;
+	d->m_axisx->setRange(range.x(), range.y());
 
 	{
 		auto range = d->m_axisy->getRange();
-		range.x -= dy;
-		range.y -= dy;
-		d->m_axisy->setRange(range.x, range.y);
+		range.x() -= dy;
+		range.y() -= dy;
+		d->m_axisy->setRange(range.x(), range.y());
 	}
 	
 	updateGridFrame();
@@ -241,17 +241,17 @@ void XChartItem2::chartSale(float dx, float dy)
 		dy = dy > 1 ? 0.1 : -0.1;
 
 		auto range = d->m_axisx->getRange();
-		auto len = range.y - range.x;
-		range.x -= dx * len;
-		range.y += dy * len;
-		d->m_axisx->setRange(range.x, range.y);
+		auto len = range.y() - range.x();
+		range.x() -= dx * len;
+		range.y() += dy * len;
+		d->m_axisx->setRange(range.x(), range.y());
 	}
 	{
 		auto range = d->m_axisy->getRange();
-		auto len = range.y - range.x;
-		range.x -= dy * len;
-		range.y += dx * len;
-		d->m_axisy->setRange(range.x, range.y);
+		auto len = range.y() - range.x();
+		range.x() -= dy * len;
+		range.y() += dx * len;
+		d->m_axisy->setRange(range.x(), range.y());
 	}
 	
 	updateGridFrame();
@@ -260,11 +260,11 @@ void XChartItem2::chartSale(float dx, float dy)
 void XChartItem2::updateGridFrame()
 {
 	//当轴的范围变化时，需要更新网格坐标系
-	auto sx = d->m_axisx->getRange().y - d->m_axisx->getRange().x;
-	auto sy = d->m_axisy->getRange().y - d->m_axisy->getRange().x;
+	auto sx = d->m_axisx->getRange().y() - d->m_axisx->getRange().x();
+	auto sy = d->m_axisy->getRange().y() - d->m_axisy->getRange().x();
 	d->m_gridItem->gridReset();
 	d->m_gridItem->gridSetSale(sx, sy);
-	auto origin = myUtilty::Vec2d(d->m_axisx->getRange().x, d->m_axisy->getRange().x);
+	auto origin = myUtilty::Vec2d(d->m_axisx->getRange().x(), d->m_axisy->getRange().x());
 	d->m_gridItem->setOrigin(origin);
 }
 

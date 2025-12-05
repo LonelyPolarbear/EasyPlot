@@ -4,7 +4,7 @@
 
 class LIB05_SHAPE_API XBarItem :public XGraphicsItem {
 public:
-	XBarItem();
+	XBarItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XBarItem();
 	virtual void updateData();
 	virtual void drawBorder(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m){}

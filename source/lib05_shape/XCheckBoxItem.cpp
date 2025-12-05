@@ -13,7 +13,7 @@ public:
 		textItem->setFixedWidth(2);
 		textItem->setPosition(0, 0);
 	}
-	std::shared_ptr<XTextItem> textItem = makeShareDbObject<XTextItem>();
+	std::shared_ptr<XTextItem> textItem = makeShareDbObject<XTextItem>(nullptr);
 	bool checked = false;
 };
 XCheckBoxItem::XCheckBoxItem(std::shared_ptr<XGraphicsItem> parent):XRectItem(parent), m_internal(new Internal)

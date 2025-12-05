@@ -77,11 +77,11 @@ enum class CameraAction {
 struct easyPlotWidget::Internal {
 	std::shared_ptr<xShaderManger> shaderManger = makeShareDbObject<xShaderManger>();
 	std::shared_ptr<XScene> scene = makeShareDbObject<XScene>();
-	std::shared_ptr<XGraphicsItem> rect = makeShareDbObject<XRectItem>();		//实时绘制的矩形
-	std::shared_ptr<XTextItem> screenTextItem = makeShareDbObject<XTextItem>();		//实时绘制的矩形
-	std::shared_ptr<XTextItem> screenTextItemLine = makeShareDbObject<XTextItem>();		//实时绘制的矩形
+	std::shared_ptr<XGraphicsItem> rect = makeShareDbObject<XRectItem>(nullptr);		//实时绘制的矩形
+	std::shared_ptr<XTextItem> screenTextItem = makeShareDbObject<XTextItem>(nullptr);		//实时绘制的矩形
+	std::shared_ptr<XTextItem> screenTextItemLine = makeShareDbObject<XTextItem>(nullptr);		//实时绘制的矩形
 
-	std::shared_ptr<XTextItem> screenTextItemMousePos = makeShareDbObject<XTextItem>();		//实时显示鼠标的当前位置
+	std::shared_ptr<XTextItem> screenTextItemMousePos = makeShareDbObject<XTextItem>(nullptr);		//实时显示鼠标的当前位置
 	
 	//鼠标的位置实时更新
 	QPoint mouseMoveLastTimePos = QPoint(0, 0);							//鼠标实时移动第一个位置
@@ -382,7 +382,7 @@ void easyPlotWidget::mouseMoveEvent(QMouseEvent* event)
 		
 		auto tip = QString("");
 		tip += QString("world:(%1,%2,%3)").arg(worldPos.x(), 0, 'f', 2).arg(worldPos.y(), 0, 'f', 2).arg(worldPos.z(), 0, 'f', 2);
-		tip += QString("\nscene:(%1,%2)").arg(scenepos.x, 0, 'f', 2).arg(scenepos.y, 0, 'f', 2);
+		tip += QString("\nscene:(%1,%2)").arg(scenepos.x(), 0, 'f', 2).arg(scenepos.y(), 0, 'f', 2);
 		tip += QString("\nscreen:(%1,%2)").arg(x).arg(y);
 
 		d->screenTextItemMousePos->setText(tip.toStdWString());
@@ -414,10 +414,10 @@ void easyPlotWidget::mouseReleaseEvent(QMouseEvent* event)
 			auto start = mapToGLScreen(d->mousePressPos);
 			auto end = mapToGLScreen(event->pos());
 
-			auto x = std::min(start.x, end.x);
-			auto y = std::min(start.y, end.y);
-			int w = start.x - end.x;
-			int h = start.y - end.y;
+			auto x = std::min(start.x(), end.x());
+			auto y = std::min(start.y(), end.y());
+			int w = start.x() - end.x();
+			int h = start.y() - end.y();
 			w = std::abs(w);
 			h = std::abs(h);
 
@@ -590,7 +590,7 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 		result.coordArray = coord;
 
 
-		auto textItem = makeShareDbObject<XTextItem>();
+		auto textItem = makeShareDbObject<XTextItem>(nullptr);
 		textItem->setSingleColor(myUtilty::Vec4f(1, 1, 1, 1));
 		textItem->setFontSize(20);
 		textItem->setText(L"测试一下文字");
@@ -609,7 +609,7 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 	if (type == render::graphicsItemType::line)
 	{
 		makeCurrent();
-		auto item = makeShareDbObject<XLineItem>();
+		auto item = makeShareDbObject<XLineItem>(nullptr);
 		item->setLineWidth(2);
 		item->setPenStyle(XGraphicsItem::PenStyle::Solid);
 		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
@@ -756,8 +756,8 @@ void easyPlotWidget::slotSetting()
 			info.content = QString::fromStdWString(text->getText());
 			info.alignH = (int)text->getHAlignment() - 1;
 			info.alignV = (int)text->getVAlignment() - 1;
-			info.x = text->getPositionByOrientation().x;
-			info.y = text->getPositionByOrientation().y;
+			info.x = text->getPositionByOrientation().x();
+			info.y = text->getPositionByOrientation().y();
 			info.isFixed = text->isFixWidth();
 			info.fixWidth = text->getFixedWidth();
 			info.color = text->getSingleColor();
@@ -789,15 +789,15 @@ void easyPlotWidget::slotSetting()
 			GridSetParam info;
 			info.gridNum = item->getGridNum();
 			info.gridSpace = item->getGridSpace();
-			info.rangex_min = item->getOrigin().x;
+			info.rangex_min = item->getOrigin().x();
 			auto scales =item->gridGetSale();
 			auto origin = item->getOrigin();
 
-			info.rangex_min = origin.x;
-			info.rangex_max = origin.x + scales.x;
+			info.rangex_min = origin.x();
+			info.rangex_max = origin.x() + scales.x();
 
-			info.rangey_min = origin.y;
-			info.rangey_max = origin.y + scales.y;
+			info.rangey_min = origin.y();
+			info.rangey_max = origin.y() + scales.y();
 
 			static GridSetDlg* dlg = nullptr;
 			if (dlg == nullptr) {
@@ -915,10 +915,10 @@ void easyPlotWidget::updateItem()
 		if (d->mDrawItemType == render::graphicsItemType::rect) {
 			auto rect = std::dynamic_pointer_cast<XRectItem>(d->mDrawItemData.item); {
 				rect->resetTransform();
-				auto scalex = (firstPos - secondPos).x;
-				auto scaley = (firstPos - secondPos).y;
+				auto scalex = (firstPos - secondPos).x();
+				auto scaley = (firstPos - secondPos).y();
 				auto center = (firstPos + secondPos) * 0.5;
-				rect->translate(center.x, center.y);
+				rect->translate(center.x(), center.y());
 				rect->scale(abs(0.5*scalex), abs(0.5*scaley));
 			}
 		}
@@ -951,7 +951,7 @@ void easyPlotWidget::slotAddLine2D(int curveType)
 	//1 正弦波 2 三角波 3 矩形波
 	//创建一条曲线
 	makeCurrent();
-	auto item = makeShareDbObject<XPolyline>();
+	auto item = makeShareDbObject<XPolyline>(nullptr);
 	std::wstring name = L"曲线";
 	name.append(std::to_wstring(myUtilty::math::randon<int>(0, 100)));
 	item->addAttribute(L"Name", name);
@@ -1085,7 +1085,7 @@ void easyPlotWidget::slotAddBar()
 	//创建一条曲线
 	makeCurrent();
 	#if 1
-	auto item = makeShareDbObject<XBarItem>();
+	auto item = makeShareDbObject<XBarItem>(nullptr);
 	item->setLineWidth(1);
 	item->setPenStyle(XGraphicsItem::PenStyle::Dash);
 
@@ -1153,7 +1153,7 @@ void easyPlotWidget::slotAddText()
 {
 	makeCurrent();
 	{
-		auto item = makeShareDbObject<XTextItem>();
+		auto item = makeShareDbObject<XTextItem>(nullptr);
 		//item->initiallize();
 		item->setVisible(true);
 		item->setVAlignment(XTextItem::VAlign::Bottom);

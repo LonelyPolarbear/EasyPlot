@@ -200,3 +200,15 @@ void XOpenGLFuntion::xglClearStencil(int s)
 	glClearStencil(s);
 	checkGLError();
 }
+
+/*
+最大本地工作组大小限制
+glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &maxLocalWorkGroupSize[0]); // X维度
+glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &maxLocalWorkGroupSize[1]); // Y维度
+glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &maxLocalWorkGroupSize[2]); // Z维度
+
+最大全局工作组数量限制
+glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, &maxComputeWorkGroupCount[0]); // X维度
+glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 1, &maxComputeWorkGroupCount[1]); // Y维度
+glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 2, &maxComputeWorkGroupCount[2]); // Z维度
+*/

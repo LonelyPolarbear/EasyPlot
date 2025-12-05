@@ -13,7 +13,7 @@ public:
 		Middle,
 		Bottom
 	};
-	XTextItem();
+	XTextItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XTextItem();
 	void draw(const Eigen::Matrix4f& m) override;
 

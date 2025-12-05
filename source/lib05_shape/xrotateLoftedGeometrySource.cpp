@@ -35,12 +35,12 @@ void XRotateLoftedgeometrySource::updateVertextCoordArray()
 
 	//先下底面
 	for (int i = 0; i < rowLen; i++) {
-		m_coord->setTuple(idx++, bottomPoints[i].x, bottomPoints[i].y, -m_height * 0.5);
+		m_coord->setTuple(idx++, bottomPoints[i].x(), bottomPoints[i].y(), -m_height * 0.5);
 	}
 
 	//上底面
 	for (int i = 0; i < rowLen; i++) {
-		m_coord->setTuple(idx++, topPoints[i].x, topPoints[i].y, m_height * 0.5);
+		m_coord->setTuple(idx++, topPoints[i].x(), topPoints[i].y(), m_height * 0.5);
 	}
 
 	m_coord->Modified();

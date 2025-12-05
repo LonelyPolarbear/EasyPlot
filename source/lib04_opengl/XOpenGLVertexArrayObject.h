@@ -5,7 +5,7 @@
 #include "XOpenGLType.h"
 
 class XOpenGLBuffer;
-class LIB04_OPENGL_API XOpenGLVertexArrayObject:DataBaseObject
+class LIB04_OPENGL_API XOpenGLVertexArrayObject:public DataBaseObject
 {
 protected:
     XOpenGLVertexArrayObject();

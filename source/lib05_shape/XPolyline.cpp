@@ -1,7 +1,7 @@
 #include "XPolyline.h"
 #include <lib04_opengl/XOpenGLBuffer.h>
 
-XPolyline::XPolyline():XGraphicsItem()
+XPolyline::XPolyline(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(parent)
 {
 	this->setDrawType(PrimitveType::line_strip_adjacency);
 	auto coord = makeShareDbObject<XFloatArray>();
@@ -44,8 +44,8 @@ void XPolyline::updateVboCoord()
 
 
 			//设置第一个点
-			addAdjacency->data(0)[0] = p1.x;
-			addAdjacency->data(0)[1] = p1.y;
+			addAdjacency->data(0)[0] = p1.x();
+			addAdjacency->data(0)[1] = p1.y();
 			addAdjacency->data(0)[2] = 0;
 
 			//拷贝原始数据
@@ -53,8 +53,8 @@ void XPolyline::updateVboCoord()
 			memcpy(addAdjacency->data(1), m_coord->data(0), oldNum * 3 * sizeof(float));
 
 			//最后一个点
-			addAdjacency->data(oldNum + 1)[0] = p2.x;
-			addAdjacency->data(oldNum + 1)[1] = p2.y;
+			addAdjacency->data(oldNum + 1)[0] = p2.x();
+			addAdjacency->data(oldNum + 1)[1] = p2.y();
 			addAdjacency->data(oldNum + 1)[2] = 0;
 
 			m_vbo_coord->allocate(addAdjacency->data(0), addAdjacency->size());

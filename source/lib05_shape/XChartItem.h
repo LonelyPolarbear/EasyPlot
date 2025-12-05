@@ -8,7 +8,7 @@ class XTextItem;
 class LIB05_SHAPE_API XChartItem :public XGraphicsItem {
 public:
 	
-	XChartItem();
+	XChartItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XChartItem();
 
 	void setRect(float x, float y, float w, float h);

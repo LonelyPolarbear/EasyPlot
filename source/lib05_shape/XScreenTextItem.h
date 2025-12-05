@@ -6,7 +6,7 @@
 class LIB05_SHAPE_API XScreenTextItem :public XTextItem {
 public:
 	
-	XScreenTextItem();
+	XScreenTextItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XScreenTextItem();
 
 	void setTextSceneScreenPos(int x, int y);

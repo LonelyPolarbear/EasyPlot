@@ -8,7 +8,7 @@
 #include "XTextItem.h"
 
 
-XScreenTextItem::XScreenTextItem():XTextItem()
+XScreenTextItem::XScreenTextItem(std::shared_ptr<XGraphicsItem> parent):XTextItem(parent)
 {
 	this->setPositionType(XGL::PositionType::sceneScreen_complete);
 }
