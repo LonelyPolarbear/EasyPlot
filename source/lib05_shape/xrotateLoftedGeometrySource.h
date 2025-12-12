@@ -26,8 +26,8 @@ protected:
 
 	void setAngle(double angle);
 
-	virtual std::vector<myUtilty::Vec3f> getBottomPoints() =0;
-	virtual std::vector<myUtilty::Vec3f> getTopPoints()=0;
+	virtual std::vector<XQ::Vec3f> getBottomPoints() =0;
+	virtual std::vector<XQ::Vec3f> getTopPoints()=0;
 	protected:
 	bool isClosed() const;
 	unsigned int m_NumVertices =3;

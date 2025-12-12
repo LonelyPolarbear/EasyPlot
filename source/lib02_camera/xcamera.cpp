@@ -24,13 +24,13 @@ Eigen::Matrix4f xcamera::projectionMatrix() const
 
 Eigen::Matrix4f xcamera::perspective() const
 {
-    return myUtilty::Matrix::perspective(m_fovy, m_aspect, m_znear, m_zfar);
+    return XQ::Matrix::perspective(m_fovy, m_aspect, m_znear, m_zfar);
 }
 
 Eigen::Matrix4f xcamera::ortho() const
 {
     float width = m_aspect * m_height;
-    return myUtilty::Matrix::ortho(-0.5*width,0.5*width,-0.5*m_height,0.5*m_height, m_znear, m_zfar);
+    return XQ::Matrix::ortho(-0.5*width,0.5*width,-0.5*m_height,0.5*m_height, m_znear, m_zfar);
 }
 
 //boundBox 是世界坐标系下的位置
@@ -48,7 +48,7 @@ void xcamera::resetCamera(const double boundBox[6])
     //如果是透视投影
     if (m_type == cameraType::perspective) {
         auto angle = m_fovy * 0.5;
-        radius = radius / tanf(myUtilty::Matrix::radian(angle));
+        radius = radius / tanf(XQ::Matrix::radian(angle));
     }
     
     Eigen::Vector3f position = center +zdir * radius;
@@ -97,10 +97,10 @@ void xcamera::resetCamera(const double boundBox[6])
     
 }
 
-std::vector<myUtilty::Vec3f> xcamera::getFrustumInWorld() const
+std::vector<XQ::Vec3f> xcamera::getFrustumInWorld() const
 {
     //获取视锥体的八个顶点
-    std::vector<myUtilty::Vec3f> frustum;
+    std::vector<XQ::Vec3f> frustum;
     Eigen::Matrix4f view = m_transform.matrix().inverse();
     Eigen::Matrix4f proj = projectionMatrix();
     Eigen::Matrix4f viewProj = proj * view;
@@ -116,25 +116,25 @@ std::vector<myUtilty::Vec3f> xcamera::getFrustumInWorld() const
     };
 
     for (int i = 0; i < 8; i++) {
-        myUtilty::Vec3f point(points[i].x() / points[i].w(), points[i].y() / points[i].w(), points[i].z() / points[i].w());
+        XQ::Vec3f point(points[i].x() / points[i].w(), points[i].y() / points[i].w(), points[i].z() / points[i].w());
         frustum.push_back(point);
     }
 
     return frustum;
 }
 
-myUtilty::Vec3f xcamera::getNearPointInWorld() const
+XQ::Vec3f xcamera::getNearPointInWorld() const
 {
     Eigen::Vector3f points(0,0,-m_znear);
     Eigen::Vector3f out =m_transform*points;
-    return myUtilty::Vec3f(out.x(), out.y(), out.z());
+    return XQ::Vec3f(out.x(), out.y(), out.z());
 }
 
-myUtilty::Vec3f xcamera::getFarPointInWorld() const
+XQ::Vec3f xcamera::getFarPointInWorld() const
 {
 	Eigen::Vector3f points(0, 0, -m_zfar);
 	Eigen::Vector3f out = m_transform * points;
-	return myUtilty::Vec3f(out.x(), out.y(), out.z());
+	return XQ::Vec3f(out.x(), out.y(), out.z());
 }
 
 /**
@@ -150,7 +150,7 @@ void xcamera::scale(float sacleFactor, bool isLast)
 			angle = m_fovy * 0.5;
 		else
 			angle = 45 * 0.5;
-		auto new_half_fovy = myUtilty::Matrix::Angle(atanf(tanf(myUtilty::Matrix::radian(angle)) / sacleFactor));
+		auto new_half_fovy = XQ::Matrix::Angle(atanf(tanf(XQ::Matrix::radian(angle)) / sacleFactor));
 		if (2 * new_half_fovy >= 170 || 2 * new_half_fovy < 1)
 			return;
 		m_fovy = 2 * new_half_fovy;
@@ -166,9 +166,9 @@ void xcamera::transform(float picth, float yaw, float roll, float tx, float ty, 
     transformImpl(picth, yaw, roll,tx,ty,tz);
 }
 
-void xcamera::setEyeDir(const myUtilty::Vec3f& dir) {
+void xcamera::setEyeDir(const XQ::Vec3f& dir) {
     //调整相机的朝向 TODO
-    auto data =  myUtilty::Matrix::transformDecomposition_TRS(m_transform);
+    auto data =  XQ::Matrix::transformDecomposition_TRS(m_transform);
 
     Eigen::Matrix4f rotate = Eigen::Matrix4f::Identity();
     Eigen::Vector3f zdir =Eigen::Vector3f(dir.x(), dir.y(), dir.z());
@@ -206,7 +206,7 @@ void xcamera::setEyeDir(const myUtilty::Vec3f& dir) {
     rotate.block(0, 1, 3, 1) = new_ydir;
     rotate.block(0, 2, 3, 1) = new_zdir;
 
-    Eigen::Matrix4f m=  myUtilty::Matrix::transltae(data.tx,data.ty,data.tz).matrix() * rotate * myUtilty::Matrix::scale(data.sx,   data.sy,   data.sz).matrix();
+    Eigen::Matrix4f m=  XQ::Matrix::transltae(data.tx,data.ty,data.tz).matrix() * rotate * XQ::Matrix::scale(data.sx,   data.sy,   data.sz).matrix();
     m_transform.matrix() = m;
 }
 
@@ -234,8 +234,8 @@ void xcamera::transformTrackball(Eigen::Vector2f curPoint, Eigen::Vector2f lastP
 		point2[0] = 2 * point2[0] - 1;
 		point2[1] = 2 * point2[1] - 1;
 
-		point1[2] = myUtilty::Matrix::tb_project_to_sphere(point1[0], point1[1]);
-		point2[2] = myUtilty::Matrix::tb_project_to_sphere(point2[0], point2[1]);
+		point1[2] = XQ::Matrix::tb_project_to_sphere(point1[0], point1[1]);
+		point2[2] = XQ::Matrix::tb_project_to_sphere(point2[0], point2[1]);
 
         rotateDir = point1.cross(point2);
 		auto len = rotateDir.norm();
@@ -297,41 +297,41 @@ void xcamera::transformTrackball(Eigen::Vector2f curPoint, Eigen::Vector2f lastP
 		Eigen::Vector3f self2Center = t.inverse() * rotate_center;
         t
 			.translate(self2Center)
-			.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian( xangle * 180.0 / 3.14), Eigen::Vector3f::UnitX()))
-			.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(-yangle * 180.0 / 3.14), Eigen::Vector3f::UnitY()))
+			.rotate(Eigen::AngleAxisf(XQ::Matrix::radian( xangle * 180.0 / 3.14), Eigen::Vector3f::UnitX()))
+			.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(-yangle * 180.0 / 3.14), Eigen::Vector3f::UnitY()))
 			//.rotate(Eigen::AngleAxisf(rotateAngle, rotateDir))
 			.scale(Eigen::Vector3f(1, 1, 1))
 			.translate(-self2Center);
 		std::cout << "t\n";
-		myUtilty::Matrix::dump(t, std::cout);
+		XQ::Matrix::dump(t, std::cout);
     }
     
 
-        auto cameraRot =myUtilty::Matrix::rotate(m_transform);
+        auto cameraRot =XQ::Matrix::rotate(m_transform);
 		{
-            auto cameraRotTest =myUtilty::Matrix::rotate(m_transform);
+            auto cameraRotTest =XQ::Matrix::rotate(m_transform);
 			Eigen::Vector3f diry = cameraRotTest * Eigen::Vector3f::UnitY();
 			Eigen::Vector3f dirx = cameraRotTest * Eigen::Vector3f::UnitX();
 
-			auto rx = myUtilty::Matrix::rotate(-xangle * 180.0 / 3.14, dirx);
-			auto ry = myUtilty::Matrix::rotate(yangle * 180.0 / 3.14, diry);
+			auto rx = XQ::Matrix::rotate(-xangle * 180.0 / 3.14, dirx);
+			auto ry = XQ::Matrix::rotate(yangle * 180.0 / 3.14, diry);
 
 			Eigen::Affine3f world = ry * rx;
             cameraRotTest = world.inverse() * cameraRotTest;
 
             std::cout<<"cameraRotTest\n";
-            myUtilty::Matrix::dump(cameraRotTest, std::cout);
+            XQ::Matrix::dump(cameraRotTest, std::cout);
 		}
         
         {
-            auto rx = myUtilty::Matrix::rotate(-xangle * 180.0 / 3.14, Eigen::Vector3f::UnitX());
-            auto ry = myUtilty::Matrix::rotate(yangle * 180.0 / 3.14, Eigen::Vector3f::UnitY());
+            auto rx = XQ::Matrix::rotate(-xangle * 180.0 / 3.14, Eigen::Vector3f::UnitX());
+            auto ry = XQ::Matrix::rotate(yangle * 180.0 / 3.14, Eigen::Vector3f::UnitY());
             Eigen::Affine3f  a= cameraRot* ry* rx* cameraRot.inverse();
             cameraRot = a.inverse() * cameraRot;
 
             //cameraRot *rx逆*ry逆*cameraRot的逆*cameraRot = cameraRot *rx逆*ry逆
             std::cout << "cameraRot\n";
-            myUtilty::Matrix::dump(cameraRot, std::cout);
+            XQ::Matrix::dump(cameraRot, std::cout);
         }
 
 
@@ -345,7 +345,7 @@ void xcamera::transformTrackball(Eigen::Vector2f curPoint, Eigen::Vector2f lastP
 
         {
 			std::cout << "m_transform\n";
-			myUtilty::Matrix::dump(m_transform, std::cout);
+			XQ::Matrix::dump(m_transform, std::cout);
         }
 
     #endif
@@ -394,7 +394,7 @@ float xcamera::scaleFactorH(float zValue, float screenw)
         return width / screenw;
     }
     else {
-        float half_height = zValue * tanf(myUtilty::Matrix::radian(0.5 * m_fovy));
+        float half_height = zValue * tanf(XQ::Matrix::radian(0.5 * m_fovy));
         float height = 2 * half_height;
         float width = m_aspect * height;
         return width / screenw;
@@ -412,7 +412,7 @@ float xcamera::scaleFactorV(float zValue, float screenh)
         return m_height / screenh;
     }
     else {
-        float half_height = zValue * tanf(myUtilty::Matrix::radian(0.5 * m_fovy));
+        float half_height = zValue * tanf(XQ::Matrix::radian(0.5 * m_fovy));
         float height = 2 * half_height;
         return height / screenh;
     }
@@ -430,9 +430,9 @@ void xcamera::transformImpl(float pitch, float yaw, float roll, float tx, float 
     //相机绕着自身坐标系运动,旋转顺序Z->X->Y
     m_transform
         .translate(self2Center)
-        .rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(roll), Eigen::Vector3f::UnitZ()))
-        .rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(pitch), Eigen::Vector3f::UnitX()))
-        .rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(yaw), Eigen::Vector3f::UnitY()))
+        .rotate(Eigen::AngleAxisf(XQ::Matrix::radian(roll), Eigen::Vector3f::UnitZ()))
+        .rotate(Eigen::AngleAxisf(XQ::Matrix::radian(pitch), Eigen::Vector3f::UnitX()))
+        .rotate(Eigen::AngleAxisf(XQ::Matrix::radian(yaw), Eigen::Vector3f::UnitY()))
         .scale(Eigen::Vector3f(1,1,1))
         .translate(-self2Center)
         .translate(Eigen::Vector3f(tx, ty, tz));

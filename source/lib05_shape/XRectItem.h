@@ -15,7 +15,7 @@ public:
 	void setRectType(RectType rectType);
 	RectType getRectType() const;
 
-	void setRect(myUtilty::Vec2f pos1,myUtilty::Vec2f pos2);
+	void setRect(XQ::Vec2f pos1,XQ::Vec2f pos2);
 
 protected:
 	 void updateVboCoord()override;

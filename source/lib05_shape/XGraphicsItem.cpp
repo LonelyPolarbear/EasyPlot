@@ -299,7 +299,7 @@ void XGraphicsItem::initResource()
 	m_ebo->bind();			//用于填充时候绘制，填充目前只支持三角形填充
 
 	//设置顶点属性
-	m_vao->addBuffer(0, m_vbo_coord, 3, XOpenGL::DataType::float_, sizeof(myUtilty::Vec3f), 0);
+	m_vao->addBuffer(0, m_vbo_coord, 3, XOpenGL::DataType::float_, sizeof(XQ::Vec3f), 0);
 
 	m_vbo_coord->release();
 
@@ -384,7 +384,7 @@ void XGraphicsItem::setInstanceArray(std::shared_ptr<XFloatArray> instanceArray)
 	m_instacePos = instanceArray;
 }
 
-void XGraphicsItem::setSingleColor(const myUtilty::Vec4f& color)
+void XGraphicsItem::setSingleColor(const XQ::Vec4f& color)
 {
 	m_singleColor = color;
 }
@@ -399,7 +399,7 @@ void XGraphicsItem::setColorMode(ColorMode mode)
 	m_colorMode = mode;
 }
 
-void XGraphicsItem::setPreSelectColor(const myUtilty::Vec4f& color)
+void XGraphicsItem::setPreSelectColor(const XQ::Vec4f& color)
 {
 	m_preSelectColor = color;
 }
@@ -414,7 +414,7 @@ void XGraphicsItem::setDrawType(PrimitveType type)
 //	return mIsComposite;
 //}
 
-myUtilty::Vec4f XGraphicsItem::getSingleColor() const
+XQ::Vec4f XGraphicsItem::getSingleColor() const
 {
 	return m_singleColor;
 }
@@ -462,7 +462,7 @@ std::shared_ptr<XFloatArray> XGraphicsItem::getCoordArray() const
 
 void XGraphicsItem::rotate(float angle)
 {
-	d->m_transform.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(angle), Eigen::Vector3f::UnitZ()));
+	d->m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), Eigen::Vector3f::UnitZ()));
 }
 
 void XGraphicsItem::translate(float dx, float dy)
@@ -510,30 +510,30 @@ XGL::Orientation XGraphicsItem::getOrientation() const
 	return m_orientation;
 }
 
-myUtilty::Vec2f XGraphicsItem::getPosition() const
+XQ::Vec2f XGraphicsItem::getPosition() const
 {
 	Eigen::Vector3f pos= d->m_transform.translation();
-	return myUtilty::Vec2f(pos.x(), pos.y());
+	return XQ::Vec2f(pos.x(), pos.y());
 }
 
-myUtilty::Vec2f XGraphicsItem::getPositionByOrientation() const
+XQ::Vec2f XGraphicsItem::getPositionByOrientation() const
 {
 	if (m_positionType == XGL::PositionType::sceneScreen_center || m_positionType == XGL::PositionType::sceneScreen_complete) {
 		if (m_orientation == XGL::Orientation::left_bottom) {
-			return myUtilty::Vec2f(d->m_transform.translation().x(), d->m_transform.translation().y());
+			return XQ::Vec2f(d->m_transform.translation().x(), d->m_transform.translation().y());
 		}
 		else if (m_orientation == XGL::Orientation::left_top) {
-			return myUtilty::Vec2f(d->m_transform.translation().x(), -d->m_transform.translation().y());
+			return XQ::Vec2f(d->m_transform.translation().x(), -d->m_transform.translation().y());
 		}
 		else if (m_orientation == XGL::Orientation::right_bottom) {
-			return myUtilty::Vec2f(-d->m_transform.translation().x(), d->m_transform.translation().y());
+			return XQ::Vec2f(-d->m_transform.translation().x(), d->m_transform.translation().y());
 		}
 		else if (m_orientation == XGL::Orientation::right_top) {
-			return myUtilty::Vec2f(-d->m_transform.translation().x(), -d->m_transform.translation().y());
+			return XQ::Vec2f(-d->m_transform.translation().x(), -d->m_transform.translation().y());
 		}
 	}
 	
-	return myUtilty::Vec2f(d->m_transform.translation().x(), d->m_transform.translation().y());
+	return XQ::Vec2f(d->m_transform.translation().x(), d->m_transform.translation().y());
 }
 
 void XGraphicsItem::scale(float sx, float sy)
@@ -543,10 +543,10 @@ void XGraphicsItem::scale(float sx, float sy)
 
 void XGraphicsItem::setScale(float sx, float sy)
 {
-	auto data = myUtilty::Matrix::transformDecomposition_TRS(d->m_transform);
+	auto data = XQ::Matrix::transformDecomposition_TRS(d->m_transform);
 	data.sx = sx;
 	data.sy = sy;
-	d->m_transform.matrix() = myUtilty::Matrix::computeMatrix(data);
+	d->m_transform.matrix() = XQ::Matrix::computeMatrix(data);
 }
 
 
@@ -590,12 +590,12 @@ XGraphicsItem::PenStyle XGraphicsItem::getPenStyle() const
 	return m_penStyle;
 }
 
-void XGraphicsItem::setFillColor(const myUtilty::Vec4f& color)
+void XGraphicsItem::setFillColor(const XQ::Vec4f& color)
 {	
 	m_fillColor = color;
 }
 
-myUtilty::Vec4f XGraphicsItem::getFillColor() const
+XQ::Vec4f XGraphicsItem::getFillColor() const
 {
 	return m_fillColor;
 }
@@ -610,20 +610,20 @@ bool XGraphicsItem::isFilled() const
 	return m_IsFilled;
 }
 
-bool XGraphicsItem::hitTest(const myUtilty::Vec2f& pos)
+bool XGraphicsItem::hitTest(const XQ::Vec2f& pos)
 {
 	return false;
 }
 
-myUtilty::BoundBox XGraphicsItem::getBoundBox()
+XQ::BoundBox XGraphicsItem::getBoundBox()
 {
 	constexpr double limitMax = std::numeric_limits<double>::max();
 	constexpr double limitMin = std::numeric_limits<double>::lowest();;
-	myUtilty::Vec3d minBound = myUtilty::Vec3d(limitMax, limitMax, limitMax);
-	myUtilty::Vec3d maxBound = myUtilty::Vec3d(limitMin, limitMin, limitMin);
+	XQ::Vec3d minBound = XQ::Vec3d(limitMax, limitMax, limitMax);
+	XQ::Vec3d maxBound = XQ::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_coordArray->size() == 0)
-		return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+		return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
 	float* pData = m_coordArray->data(0);
 	for (int i = 0; i < m_coordArray->getNumOfTuple(); i++) {
@@ -631,10 +631,10 @@ myUtilty::BoundBox XGraphicsItem::getBoundBox()
 		Eigen::Vector3f pos = Eigen::Vector3f(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
 		pos = d->m_transform * pos;
 
-		minBound = myUtilty::Vec3d(std::min<double>(minBound.x(), pos.x()), std::min<double>(minBound.y(), pos.y()), pData[i * 3 + 2]);
-		maxBound = myUtilty::Vec3d(std::max<double>(maxBound.x(), pos.x()), std::max<double>(maxBound.y(), pos.y()), pData[i * 3 + 2]);
+		minBound = XQ::Vec3d(std::min<double>(minBound.x(), pos.x()), std::min<double>(minBound.y(), pos.y()), pData[i * 3 + 2]);
+		maxBound = XQ::Vec3d(std::max<double>(maxBound.x(), pos.x()), std::max<double>(maxBound.y(), pos.y()), pData[i * 3 + 2]);
 	}
-	return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+	return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 }
 
 float* XGraphicsItem::getMatrix() const

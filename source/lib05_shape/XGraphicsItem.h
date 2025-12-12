@@ -198,13 +198,13 @@ public:
 	void setIndexArray(std::shared_ptr<XUIntArray> coordArray);
 	void setColorArray(std::shared_ptr<XFloatArray> colorArray);
 	void setInstanceArray(std::shared_ptr<XFloatArray> colorArray);
-	void setSingleColor(const myUtilty::Vec4f& color);
+	void setSingleColor(const XQ::Vec4f& color);
 	void setPolygonMode(PolygonMode mode);
 	void setColorMode(ColorMode mode);
-	void setPreSelectColor(const myUtilty::Vec4f& color);
+	void setPreSelectColor(const XQ::Vec4f& color);
 	void setDrawType(PrimitveType type);
 
-	myUtilty::Vec4f getSingleColor() const;
+	XQ::Vec4f getSingleColor() const;
 
 	PrimitveType getDrawType() const;
 
@@ -231,9 +231,9 @@ public:
 	void setOrientation(XGL::Orientation orientation);
 	XGL::Orientation getOrientation() const;
 
-	myUtilty::Vec2f getPosition() const;
+	XQ::Vec2f getPosition() const;
 
-	myUtilty::Vec2f getPositionByOrientation() const;
+	XQ::Vec2f getPositionByOrientation() const;
 
 	void scale(float sx, float sy);
 
@@ -255,9 +255,9 @@ public:
 
 	PenStyle getPenStyle() const;
 
-	void setFillColor(const myUtilty::Vec4f& color);
+	void setFillColor(const XQ::Vec4f& color);
 
-	myUtilty::Vec4f getFillColor() const;
+	XQ::Vec4f getFillColor() const;
 
 	void setIsFilled(bool filled);
 
@@ -268,9 +268,9 @@ public:
 	/// </summary>
 	/// <param name="pos">待确认</param>
 	/// <returns></returns>
-	virtual bool hitTest(const myUtilty::Vec2f& pos);
+	virtual bool hitTest(const XQ::Vec2f& pos);
 
-	myUtilty::BoundBox getBoundBox();
+	XQ::BoundBox getBoundBox();
 
 	float* getMatrix() const;
 
@@ -326,9 +326,9 @@ protected:
 	std::shared_ptr<XOpenGLBuffer> m_ssbo_len;																//每个片元(线段)的长度,主要用于多段线
 	std::shared_ptr<XOpenGLBuffer> m_instanceAttrBufffer; //实例化属性的buffer
 
-	myUtilty::Vec4f m_singleColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-	myUtilty::Vec4f m_fillColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-	myUtilty::Vec4f m_preSelectColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+	XQ::Vec4f m_singleColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+	XQ::Vec4f m_fillColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+	XQ::Vec4f m_preSelectColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	XGL::PositionType m_positionType = XGL::PositionType::local_complete;
 	XGL::Orientation m_orientation = XGL::Orientation::left_bottom;
 

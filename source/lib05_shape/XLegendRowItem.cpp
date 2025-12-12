@@ -15,12 +15,12 @@ public:
 		checkboxItem->setChecked(true);
 
 		//背景颜色设置
-		//backGrounditem->setSingleColor(myUtilty::Vec4f(0, 1, 1, 1));
+		//backGrounditem->setSingleColor(XQ::Vec4f(0, 1, 1, 1));
 		backGrounditem->setIsFilled(true);
-		backGrounditem->setFillColor(myUtilty::Vec4f(0, 1, 1, 1));
+		backGrounditem->setFillColor(XQ::Vec4f(0, 1, 1, 1));
 
 		//文字设置
-		textItem->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		textItem->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
 		textItem->setFontSize(textSize);
 		textItem->setText(plotText);
 		textItem->setVAlignment(XTextItem::VAlign::Middle);

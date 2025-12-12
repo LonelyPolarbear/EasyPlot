@@ -1,5 +1,5 @@
 #include "myUtilty.h"
-namespace myUtilty {
+namespace XQ {
 	double PI = 3.14159265358979323846;
 
 	Eigen::Matrix4f Matrix::perspective(float fovy, float aspect, float znaer, float zfar)
@@ -213,7 +213,7 @@ namespace myUtilty {
 	template class lib00_utilty_API Vector<4, unsigned int>;
 }
 
-namespace myUtilty::chrono {
+namespace XQ::chrono {
 	void clock::start()
 	{
 		start_time_point = std::chrono::high_resolution_clock::now();
@@ -241,22 +241,22 @@ namespace myUtilty::chrono {
 	}
 }
 
-namespace myUtilty::math{
-	std::vector<myUtilty::Vec2f> lib00_utilty_API circleSplit(int num, float angle)
+namespace XQ::math{
+	std::vector<XQ::Vec2f> lib00_utilty_API circleSplit(int num, float angle)
 	{
 		//num必须大于等于1
 		if (num < 1) {
-			return std::vector<myUtilty::Vec2f>();
+			return std::vector<XQ::Vec2f>();
 		}
 
-		std::vector<myUtilty::Vec2f> ret;
+		std::vector<XQ::Vec2f> ret;
 		float deltaAngle = angle / num;
 		float angleTemp = 0;
 		for (int i = 0; i <= num; i++) {
 			if (i == num) {
 				angleTemp = angle;
 			}
-			myUtilty::Vec2f v;
+			XQ::Vec2f v;
 			v.x() = std::cos(Matrix::radian(angleTemp));
 			v.y() = std::sin(Matrix::radian(angleTemp));
 			ret.push_back(v);
@@ -265,7 +265,7 @@ namespace myUtilty::math{
 		return ret;
 	}
 
-	std::vector<myUtilty::Vec2f>lib00_utilty_API getRectCorner(myUtilty::Vec2f corner1, myUtilty::Vec2f corner2)
+	std::vector<XQ::Vec2f>lib00_utilty_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2)
 	{
 		auto  w =  std::abs(corner2.x() - corner1.x());
 		auto  h =  std::abs(corner2.y() - corner1.y());
@@ -273,16 +273,16 @@ namespace myUtilty::math{
 		auto x =std::min(corner1.x(), corner2.x());
 		auto y = std::min(corner1.y(), corner2.y());
 
-		auto p1 = myUtilty::Vec2f(x, y);
-		auto p2 = myUtilty::Vec2f(x + w, y);
-		auto p3 = myUtilty::Vec2f(x + w, y + h);
-		auto p4 = myUtilty::Vec2f(x, y + h);
+		auto p1 = XQ::Vec2f(x, y);
+		auto p2 = XQ::Vec2f(x + w, y);
+		auto p3 = XQ::Vec2f(x + w, y + h);
+		auto p4 = XQ::Vec2f(x, y + h);
 
 		return { p1,p2,p3,p4 };
 	}
 } 
 
-namespace myUtilty {
+namespace XQ {
 	lib00_utilty_API std::wstring to_wstring_with_precision(double value, int precision)
 	{
 		std::wstringstream wss;

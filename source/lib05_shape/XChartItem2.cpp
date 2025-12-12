@@ -26,9 +26,9 @@ public:
 	int m_ylabelNum =4;						//Y轴标签数量
 	bool m_isShowGrid = true;			//是否显示网格
 
-	myUtilty::Vec2f mXRange = myUtilty::Vec2f(-1, 1);
+	XQ::Vec2f mXRange = XQ::Vec2f(-1, 1);
 
-	myUtilty::Vec2f mYRange = myUtilty::Vec2f(-1, 1);
+	XQ::Vec2f mYRange = XQ::Vec2f(-1, 1);
 	
 	Internal() {
 		//创建默认的图元
@@ -37,7 +37,7 @@ public:
 			m_title->setHAlignment(XTextItem::HAlign::Center);
 			m_title->setVAlignment(XTextItem::VAlign::Middle);
 			m_title->setPositionType(XGL::PositionType::local_center);
-			m_title->setSingleColor(myUtilty::Vec4f(1, 1, 0, 1));
+			m_title->setSingleColor(XQ::Vec4f(1, 1, 0, 1));
 			m_title->setText(L"标题测试");
 			m_title->setFontSize(20);
 		}
@@ -50,8 +50,8 @@ public:
 			m_axisx->setLayout(XGL::Layout::horizontal);
 			m_axisx->updateTextPos();
 
-			m_axisx->getLine()->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
-			m_axisy->getLine()->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
+			m_axisx->getLine()->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
+			m_axisy->getLine()->setSingleColor(XQ::Vec4f(0, 1, 0, 1));
 
 			m_axisx->getLine()->setFixedLine(true);
 			m_axisy->getLine()->setFixedLine(true);
@@ -97,7 +97,7 @@ XChartItem2::XChartItem2(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(pa
 
 	this->setIsFilled(false);
 
-	this->setBackgroundColor(myUtilty::Vec4f(1.f, 1.f, 0.f, 1.0f));
+	this->setBackgroundColor(XQ::Vec4f(1.f, 1.f, 0.f, 1.0f));
 
 	m_isShowGrid = true;
 	addChildItem(d->m_gridItem);
@@ -194,7 +194,7 @@ void XChartItem2::fitView()
 	}
 }
 
-void XChartItem2::setBackgroundColor(const myUtilty::Vec4f& color)
+void XChartItem2::setBackgroundColor(const XQ::Vec4f& color)
 {
 	m_fillColor = color;
 }
@@ -204,7 +204,7 @@ void XChartItem2::setTtitle(const std::wstring& title)
 	d->m_title->setText(title);
 }
 
-void XChartItem2::chartTranslate(const myUtilty::Vec2f& lastPos_, const myUtilty::Vec2f& curPos_)
+void XChartItem2::chartTranslate(const XQ::Vec2f& lastPos_, const XQ::Vec2f& curPos_)
 {
 	auto parentTran = getParentAccumulateTransform();
 	
@@ -264,7 +264,7 @@ void XChartItem2::updateGridFrame()
 	auto sy = d->m_axisy->getRange().y() - d->m_axisy->getRange().x();
 	d->m_gridItem->gridReset();
 	d->m_gridItem->gridSetSale(sx, sy);
-	auto origin = myUtilty::Vec2d(d->m_axisx->getRange().x(), d->m_axisy->getRange().x());
+	auto origin = XQ::Vec2d(d->m_axisx->getRange().x(), d->m_axisy->getRange().x());
 	d->m_gridItem->setOrigin(origin);
 }
 
@@ -295,8 +295,8 @@ void XChartItem2::updateChildPosition(const Eigen::Matrix4f& m)
 		d->m_gridItem->scale(0.5 * lengthx, 0.5 * lengthy);
 	}
 
-	d->m_axisx->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(rightBot.x(), rightBot.y()));
-	d->m_axisy->getLine()->setLine(myUtilty::Vec2f(leftBot.x(), leftBot.y()), myUtilty::Vec2f(leftTop.x(), leftTop.y()));
+	d->m_axisx->getLine()->setLine(XQ::Vec2f(leftBot.x(), leftBot.y()), XQ::Vec2f(rightBot.x(), rightBot.y()));
+	d->m_axisy->getLine()->setLine(XQ::Vec2f(leftBot.x(), leftBot.y()), XQ::Vec2f(leftTop.x(), leftTop.y()));
 
 
 	//图例位置的更新

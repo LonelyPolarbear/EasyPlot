@@ -21,7 +21,7 @@ public:
 
 	 std::shared_ptr<XFloatArray> getVertexColorArray() { return m_VertexColor; }
 
-	 myUtilty::Vec3f getFaceNormal(uint32_t index);
+	 XQ::Vec3f getFaceNormal(uint32_t index);
 
 	 virtual void updateVertextCoordArray() =0;
 
@@ -35,9 +35,9 @@ public:
 
 	virtual bool update();
 
-	virtual myUtilty::BoundBox getBoundBox();
+	virtual XQ::BoundBox getBoundBox();
 
-	virtual myUtilty::BoundBox getBoundBox(const Eigen::Affine3f& mat);
+	virtual XQ::BoundBox getBoundBox(const Eigen::Affine3f& mat);
 
 	void writeToFile(const std::string& filename);
 

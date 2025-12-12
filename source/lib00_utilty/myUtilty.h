@@ -28,7 +28,7 @@ namespace render {
 	};
 }
 
-namespace myUtilty {
+namespace XQ {
 	// 前置声明友元函数模板
 	template<unsigned int N, typename T>
 	struct Vector {
@@ -204,7 +204,7 @@ namespace myUtilty {
 	using Vec4u = Vector<4, unsigned int>;
 }
 
-namespace myUtilty {
+namespace XQ {
 	extern lib00_utilty_API double PI;
 	
 	enum class tranformType {
@@ -459,9 +459,9 @@ namespace myUtilty {
 		/// <param name="num">分割数量</param>
 		/// <param name="angle">被分割的圆的度数，单位角度 起始为X正半轴</param>
 		/// <returns></returns>
-		extern std::vector<myUtilty::Vec2f> lib00_utilty_API circleSplit(int num, float angle);
+		extern std::vector<XQ::Vec2f> lib00_utilty_API circleSplit(int num, float angle);
 
-		extern std::vector<myUtilty::Vec2f> lib00_utilty_API getRectCorner(myUtilty::Vec2f corner1, myUtilty::Vec2f corner2);
+		extern std::vector<XQ::Vec2f> lib00_utilty_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2);
 
 		static double randon_color() {
 			static std::random_device rd;
@@ -501,7 +501,7 @@ namespace myUtilty {
 				return p;
 			}
 			else {
-				static_assert("true", "myUtilty::randon(T) 类型错误");
+				static_assert("true", "XQ::randon(T) 类型错误");
 			}
 		}
 
@@ -518,13 +518,13 @@ namespace myUtilty {
 				return  u(e);
 			}
 			else {
-				static_assert("true", "myUtilty::randon(T) 类型错误");
+				static_assert("true", "XQ::randon(T) 类型错误");
 			}
 		}
 	}
 }
 
-namespace myUtilty {
+namespace XQ {
 	extern lib00_utilty_API std::wstring to_wstring_with_precision(double value, int precision);
 
 	extern lib00_utilty_API std::string to_string_with_precision(double value, int precision);
@@ -592,7 +592,7 @@ namespace myUtilty {
 
 #define USE_PARALLEL_ALGO  1
 //并行算法
-namespace myUtilty::ParaAlgo
+namespace XQ::ParaAlgo
 {
 	template<class iterator>
 	size_t Distance(iterator first, iterator last) {

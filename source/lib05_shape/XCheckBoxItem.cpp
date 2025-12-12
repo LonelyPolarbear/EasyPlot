@@ -4,7 +4,7 @@
 class XCheckBoxItem::Internal {
 public:
 	Internal() {
-		textItem->setSingleColor(myUtilty::Vec4f(1, 0,0, 1));
+		textItem->setSingleColor(XQ::Vec4f(1, 0,0, 1));
 		textItem->setFontSize(20);
 		textItem->setText(L" ");
 		textItem->setVAlignment(XTextItem::VAlign::Middle);

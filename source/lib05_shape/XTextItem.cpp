@@ -62,13 +62,13 @@ void XTextItem::draw(const Eigen::Matrix4f& m)
 		Eigen::Affine3f transform = Eigen::Affine3f::Identity();
 		transform.matrix() = m;
 
-		auto data = myUtilty::Matrix::transformDecomposition_TRS(transform);
+		auto data = XQ::Matrix::transformDecomposition_TRS(transform);
 		auto tmp = data;
 		tmp.sx = 1;
 		tmp.sy = 1;
 		tmp.sz = 1;
 
-		auto mat = myUtilty::Matrix::computeMatrix(tmp);
+		auto mat = XQ::Matrix::computeMatrix(tmp);
 
 		drawFill(m_shaderManger->getTextShader(), m);
 		glEnableObj->restore();

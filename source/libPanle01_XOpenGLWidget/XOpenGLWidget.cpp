@@ -115,15 +115,15 @@ std::shared_ptr<XOpenGLContext> XOpenGLWidget::getContext() const{
 	return mContext;
 }
 
-myUtilty::Vec2u  XOpenGLWidget::mapToGLScreen(const QPoint& point) const{
-	myUtilty::Vec2u p;
+XQ::Vec2u  XOpenGLWidget::mapToGLScreen(const QPoint& point) const{
+	XQ::Vec2u p;
 	p.x() = point.x();
 	p.y() = mHeight - point.y();
 	return p;
 }
 
-myUtilty::Vec2f  XOpenGLWidget::mapToNormGLScreen(const QPoint& point) const{
-	myUtilty::Vec2f p;
+XQ::Vec2f  XOpenGLWidget::mapToNormGLScreen(const QPoint& point) const{
+	XQ::Vec2f p;
 	p.x() = (float)point.x() / (float)mWidth;
 	p.y() = (float)(mHeight - point.y()) / (float)mHeight;
 	return p;

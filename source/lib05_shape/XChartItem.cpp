@@ -18,7 +18,7 @@ public:
 	int m_xlabelNum =11;					//X轴标签数量
 	int m_ylabelNum =4;						//Y轴标签数量
 	bool m_isShowGrid = true;			//是否显示网格
-	myUtilty::Vec2f m_gridOrigin = myUtilty::Vec2f(0,0);
+	XQ::Vec2f m_gridOrigin = XQ::Vec2f(0,0);
 
 	bool createAxisText() {
 		if (m_axisx_value.empty()) {
@@ -36,7 +36,7 @@ public:
 				xaxis->setPosition(xpos,m_gridOrigin.y());
 				xaxis->setFontSize(16);
 				xaxis->setPositionType(XGL::PositionType::local_center);
-				xaxis->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+				xaxis->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
 				xaxis->setText(L"0");
 				m_axisx_value.push_back(xaxis);
 			}
@@ -55,7 +55,7 @@ public:
 				xaxis->setPosition(m_gridOrigin.x(), ypos);
 				xaxis->setFontSize(16);
 				xaxis->setPositionType(XGL::PositionType::local_center);
-				xaxis->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
+				xaxis->setSingleColor(XQ::Vec4f(0, 1, 0, 1));
 				xaxis->setText(L"0");
 				m_axisy_value.push_back(xaxis);
 			}
@@ -91,7 +91,7 @@ XChartItem::XChartItem(std::shared_ptr<XGraphicsItem> parent):XGraphicsItem(pare
 
 	this->setIsFilled(false);
 
-	this->setBackgroundColor(myUtilty::Vec4f(	0.f, 0.f, 0.f, 1.0f));
+	this->setBackgroundColor(XQ::Vec4f(	0.f, 0.f, 0.f, 1.0f));
 
 	m_isShowGrid = true;
 	m_clipEnable = true;
@@ -133,14 +133,14 @@ void XChartItem::draw(const Eigen::Matrix4f& m)
 		auto chartTransform = this->getTransform();
 
 		//此时，XChartItem的大小已经确定，可以根据需要调整原点位置
-		//auto chartTransformData = myUtilty::Matrix::transformDecomposition_TRS(chartTransform);
+		//auto chartTransformData = XQ::Matrix::transformDecomposition_TRS(chartTransform);
 		
 		//Eigen::Vector3f leftBottomPos =chartTransform*Eigen::Vector3f(-1,-1,0);
 		//leftBottomPos +=Eigen::Vector3f(18,18,0);
 
 		//leftBottomPos = chartTransform.inverse()* leftBottomPos;
 
-		//d->m_gridOrigin = myUtilty::Vec2f(leftBottomPos.x(), leftBottomPos.y());
+		//d->m_gridOrigin = XQ::Vec2f(leftBottomPos.x(), leftBottomPos.y());
 		
 
 		createGrid();
@@ -181,7 +181,7 @@ void XChartItem::draw(const Eigen::Matrix4f& m)
 	}
 }
 
-void XChartItem::setBackgroundColor(const myUtilty::Vec4f& color)
+void XChartItem::setBackgroundColor(const XQ::Vec4f& color)
 {
 	m_fillColor = color;
 }
@@ -218,7 +218,7 @@ void XChartItem::updateAxisLabel()
 {
 	//获取网格的变换矩阵
 	auto gridTransform = d->m_gridItem->getTransform();
-	auto data = myUtilty::Matrix::transformDecomposition_TRS(gridTransform);
+	auto data = XQ::Matrix::transformDecomposition_TRS(gridTransform);
 
 	for (int i = 0; i < d->m_axisx_value.size(); i++) {
 		auto xaxis = d->m_axisx_value[i];
@@ -227,7 +227,7 @@ void XChartItem::updateAxisLabel()
 		auto step = length / (d->m_xlabelNum - 1);
 		double value = -0.5 * length + i * step;
 
-		xaxis->setText(myUtilty::to_wstring_with_precision(value, 1));
+		xaxis->setText(XQ::to_wstring_with_precision(value, 1));
 	}
 
 	for (int i = 0; i < d->m_axisy_value.size(); i++) {
@@ -236,7 +236,7 @@ void XChartItem::updateAxisLabel()
 		auto step = length / (d->m_ylabelNum - 1);
 		double value = -0.5 * length + i * step;
 		//double v = (i - 2) * 0.5 * 1. / data.sy;
-		xaxis->setText(myUtilty::to_wstring_with_precision(value, 1));
+		xaxis->setText(XQ::to_wstring_with_precision(value, 1));
 	}
 }
 

@@ -39,8 +39,8 @@ void XPolyline::updateVboCoord()
 			// 4 1 2 3 4 1 2
 			addAdjacency->setNumOfTuple(oldNum + 2);
 
-			myUtilty::Vec2f p1 = myUtilty::Vec2f(m_coord->data(0)[0], m_coord->data(0)[1]);
-			myUtilty::Vec2f p2 = myUtilty::Vec2f(m_coord->data(1)[oldNum - 1], m_coord->data(1)[1]);
+			XQ::Vec2f p1 = XQ::Vec2f(m_coord->data(0)[0], m_coord->data(0)[1]);
+			XQ::Vec2f p2 = XQ::Vec2f(m_coord->data(1)[oldNum - 1], m_coord->data(1)[1]);
 
 
 			//设置第一个点

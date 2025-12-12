@@ -34,12 +34,12 @@ public:
 		return (SNRange.second - SNRange.first) / (double)SNNum;
 	}
 
-	std::vector<myUtilty::Vec3f> generatePoints() {
+	std::vector<XQ::Vec3f> generatePoints() {
 		auto LongitudeStepLen = getEWStepLen();
 		auto LatitudeStepLen = getSNStepLen();
 
 		auto pointNum = getSurfaceNumberPoints();
-		std::vector<myUtilty::Vec3f> points;
+		std::vector<XQ::Vec3f> points;
 		points.resize(pointNum);
 
 		//先遍历维度
@@ -52,10 +52,10 @@ public:
 					auto idx = j * (SNNum + 1) + i;
 					auto xAngle = EWRange.first + j * LongitudeStepLen;
 					auto r =/* abs( csvData[idx].Gain)*/m_radius;
-					double z = r * cos(zAngle * myUtilty::PI / 180.0);
-					double x = r * sin(zAngle * myUtilty::PI / 180.0) * cos(xAngle * myUtilty::PI / 180.0);
-					double y = r * sin(zAngle * myUtilty::PI / 180.0) * sin(xAngle * myUtilty::PI / 180.0);
-					points[i * (EWNum + 1) + j] = myUtilty::Vec3f(x, y, z);
+					double z = r * cos(zAngle * XQ::PI / 180.0);
+					double x = r * sin(zAngle * XQ::PI / 180.0) * cos(xAngle * XQ::PI / 180.0);
+					double y = r * sin(zAngle * XQ::PI / 180.0) * sin(xAngle * XQ::PI / 180.0);
+					points[i * (EWNum + 1) + j] = XQ::Vec3f(x, y, z);
 				}
 			}
 		}
@@ -67,18 +67,18 @@ public:
 					//auto idx =i * (EWNum + 1) + i;
 					auto zAngle = SNRange.first + j * LatitudeStepLen;
 					auto r = m_radius;
-					double z = r * cos(zAngle * myUtilty::PI / 180.0);
-					double x = r * sin(zAngle * myUtilty::PI / 180.0) * cos(xAngle * myUtilty::PI / 180.0);
-					double y = r * sin(zAngle * myUtilty::PI / 180.0) * sin(xAngle * myUtilty::PI / 180.0);
-					points[i * (SNNum + 1) + j] = myUtilty::Vec3f(x, y, z);
+					double z = r * cos(zAngle * XQ::PI / 180.0);
+					double x = r * sin(zAngle * XQ::PI / 180.0) * cos(xAngle * XQ::PI / 180.0);
+					double y = r * sin(zAngle * XQ::PI / 180.0) * sin(xAngle * XQ::PI / 180.0);
+					points[i * (SNNum + 1) + j] = XQ::Vec3f(x, y, z);
 				}
 			}
 		}
 		return points;
 	}
 
-	std::vector<myUtilty::Vec3u> generateIndexs() {
-		std::vector<myUtilty::Vec3u> indices;
+	std::vector<XQ::Vec3u> generateIndexs() {
+		std::vector<XQ::Vec3u> indices;
 		indices.resize(getSurfaceNumberOfTriangle());
 		int index = 0;
 		if (direction == Direaction::horizontal)
@@ -89,8 +89,8 @@ public:
 				auto firstRowSrart = (i - 1) * (EWNum + 1);
 				auto secondRowStart = i * (EWNum + 1);
 				for (int j = 0; j < EWNum; j++) {
-					myUtilty::Vec3u fisrttriangle = myUtilty::Vec3u(firstRowSrart + j, secondRowStart + j, secondRowStart + j + 1);
-					myUtilty::Vec3u secondtriangle = myUtilty::Vec3u(firstRowSrart + j, secondRowStart + j + 1, (firstRowSrart + 1) + j);
+					XQ::Vec3u fisrttriangle = XQ::Vec3u(firstRowSrart + j, secondRowStart + j, secondRowStart + j + 1);
+					XQ::Vec3u secondtriangle = XQ::Vec3u(firstRowSrart + j, secondRowStart + j + 1, (firstRowSrart + 1) + j);
 					indices[index++] = fisrttriangle;
 					indices[index++] = secondtriangle;
 				}
@@ -104,8 +104,8 @@ public:
 				auto firstRowSrart = (i - 1) * (SNNum + 1);
 				auto secondRowStart = i * (SNNum + 1);
 				for (int j = 0; j < SNNum; j++) {
-					myUtilty::Vec3u fisrttriangle = myUtilty::Vec3u(firstRowSrart + j, secondRowStart + j, secondRowStart + j + 1);
-					myUtilty::Vec3u secondtriangle = myUtilty::Vec3u(firstRowSrart + j, secondRowStart + j + 1, (firstRowSrart + 1) + j);
+					XQ::Vec3u fisrttriangle = XQ::Vec3u(firstRowSrart + j, secondRowStart + j, secondRowStart + j + 1);
+					XQ::Vec3u secondtriangle = XQ::Vec3u(firstRowSrart + j, secondRowStart + j + 1, (firstRowSrart + 1) + j);
 					indices[index++] = fisrttriangle;
 					indices[index++] = secondtriangle;
 				}
@@ -116,8 +116,8 @@ public:
 	}
 
 	//补东西缺口
-	std::vector<myUtilty::Vec3u> generateEWRestIndexs(unsigned int offset) {
-		std::vector<myUtilty::Vec3u> indices;
+	std::vector<XQ::Vec3u> generateEWRestIndexs(unsigned int offset) {
+		std::vector<XQ::Vec3u> indices;
 
 		auto SNStepLen = getSNStepLen();
 		auto num = std::ceil((SNRange.second - SNRange.first) / SNStepLen);
@@ -128,30 +128,30 @@ public:
 			return indices;
 		int idx = 0;
 		for (int i = 1; i <= num; i++) {
-			myUtilty::Vec3u firsttriangle = myUtilty::Vec3u(offset, offset + i, offset + i + 1);
+			XQ::Vec3u firsttriangle = XQ::Vec3u(offset, offset + i, offset + i + 1);
 			indices[idx++] = firsttriangle;
 		}
 
 		//对于第二条弧,一共可以绘制num个三角形
 		auto secondOffset = offset + num + 2;
 		for (int i = 1; i <= num; i++) {
-			myUtilty::Vec3u firsttriangle = myUtilty::Vec3u(secondOffset, secondOffset + i, secondOffset + i + 1);
+			XQ::Vec3u firsttriangle = XQ::Vec3u(secondOffset, secondOffset + i, secondOffset + i + 1);
 			indices[idx++] = firsttriangle;
 		}
 
 		//(0 1 3), (0, 2, 4), (0, 1, 5), (0, 2, 6)
 		auto curIdx = secondOffset + num + 1;
 		curIdx++;
-		indices[idx++] = myUtilty::Vec3u(curIdx + 0, curIdx + 1, curIdx + 3);
-		indices[idx++] = myUtilty::Vec3u(curIdx + 0, curIdx + 2, curIdx + 4);
-		indices[idx++] = myUtilty::Vec3u(curIdx + 0, curIdx + 1, curIdx + 5);
-		indices[idx++] = myUtilty::Vec3u(curIdx + 0, curIdx + 2, curIdx + 6);
+		indices[idx++] = XQ::Vec3u(curIdx + 0, curIdx + 1, curIdx + 3);
+		indices[idx++] = XQ::Vec3u(curIdx + 0, curIdx + 2, curIdx + 4);
+		indices[idx++] = XQ::Vec3u(curIdx + 0, curIdx + 1, curIdx + 5);
+		indices[idx++] = XQ::Vec3u(curIdx + 0, curIdx + 2, curIdx + 6);
 		return indices;
 	}
 
 	//EW结束后剩下的是SN的部分
-	std::vector<myUtilty::Vec3f> getEWRestPoints() {
-		std::vector<myUtilty::Vec3f> points;
+	std::vector<XQ::Vec3f> getEWRestPoints() {
+		std::vector<XQ::Vec3f> points;
 
 		//获取起点和终点的圆弧
 		auto SNStepLen = getSNStepLen();
@@ -161,40 +161,40 @@ public:
 		//int vecNum =(1 + num+1)*2+7;
 
 		int vecNum = getNumofEWRestPoint();
-		std::vector<myUtilty::Vec3f> points1;
-		std::vector<myUtilty::Vec3f> points2;
+		std::vector<XQ::Vec3f> points1;
+		std::vector<XQ::Vec3f> points2;
 
-		points1.push_back(myUtilty::Vec3f(0, 0, 0));		//1
-		points2.push_back(myUtilty::Vec3f(0, 0, 0));
-		myUtilty::Vec3f SNStartPointTop;
-		myUtilty::Vec3f SNStartPointBottom;
+		points1.push_back(XQ::Vec3f(0, 0, 0));		//1
+		points2.push_back(XQ::Vec3f(0, 0, 0));
+		XQ::Vec3f SNStartPointTop;
+		XQ::Vec3f SNStartPointBottom;
 
-		myUtilty::Vec3f SNEndPointTop;
-		myUtilty::Vec3f SNEndPointBottom;
+		XQ::Vec3f SNEndPointTop;
+		XQ::Vec3f SNEndPointBottom;
 
-		myUtilty::Vec3f centerTop;
-		myUtilty::Vec3f centerBottom;
+		XQ::Vec3f centerTop;
+		XQ::Vec3f centerBottom;
 
 		for (int i = 0; i < num; i++) {									//num
 			auto zAngle = SNRange.first + i * newStepLen;
 			auto xAngle1 = EWRange.first;
 			auto xAngle2 = EWRange.second;
 			auto r =/* abs( csvData[idx].Gain)*/m_radius;
-			double z1 = r * cos(zAngle * myUtilty::PI / 180.0);
-			double x1 = r * sin(zAngle * myUtilty::PI / 180.0) * cos(xAngle1 * myUtilty::PI / 180.0);
-			double y1 = r * sin(zAngle * myUtilty::PI / 180.0) * sin(xAngle1 * myUtilty::PI / 180.0);
+			double z1 = r * cos(zAngle * XQ::PI / 180.0);
+			double x1 = r * sin(zAngle * XQ::PI / 180.0) * cos(xAngle1 * XQ::PI / 180.0);
+			double y1 = r * sin(zAngle * XQ::PI / 180.0) * sin(xAngle1 * XQ::PI / 180.0);
 
-			double x2 = r * sin(zAngle * myUtilty::PI / 180.0) * cos(xAngle2 * myUtilty::PI / 180.0);
-			double y2 = r * sin(zAngle * myUtilty::PI / 180.0) * sin(xAngle2 * myUtilty::PI / 180.0);
+			double x2 = r * sin(zAngle * XQ::PI / 180.0) * cos(xAngle2 * XQ::PI / 180.0);
+			double y2 = r * sin(zAngle * XQ::PI / 180.0) * sin(xAngle2 * XQ::PI / 180.0);
 
-			points1.push_back(myUtilty::Vec3f(x1, y1, z1));
-			points2.push_back(myUtilty::Vec3f(x2, y2, z1));
+			points1.push_back(XQ::Vec3f(x1, y1, z1));
+			points2.push_back(XQ::Vec3f(x2, y2, z1));
 
 			if (i == 0)
 			{
-				SNStartPointTop = myUtilty::Vec3f(x1, y1, z1);
-				SNEndPointTop = myUtilty::Vec3f(x2, y2, z1);
-				centerTop = myUtilty::Vec3f(0, 0, z1);
+				SNStartPointTop = XQ::Vec3f(x1, y1, z1);
+				SNEndPointTop = XQ::Vec3f(x2, y2, z1);
+				centerTop = XQ::Vec3f(0, 0, z1);
 			}
 		}
 		//还差最后一个点
@@ -203,27 +203,27 @@ public:
 			auto xAngle1 = EWRange.first;
 			auto xAngle2 = EWRange.second;
 			auto r =/* abs( csvData[idx].Gain)*/m_radius;
-			double z1 = r * cos(zAngle * myUtilty::PI / 180.0);
-			double x1 = r * sin(zAngle * myUtilty::PI / 180.0) * cos(xAngle1 * myUtilty::PI / 180.0);
-			double y1 = r * sin(zAngle * myUtilty::PI / 180.0) * sin(xAngle1 * myUtilty::PI / 180.0);
-			double x2 = r * sin(zAngle * myUtilty::PI / 180.0) * cos(xAngle2 * myUtilty::PI / 180.0);
-			double y2 = r * sin(zAngle * myUtilty::PI / 180.0) * sin(xAngle2 * myUtilty::PI / 180.0);
-			points1.push_back(myUtilty::Vec3f(x1, y1, z1));											//1
-			points2.push_back(myUtilty::Vec3f(x2, y2, z1));
+			double z1 = r * cos(zAngle * XQ::PI / 180.0);
+			double x1 = r * sin(zAngle * XQ::PI / 180.0) * cos(xAngle1 * XQ::PI / 180.0);
+			double y1 = r * sin(zAngle * XQ::PI / 180.0) * sin(xAngle1 * XQ::PI / 180.0);
+			double x2 = r * sin(zAngle * XQ::PI / 180.0) * cos(xAngle2 * XQ::PI / 180.0);
+			double y2 = r * sin(zAngle * XQ::PI / 180.0) * sin(xAngle2 * XQ::PI / 180.0);
+			points1.push_back(XQ::Vec3f(x1, y1, z1));											//1
+			points2.push_back(XQ::Vec3f(x2, y2, z1));
 			{
-				SNStartPointBottom = myUtilty::Vec3f(x1, y1, z1);
-				SNEndPointBottom = myUtilty::Vec3f(x2, y2, z1);
-				centerBottom = myUtilty::Vec3f(0, 0, z1);
+				SNStartPointBottom = XQ::Vec3f(x1, y1, z1);
+				SNEndPointBottom = XQ::Vec3f(x2, y2, z1);
+				centerBottom = XQ::Vec3f(0, 0, z1);
 			}
 		}
 
 		//合并两个数组
 
 		//6个点 四个三角形 (0 1 3),(0,2,4),(0,1,5),(0,2,6)  
-		myUtilty::Vec3f center = myUtilty::Vec3f(0, 0, 0);
+		XQ::Vec3f center = XQ::Vec3f(0, 0, 0);
 		//点的判断
 		if (centerTop.z() * centerBottom.z() < 0) {
-			center = myUtilty::Vec3f(0, 0, 0);
+			center = XQ::Vec3f(0, 0, 0);
 		}
 		else if (centerTop.z() > 0) {
 			//说明都在上面
@@ -255,46 +255,46 @@ public:
 	}
 
 	//补上下的缺口
-	std::vector<myUtilty::Vec3f> getSNRestPoints() {
-		std::vector<myUtilty::Vec3f> points;
+	std::vector<XQ::Vec3f> getSNRestPoints() {
+		std::vector<XQ::Vec3f> points;
 		//容器总大小
 		int vecNum = getNumofSNRestPoint();
-		double z1 = m_radius * cos(SNRange.first * myUtilty::PI / 180.0);
-		double z2 = m_radius * cos(SNRange.second * myUtilty::PI / 180.0);
-		double r_top = abs(m_radius * sin(SNRange.first * myUtilty::PI / 180.0));
-		double r_bottom = abs(m_radius * sin(SNRange.second * myUtilty::PI / 180.0));
+		double z1 = m_radius * cos(SNRange.first * XQ::PI / 180.0);
+		double z2 = m_radius * cos(SNRange.second * XQ::PI / 180.0);
+		double r_top = abs(m_radius * sin(SNRange.first * XQ::PI / 180.0));
+		double r_bottom = abs(m_radius * sin(SNRange.second * XQ::PI / 180.0));
 
-		myUtilty::Vec3f centerTop = myUtilty::Vec3f(0, 0, z1);
-		myUtilty::Vec3f centerBottom = myUtilty::Vec3f(0, 0, z2);
+		XQ::Vec3f centerTop = XQ::Vec3f(0, 0, z1);
+		XQ::Vec3f centerBottom = XQ::Vec3f(0, 0, z2);
 
 		//EWRange.first 到 EWRange.second 之间 绘制的点
-		std::vector<myUtilty::Vec3f> pointsTop;
-		std::vector<myUtilty::Vec3f> pointsBottom;
+		std::vector<XQ::Vec3f> pointsTop;
+		std::vector<XQ::Vec3f> pointsBottom;
 		pointsTop.push_back(centerTop);																//1
 		pointsBottom.push_back(centerBottom);
 
 		for (int i = 0; i < EWNum; i++) {																//EWNum
 			auto xAngle = EWRange.first + i * getEWStepLen();
-			double x = r_top * cos(xAngle * myUtilty::PI / 180.0);
-			double y = r_top * sin(xAngle * myUtilty::PI / 180.0);
+			double x = r_top * cos(xAngle * XQ::PI / 180.0);
+			double y = r_top * sin(xAngle * XQ::PI / 180.0);
 
-			double x2 = r_bottom * cos(xAngle * myUtilty::PI / 180.0);
-			double y2 = r_bottom * sin(xAngle * myUtilty::PI / 180.0);
+			double x2 = r_bottom * cos(xAngle * XQ::PI / 180.0);
+			double y2 = r_bottom * sin(xAngle * XQ::PI / 180.0);
 
-			pointsTop.push_back(myUtilty::Vec3f(x, y, z1));
-			pointsBottom.push_back(myUtilty::Vec3f(x2, y2, z2));
+			pointsTop.push_back(XQ::Vec3f(x, y, z1));
+			pointsBottom.push_back(XQ::Vec3f(x2, y2, z2));
 		}
 
 		{
 			//最后一个点单独处理，保证精度																	//1
 			auto xAngle = EWRange.second;
-			double x = r_top * cos(xAngle * myUtilty::PI / 180.0);
-			double y = r_top * sin(xAngle * myUtilty::PI / 180.0);
+			double x = r_top * cos(xAngle * XQ::PI / 180.0);
+			double y = r_top * sin(xAngle * XQ::PI / 180.0);
 
-			double x2 = r_bottom * cos(xAngle * myUtilty::PI / 180.0);
-			double y2 = r_bottom * sin(xAngle * myUtilty::PI / 180.0);
-			pointsTop.push_back(myUtilty::Vec3f(x, y, z1));
-			pointsBottom.push_back(myUtilty::Vec3f(x2, y2, z2));
+			double x2 = r_bottom * cos(xAngle * XQ::PI / 180.0);
+			double y2 = r_bottom * sin(xAngle * XQ::PI / 180.0);
+			pointsTop.push_back(XQ::Vec3f(x, y, z1));
+			pointsBottom.push_back(XQ::Vec3f(x2, y2, z2));
 		}
 
 		points.insert(points.end(), pointsTop.begin(), pointsTop.end());
@@ -303,18 +303,18 @@ public:
 		return points;
 	}
 
-	std::vector<myUtilty::Vec3u> generateSNRestIndexs(unsigned int offset) {
-		std::vector<myUtilty::Vec3u> indices;
+	std::vector<XQ::Vec3u> generateSNRestIndexs(unsigned int offset) {
+		std::vector<XQ::Vec3u> indices;
 		int vecNum = getSNNumberOfTriangle();
 		for (int i = 0; i < EWNum; i++) {
-			myUtilty::Vec3u firsttriangle = myUtilty::Vec3u(offset, offset + i + 1, offset + i + 2);
+			XQ::Vec3u firsttriangle = XQ::Vec3u(offset, offset + i + 1, offset + i + 2);
 			indices.push_back(firsttriangle);
 		}
 
 		auto secondOffset = offset + EWNum + 2;
 
 		for (int i = 0; i < EWNum; i++) {
-			myUtilty::Vec3u firsttriangle = myUtilty::Vec3u(secondOffset, secondOffset + i + 1, secondOffset + i + 2);
+			XQ::Vec3u firsttriangle = XQ::Vec3u(secondOffset, secondOffset + i + 1, secondOffset + i + 2);
 			indices.push_back(firsttriangle);
 		}
 
@@ -402,7 +402,7 @@ public:
 	void readCSV() {
 		//读取CSV文件
 
-		QFile file(QString::fromStdString(myUtilty::ShareVar::instance().currentExeDir + "/test.csv"));
+		QFile file(QString::fromStdString(XQ::ShareVar::instance().currentExeDir + "/test.csv"));
 		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 			return;
 		}
@@ -541,7 +541,7 @@ unsigned int XSphereSource::getNumofEWRestPoint() const
 
 void XSphereSource::updateVertextCoordArray()
 {
-	std::vector<myUtilty::Vec3f> points = d->generatePoints();
+	std::vector<XQ::Vec3f> points = d->generatePoints();
 
 	auto pointNum = points.size();
 
@@ -566,7 +566,7 @@ void XSphereSource::updateVertextCoordArray()
 void XSphereSource::updateIndexArray()
 {
 	//获取ebo数据
-	std::vector<myUtilty::Vec3u> indices = d->generateIndexs();
+	std::vector<XQ::Vec3u> indices = d->generateIndexs();
 
 	auto restIndices = d->generateEWRestIndexs(getSurfaceNumberPoints());
 

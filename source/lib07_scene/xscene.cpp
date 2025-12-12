@@ -153,7 +153,7 @@ public:
             gridSource->Modified();
 
             gridShape->setColorMode(ColorMode::SingleColor);
-            gridShape->setSingleColor(myUtilty::Vec4f(1,1,1,1));
+            gridShape->setSingleColor(XQ::Vec4f(1,1,1,1));
 
             gridShape->setInput(gridSource);
 		}
@@ -670,7 +670,7 @@ void XScene::render3D()
 		auto shader = d->shaderManger->getGridShader3D();
 		shader->use();
         Eigen::Affine3f t= Eigen::Affine3f::Identity();
-        t.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(90), Eigen::Vector3f::UnitX()));
+        t.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(90), Eigen::Vector3f::UnitX()));
         Eigen::Matrix4f mat = t.matrix();
         //mat = Eigen::Matrix4f::Identity();
         shader->setMat4("gridPlaneMatInWorld",mat);
@@ -757,13 +757,13 @@ void XScene::render2D()
 
 					auto fn = [&result, &width, &height](int i) {
 						std::string  str = std::to_string(i).append(".bmp");
-						auto info = stbImage::readPicture(myUtilty::ShareVar::instance().currentExeDir + "\\sdf\\" + str, false);
+						auto info = stbImage::readPicture(XQ::ShareVar::instance().currentExeDir + "\\sdf\\" + str, false);
 						width = info.width;
 						height = info.height;
 						std::get<2>(result)[i] = info.data;
 						};
 
-					myUtilty::ParaAlgo::ParallelForeach(0, 11, fn, 1);
+					XQ::ParaAlgo::ParallelForeach(0, 11, fn, 1);
 
 					std::get<0>(result) = width;
 					std::get<1>(result) = height;
@@ -937,11 +937,11 @@ void XScene::wheelEvent(int angle,int x,int y)
 	d->camera->scale(factor);
 
     //场景坐标系下的缩放
-    auto center = screenPos2ScenePos(myUtilty::Vec2u(x,y));
+    auto center = screenPos2ScenePos(XQ::Vec2u(x,y));
     
     //控制缩放范围
 
-    auto transform_data = myUtilty::Matrix::transformDecomposition_TRS(d->sceneFrameInVirtualWorld);
+    auto transform_data = XQ::Matrix::transformDecomposition_TRS(d->sceneFrameInVirtualWorld);
     if (transform_data.sx*factor > 0.1 && transform_data.sx *factor <50) {
         d->sceneFrameInVirtualWorld.translate(Eigen::Vector3f(center.x(), center.y(), 0));
         d->sceneFrameInVirtualWorld.scale(Eigen::Vector3f(factor, factor, 1));
@@ -951,7 +951,7 @@ void XScene::wheelEvent(int angle,int x,int y)
 
 void XScene::fitView2D()
 {
-   auto data = myUtilty::Matrix::transformDecomposition_TRS(d->sceneFrameInVirtualWorld);
+   auto data = XQ::Matrix::transformDecomposition_TRS(d->sceneFrameInVirtualWorld);
    data.sx = 1;
    data.sy = 1;
    data.sz = 1;
@@ -959,7 +959,7 @@ void XScene::fitView2D()
    data.ty = 0;
    data.tz = 0;
 
-   auto mat = myUtilty::Matrix::computeMatrix(data);
+   auto mat = XQ::Matrix::computeMatrix(data);
    d->sceneFrameInVirtualWorld.matrix() = mat;
 }
 
@@ -1013,7 +1013,7 @@ void XScene::rotate(int x1,int y1,int x2,int y2)
     d->camera->transformTrackball(curPos_,lastPos_ ,getViewportWidth(), getViewportHeight(), true,true);
 }
 
-void XScene::rotate(myUtilty::Vec2u curpos, myUtilty::Vec2u lastpos)
+void XScene::rotate(XQ::Vec2u curpos, XQ::Vec2u lastpos)
 {
     return rotate(curpos.x(), curpos.y(), lastpos.x(), lastpos.y());
 }
@@ -1027,54 +1027,54 @@ void XScene::translate(int x1, int y1, int x2, int y2)
 	d->camera->transformTrackball(curPos_, lastPos_, getViewportWidth(), getViewportHeight(), false, true);
 
     //场景坐标系下的平移
-	auto cur_scenePos = screenPos2ScenePos(myUtilty::Vec2u(x1, y1));
-	auto last_scenePos = screenPos2ScenePos(myUtilty::Vec2u(x2, y2));
+	auto cur_scenePos = screenPos2ScenePos(XQ::Vec2u(x1, y1));
+	auto last_scenePos = screenPos2ScenePos(XQ::Vec2u(x2, y2));
     d->sceneFrameInVirtualWorld.translate(Eigen::Vector3f(cur_scenePos.x() - last_scenePos.x(), cur_scenePos.y() - last_scenePos.y(), 0));
 }
 
-void XScene::translate(myUtilty::Vec2u curpos, myUtilty::Vec2u lastpos)
+void XScene::translate(XQ::Vec2u curpos, XQ::Vec2u lastpos)
 {
     translate(curpos.x(), curpos.y(), lastpos.x(), lastpos.y());
 }
 
-myUtilty::Vec2i XScene::screenPos2ViewportPos(myUtilty::Vec2u pos) const
+XQ::Vec2i XScene::screenPos2ViewportPos(XQ::Vec2u pos) const
 {
-    myUtilty ::Vec2i result;
+    XQ ::Vec2i result;
     result.x() = pos.x() - d->startx;
     result.y() = pos.y() - d->starty;
     return result;
 }
 
-myUtilty::Vec2u XScene::viewportPos2ScreenPos(myUtilty::Vec2i pos) const
+XQ::Vec2u XScene::viewportPos2ScreenPos(XQ::Vec2i pos) const
 {
-    myUtilty::Vec2u result;
+    XQ::Vec2u result;
     result.x() = pos.x() + d->startx;
     result.y() = pos.y() + d->starty;
     return result;
 }
 
 //场景坐标系下的点转化到场景视口坐标系下的点
-myUtilty::Vec2i XScene::scenePos2ViewportPos(myUtilty::Vec2f pos) const
+XQ::Vec2i XScene::scenePos2ViewportPos(XQ::Vec2f pos) const
 {
     Eigen::Vector3f posInVirtualWorld = d->sceneFrameInVirtualWorld*Eigen::Vector3f(pos.x(), pos.y(), 0);
 	auto x = posInVirtualWorld.x();
 	auto y = posInVirtualWorld.y();
 
-    return myUtilty::Vec2i( x + 0.5*getViewportWidth(), y + 0.5*getViewportHeight());
+    return XQ::Vec2i( x + 0.5*getViewportWidth(), y + 0.5*getViewportHeight());
 }
 
 //视口坐标系在左下角
-myUtilty::Vec2f XScene::viewportPos2ScenePos(myUtilty::Vec2i pos) const
+XQ::Vec2f XScene::viewportPos2ScenePos(XQ::Vec2i pos) const
 {
     pos.x() -= 0.5 * getViewportWidth();
     pos.y() -= 0.5 * getViewportHeight();
 
     Eigen::Vector3f posInSceneFrmae = d->sceneFrameInVirtualWorld.inverse()*Eigen::Vector3f(pos.x(), pos.y(), 0);
 
-    return myUtilty::Vec2f(posInSceneFrmae.x(), posInSceneFrmae.y());
+    return XQ::Vec2f(posInSceneFrmae.x(), posInSceneFrmae.y());
 }
 
-myUtilty::Vec2f XScene::screenPos2ScenePos(myUtilty::Vec2u pos) const
+XQ::Vec2f XScene::screenPos2ScenePos(XQ::Vec2u pos) const
 {
     //屏幕到视口
     auto viewportPos = screenPos2ViewportPos(pos);
@@ -1085,7 +1085,7 @@ myUtilty::Vec2f XScene::screenPos2ScenePos(myUtilty::Vec2u pos) const
     return scenePos;
 }
 
-myUtilty::Vec2u XScene::scenePos2ScreenPos(myUtilty::Vec2f pos) const
+XQ::Vec2u XScene::scenePos2ScreenPos(XQ::Vec2f pos) const
 {
     //场景到视口
     auto viewportPos = scenePos2ViewportPos(pos);
@@ -1146,10 +1146,10 @@ void XScene::doneCurrent()
 		d->context->doneCurrent();
 }
 
-myUtilty::BoundBox  XScene::computeBoundBox() {
+XQ::BoundBox  XScene::computeBoundBox() {
 	 constexpr double limitMax = std::numeric_limits<double>::max();
      constexpr double limitMin = std::numeric_limits<double>::lowest();;
-    myUtilty::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
+    XQ::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
     for (auto& shape : d->shapes) {
         auto shapeBoundBox = shape->getBoundBox();
         boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);

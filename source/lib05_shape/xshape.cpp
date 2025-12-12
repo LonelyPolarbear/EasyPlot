@@ -110,7 +110,7 @@ void XShape::initResource()
 
 	//ÉèÖÃ¶¥µãÊôÐÔ
 	
-	m_vao->addBuffer(0, m_vbo_coord, 3, XOpenGL::DataType::float_, sizeof(myUtilty::Vec3f), 0);
+	m_vao->addBuffer(0, m_vbo_coord, 3, XOpenGL::DataType::float_, sizeof(XQ::Vec3f), 0);
 
 	m_ebo->setBufferType(XOpenGLBuffer::IndexBuffer);
 
@@ -161,18 +161,18 @@ void XShape::setPosition(float x, float y, float z)
 
 void XShape::setScale(float x, float y, float z)
 {
-	auto data = myUtilty::Matrix::transformDecomposition_TRS(d->m_transform);
+	auto data = XQ::Matrix::transformDecomposition_TRS(d->m_transform);
 	data.sx = x;
 	data.sy = y;
 	data.sz = z;
-	d->m_transform.matrix() = myUtilty::Matrix::computeMatrix(data);
+	d->m_transform.matrix() = XQ::Matrix::computeMatrix(data);
 }
 
-void XShape::rotate(float angle, myUtilty::Vec3f dir)
+void XShape::rotate(float angle, XQ::Vec3f dir)
 {
 	Eigen::Vector3f axis = Eigen::Vector3f(dir.x(), dir.y(), dir.z());
 	axis.normalize();
-	d->m_transform.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(angle), axis));
+	d->m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), axis));
 }
 
 float* XShape::getMatrix() const
@@ -190,17 +190,17 @@ bool XShape::isVisible() {
 
 void XShape::rotateX(float angle)
 {
-	d->m_transform.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(angle), Eigen::Vector3f::UnitX()));
+	d->m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), Eigen::Vector3f::UnitX()));
 }
 
 void XShape::rotateY(float angle)
 {
-	d->m_transform.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(angle), Eigen::Vector3f::UnitY()));
+	d->m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), Eigen::Vector3f::UnitY()));
 }
 
 void XShape::rotateZ(float angle)
 {
-	d->m_transform.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(angle), Eigen::Vector3f::UnitZ()));
+	d->m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), Eigen::Vector3f::UnitZ()));
 }
 
 void XShape::scale(float x, float y, float z)
@@ -230,25 +230,25 @@ ColorMode XShape::getColorMode() const
 	return m_colorMode;
 }
 
-void XShape::setSingleColor(myUtilty::Vec4f color)
+void XShape::setSingleColor(XQ::Vec4f color)
 {
 	m_singleColor = color;
 }
 
-myUtilty::Vec4f XShape::getSingleColor() const
+XQ::Vec4f XShape::getSingleColor() const
 {
 	return m_singleColor;
 }
 
-void XShape::setPreSelectColor(myUtilty::Vec4f color) {
+void XShape::setPreSelectColor(XQ::Vec4f color) {
 	m_preSelectColor = color;
 }
 
-myUtilty::Vec4f XShape::getPreSelectColor() const {
+XQ::Vec4f XShape::getPreSelectColor() const {
 	return m_preSelectColor;
 }
 
-myUtilty::Vec4f XShape::computeSelectTestColor()
+XQ::Vec4f XShape::computeSelectTestColor()
 {
 	int32_t id = d->m_id;
 
@@ -258,11 +258,11 @@ myUtilty::Vec4f XShape::computeSelectTestColor()
 	int32_t r = id & 0xff;
 	a = 255;
 
-	return myUtilty::Vec4f((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)a / 255.0f);
+	return XQ::Vec4f((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)a / 255.0f);
 
 }
 
-uint64_t XShape::colorToUInt(myUtilty::Vec4f color)
+uint64_t XShape::colorToUInt(XQ::Vec4f color)
 {
 	uint64_t a = (uint64_t)(color.x() * 255.0f);
 	uint64_t b = (uint64_t)(color.y() * 255.0f);
@@ -371,7 +371,7 @@ void XShape::setInput(std::shared_ptr<XShapeSource> input)
 	m_Input = input;
 }
 
-myUtilty::BoundBox XShape::getBoundBox() const
+XQ::BoundBox XShape::getBoundBox() const
 {
 	return m_Input->getBoundBox(d->m_transform);
 }

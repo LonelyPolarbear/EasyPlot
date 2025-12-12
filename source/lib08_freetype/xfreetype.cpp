@@ -497,7 +497,7 @@ void xfreetype::LoadGlyphImpl(const QString& dir, std::vector<Character>& charac
 
         charactersList.resize(glyphNum);
        
-		myUtilty::ParaAlgo::ParallelForeach(0, glyphNum, [&charactersList, &result](int idx) {
+		XQ::ParaAlgo::ParallelForeach(0, glyphNum, [&charactersList, &result](int idx) {
         #if 0
             //正则表达式不具备线程安全性,多线程反而会变慢
            static std::regex ws_re("\\s+");

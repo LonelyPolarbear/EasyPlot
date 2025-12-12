@@ -12,5 +12,5 @@ public:
 	void setTextSceneScreenPos(int x, int y);
 	
 private:
-	myUtilty::Vec2i m_scene_screenPos;
+	XQ::Vec2i m_scene_screenPos;
 };

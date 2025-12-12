@@ -34,7 +34,7 @@ public:
 
 	void transform(float picth, float yaw, float roll,  float tx, float ty, float tz);
 
-	void setEyeDir(const myUtilty::Vec3f &dir);
+	void setEyeDir(const XQ::Vec3f &dir);
 
 	/**
 	 * @brief 
@@ -62,9 +62,9 @@ public:
 
 	void resetCamera(const double boundBox[6]);
 
-	std::vector<myUtilty::Vec3f> getFrustumInWorld() const;
-	myUtilty::Vec3f getNearPointInWorld() const;
-	myUtilty::Vec3f getFarPointInWorld() const;
+	std::vector<XQ::Vec3f> getFrustumInWorld() const;
+	XQ::Vec3f getNearPointInWorld() const;
+	XQ::Vec3f getFarPointInWorld() const;
 private:
 	void transformImpl(float picth, float yaw, float roll, float tx, float ty, float tz);
 public:

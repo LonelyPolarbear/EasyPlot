@@ -8,10 +8,10 @@ XAxisItem::XAxisItem(std::shared_ptr<XGraphicsItem> parent) :XCompositeItem(pare
 	m_line = makeShareDbObject<XLineItem>(nullptr);
 
 	if (mLayout == XGL::Layout::horizontal) {
-		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(1, 0));
+		m_line->setLine(XQ::Vec2f(0, 0), XQ::Vec2f(1, 0));
 	}
 	else {
-		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(0, 1));
+		m_line->setLine(XQ::Vec2f(0, 0), XQ::Vec2f(0, 1));
 	}
 	addChildItem(m_line);
 
@@ -39,7 +39,7 @@ void XAxisItem::setRange(double minVal, double maxVal)
 		auto text = m_texts[i];
 		auto step = length / (mLabelNum - 1);
 		double value = minVal + i * step;
-		text->setText(myUtilty::to_wstring_with_precision(value, 1));
+		text->setText(XQ::to_wstring_with_precision(value, 1));
 	}
 }
 
@@ -84,7 +84,7 @@ void XAxisItem::setLabelNum(int num)
 		text->setVisible(true);
 		text->setFontSize(16);
 		text->setPositionType(XGL::PositionType::local_center);		//»òÕßsceneScreen_center
-		text->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		text->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
 		text->setText(L"0");
 
 		m_texts.push_back(text);
@@ -98,9 +98,9 @@ void XAxisItem::setLayout(XGL::Layout layout)
 {
 	mLayout = layout;
 	if (mLayout == XGL::Layout::horizontal) {
-		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(1, 0));
+		m_line->setLine(XQ::Vec2f(0, 0), XQ::Vec2f(1, 0));
 	}
 	else {
-		m_line->setLine(myUtilty::Vec2f(0, 0), myUtilty::Vec2f(0, 1));
+		m_line->setLine(XQ::Vec2f(0, 0), XQ::Vec2f(0, 1));
 	}
 }

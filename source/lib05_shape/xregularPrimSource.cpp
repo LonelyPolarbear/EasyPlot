@@ -19,39 +19,39 @@ void XRegularPrimSource::setAngle(double angle)
 	XRotateLoftedgeometrySource::setAngle(angle);
 }
 
-std::vector<myUtilty::Vec3f> XRegularPrimSource::getBottomPoints() {
-	std::vector<myUtilty::Vec3f> result;
-	std::vector<myUtilty::Vec2f> tmp;
+std::vector<XQ::Vec3f> XRegularPrimSource::getBottomPoints() {
+	std::vector<XQ::Vec3f> result;
+	std::vector<XQ::Vec2f> tmp;
 	if (isClosed()) {
-		tmp = myUtilty::math::circleSplit(m_NumVertices, m_angle);
+		tmp = XQ::math::circleSplit(m_NumVertices, m_angle);
 	}
 	else {
-		tmp = myUtilty::math::circleSplit(m_NumVertices - 1, m_angle);
+		tmp = XQ::math::circleSplit(m_NumVertices - 1, m_angle);
 	}
 
 	result.resize(tmp.size() + 1);
-	result[0] = myUtilty::Vec3f(0, 0, -m_height * 0.5);
+	result[0] = XQ::Vec3f(0, 0, -m_height * 0.5);
 	for (int i = 0; i < tmp.size(); i++) {
-		result[i + 1] = myUtilty::Vec3f(tmp[i].x(), tmp[i].y(), -m_height * 0.5);
+		result[i + 1] = XQ::Vec3f(tmp[i].x(), tmp[i].y(), -m_height * 0.5);
 	}
 
 	return result;
 }
 
-std::vector<myUtilty::Vec3f> XRegularPrimSource::getTopPoints() {
-	std::vector<myUtilty::Vec3f> result;
-	std::vector<myUtilty::Vec2f> tmp;
+std::vector<XQ::Vec3f> XRegularPrimSource::getTopPoints() {
+	std::vector<XQ::Vec3f> result;
+	std::vector<XQ::Vec2f> tmp;
 	if (isClosed()) {
-		tmp = myUtilty::math::circleSplit(m_NumVertices, m_angle);
+		tmp = XQ::math::circleSplit(m_NumVertices, m_angle);
 	}
 	else {
-		tmp = myUtilty::math::circleSplit(m_NumVertices - 1, m_angle);
+		tmp = XQ::math::circleSplit(m_NumVertices - 1, m_angle);
 	}
 
 	result.resize(tmp.size() + 1);
-	result[0] = myUtilty::Vec3f(0, 0, m_height * 0.5);
+	result[0] = XQ::Vec3f(0, 0, m_height * 0.5);
 	for (int i = 0; i < tmp.size(); i++) {
-		result[i + 1] = myUtilty::Vec3f(tmp[i].x(), tmp[i].y(), m_height * 0.5);
+		result[i + 1] = XQ::Vec3f(tmp[i].x(), tmp[i].y(), m_height * 0.5);
 	}
 
 	return result;

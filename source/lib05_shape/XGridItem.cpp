@@ -97,14 +97,14 @@ bool XGridItem::isScreenGrid() const
 	return m_isScreenGrid;
 }
 
-void XGridItem::setOrigin(const myUtilty::Vec2f& origin)
+void XGridItem::setOrigin(const XQ::Vec2f& origin)
 {
 	mOrigin = origin;
 	//m_gridTransform.translate(Eigen::Vector3f(-mOrigin.x, -mOrigin.y, 0));
 	m_transformItem->translate(-mOrigin.x(), -mOrigin.y());
 }
 
-const myUtilty::Vec2f& XGridItem::getOrigin() const
+const XQ::Vec2f& XGridItem::getOrigin() const
 {
 	return mOrigin;
 }
@@ -132,26 +132,26 @@ void XGridItem::gridSale(float dx, float dy)
 
 void XGridItem::gridSetSale(float sx, float sy)
 {
-	/*auto data = myUtilty::Matrix::transformDecomposition_TRS(m_gridTransform);
+	/*auto data = XQ::Matrix::transformDecomposition_TRS(m_gridTransform);
 	data.sx = 2./sx;
 	data.sy = 2./sy;
-	m_gridTransform.matrix() = myUtilty::Matrix::computeMatrix(data);*/
+	m_gridTransform.matrix() = XQ::Matrix::computeMatrix(data);*/
 
-	auto data = myUtilty::Matrix::transformDecomposition_TRS(m_transformItem->getTransform());
+	auto data = XQ::Matrix::transformDecomposition_TRS(m_transformItem->getTransform());
 	data.sx = 2./sx;
 	data.sy = 2./sy;
-	m_transformItem->setTransform( myUtilty::Matrix::computeMatrix(data));
+	m_transformItem->setTransform( XQ::Matrix::computeMatrix(data));
 }
 
-myUtilty::Vec2f XGridItem::gridGetSale() const
+XQ::Vec2f XGridItem::gridGetSale() const
 {
-	/*auto data = myUtilty::Matrix::transformDecomposition_TRS(m_gridTransform);
+	/*auto data = XQ::Matrix::transformDecomposition_TRS(m_gridTransform);
 
-	return myUtilty::Vec2f( 2./data.sx, 2./data.sy);*/
+	return XQ::Vec2f( 2./data.sx, 2./data.sy);*/
 
-	auto data = myUtilty::Matrix::transformDecomposition_TRS(m_transformItem->getTransform());
+	auto data = XQ::Matrix::transformDecomposition_TRS(m_transformItem->getTransform());
 
-	return myUtilty::Vec2f( 2./data.sx, 2./data.sy);
+	return XQ::Vec2f( 2./data.sx, 2./data.sy);
 }
 
 void XGridItem::setGridNum(int num)

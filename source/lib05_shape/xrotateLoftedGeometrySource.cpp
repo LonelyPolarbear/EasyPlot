@@ -13,12 +13,12 @@ void XRotateLoftedgeometrySource::updateVertextCoordArray()
 {
 	//更新顶点
 	//前面的四个坐标点
-	std::vector<myUtilty::Vec2f> points;
+	std::vector<XQ::Vec2f> points;
 	if (isClosed()) {
-		points = myUtilty::math::circleSplit(m_NumVertices, m_angle);
+		points = XQ::math::circleSplit(m_NumVertices, m_angle);
 	}
 	else
-		points = myUtilty::math::circleSplit(m_NumVertices - 1, m_angle);
+		points = XQ::math::circleSplit(m_NumVertices - 1, m_angle);
 
 	auto singleSurfacenum = m_NumVertices;
 	if (isClosed()) {
@@ -167,39 +167,39 @@ void XRotateLoftedgeometrySource::setAngle(double angle) {
 	m_angle = angle;
 }
 
-//std::vector<myUtilty::Vec3f> XRotateLoftedgeometrySource::getBottomPoints() {
-//	std::vector<myUtilty::Vec3f> result;
-//	std::vector<myUtilty::Vec2f> tmp;
+//std::vector<XQ::Vec3f> XRotateLoftedgeometrySource::getBottomPoints() {
+//	std::vector<XQ::Vec3f> result;
+//	std::vector<XQ::Vec2f> tmp;
 //	if (isClosed()) {
-//		tmp = myUtilty::math::circleSplit(m_NumVertices, m_angle);
+//		tmp = XQ::math::circleSplit(m_NumVertices, m_angle);
 //	}
 //	else {
-//		tmp = myUtilty::math::circleSplit(m_NumVertices - 1, m_angle);
+//		tmp = XQ::math::circleSplit(m_NumVertices - 1, m_angle);
 //	}
 //
 //	result.resize(tmp.size() + 1);
-//	result[0] = myUtilty::Vec3f(0, 0, -m_height * 0.5);
+//	result[0] = XQ::Vec3f(0, 0, -m_height * 0.5);
 //	for (int i = 0; i < tmp.size(); i++) {
-//		result[i + 1] = myUtilty::Vec3f(tmp[i].x, tmp[i].y, -m_height * 0.5);
+//		result[i + 1] = XQ::Vec3f(tmp[i].x, tmp[i].y, -m_height * 0.5);
 //	}
 //
 //	return result;
 //}
 //
-//std::vector<myUtilty::Vec3f> XRotateLoftedgeometrySource::getTopPoints() {
-//	std::vector<myUtilty::Vec3f> result;
-//	std::vector<myUtilty::Vec2f> tmp;
+//std::vector<XQ::Vec3f> XRotateLoftedgeometrySource::getTopPoints() {
+//	std::vector<XQ::Vec3f> result;
+//	std::vector<XQ::Vec2f> tmp;
 //	if (isClosed()) {
-//		tmp = myUtilty::math::circleSplit(m_NumVertices, m_angle);
+//		tmp = XQ::math::circleSplit(m_NumVertices, m_angle);
 //	}
 //	else {
-//		tmp = myUtilty::math::circleSplit(m_NumVertices - 1, m_angle);
+//		tmp = XQ::math::circleSplit(m_NumVertices - 1, m_angle);
 //	}
 //
 //	result.resize(tmp.size() + 1);
-//	result[0] = myUtilty::Vec3f(0, 0, m_height * 0.5);
+//	result[0] = XQ::Vec3f(0, 0, m_height * 0.5);
 //	for (int i = 0; i < tmp.size(); i++) {
-//		result[i + 1] = myUtilty::Vec3f(tmp[i].x, tmp[i].y, m_height * 0.5);
+//		result[i + 1] = XQ::Vec3f(tmp[i].x, tmp[i].y, m_height * 0.5);
 //	}
 //
 //	return result;

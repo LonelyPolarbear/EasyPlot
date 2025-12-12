@@ -134,7 +134,7 @@ easyPlotWidget::easyPlotWidget(QWidget* parent) :XOpenGLWidget(parent),d(std::ma
 
 
 	QFuture<void> future = QtConcurrent::run([]()->void {
-		auto ss = myUtilty::ShareVar::instance().currentExeDir + "\\sdf\\data.txt";
+		auto ss = XQ::ShareVar::instance().currentExeDir + "\\sdf\\data.txt";
 		xfreetype::Instance()->LoadGlyphSdf(QString::fromStdString(ss));
 		});
 
@@ -168,7 +168,7 @@ void easyPlotWidget::initGLResource()
 		auto rect = d->rect;
 		rect->setLineWidth(1);
 		rect->setFixedLine(true);
-		rect->setSingleColor(myUtilty::Vec4f(1, 1,1, 1));
+		rect->setSingleColor(XQ::Vec4f(1, 1,1, 1));
 		//rect->initiallize();
 		rect->setVisible(false);
 		d->scene->addGraphicsItem(rect);
@@ -186,7 +186,7 @@ void easyPlotWidget::initGLResource()
 		item->setFontSize(28);
 		item->setIsFixWidth(true);
 		item->setFixedWidth(500);
-		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		item->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
 		d->scene->addGraphicsItem(item);
 
 		{
@@ -200,7 +200,7 @@ void easyPlotWidget::initGLResource()
 			item->setPositionType(XGL::PositionType::sceneScreen_complete);
 			item->setOrientation(XGL::Orientation::left_top);
 			item->setPosition(10,0);
-			item->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
+			item->setSingleColor(XQ::Vec4f(0, 1, 0, 1));
 			d->scene->addGraphicsItem(item);
 		}
 	}
@@ -217,7 +217,7 @@ void easyPlotWidget::initGLResource()
 		item->setPositionType(XGL::PositionType::sceneScreen_complete);
 		item->setOrientation(XGL::Orientation::right_top);
 		item->setPosition(0, 0);
-		item->setSingleColor(myUtilty::Vec4f(0, 1, 0, 1));
+		item->setSingleColor(XQ::Vec4f(0, 1, 0, 1));
 		d->scene->addGraphicsItem(item);
 	}
 
@@ -377,7 +377,7 @@ void easyPlotWidget::mouseMoveEvent(QMouseEvent* event)
 	{
 		auto x = event->pos().x();
 		auto y = event->pos().y();
-		auto scenepos = d->scene->screenPos2ScenePos(myUtilty::Vec2u(x, mHeight - y));
+		auto scenepos = d->scene->screenPos2ScenePos(XQ::Vec2u(x, mHeight - y));
 		auto worldPos = d->scene->getCamera()->ComputeDisplayToWorld(Eigen::Vector3f((float)x / (float)mWidth, (float)(mHeight - y) / (float)mHeight, 0.0f));
 		
 		auto tip = QString("");
@@ -576,8 +576,8 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 		item->setRectType((XRectItem::RectType)d->mDrawItemMethod);
 		item->setConnectSmoothEnable(false);
 		item->setLineWidth(1);
-		item->setSingleColor(myUtilty::Vec4f(0, 1, 1, 1));
-		item->setFillColor(myUtilty::Vec4f(0, 0, 0, 1));
+		item->setSingleColor(XQ::Vec4f(0, 1, 1, 1));
+		item->setFillColor(XQ::Vec4f(0, 0, 0, 1));
 		item->setVisible(true);
 		item->setIsFilled(false);
 
@@ -591,7 +591,7 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 
 
 		auto textItem = makeShareDbObject<XTextItem>(nullptr);
-		textItem->setSingleColor(myUtilty::Vec4f(1, 1, 1, 1));
+		textItem->setSingleColor(XQ::Vec4f(1, 1, 1, 1));
 		textItem->setFontSize(20);
 		textItem->setText(L"测试一下文字");
 		textItem->setVAlignment(XTextItem::VAlign::Middle);
@@ -612,7 +612,7 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 		auto item = makeShareDbObject<XLineItem>(nullptr);
 		item->setLineWidth(2);
 		item->setPenStyle(XGraphicsItem::PenStyle::Solid);
-		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		item->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
 		item->setVisible(true);
 
 		item->setVisible(false);
@@ -740,7 +740,7 @@ void easyPlotWidget::slotCreateCone()
 	coneActor->translate(0, 0, 4);
 	coneActor->scale(2, 2, 2);
 	d->scene->addShape(coneActor);
-	coneActor->setSingleColor(myUtilty::Vec4f(0,1,0,1));
+	coneActor->setSingleColor(XQ::Vec4f(0,1,0,1));
 	coneActor->setColorMode(ColorMode::SingleColor);
 	doneCurrent();
 }
@@ -805,7 +805,7 @@ void easyPlotWidget::slotSetting()
 				connect(dlg,&GridSetDlg::sigGridSetParam,this,[item](const GridSetParam& parm){
 					auto sx =parm.rangex_max - parm.rangex_min;
 					auto sy =parm.rangey_max - parm.rangey_min;
-					item->setOrigin(myUtilty::Vec2f(parm.rangex_min, parm.rangey_min));
+					item->setOrigin(XQ::Vec2f(parm.rangex_min, parm.rangey_min));
 					item->gridSetSale(sx,sy);
 					item->setGridNum( parm.gridNum);
 					item->setGridSpace(parm.gridSpace);
@@ -835,7 +835,7 @@ void easyPlotWidget::slotFileLoadFinished()
 
 	shape->setInput(source);
 	shape->setColorMode(ColorMode::SingleColor);
-	shape->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+	shape->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
 	shape->translate(4, 2, 0);
 	shape->scale(2, 1, 1);
 
@@ -953,17 +953,17 @@ void easyPlotWidget::slotAddLine2D(int curveType)
 	makeCurrent();
 	auto item = makeShareDbObject<XPolyline>(nullptr);
 	std::wstring name = L"曲线";
-	name.append(std::to_wstring(myUtilty::math::randon<int>(0, 100)));
+	name.append(std::to_wstring(XQ::math::randon<int>(0, 100)));
 	item->addAttribute(L"Name", name);
 	item->setLineWidth(3);
 	item->setFixedLine(true);
 	item->setPenStyle(XGraphicsItem::PenStyle::Solid);
 
 	//生成随机颜色
-	auto r =myUtilty::math::randon_color();
-	auto g = myUtilty::math::randon_color();
-	auto b= myUtilty::math::randon_color();
-	item->setSingleColor(myUtilty::Vec4f(r,g, b, 1));
+	auto r =XQ::math::randon_color();
+	auto g = XQ::math::randon_color();
+	auto b= XQ::math::randon_color();
+	item->setSingleColor(XQ::Vec4f(r,g, b, 1));
 	//item->initiallize();
 	item->setVisible(true);
 
@@ -972,12 +972,12 @@ void easyPlotWidget::slotAddLine2D(int curveType)
 	curveData->setComponent(3);
 
 	//生成正弦波
-	auto xoffset = myUtilty::math::randon<float>(-200, 200);
-	auto yoffset = myUtilty::math::randon<float>(10, 50);
+	auto xoffset = XQ::math::randon<float>(-200, 200);
+	auto yoffset = XQ::math::randon<float>(10, 50);
 
 	if (curveType == 1) {
 		
-		auto fre = myUtilty::math::randon<float>(0.05, 0.1);
+		auto fre = XQ::math::randon<float>(0.05, 0.1);
 		int num = 200;
 		curveData->setNumOfTuple(num);
 		//x随机偏移
@@ -995,7 +995,7 @@ void easyPlotWidget::slotAddLine2D(int curveType)
 	if (curveType == 2) {
 		//设周期T
 		double T =30;	
-		auto fre = myUtilty::math::randon<float>(0.05, 0.1);
+		auto fre = XQ::math::randon<float>(0.05, 0.1);
 		int num = 50; //表示周期
 
 		//三角波
@@ -1045,14 +1045,14 @@ void easyPlotWidget::slotAddChart()
 		auto chart = makeShareDbObject<XChartItem2>();
 		chart->setVisible(true);
 
-		auto tx = myUtilty::math::randon<double>(-200, 200);
-		auto ty = myUtilty::math::randon<double>(-200, 200);
-		auto sx = myUtilty::math::randon<double>(400, 500);
-		auto sy = myUtilty::math::randon<double>(300, 400);
+		auto tx = XQ::math::randon<double>(-200, 200);
+		auto ty = XQ::math::randon<double>(-200, 200);
+		auto sx = XQ::math::randon<double>(400, 500);
+		auto sy = XQ::math::randon<double>(300, 400);
 
 		chart->translate(tx, ty);
 
-		auto angle = myUtilty::math::randon<double>(-90, 90);
+		auto angle = XQ::math::randon<double>(-90, 90);
 		//chart->rotate(angle);
 
 		chart->scale(sx, sy);
@@ -1067,7 +1067,7 @@ void easyPlotWidget::slotAddChart()
 		grid->gridTranslate(-1,-1);
 		grid->gridSetSale(200,100);
 		grid->setIsScreenGrid(false);
-		grid->setOrigin(myUtilty::Vec2f(-20,-20));
+		grid->setOrigin(XQ::Vec2f(-20,-20));
 
 		//网格的大小
 		grid->scale(100, 50);
@@ -1090,11 +1090,11 @@ void easyPlotWidget::slotAddBar()
 	item->setPenStyle(XGraphicsItem::PenStyle::Dash);
 
 	//生成随机颜色
-	auto r = myUtilty::math::randon_color();
-	auto g = myUtilty::math::randon_color();
-	auto b = myUtilty::math::randon_color();
-	item->setSingleColor(myUtilty::Vec4f(r, g, b, 1));
-	item->setFillColor(myUtilty::Vec4f(r, g, b, 1));
+	auto r = XQ::math::randon_color();
+	auto g = XQ::math::randon_color();
+	auto b = XQ::math::randon_color();
+	item->setSingleColor(XQ::Vec4f(r, g, b, 1));
+	item->setFillColor(XQ::Vec4f(r, g, b, 1));
 	//item->initiallize();
 	item->setVisible(true);
 
@@ -1102,9 +1102,9 @@ void easyPlotWidget::slotAddBar()
 	auto curveData = makeShareDbObject<XFloatArray>();
 	curveData->setComponent(3);
 
-	auto xoffset = myUtilty::math::randon<float>(-200, 200);
-	auto yoffset = myUtilty::math::randon<float>(10, 50);
-	auto fre = myUtilty::math::randon<float>(0.05, 0.1);
+	auto xoffset = XQ::math::randon<float>(-200, 200);
+	auto yoffset = XQ::math::randon<float>(10, 50);
+	auto fre = XQ::math::randon<float>(0.05, 0.1);
 	int num = 10000;
 	curveData->setNumOfTuple(num);
 	//x随机偏移
@@ -1113,7 +1113,7 @@ void easyPlotWidget::slotAddBar()
 	//柱坐标系应该规范多条数据X轴坐标相同，都为整数
 	for (int i = 0; i < num; i++) {
 		auto x =-0.5*num + i;
-		auto y = myUtilty::math::randon<int>(10, 200);
+		auto y = XQ::math::randon<int>(10, 200);
 		auto z = 0;
 		curveData->setTuple(i, x, y, z);
 	}
@@ -1138,7 +1138,7 @@ void easyPlotWidget::slotAddBar()
 
 	//for (int i = 0; i < 1; i++) {
 	//	auto item = makeShareDbObject<XLegendRowItem>();
-	//	item->setSingleColor(myUtilty::Vec4f( 1,0,0,0));
+	//	item->setSingleColor(XQ::Vec4f( 1,0,0,0));
 	//	item->setVisible(true);
 	//	item->setChecked(true);
 	//	item->translate(0,30*i+10);
@@ -1161,7 +1161,7 @@ void easyPlotWidget::slotAddText()
 
 		
 		item->setFontSize(36);
-		item->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		item->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
 		item->setText(L"请输入一段文字");
 		item->setPositionType(XGL::PositionType::local_center);
 		item->setOrientation(XGL::Orientation::left_bottom);
@@ -1239,7 +1239,7 @@ void easyPlotWidget::slotAxis2D()
 
 		axis->setVisible(true);
 
-		axis->getLine()->setSingleColor(myUtilty::Vec4f(1, 0, 0, 1));
+		axis->getLine()->setSingleColor(XQ::Vec4f(1, 0, 0, 1));
 		axis->getLine()->setFixedLine(true);
 		axis->getLine()->setLineWidth(2);
 		axis->getLine()->setPositionType(XGL::PositionType::local_complete);
@@ -1286,7 +1286,7 @@ void easyPlotWidget::slotComputeShaderTest()
 {
 	makeCurrent();
 	auto computeShader = makeShareDbObject<XComputeShader>();
-	computeShader->loadComputeShader(myUtilty::ShareVar::instance().currentExeDir + "/easyPlot/" + "compute.cs");
+	computeShader->loadComputeShader(XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "compute.cs");
 	
 	computeShader->use();
 	//准备数据，创建一个SSBO，并分配数据

@@ -107,29 +107,29 @@ protected:
 
 		void rotate(int x1, int y1, int x2, int y2);		//对相机的操作
 
-		void rotate(myUtilty::Vec2u curpos, myUtilty::Vec2u lastpos);		//对相机的操作
+		void rotate(XQ::Vec2u curpos, XQ::Vec2u lastpos);		//对相机的操作
 
 		void translate(int x1, int y1, int x2, int y2);		//对相机的操作
 
-		void translate(myUtilty::Vec2u curpos,myUtilty::Vec2u lastpos );		//对相机的操作
+		void translate(XQ::Vec2u curpos,XQ::Vec2u lastpos );		//对相机的操作
 
 		//屏幕到视口坐标系的转换
-		myUtilty::Vec2i screenPos2ViewportPos(myUtilty::Vec2u) const;
+		XQ::Vec2i screenPos2ViewportPos(XQ::Vec2u) const;
 
 		//视口到屏幕坐标系的转换
-		myUtilty::Vec2u viewportPos2ScreenPos(myUtilty::Vec2i) const;
+		XQ::Vec2u viewportPos2ScreenPos(XQ::Vec2i) const;
 
 		//场景坐标系到视口坐标系的转换
-		myUtilty::Vec2i scenePos2ViewportPos(myUtilty::Vec2f) const;
+		XQ::Vec2i scenePos2ViewportPos(XQ::Vec2f) const;
 
 		//视口坐标系到场景坐标系的转换
-		myUtilty::Vec2f viewportPos2ScenePos(myUtilty::Vec2i) const;
+		XQ::Vec2f viewportPos2ScenePos(XQ::Vec2i) const;
 
 		//屏幕坐标系到场景坐标系的转换
-		myUtilty::Vec2f screenPos2ScenePos(myUtilty::Vec2u) const;
+		XQ::Vec2f screenPos2ScenePos(XQ::Vec2u) const;
 
 		//场景坐标系到屏幕坐标系的转换	
-		myUtilty::Vec2u scenePos2ScreenPos(myUtilty::Vec2f) const;
+		XQ::Vec2u scenePos2ScreenPos(XQ::Vec2f) const;
 
 	
 		/// <summary>
@@ -144,7 +144,7 @@ protected:
 		bool isBelongtoViewPort(int x, int y);
 
 		//获取场景的包围盒
-		myUtilty::BoundBox computeBoundBox();
+		XQ::BoundBox computeBoundBox();
 
 		int mousePosx{0};
 		int mousePosy{0};

@@ -18,7 +18,7 @@ XShapeSource::~XShapeSource()
 {
 }
 
-myUtilty::Vec3f XShapeSource::getFaceNormal(uint32_t index)
+XQ::Vec3f XShapeSource::getFaceNormal(uint32_t index)
 {
 	uint32_t* pIndex = m_indexs->data(index);
 	Eigen::Vector3f v1(m_coord->data(pIndex[0])[0], m_coord->data(pIndex[0])[1], m_coord->data(pIndex[0])[2]);
@@ -29,7 +29,7 @@ myUtilty::Vec3f XShapeSource::getFaceNormal(uint32_t index)
 	Eigen::Vector3f e2 = v3 - v1;
 	Eigen::Vector3f normalVec = e1.cross(e2);
 	normalVec.normalize();
-	auto normal = myUtilty::Vec3f(normalVec.x(), normalVec.y(), normalVec.z());
+	auto normal = XQ::Vec3f(normalVec.x(), normalVec.y(), normalVec.z());
 
 	return normal;
 }
@@ -52,35 +52,35 @@ bool XShapeSource::update()
 	return true;
 }
 
-myUtilty::BoundBox XShapeSource::getBoundBox()
+XQ::BoundBox XShapeSource::getBoundBox()
 {
 	constexpr double limitMax = std::numeric_limits<double>::max();
 	constexpr double limitMin = std::numeric_limits<double>::lowest();;
-	myUtilty::Vec3d minBound = myUtilty::Vec3d(limitMax, limitMax, limitMax);
-	myUtilty::Vec3d maxBound = myUtilty::Vec3d(limitMin, limitMin, limitMin);
+	XQ::Vec3d minBound = XQ::Vec3d(limitMax, limitMax, limitMax);
+	XQ::Vec3d maxBound = XQ::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_coord->size() == 0)
-		return myUtilty::BoundBox{ minBound.x(), maxBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+		return XQ::BoundBox{ minBound.x(), maxBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
 	float* pData = m_coord->data(0);
 	for (int i = 0; i < m_coord->getNumOfTuple(); i++) {
 
-		myUtilty::Vec3d pos = myUtilty::Vec3d(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
-		minBound = myUtilty::Vec3d(std::min(minBound.x(), pos.x()), std::min(minBound.y(), pos.y()), std::min(minBound.z(), pos.z()));
-		maxBound = myUtilty::Vec3d(std::max(maxBound.x(), pos.x()), std::max(maxBound.y(), pos.y()), std::max(maxBound.z(), pos.z()));
+		XQ::Vec3d pos = XQ::Vec3d(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
+		minBound = XQ::Vec3d(std::min(minBound.x(), pos.x()), std::min(minBound.y(), pos.y()), std::min(minBound.z(), pos.z()));
+		maxBound = XQ::Vec3d(std::max(maxBound.x(), pos.x()), std::max(maxBound.y(), pos.y()), std::max(maxBound.z(), pos.z()));
 	}
-	return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+	return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 }
 
-myUtilty::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
+XQ::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 {
 	constexpr double limitMax = std::numeric_limits<double>::max();
 	constexpr double limitMin = std::numeric_limits<double>::lowest();;
-	myUtilty::Vec3d minBound = myUtilty::Vec3d(limitMax, limitMax, limitMax);
-	myUtilty::Vec3d maxBound = myUtilty::Vec3d(limitMin, limitMin, limitMin);
+	XQ::Vec3d minBound = XQ::Vec3d(limitMax, limitMax, limitMax);
+	XQ::Vec3d maxBound = XQ::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_coord->size() == 0)
-		return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+		return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
 	float* pData = m_coord->data(0);
 	for (int i = 0; i < m_coord->getNumOfTuple(); i++) {
@@ -88,10 +88,10 @@ myUtilty::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 		Eigen::Vector3f pos = Eigen::Vector3f(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
 		pos = mat * pos;
 
-		minBound = myUtilty::Vec3d(std::min<double>(minBound.x(), pos.x()), std::min<double>(minBound.y(), pos.y()), std::min<double>(minBound.z(), pos.z()));
-		maxBound = myUtilty::Vec3d(std::max<double>(maxBound.x(), pos.x()), std::max<double>(maxBound.y(), pos.y()), std::max<double>(maxBound.z(), pos.z()));
+		minBound = XQ::Vec3d(std::min<double>(minBound.x(), pos.x()), std::min<double>(minBound.y(), pos.y()), std::min<double>(minBound.z(), pos.z()));
+		maxBound = XQ::Vec3d(std::max<double>(maxBound.x(), pos.x()), std::max<double>(maxBound.y(), pos.y()), std::max<double>(maxBound.z(), pos.z()));
 	}
-	return myUtilty::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+	return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 }
 
 void XShapeSource::writeToFile(const std::string& filename)

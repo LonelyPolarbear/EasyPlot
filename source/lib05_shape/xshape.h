@@ -61,7 +61,7 @@ public:
 	void translate(float x, float y, float z);
 	void setPosition(float x, float y, float z);
 	void setScale(float x, float y, float z);
-	void rotate(float angle, myUtilty::Vec3f dir);
+	void rotate(float angle, XQ::Vec3f dir);
 
 	//按列矩阵形式存储
 	float* getMatrix() const;
@@ -84,15 +84,15 @@ public:
 
 	void setColorMode(ColorMode mode);
 	ColorMode getColorMode() const;
-	void setSingleColor(myUtilty::Vec4f color);
-	myUtilty::Vec4f getSingleColor() const;
+	void setSingleColor(XQ::Vec4f color);
+	XQ::Vec4f getSingleColor() const;
 
-	void setPreSelectColor(myUtilty::Vec4f color);
-	myUtilty::Vec4f getPreSelectColor() const;
+	void setPreSelectColor(XQ::Vec4f color);
+	XQ::Vec4f getPreSelectColor() const;
 
-	myUtilty::Vec4f computeSelectTestColor();
+	XQ::Vec4f computeSelectTestColor();
 
-	static uint64_t colorToUInt(myUtilty::Vec4f color);
+	static uint64_t colorToUInt(XQ::Vec4f color);
 
 	bool isSelf(uint64_t id);
 
@@ -116,7 +116,7 @@ public:
 		return m_Input;
 	}
 
-	myUtilty::BoundBox getBoundBox() const;
+	XQ::BoundBox getBoundBox() const;
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;
@@ -136,9 +136,9 @@ private:
 	ColorMode m_colorMode = ColorMode::FaceColor;
 	PrimitveType m_drawType = PrimitveType::triangle;
 	PolygonMode m_polygonMode = PolygonMode::line_fill;
-	myUtilty::Vec4f m_singleColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-	myUtilty::Vec4f m_preSelectColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-	myUtilty::Vec4f m_selectTestColor = myUtilty::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+	XQ::Vec4f m_singleColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+	XQ::Vec4f m_preSelectColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
+	XQ::Vec4f m_selectTestColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 
 	//同步CPU和GPU端数据的时间戳
 	XTimeStamp m_UpdateTime;

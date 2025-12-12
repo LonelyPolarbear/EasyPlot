@@ -21,7 +21,7 @@ class lib09_XPANEL_API FontSetDlg : public QDialog
         double y =0;
         bool isFixed =false;
         double fixWidth =0;
-        myUtilty::Vec4f color =myUtilty::Vec4f(1,1,11);
+        XQ::Vec4f color =XQ::Vec4f(1,1,11);
         int tackMode=0;  //local_complete,	local_center,sceneScreen_complete,sceneScreen_center
         int refOrigin =0; //left_top,left_bottom,right_top,right_bottom
     };

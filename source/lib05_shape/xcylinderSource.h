@@ -11,8 +11,8 @@ protected:
 	XCylinderSource();
 
 	~XCylinderSource();
-	virtual std::vector<myUtilty::Vec3f> getBottomPoints();
-	virtual std::vector<myUtilty::Vec3f> getTopPoints();
+	virtual std::vector<XQ::Vec3f> getBottomPoints();
+	virtual std::vector<XQ::Vec3f> getTopPoints();
 public:
 	void setNumVertices(unsigned int numVertices);
 	void setAngle(double angle);

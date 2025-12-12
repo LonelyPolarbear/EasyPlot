@@ -20,9 +20,9 @@ public:
 
 	bool isScreenGrid() const;
 
-	void setOrigin(const myUtilty::Vec2f& origin);
+	void setOrigin(const XQ::Vec2f& origin);
 
-	const myUtilty::Vec2f& getOrigin() const;
+	const XQ::Vec2f& getOrigin() const;
 
 	void gridReset();
 
@@ -32,7 +32,7 @@ public:
 
 	void gridSetSale(float sx, float sy);
 
-    myUtilty::Vec2f gridGetSale() const;
+    XQ::Vec2f gridGetSale() const;
 
 	void setGridNum(int num);
 
@@ -54,7 +54,7 @@ protected:
 	//Eigen::Affine3f m_gridTransform = Eigen::Affine3f::Identity();
 private:
 	bool m_isScreenGrid = true;	//true:屏幕坐标系，false:局部坐标系
-	myUtilty::Vec2f mOrigin = myUtilty::Vec2f(0,0);
+	XQ::Vec2f mOrigin = XQ::Vec2f(0,0);
 	bool m_isShowAxis = true;
 	//主网格间距
 	int  m_gridNum = 5;		//每间隔几个次网格绘制一次主网格

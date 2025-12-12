@@ -27,7 +27,7 @@ int main(int argc,char** argv) {
 	Eigen::Affine3f rot = Eigen::Affine3f::Identity();
 	rot.rotate(Eigen::AngleAxisf(2, ydir));
 
-	myUtilty::Matrix::dump(rot,std::cout);
+	XQ::Matrix::dump(rot,std::cout);
 	std::cout<<"\n";
 
 
@@ -37,14 +37,14 @@ int main(int argc,char** argv) {
 		rot1.rotate(Eigen::AngleAxisf(2, Eigen::Vector3f::UnitY()));
 
 		Eigen::Affine3f a = frame*rot1*frame.inverse();
-		myUtilty::Matrix::dump(a, std::cout);
+		XQ::Matrix::dump(a, std::cout);
 		std::cout << "\n";
 	}
 
 	return 0;
 
 #else
-	myUtilty::ShareVar::instance().currentExeDir = std::filesystem::path(argv[0]).parent_path().string();
+	XQ::ShareVar::instance().currentExeDir = std::filesystem::path(argv[0]).parent_path().string();
 	QApplication a(argc, argv);
 
 	QLoggingCategory::setFilterRules("qt.qpa.window.setGeometry=false");

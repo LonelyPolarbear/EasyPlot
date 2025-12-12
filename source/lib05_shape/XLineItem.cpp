@@ -36,8 +36,8 @@ void XLineItem::updateVboCoord()
 			// 4 1 2 3 4 1 2
 			addAdjacency->setNumOfTuple(oldNum + 2);
 
-			myUtilty::Vec2f p1 = myUtilty::Vec2f(m_coord->data(0)[0], m_coord->data(0)[1]);
-			myUtilty::Vec2f p2 = myUtilty::Vec2f(m_coord->data(1)[0], m_coord->data(1)[1]);
+			XQ::Vec2f p1 = XQ::Vec2f(m_coord->data(0)[0], m_coord->data(0)[1]);
+			XQ::Vec2f p2 = XQ::Vec2f(m_coord->data(1)[0], m_coord->data(1)[1]);
 
 			auto pre = 2.0f * p1 - p2;
 			auto next = 2.0f * p2 - p1;
@@ -71,21 +71,21 @@ void XLineItem::updateVboCoord()
 	}
 }
 
-void XLineItem::setLine(const myUtilty::Vec2f& start, const myUtilty::Vec2f& end)
+void XLineItem::setLine(const XQ::Vec2f& start, const XQ::Vec2f& end)
 {
 	m_coordArray->setTuple(0, start.x(), start.y(), 0);
 	m_coordArray->setTuple(1, end.x(), end.y(), 0);
 	m_coordArray->Modified();
 }
 
-myUtilty::Vec2f XLineItem::getStart() const
+XQ::Vec2f XLineItem::getStart() const
 {
- 	return myUtilty::Vec2f(m_coordArray->data(0)[0], m_coordArray->data(0)[1]);
+ 	return XQ::Vec2f(m_coordArray->data(0)[0], m_coordArray->data(0)[1]);
 }
 
-myUtilty::Vec2f XLineItem::getEnd() const
+XQ::Vec2f XLineItem::getEnd() const
 {
-	return myUtilty::Vec2f(m_coordArray->data(1)[0], m_coordArray->data(1)[1]);
+	return XQ::Vec2f(m_coordArray->data(1)[0], m_coordArray->data(1)[1]);
 }
 
 double XLineItem::getLength() const

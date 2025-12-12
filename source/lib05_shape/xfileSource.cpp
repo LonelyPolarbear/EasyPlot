@@ -296,7 +296,7 @@ void XFileSource::transform()
 		//计算每个顶点的法线
 		//遍历每个节点的连接信息，查找共面单元
 		QHash<int, QMap<int, Eigen::Vector3f>> elem_normals;//单元的法线方向 <单元id, <节点id, 法线方向>
-		const float one_face_criteria = cos(myUtilty::Matrix::radian(10));//cos(25) = 0.906，夹角小于25度即认为共面，暂写死
+		const float one_face_criteria = cos(XQ::Matrix::radian(10));//cos(25) = 0.906，夹角小于25度即认为共面，暂写死
 		for (int i = 0; i < pointNum; i++) {
 			auto normal = Eigen::Vector3f(0, 0, 0);
 			auto elemIdx = nodeIdx2ElemIdx[i];		//该节点的共享单元
@@ -432,8 +432,8 @@ void XFileSource::transform()
 				for (int j = 0; j < 3; j++) {
 					//j j+1
 					//j j+1
-					auto fisrt = myUtilty::Vec3u(oldEbo[j], newEbo[j], oldEbo[(j + 1)%3]);
-					auto second = myUtilty::Vec3u(oldEbo[(j+1)%3], newEbo[j], newEbo[(j+1)%3]);
+					auto fisrt = XQ::Vec3u(oldEbo[j], newEbo[j], oldEbo[(j + 1)%3]);
+					auto second = XQ::Vec3u(oldEbo[(j+1)%3], newEbo[j], newEbo[(j+1)%3]);
 					ebo->setTuple(idx++, fisrt.x(), fisrt.y(), fisrt.z());
 					ebo->setTuple(idx++, second.x(), second.y(), second.z());
 				}

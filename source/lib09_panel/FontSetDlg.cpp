@@ -141,7 +141,7 @@ void FontSetDlg::slotBtnOk(){
     mTextInfo.isFixed = ui->isFixWidth->isChecked();
     mTextInfo.fixWidth = ui->fixWidth->value();
     auto c = ui->btnColorSet->currentColor();
-    mTextInfo.color = myUtilty::Vec4f(c.redF(), c.greenF(), c.blueF(), c.alphaF());
+    mTextInfo.color = XQ::Vec4f(c.redF(), c.greenF(), c.blueF(), c.alphaF());
 
     emit sigSetTextInfo();
     m_callback();

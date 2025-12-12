@@ -7,9 +7,9 @@ public:
 	XLineItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XLineItem();
 	void updateVboCoord() override;
-	void setLine(const myUtilty::Vec2f& start, const myUtilty::Vec2f& end);
-	myUtilty::Vec2f getStart() const;
-	myUtilty::Vec2f getEnd() const;
+	void setLine(const XQ::Vec2f& start, const XQ::Vec2f& end);
+	XQ::Vec2f getStart() const;
+	XQ::Vec2f getEnd() const;
 
 	double getLength() const;
 	virtual uint32_t computeNumofVertices() override;
