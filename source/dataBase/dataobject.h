@@ -34,12 +34,12 @@ public:
 template<typename object>
 struct dataObjectShare:public object {
 public:
-	//using object::object;
 	template<typename... Args, typename = std::enable_if_t<
 		XTraits::is_onlyone_base_of_v<object, Args...>
 		>>
 	dataObjectShare(Args&&... args) :object(std::forward<Args>(args)...) {}
 };
+
 
 namespace __detail__{
 	DEFINE_HAS_MEMBER_AND_ARGUMENT_NUM_COUNT(Init, 10);
@@ -83,56 +83,25 @@ std::shared_ptr<object> makeShareDbObject(Args&& ...args) {
 	//return std::make_shared<helper>(std::forward<Args>(args)...);
 }
 
-class database_API DataBaseObject : public std::enable_shared_from_this<DataBaseObject> {
+class database_API XBaseObject : public std::enable_shared_from_this<XBaseObject> {
 protected:
-	DataBaseObject() ;
+	XBaseObject(){}
+	virtual ~XBaseObject(){}
+};
+
+class database_API DataBaseObject :public std::enable_shared_from_this<DataBaseObject> {
+protected:
+	DataBaseObject();
 	virtual ~DataBaseObject();
 	XTimeStamp m_DataModifyTime;
-
 public:
 	void Modified() {
 		m_DataModifyTime.Modified();
-		for (auto observer : observers) {
-			auto p = observer.first;
-			if (auto ptr = p.lock()) {
-				observer.second(ptr);
-			}
-		}
-
-		//弱引用的销毁
-		auto it = observers.begin();
-		while (it != observers.end()) {
-			if (it->first.expired()) {
-				it = observers.erase(it);
-			}
-			else {
-				++it;
-			}
-		}
 	}
 
-	bool addObserver(std::shared_ptr<DataBaseObject> obj, std::function<void(std::shared_ptr<DataBaseObject>)> f) {
-		observers.insert(std::make_pair(std::weak_ptr<DataBaseObject>(obj), f));
-		return false;
-	}
-
-	bool removeObserver(std::shared_ptr<DataBaseObject> obj) {
-		auto it = observers.begin();
-		while (it != observers.end()) {
-			if (it->first.lock() == obj) {
-				it = observers.erase(it);
-				return true;
-			}
-			else {
-				++it;
-			}
-		}
-		return false;
-	}
-
-	XTimeStamp GetTimeStamp() const {
+	 XTimeStamp GetTimeStamp() const {
 		return m_DataModifyTime;
 	}
 
-	std::map<std::weak_ptr<DataBaseObject>,std::function<void(std::shared_ptr<DataBaseObject>)>,std::owner_less<std::weak_ptr<DataBaseObject>>> observers;
+	virtual void Init();
 };

@@ -18,6 +18,7 @@ public:
 	Eigen::Affine3f m_transform = Eigen::Affine3f::Identity();
 	std::mutex m_mutex;
 	uint64_t m_id = ++object_id_counter;
+	bool isInitResource = false;
 };
 XShape::XShape():d(new Internal)
 {
@@ -36,6 +37,8 @@ XShape::~XShape()
 
 void XShape::draw(std::shared_ptr<xshader> shader)
 {
+	initiallize();
+
 	//先更新数据
 	updateData();
 	if(!m_visible)
@@ -79,6 +82,7 @@ void XShape::draw(std::shared_ptr<xshader> shader)
 
 void XShape::draw()
 {
+	initiallize();
 	auto shader = m_shaderManger->getShader3D(m_drawType);
 	draw(shader);
 }
@@ -123,6 +127,14 @@ void XShape::initResource()
 	m_vbo_coord->release();
 
 	m_vao->release();
+}
+
+void XShape::initiallize()
+{
+	if (d->isInitResource == false) {
+		initResource();
+		d->isInitResource = true;
+	}
 }
 
 

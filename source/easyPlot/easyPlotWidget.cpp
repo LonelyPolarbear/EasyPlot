@@ -177,7 +177,7 @@ void easyPlotWidget::initGLResource()
 	{
 		auto item = d->screenTextItem;
 		//item->initiallize();
-		item->setVisible(true);
+		item->setVisible(false);
 		item->setPosition(250, 0);
 		item->setVAlignment(XTextItem::VAlign::Top);
 		item->setHAlignment(XTextItem::HAlign::Center);
@@ -192,7 +192,7 @@ void easyPlotWidget::initGLResource()
 		{
 			auto item = d->screenTextItemLine;
 			//item->initiallize();
-			item->setVisible(true);
+			item->setVisible(false);
 			item->setFontSize(28);
 			item->setIsFixWidth(false);
 			item->setVAlignment(XTextItem::VAlign::Top);
@@ -702,7 +702,7 @@ void easyPlotWidget::slotCreateCube()
 	std::shared_ptr<xchamferCubeSource> cubeSource = makeShareDbObject<xchamferCubeSource>();
 	std::shared_ptr<XShape> cubeActor = makeShareDbObject<XShape>();
 
-	cubeActor->initResource();
+	//cubeActor->initResource();
 	cubeActor->setInput(cubeSource);
 
 	cubeSource->Modified();
@@ -717,7 +717,7 @@ void easyPlotWidget::slotCreateSphere()
 	std::shared_ptr<XSphereSource> sphereSource = makeShareDbObject<XSphereSource>();
 	std::shared_ptr<XShape> sphereActor = makeShareDbObject<XShape>();
 
-	sphereActor->initResource();
+	//sphereActor->initResource();
 	sphereActor->setInput(sphereSource);
 	sphereActor->scale(10,10,10);
 	sphereSource->setDirection(XSphereSource::Direaction::horizontal);
@@ -735,7 +735,7 @@ void easyPlotWidget::slotCreateCone()
 	makeCurrent();
 	std::shared_ptr<XConeSource> coneSource = makeShareDbObject<XConeSource>();
 	std::shared_ptr<XShape> coneActor = makeShareDbObject<XShape>();
-	coneActor->initResource();
+	//coneActor->initResource();
 	coneActor->setInput(coneSource);
 	coneActor->translate(0, 0, 4);
 	coneActor->scale(2, 2, 2);
@@ -829,7 +829,7 @@ void easyPlotWidget::slotFileLoadFinished()
 	makeCurrent();
 	//创建一个新的shape
 	auto shape = makeShareDbObject<XShape>();
-	shape->initResource();
+	//shape->initResource();
 
 	auto source =d->mFutureWatcher->result();
 

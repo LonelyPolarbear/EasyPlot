@@ -276,17 +276,79 @@ void xcamera::transformTrackball(Eigen::Vector2f curPoint, Eigen::Vector2f lastP
         xangle = 0;
         yangle = 0;
     }
-
+    #if 1
     //相机绕着自身坐标系运动,旋转顺序Z->X->Y
     Eigen::Vector3f self2Center = m_transform.inverse() * rotate_center;
     m_transform
         .translate(self2Center)
-		//.rotate(Eigen::AngleAxisf(xangle, Eigen::Vector3f::UnitX()))
-		//.rotate(Eigen::AngleAxisf(-yangle, Eigen::Vector3f::UnitY()))
-        .rotate(Eigen::AngleAxisf(rotateAngle, rotateDir))
+		.rotate(Eigen::AngleAxisf(xangle, Eigen::Vector3f::UnitX()))
+		.rotate(Eigen::AngleAxisf(-yangle, Eigen::Vector3f::UnitY()))
+        //.rotate(Eigen::AngleAxisf(rotateAngle, rotateDir))
         .scale(Eigen::Vector3f(1, 1, 1))
         .translate(-self2Center)
         .translate(space);
+    #else
+        //先计算姿态，后计算位置
+        //相机先绕着世界坐标系的Y轴旋转，然后绕着自身的X坐标系旋转，这样可以保证不侧翻
+        
+        //提取姿态
+    {
+        Eigen::Affine3f t = m_transform;
+		Eigen::Vector3f self2Center = t.inverse() * rotate_center;
+        t
+			.translate(self2Center)
+			.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian( xangle * 180.0 / 3.14), Eigen::Vector3f::UnitX()))
+			.rotate(Eigen::AngleAxisf(myUtilty::Matrix::radian(-yangle * 180.0 / 3.14), Eigen::Vector3f::UnitY()))
+			//.rotate(Eigen::AngleAxisf(rotateAngle, rotateDir))
+			.scale(Eigen::Vector3f(1, 1, 1))
+			.translate(-self2Center);
+		std::cout << "t\n";
+		myUtilty::Matrix::dump(t, std::cout);
+    }
+    
+
+        auto cameraRot =myUtilty::Matrix::rotate(m_transform);
+		{
+            auto cameraRotTest =myUtilty::Matrix::rotate(m_transform);
+			Eigen::Vector3f diry = cameraRotTest * Eigen::Vector3f::UnitY();
+			Eigen::Vector3f dirx = cameraRotTest * Eigen::Vector3f::UnitX();
+
+			auto rx = myUtilty::Matrix::rotate(-xangle * 180.0 / 3.14, dirx);
+			auto ry = myUtilty::Matrix::rotate(yangle * 180.0 / 3.14, diry);
+
+			Eigen::Affine3f world = ry * rx;
+            cameraRotTest = world.inverse() * cameraRotTest;
+
+            std::cout<<"cameraRotTest\n";
+            myUtilty::Matrix::dump(cameraRotTest, std::cout);
+		}
+        
+        {
+            auto rx = myUtilty::Matrix::rotate(-xangle * 180.0 / 3.14, Eigen::Vector3f::UnitX());
+            auto ry = myUtilty::Matrix::rotate(yangle * 180.0 / 3.14, Eigen::Vector3f::UnitY());
+            Eigen::Affine3f  a= cameraRot* ry* rx* cameraRot.inverse();
+            cameraRot = a.inverse() * cameraRot;
+
+            //cameraRot *rx逆*ry逆*cameraRot的逆*cameraRot = cameraRot *rx逆*ry逆
+            std::cout << "cameraRot\n";
+            myUtilty::Matrix::dump(cameraRot, std::cout);
+        }
+
+
+        //求解平移部分
+        Eigen::Vector3f self2Center = m_transform.inverse() * rotate_center;
+        Eigen::Vector3f T = rotate_center - cameraRot*self2Center;
+
+        //合并R T
+        cameraRot.translation()<<T.x(),T.y(),T.z();
+        m_transform.matrix() = cameraRot.matrix();
+
+        {
+			std::cout << "m_transform\n";
+			myUtilty::Matrix::dump(m_transform, std::cout);
+        }
+
+    #endif
 }
 
 Eigen::Vector3f xcamera::billboard(float screenw, float screenh, float posx, float posy, float zInCamera, oriention orien )

@@ -159,7 +159,6 @@ namespace myUtilty {
 		friend Vector<N, T> operator*(const Vector<N, T>& c, U scalar);
 	};
 
-
 	template<unsigned int N, typename T, typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
 	Vector<N, T> operator*(U scalar, const Vector<N, T>& c) {
 		Vector<N, T> res = c;
@@ -359,6 +358,15 @@ namespace myUtilty {
 		static Eigen::Affine3f transltae(float tx, float ty, float tz) {
 			Eigen::Affine3f t = Eigen::Affine3f::Identity();
 			t.translation() << tx, ty, tz;
+			return t;
+		}
+
+		/**
+		 * ÌáÈ¡Ðý×ª¾ØÕó
+		 */
+		static Eigen::Affine3f rotate(const Eigen::Affine3f& m) {
+			Eigen::Affine3f t = Eigen::Affine3f::Identity();
+			t.linear() = m.rotation();
 			return t;
 		}
 

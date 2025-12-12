@@ -165,6 +165,7 @@ public:
             //grid->initiallize();
             gridShape2d = grid;
             gridShape2d->setShaderManger(shaderManger);
+            gridShape2d->setVisible(false);
 		}
 	}
 

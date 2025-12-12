@@ -52,6 +52,8 @@ public:
 
     virtual void initResource();
 
+	virtual void initiallize();
+
 	int64_t getID() const;
 
 	void bindSSBO();
@@ -120,15 +122,15 @@ private:
 	std::unique_ptr<Internal> d;
  protected:
 	//GPU端对象
-	std::shared_ptr<XOpenGLVertexArrayObject> m_vao;					//VAO
-	std::shared_ptr<XOpenGLBuffer> m_vbo_coord;							//顶点坐标，必须有
-	std::shared_ptr<XOpenGLBuffer> m_vbo_normal;						//法线
-	std::shared_ptr<XOpenGLBuffer> m_vbo_color;							//颜色
-	std::shared_ptr<XOpenGLBuffer> m_ssbo_color;							//每个片元的颜色
-	std::shared_ptr<XOpenGLBuffer> m_ebo;										//EBO
+	sptr<XOpenGLVertexArrayObject> m_vao;					//VAO
+	sptr<XOpenGLBuffer> m_vbo_coord;							//顶点坐标，必须有
+	sptr<XOpenGLBuffer> m_vbo_normal;						//法线
+	sptr<XOpenGLBuffer> m_vbo_color;							//颜色
+	sptr<XOpenGLBuffer> m_ssbo_color;							//每个片元的颜色
+	sptr<XOpenGLBuffer> m_ebo;										//EBO
 	
 	//CPU端数据
-	std::shared_ptr<XShapeSource> m_Input;;
+	sptr<XShapeSource> m_Input;;
 
 	//着色器相关设置
 	ColorMode m_colorMode = ColorMode::FaceColor;
@@ -141,5 +143,5 @@ private:
 	//同步CPU和GPU端数据的时间戳
 	XTimeStamp m_UpdateTime;
 	bool m_visible = true;
-	std::shared_ptr<xShaderManger> m_shaderManger;
+	sptr<xShaderManger> m_shaderManger;
 };

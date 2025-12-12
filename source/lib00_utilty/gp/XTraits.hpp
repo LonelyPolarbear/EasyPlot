@@ -31,6 +31,16 @@ namespace XTraits {
 		template<typename T>
 		operator T() const { return T{}; }
 	};
+
+	// 自定义 constexpr max 函数
+	constexpr int max_value(int a, int b) {
+		return a > b ? a : b;
+	}
+
+	template<typename... Args>
+	constexpr int max_value(int a, int b, Args... args) {
+		return max_value(a, max_value(b, args...));
+	}
 }
 
 #define DEFINE_ARGS(n) DEFINE_ARGS_##n
@@ -114,7 +124,7 @@ constexpr int funName##_parameterNum_##n = has_##funName##_##n##_args_v<T> ? n:0
 #define DEFINE_HAS_MEMBER_N_ARGS_9(funName) DEFINE_HAS_TEST_N_ARGS(funName,9) DEFINE_HAS_MEMBER_N_ARGS_8(funName)
 #define DEFINE_HAS_MEMBER_N_ARGS_10(funName) DEFINE_HAS_TEST_N_ARGS(funName,10) DEFINE_HAS_MEMBER_N_ARGS_9(funName)
 
-#define DEFINE_FUN_ANY_ARGS(n,funName,ClassName) DEFINE_FUN_ANY_ARGS_##n(funName,ClassName)
+#define DEFINE_FUN_ANY_ARGS(n,funName,ClassName)  DEFINE_FUN_ANY_ARGS_##n(funName,ClassName)
 #define DEFINE_FUN_ANY_ARGS_0(funName,ClassName) has_##funName##_0_args_v<ClassName>
 #define DEFINE_FUN_ANY_ARGS_1(funName,ClassName) DEFINE_FUN_ANY_ARGS_0(funName,ClassName) || has_##funName##_1_args_v<ClassName>
 #define DEFINE_FUN_ANY_ARGS_2(funName,ClassName) DEFINE_FUN_ANY_ARGS_1(funName,ClassName) ||   has_##funName##_2_args_v<ClassName>
@@ -140,18 +150,31 @@ constexpr int funName##_parameterNum_##n = has_##funName##_##n##_args_v<T> ? n:0
 #define DEFINE_FUN_ARGUMENT_NUM_ARGS_9(funName,ClassName) DEFINE_FUN_ARGUMENT_NUM_ARGS_8(funName,ClassName) +funName##_parameterNum_9<ClassName>
 #define DEFINE_FUN_ARGUMENT_NUM_ARGS_10(funName,ClassName) DEFINE_FUN_ARGUMENT_NUM_ARGS_9(funName,ClassName) +funName##_parameterNum_10<ClassName>
 
-#define DEFINE_FUN_MAX_NUM_ARGS(n,funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_##n(funName,ClassName)
-#define DEFINE_FUN_MAX_NUM_ARGS_0(funName,ClassName) std::max( funName##_parameterNum_0<ClassName>,0)
-#define DEFINE_FUN_MAX_NUM_ARGS_1(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_0(funName,ClassName),funName##_parameterNum_1<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_2(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_1(funName,ClassName) ,funName##_parameterNum_2<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_3(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_2(funName,ClassName) ,funName##_parameterNum_3<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_4(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_3(funName,ClassName) ,funName##_parameterNum_4<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_5(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_4(funName,ClassName) ,funName##_parameterNum_5<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_6(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_5(funName,ClassName) ,funName##_parameterNum_6<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_7(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_6(funName,ClassName) ,funName##_parameterNum_7<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_8(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_7(funName,ClassName) ,funName##_parameterNum_8<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_9(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_8(funName,ClassName) ,funName##_parameterNum_9<ClassName>)
-#define DEFINE_FUN_MAX_NUM_ARGS_10(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_9(funName,ClassName) ,funName##_parameterNum_10<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS(n,funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_##n(funName,ClassName)
+//#define DEFINE_FUN_MAX_NUM_ARGS_0(funName,ClassName) std::max( funName##_parameterNum_0<ClassName>,0)
+//#define DEFINE_FUN_MAX_NUM_ARGS_1(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_0(funName,ClassName),funName##_parameterNum_1<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_2(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_1(funName,ClassName) ,funName##_parameterNum_2<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_3(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_2(funName,ClassName) ,funName##_parameterNum_3<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_4(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_3(funName,ClassName) ,funName##_parameterNum_4<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_5(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_4(funName,ClassName) ,funName##_parameterNum_5<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_6(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_5(funName,ClassName) ,funName##_parameterNum_6<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_7(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_6(funName,ClassName) ,funName##_parameterNum_7<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_8(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_7(funName,ClassName) ,funName##_parameterNum_8<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_9(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_8(funName,ClassName) ,funName##_parameterNum_9<ClassName>)
+//#define DEFINE_FUN_MAX_NUM_ARGS_10(funName,ClassName) std::max(DEFINE_FUN_MAX_NUM_ARGS_9(funName,ClassName) ,funName##_parameterNum_10<ClassName>)
+
+#define DEFINE_FUN_MAX_NUM_ARGS(n,funName,ClassName) XTraits::max_value(DEFINE_FUN_MAX_NUM_ARGS_##n(funName,ClassName))
+#define DEFINE_FUN_MAX_NUM_ARGS_0(funName,ClassName) funName##_parameterNum_0<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_1(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_0(funName,ClassName),funName##_parameterNum_1<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_2(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_1(funName,ClassName) ,funName##_parameterNum_2<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_3(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_2(funName,ClassName) ,funName##_parameterNum_3<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_4(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_3(funName,ClassName) ,funName##_parameterNum_4<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_5(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_4(funName,ClassName) ,funName##_parameterNum_5<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_6(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_5(funName,ClassName) ,funName##_parameterNum_6<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_7(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_6(funName,ClassName) ,funName##_parameterNum_7<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_8(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_7(funName,ClassName) ,funName##_parameterNum_8<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_9(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_8(funName,ClassName) ,funName##_parameterNum_9<ClassName>
+#define DEFINE_FUN_MAX_NUM_ARGS_10(funName,ClassName) DEFINE_FUN_MAX_NUM_ARGS_9(funName,ClassName) ,funName##_parameterNum_10<ClassName>
 
 //////////////////////////////////////////////////////////////////////////
 //获取某个成员函数的重载版本的参数总和数量

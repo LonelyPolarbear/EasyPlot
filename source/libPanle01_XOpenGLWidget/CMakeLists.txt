@@ -73,6 +73,8 @@ SET(LIB_NAMES
 				opengl32
 				xopengl${DLL_DEBUG_POSTFIX}
 				myUtilty${DLL_DEBUG_POSTFIX}
+				dataBase${DLL_DEBUG_POSTFIX}
+
 	)
 
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin
