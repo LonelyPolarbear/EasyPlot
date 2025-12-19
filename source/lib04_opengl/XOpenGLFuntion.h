@@ -24,7 +24,7 @@ public:
 
 	static void xglGetBindDataBufferId(XOpenGL::DataBufferBindingType bufferType, int& bufferId);
 
-	static void xglPixelStorei(XOpenGL::PixelStoreParameter pname, int param);
+	static int xglPixelStorei(XOpenGL::PixelStoreParameter pname, int param);
 
 	static void xglReadPixels(int startx,int starty, int width, int height, XOpenGL::TextureExternalFormat format, XOpenGL::DataType type, void *data);
 
@@ -108,4 +108,8 @@ public:
 	/// 设置当前绑定的FBO的模板缓冲清除值[0-255]
 	/// </summary>
 	static void xglClearStencil(int s);
+
+	static std::vector<std::string> xglGetExtensions();
+
+	static bool xisExtensionSupported(const std::string& extensionName);
 };

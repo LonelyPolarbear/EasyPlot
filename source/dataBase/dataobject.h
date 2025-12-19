@@ -104,4 +104,9 @@ public:
 	}
 
 	virtual void Init();
+
+	template<typename T>
+	sptr<T> asDerived() {
+		return std::dynamic_pointer_cast<T>(this->shared_from_this());
+	}
 };

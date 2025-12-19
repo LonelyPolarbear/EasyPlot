@@ -120,7 +120,7 @@ void xfreetype::generateFontTextures(const QString&dir, bool flip,bool inverse)
     for (int i = 0; i < pictureNum; i++) {
 		auto data = makeShareDbObject<XUCharArray2D>();
 		data->setComponent(1);
-		data->setDimensions(textureHeight, textureWidth);
+		data->setDimensions(textureWidth,textureHeight);
         FontTextures.push_back(data);
     }
 
@@ -223,7 +223,7 @@ void xfreetype::generateFontSdf(const QString& dir, bool flip, bool inverse)
 	for (int i = 0; i < pictureNum; i++) {
 		auto data = makeShareDbObject<XUCharArray2D>();
 		data->setComponent(1);
-		data->setDimensions(textureHeight, textureWidth);
+		data->setDimensions(textureWidth,textureHeight);
 		FontTextures.push_back(data);
 	}
 

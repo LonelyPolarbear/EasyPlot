@@ -6,11 +6,16 @@
 
 class LIB04_OPENGL_API XOpenGLFramebufferObject :DataBaseObject {
 public:
-
+	/*enum AttachmentDSMode {
+		DepthStencil,
+		Depth,
+		DepthAndStencil,
+	};*/
 	enum Attachment {
 		CombinedDepthStencil, 
-		Depth,
-		Color
+		Depth,				//深度附件
+		Color,				//颜色附件
+		stencil,				//模板附件
 	};
 	enum
 		FramebufferRestorePolicy {
@@ -37,13 +42,14 @@ public:
 	std::shared_ptr<XOpenGLTexture>getColorAttachment(int index = 0) const;
 	std::shared_ptr<XOpenGLTexture>getDepthAttachment() const;
 
-
 	void addAttachment(Attachment attachment, 
 				XOpenGLTexture::TextureFormat internalFormat, 
 				XOpenGLTexture::PixelFormat inputdataPixelFormat, 
 				XOpenGLTexture::PixelType inputdataPixelType,
 				int index =0
 				);
+
+	void addAttachment(Attachment attachment,sptr<XOpenGLTexture> texture,int index = 0);
 
 	void addAttachmentMSAA(Attachment attachment,
 		XOpenGLTexture::TextureFormat internalFormat,

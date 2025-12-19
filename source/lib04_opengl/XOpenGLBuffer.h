@@ -1,6 +1,7 @@
 #pragma once
 #include "XOpenglApi.h"
 #include <dataBase/dataobject.h>
+#include <dataBase/XDataArray.h>
 #include "XOpenGLType.h"
 
 enum class LIB04_OPENGL_API XOpenGLValueType {
@@ -101,6 +102,8 @@ public:
 	uint32_t bufferSize() const;
 
 	void* map(XOpenGLBuffer::Access access);
+
+	sptr<XUCharArray> map2cpu();
 
 	bool unmap();
 

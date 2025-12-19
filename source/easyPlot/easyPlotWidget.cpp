@@ -1255,8 +1255,337 @@ void easyPlotWidget::slotAxis2D()
 	doneCurrent();
 }
 
+unsigned int combine(float depth, unsigned char stencial) {
+	auto maxUint = std::numeric_limits<unsigned int>::max();
+	maxUint = maxUint >>8;
+	unsigned int udepth = maxUint * depth;
+	udepth = udepth << 8;
+	auto ret = udepth  + stencial;
+	return ret;
+}
+
 void easyPlotWidget::slotFboTest()
 {
+	{
+		makeCurrent();
+#if 0
+		auto strs =XOpenGLFuntion::xglGetExtensions();
+		bool isSupport = XOpenGLFuntion::xisExtensionSupported("GL_ARB_get_texture_sub_image");
+		
+		int rowNUm = 10;
+		int colNum = 20;
+		auto cpuData = makeShareDbObject<XUCharArray2D>();
+		cpuData->setComponent(1);
+		cpuData->setDimensions(colNum, rowNUm);
+
+		std::cout<<"[1]\n从CPU读取数据到纹理\n";
+		{
+			for (int row = 0; row < rowNUm; row++) {
+				for (int col = 0; col < colNum; col++) {
+					*cpuData->data(row, col) = row * colNum + col;
+				}
+			}
+
+			std::cout << "cpuData\n";
+			cpuData->dump(true);
+		}
+
+		auto oldUnpackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_alignment, 1);
+		auto oldUnpackRowlegth = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_row_length, 10);
+		auto oldUnpackSkipRows = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_skip_rows, 1);
+		auto oldUnpackSkipPixels = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_skip_pixels, 1);
+
+		int textureWidth = 5;
+		int textureHeight = 4;
+		auto texture = makeShareDbObject<XOpenGLTexture>();
+		texture->setTarget(XOpenGLTexture::Target2D);
+		texture->setInternalFormat(XOpenGLTexture::TextureFormat::R8_UNorm);
+		texture->create();
+		texture->bind(); 
+
+		texture->setData(textureWidth, textureHeight,0,XOpenGLTexture::PixelFormat::Red, XOpenGLTexture::PixelType::UInt8, cpuData->data(0,0));
+
+		//恢复配置
+		oldUnpackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_alignment, oldUnpackAlignment);
+		oldUnpackRowlegth = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_row_length, oldUnpackRowlegth);
+		oldUnpackSkipRows = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_skip_rows, oldUnpackSkipRows);
+		oldUnpackSkipPixels = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_skip_pixels, oldUnpackSkipPixels);
+
+		{
+			auto oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, 1);
+
+			auto pbo = texture->map();
+			auto* map_data = (unsigned char*)pbo->map(XOpenGLBuffer::ReadOnly);
+			auto cpuData = makeShareDbObject<XUCharArray2D>();
+			cpuData->setComponent(1);
+			cpuData->setDimensions(textureWidth,textureHeight);
+			cpuData->setData(0, 0, textureWidth, textureHeight, map_data);
+			std::cout << "GPU2CPU\n";
+			cpuData->dump(true);
+			pbo->unmap();
+
+			oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, oldPackAlignment);
+		}
+
+		std::cout << "[2]\n从纹理读取数据到CPU\n";
+		{
+			auto cpuData = makeShareDbObject<XUCharArray2D>();
+			cpuData->setComponent(1);
+			cpuData->setDimensions(10, 10);
+			std::cout<<"原始CPU分配足够的空白内存\n";
+			cpuData->dump(true);
+
+			oldUnpackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, 1);
+			oldUnpackRowlegth = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_row_length, 10);
+			oldUnpackSkipRows = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_rows, 3);
+			oldUnpackSkipPixels = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, 3);
+
+			auto pbo = texture->map(10,10,3,3);
+			auto tmp = pbo->map2cpu();
+			cpuData->setData(0, 0, 10, 10, tmp->data(0));
+			std::cout << "GPU2CPU\n";
+			cpuData->dump(true);
+	
+		}
+
+		std::cout << "[3]\n读取纹理子区域数据到CPU\n";
+		{
+			auto cpuData = makeShareDbObject<XUCharArray2D>();
+			cpuData->setComponent(1);
+			cpuData->setDimensions(10, 10);
+			std::cout << "原始CPU分配足够的空白内存\n";
+			cpuData->dump(true);
+
+			auto fbo = makeShareDbObject<XOpenGLFramebufferObject>();
+			fbo->create();
+			fbo->bind();
+			fbo->setWidth(10);
+			fbo->setHeight(10);
+			fbo->addAttachment(XOpenGLFramebufferObject::Color,texture);
+			bool flag =fbo->isComplete();
+			if (flag) {
+				auto s1 = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, 1);
+				auto s2 = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_row_length, 10);
+				auto s3 = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_rows, 3);
+				auto s4 = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, 3);
+
+				XOpenGLFuntion::xglReadPixels(1,1,3,2,XOpenGL::TextureExternalFormat::Red,XOpenGL::DataType::unsigned_byte, cpuData->data(0,0));
+
+				std::cout << "xglReadPixels\n";
+				cpuData->dump(true);
+
+				XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, s1);
+				XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_row_length, s2);
+				XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_rows, s3);
+				XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, s4);
+			}
+
+			fbo->release(XOpenGL::FrameBufferType::framebuffer);
+		}
+		#endif
+		std::cout << "[1]\nXDataArray3D测试\n";
+		{
+			int rowNUm = 4;
+			int colNum = 5;
+			auto cpuData = makeShareDbObject<XUIntArray2D>();
+			cpuData->setComponent(1);
+			cpuData->setDimensions(colNum, rowNUm);
+
+			std::cout << "[1]\n从CPU读取数据到纹理\n";
+			{
+				*cpuData->data(0, 0) = 0x12345601;
+				*cpuData->data(0, 1) = 0x23456702;
+
+				/*for (int row = 0; row < rowNUm; row++) {
+					for (int col = 0; col < colNum; col++) {
+						*cpuData->data(row, col) = row * colNum + col;
+					}
+				}*/
+
+				std::cout << "cpuData\n";
+				cpuData->dump(true);
+			}
+
+			auto array3D =makeShareDbObject<XUCharArray3D>();
+			array3D->setComponent(1);
+			int w =20;		//每一行5个颜色数据
+			int h = rowNUm;
+			int z =2;
+			array3D->setDimensions(w,h,z);
+			array3D->memCopy(0,cpuData);
+			array3D->forEach(1, [](unsigned char* data) {
+				*data+=0x123456;
+				});
+			array3D->dump(true);
+
+			auto textureArry2d =makeShareDbObject<XOpenGLTexture>();
+			textureArry2d->setTarget(XOpenGLTexture::Target2DArray);
+			textureArry2d->setInternalFormat(XOpenGLTexture::RGBA8_UNorm);
+			textureArry2d->create();
+			textureArry2d->bind();
+
+			auto oldUnpackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_alignment, 1);
+			textureArry2d->setData(w,h,0,XOpenGLTexture::PixelFormat::RGBA,XOpenGLTexture::PixelType::UInt8,{ array3D->data(0),array3D->data(1) });
+			oldUnpackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_alignment, oldUnpackAlignment);
+
+			
+			std::cout<<"回读二维数组纹理\n";
+			auto pbo =textureArry2d->map(1);
+			auto array1d = pbo->map2cpu();
+			{
+				auto array3D = makeShareDbObject<XUCharArray3D>();
+				array3D->setComponent(1);
+				array3D->setDimensions(w, h, z);
+				array3D->memCopy(array1d);
+				array3D->dump();
+			}
+
+		}
+
+		std::cout << "[2]\n深度模板附件测试\n";
+		{
+			XQ::print("深度附件测试...");
+			{
+				//5*4的二维纹理数组
+				auto row = 4;
+				auto col = 5;
+				auto cpuDepthData = makeShareDbObject<XFloatArray2D>();
+				cpuDepthData->setComponent(1);
+				cpuDepthData->setDimensions(5, 4);
+				std::vector<std::vector<float>> depth{
+					{0.1,0.2,0.3,0.4,1.0},
+					{0.5,0.6,0.7,0.8,1.0},
+					{0.8,0.9,0.8,0.6,1,.0},
+					{0.5,0.4,0.3,0.2,1.0},
+				};
+				for (int r = 0; r < row; r++) {
+					for (int c = 0; c < col; c++) {
+						cpuDepthData->setData(c, r, depth[r][c]);
+					}
+				}
+
+				XQ::print("cpu端预设深度");
+				cpuDepthData->dump();
+
+				XQ::print("创建深度纹理");
+				auto depthTexture = makeShareDbObject< XOpenGLTexture>();
+				depthTexture->setInternalFormat(XOpenGLTexture::D32);
+				depthTexture->setTarget(XOpenGLTexture::Target2D);
+				depthTexture->create();
+				depthTexture->bind();
+
+				depthTexture->setData(col, row, 0, XOpenGLTexture::PixelFormat::Depth, XOpenGLTexture::PixelType::Float32, cpuDepthData->data());
+
+				XQ::print("读取深度纹理");
+				auto pbo = depthTexture->map(1);
+				auto pbo2cpuData = pbo->map2cpu();
+
+				auto gpuDepthData = makeShareDbObject<XFloatArray2D>();
+				gpuDepthData->setComponent(1);
+				gpuDepthData->setDimensions(5, 4);
+				gpuDepthData->memCopy(pbo2cpuData);
+				gpuDepthData->dump();
+				depthTexture->release();
+			}
+		
+			XQ::print("模板附件测试...");
+			{
+				//5*4的二维纹理数组
+				auto row = 4;
+				auto col = 5;
+				auto cpuStencilData = makeShareDbObject<XUCharArray2D>();
+				cpuStencilData->setComponent(1);
+				cpuStencilData->setDimensions(5, 4);
+				std::vector<std::vector<unsigned char>> depth{
+					{1,2,3,4,5},
+					{6,7,8,9,10},
+					{11,12,13,14,15},
+					{16,17,18,19,20},
+				};
+				for (int r = 0; r < row; r++) {
+					for (int c = 0; c < col; c++) {
+						cpuStencilData->setData(c, r, depth[r][c]);
+					}
+				}
+
+				XQ::print("cpu端预设模板");
+				cpuStencilData->dump();
+
+				XQ::print("创建模板纹理");
+				auto depthTexture = makeShareDbObject< XOpenGLTexture>();
+				depthTexture->setInternalFormat(XOpenGLTexture::TextureFormat::S8);
+				depthTexture->setTarget(XOpenGLTexture::Target2D);
+				depthTexture->create();
+				depthTexture->bind();
+
+				depthTexture->setData(col, row, 0, XOpenGLTexture::PixelFormat::Stencil, XOpenGLTexture::PixelType::UInt8, cpuStencilData->data());
+
+				XQ::print("读取模板纹理");
+				auto pbo = depthTexture->map(1);
+				auto pbo2cpuData = pbo->map2cpu();
+
+				auto gpuDepthData = makeShareDbObject<XUCharArray2D>();
+				gpuDepthData->setComponent(1);
+				gpuDepthData->setDimensions(5, 4);
+				gpuDepthData->memCopy(pbo2cpuData);
+				gpuDepthData->dump();
+				depthTexture->release();
+			}
+
+			XQ::print("深度模板附件测试...");
+			{
+				auto row = 4;
+				auto col = 5;
+				auto cpuDepthData = makeShareDbObject<XUIntArray2D>();
+				cpuDepthData->setComponent(1);
+				cpuDepthData->setDimensions(5, 4);
+				std::vector<std::vector<unsigned int>> depth{
+					{combine(0.1,1),combine(0.2,2),combine(0.3,3),combine(0.4,4),combine(0.5,5)},
+					{combine(0.6,6),combine(0.7,7),combine(0.8,8),combine(0.9,9),combine(0.8,10)},
+					{combine(0.1,1),combine(0.2,2),combine(0.3,3),combine(0.4,4),combine(0.5,5)},
+					{combine(0.1,1),combine(0.2,2),combine(0.3,3),combine(0.4,4),combine(0.5,5)},
+					
+				};
+				for (int r = 0; r < row; r++) {
+					for (int c = 0; c < col; c++) {
+						cpuDepthData->setData(c, r, depth[r][c]);
+					}
+				}
+				XQ::print("cpu端预设深度模板");
+				std::cout << std::hex;
+				cpuDepthData->dump();
+				std::cout << std::dec;
+
+				XQ::print("创建深度模板纹理");
+				auto depthTexture = makeShareDbObject< XOpenGLTexture>();
+				depthTexture->setInternalFormat(XOpenGLTexture::D24S8);
+				depthTexture->setTarget(XOpenGLTexture::Target2D);
+				depthTexture->create();
+				depthTexture->bind();
+
+				depthTexture->setData(col, row, 0, XOpenGLTexture::PixelFormat::DepthStencil, XOpenGLTexture::PixelType::UInt32_D24S8, cpuDepthData->data());
+
+				XQ::print("读取深度模板纹理");
+				auto pbo = depthTexture->map(1);
+				auto pbo2cpuData = pbo->map2cpu();
+
+				auto gpuDepthData = makeShareDbObject<XUIntArray2D>();
+				gpuDepthData->setComponent(1);
+				gpuDepthData->setDimensions(5, 4);
+				gpuDepthData->memCopy(pbo2cpuData);
+				std::cout<<std::hex;
+				gpuDepthData->dump();
+				std::cout << std::dec;
+				depthTexture->release();
+
+			}
+		}
+		doneCurrent();
+		return;
+	}
+
+
+	#if 0
 	static FboTest* dlg = nullptr;
 	if (dlg == nullptr) {
 
@@ -1280,6 +1609,7 @@ void easyPlotWidget::slotFboTest()
 
 	dlg->raise();
 	dlg->show();
+	#endif
 }
 
 void easyPlotWidget::slotComputeShaderTest()

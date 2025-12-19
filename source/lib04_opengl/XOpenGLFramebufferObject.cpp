@@ -6,7 +6,7 @@
 class XOpenGLFramebufferObject::Internal {
 public:
 	GLuint FBO{0};
-	std::shared_ptr< XOpenGLTexture> depthStencilTexture{nullptr};
+	std::shared_ptr< XOpenGLTexture> depthStencilTexture{nullptr};					//
 	std::map<uint32_t, std::shared_ptr< XOpenGLTexture>> colorTextures;		//多个颜色附件
 	Attachment depthStencilAttachment{Attachment::Depth};								//深度附件或深度-模板附件
 	int width{10};      //纹理宽度
@@ -150,6 +150,24 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		
 		d->depthStencilTexture->setData(d->width, d->height, 0/*, internalFormat*/, inputdataPixelFormat, inputdataPixelType, nullptr);
 
+		if (attachment == Attachment::Depth) {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
+		}
+		else {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
+		}
+	}
+}
+
+void XOpenGLFramebufferObject::addAttachment(Attachment attachment, sptr<XOpenGLTexture> texture, int index)
+{
+	if (attachment == Attachment::Color) {
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture->getTarget(), texture->getId(), 0);
+		d->colorTextures[index] = texture;
+	}
+	else {
+		d->depthStencilAttachment = attachment;
+		d->depthStencilTexture = texture;
 		if (attachment == Attachment::Depth) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
 		}

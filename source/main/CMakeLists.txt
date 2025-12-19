@@ -83,6 +83,7 @@ SET(LIB_NAMES
 				#MultiPolygonModeCube${DLL_DEBUG_POSTFIX}
 				xeasyplot${DLL_DEBUG_POSTFIX}
 				xpanel${DLL_DEBUG_POSTFIX}
+				dataBase${DLL_DEBUG_POSTFIX}
 				
 	)
 

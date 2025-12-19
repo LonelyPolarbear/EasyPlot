@@ -40,10 +40,14 @@ void XOpenGLFuntion::xglGetBindDataBufferId(XOpenGL::DataBufferBindingType buffe
 	checkGLError();
 }
 
-void XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter pname, int param)
+int XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter pname, int param)
 {
+	int oldConfig = 0;
+	glGetIntegerv((unsigned int)pname, &oldConfig);
+
 	glPixelStorei( (unsigned int)(pname), param);
 	checkGLError();
+	return oldConfig;
 }
 
 void XOpenGLFuntion::xglReadPixels(int startx, int starty, int width, int height, XOpenGL::TextureExternalFormat format, XOpenGL::DataType type, void* data)
@@ -199,6 +203,36 @@ void XOpenGLFuntion::xglClearStencil(int s)
 {
 	glClearStencil(s);
 	checkGLError();
+}
+
+std::vector<std::string> XOpenGLFuntion::xglGetExtensions()
+{
+	std::vector<std::string> names;
+	// 获取扩展数量
+	GLint numExtensions = 0;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+
+	// 遍历扩展列表
+	for (int i = 0; i < numExtensions; ++i) {
+		const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);
+		names.push_back(std::string(extension));
+	}
+	return names;
+}
+
+bool XOpenGLFuntion::xisExtensionSupported(const std::string& extensionName)
+{
+	GLint numExtensions = 0;
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+
+	// 遍历所有扩展
+	for (GLint i = 0; i < numExtensions; i++) {
+		const char* ext = (const char*)glGetStringi(GL_EXTENSIONS, i);
+		if (extensionName == std::string(ext)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /*

@@ -157,6 +157,18 @@ namespace XQ {
 
 		template<typename U>
 		friend Vector<N, T> operator*(const Vector<N, T>& c, U scalar);
+
+		friend std::ostream& operator<<(std::ostream& os, const Vector<N, T> & obj) {
+			os<<"(";
+			for (int i = 0; i < N; i++) {
+				if(i==0){
+					os << obj.data[i];
+				}else
+					os <<"," << obj.data[i];
+			}
+			os << ")";
+			return os;
+		}
 	};
 
 	template<unsigned int N, typename T, typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
@@ -552,7 +564,7 @@ namespace XQ {
 	}
 
 	template<typename ... Args>
-	std::ostream& print(Args&& ... args) {
+	void print(Args&& ... args) {
 		//折叠表达式，展开参数
 		//一元左折叠
 		//(pack op ...)  -> (((pack1 op pack2) op pack3) op ...)
@@ -564,7 +576,7 @@ namespace XQ {
 		osm << std::endl;*/
 
 		auto all_args = std::forward_as_tuple(std::forward<Args>(args)... );
-		printTuple(all_args, true);
+		//printTuple(all_args, true);
 		printTuple(all_args, false);
 
 		//osm<<std::get<0>(std::forward<decltype(all_args)>(all_args));
@@ -586,7 +598,7 @@ namespace XQ {
 		(... , (osm<<"**" << std::forward<Args>(args)));*/
 		
 		//二元折叠
-		return osm;
+		//return osm;
 	}
 }
 

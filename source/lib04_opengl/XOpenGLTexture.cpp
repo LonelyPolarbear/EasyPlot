@@ -10,7 +10,7 @@ public:
 	Target target{Target::Target2D};
 	int width{0};
 	int height{0};
-	int layer{0};
+	int layer{1};
 	int samples{0};
 	XOpenGLTexture::TextureFormat internalFormat;
 	XOpenGLTexture::PixelFormat dataFormat;				//对于MSAA，该值不起作用
@@ -53,6 +53,7 @@ bool XOpenGLTexture::create()
 	if (d->textureId != 0)
 		return true;
 	glGenTextures(1, &d->textureId);
+	XOpenGLFuntion::checkGLError();
 	return d->textureId != 0;
 }
 
@@ -67,6 +68,7 @@ void XOpenGLTexture::destroy()
 void XOpenGLTexture::bind()
 {
 	glBindTexture(d->target, d->textureId);
+	XOpenGLFuntion::checkGLError();
 }
 
 void XOpenGLTexture::bindUnit(unsigned int unit)
@@ -95,6 +97,7 @@ void XOpenGLTexture::bindUnit(unsigned int unit)
 void XOpenGLTexture::release()
 {
 	glBindTexture(d->target, 0);
+	XOpenGLFuntion::checkGLError();
 }
 
 void XOpenGLTexture::releaseUnit(unsigned int unit)
@@ -139,7 +142,6 @@ void XOpenGLTexture::setData(
 													int width, 
 													int height, 
 													int level, 
-													/*XOpenGLTexture::TextureFormat internalFormat,*/
 													XOpenGLTexture::PixelFormat dataFormat, 
 													XOpenGLTexture::PixelType datatype,
 													const void* data)
@@ -149,6 +151,7 @@ void XOpenGLTexture::setData(
 	d->dataFormat = dataFormat;
 	d->datatype = datatype;
 	glTexImage2D(d->target, level/*mimmap层级*/, d->internalFormat, width, height, 0/*历史遗留问题*/,dataFormat , datatype, data);
+	XOpenGLFuntion::checkGLError();
 }
 
 void XOpenGLTexture::setMultiSample(int width, int height, int sampleNum, XOpenGLTexture::PixelFormat dataFormat, XOpenGLTexture::PixelType type)
@@ -182,11 +185,8 @@ void XOpenGLTexture::setData(
 	d->layer = datas.size();
 
 	glTexImage3D(d->target, level, d->internalFormat, width, height, datas.size(), 0, dataFormat, type, nullptr);
-	GLenum error = glGetError();
-	if (error != GL_NO_ERROR) {
-		int dddd = 10;
-	}
-
+	XOpenGLFuntion::checkGLError();
+	//glTextureSubImage2D
 	for (int lay = 0; lay < datas.size(); ++lay) {
 		glTexSubImage3D(d->target,
 			level,
@@ -195,10 +195,7 @@ void XOpenGLTexture::setData(
 			dataFormat,
 			type,
 			datas[lay]);
-		GLenum error = glGetError();
-		if (error != GL_NO_ERROR) {
-			int dddd = 10;
-		}
+		XOpenGLFuntion::checkGLError();
 	}
 	;
 }
@@ -235,43 +232,122 @@ XOpenGLTexture::PixelType XOpenGLTexture::getInputDataPixelType() const
 	return d->datatype;
 }
 
-sptr<XOpenGLBuffer> XOpenGLTexture::map()
+sptr<XOpenGLBuffer> XOpenGLTexture::map(int alignment)
 {
+	//设值对齐
+	//获取每行的实际宽度
+	auto originRowlen = d->width* getInternalFormatSize(d->internalFormat);
+	auto aligmentLen = alignment ==0 ? originRowlen : ((originRowlen + alignment - 1) / alignment)* alignment;
+
+	auto oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, alignment);
+
 	auto pbo = makeShareDbObject<XOpenGLBuffer>();
 	pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
 	pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
 	pbo->create();
 	pbo->bind();
-	pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-	pbo->bind();
+
+	auto expactedSize =  d->height *d->layer* aligmentLen;
 	auto pboSize = pbo->bufferSize();
 
-	if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
-		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+	if (pboSize != expactedSize) {
+		pbo->allocate(expactedSize);
 	}
 
 	bind();
-	glGetTexImage(
-		d->target,							// 纹理目标
-		0,											// mipmap级别
-		d->dataFormat,					// 格式（必须匹配纹理的内部格式）
-		d->datatype,						// 类型（必须匹配纹理的数据类型）
-		0											// 偏移量（使用PBO时设为0）
-	);
+	if (getTarget() == Target2DArray) {
+		//是在 OpenGL 4.5 中引入的
+		glGetTextureSubImage(getId(),0,
+		0,0,0,
+		d->width,d->height,d->layer,
+		d->dataFormat,
+		d->datatype,
+		expactedSize,
+		0);
+	}
+	else {
+		glGetTexImage(
+			d->target,							// 纹理目标
+			0,											// mipmap级别
+			d->dataFormat,					// 格式（必须匹配纹理的内部格式）
+			d->datatype,						// 类型（必须匹配纹理的数据类型）
+			0											// 偏移量（使用PBO时设为0）
+		);
+	}
+
+	
+	XOpenGLFuntion::checkGLError();
 
 	release();
+	oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, oldPackAlignment);
+	return pbo;
+}
+
+sptr<XOpenGLBuffer> XOpenGLTexture::map(int pboWidth, int pboHeight, int x, int y)
+{
+	auto alignment =1;
+	auto oldPackRowLength = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_row_length, pboWidth);
+	auto oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, alignment);
+	auto oldPackSkipRows = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_rows, y);
+	auto oldPackSkipPixel = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, x);
+
+	auto originRowlen = d->width * getInternalFormatSize(d->internalFormat);
+	auto aligmentLen = alignment == 0 ? originRowlen : ((originRowlen + alignment - 1) / alignment) * alignment;
+
+	auto pbo = makeShareDbObject<XOpenGLBuffer>();
+	pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+	pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+	pbo->create();
+	pbo->bind();
+	
+	auto pboSize = pbo->bufferSize();
+
+	if (pboSize != pboHeight * aligmentLen) {
+		pbo->allocate(pboHeight * aligmentLen); // RGBA8格式
+	}
+
+	bind();
+	if (getTarget() == Target2DArray) {
+		auto expactedSize = d->height * d->layer * aligmentLen;
+		//是在 OpenGL 4.5 中引入的
+		glGetTextureSubImage(getId(), 0,
+			0, 0, 0,
+			d->width, d->height, d->layer,
+			d->dataFormat,
+			d->datatype,
+			expactedSize,
+			0);
+	}else{
+		glGetTexImage(
+			d->target,							// 纹理目标
+			0,											// mipmap级别
+			d->dataFormat,					// 格式（必须匹配纹理的内部格式）
+			d->datatype,						// 类型（必须匹配纹理的数据类型）
+			0											// 偏移量（使用PBO时设为0）
+		);
+	}
+
+	release();
+
+	 oldPackRowLength = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_row_length, oldPackRowLength);
+	 oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, oldPackAlignment);
+	 oldPackSkipRows = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_rows, oldPackSkipRows);
+	 oldPackSkipPixel = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, oldPackSkipPixel);
 	return pbo;
 }
 
 sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleColor(unsigned int fboId)
 {
+	auto alignment =1;
+	auto originRowlen = d->width * getInternalFormatSize(d->internalFormat);
+	auto aligmentLen = alignment == 0 ? originRowlen : ((originRowlen + alignment - 1) / alignment) * alignment;
+
 	auto pbo = makeShareDbObject<XOpenGLBuffer>();
 	pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
 	pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
 	pbo->create();
 	pbo->bind();
-	pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
-
+	//pbo->allocate(d->height * aligmentLen); // RGBA8格式
 
 	auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
 	resoveFbo->create();
@@ -293,8 +369,8 @@ sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleColor(unsigned int fboId)
 	pbo->bind();
 	auto pboSize = pbo->bufferSize();
 
-	if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
-		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+	if (pboSize !=  d->height * aligmentLen) {
+		pbo->allocate(d->height * aligmentLen); // RGBA8格式
 	}
 
 	texture->bind();
@@ -310,12 +386,17 @@ sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleColor(unsigned int fboId)
 
 sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleDepth(unsigned int fboId)
 {
+	auto alignment = 1;
+	auto originRowlen = d->width * getInternalFormatSize(d->internalFormat);
+	auto aligmentLen = alignment == 0 ? originRowlen : ((originRowlen + alignment - 1) / alignment) * alignment;
+
 	auto pbo = makeShareDbObject<XOpenGLBuffer>();
 	pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
 	pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
 	pbo->create();
 	pbo->bind();
-	pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+
+	//pbo->allocate(d->height * aligmentLen); // RGBA8格式
 
 	auto resoveFbo = makeShareDbObject<XOpenGLFramebufferObject>();
 	resoveFbo->create();
@@ -340,12 +421,11 @@ sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleDepth(unsigned int fboId)
 	//d->pbo->bind();
 	auto pboSize = pbo->bufferSize();
 
-	if (pboSize != d->width * d->height * getInternalFormatSize(d->internalFormat)) {
-		pbo->allocate(d->width * d->height * getInternalFormatSize(d->internalFormat)); // RGBA8格式
+	if (pboSize != d->height * aligmentLen) {
+		pbo->allocate(d->height * aligmentLen); // RGBA8格式
 	}
 
 	texture->bind();
-	std::vector<float> depthData(d->width * d->height, 1);
 	glGetTexImage(
 		texture->getTarget(),			// 纹理目标
 		0,											// mipmap级别
@@ -356,7 +436,6 @@ sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleDepth(unsigned int fboId)
 
 	return pbo;
 }
-
 
 unsigned int XOpenGLTexture::getInternalFormatSize(XOpenGLTexture::TextureFormat format)
 {

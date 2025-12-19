@@ -569,7 +569,7 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
         void *p = pbo->map(XOpenGLBuffer::Access::ReadOnly);
 		auto data = makeShareDbObject<XUCharArray2D>();
 		data->setComponent(4);
-		data->setDimensions(fboHeight, fboWidth);
+		data->setDimensions(fboWidth,fboHeight );
 		memcpy(data->data(0, 0), p, fboWidth*fboHeight * 4);
 		
 		texture->release();
@@ -594,7 +594,7 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
         void* p = pbo->map(XOpenGLBuffer::Access::ReadOnly);
 		auto data = makeShareDbObject<XUCharArray2D>();
 		data->setComponent(1);
-		data->setDimensions(fboHeight,fboWidth);
+		data->setDimensions(fboWidth, fboHeight);
 
         std::vector<float> depthData(fboWidth*fboHeight);
         for (int i = 0; i < fboHeight * fboWidth; i++) {
@@ -1267,7 +1267,7 @@ std::shared_ptr<XUCharArray2D> XScene::grabFramebuffer(
      height = std::min(height , getViewportHeight() - starty);
 
      //目标区域总大小
-    data->setDimensions(dest_height,dest_width);
+    data->setDimensions(dest_width,dest_height);
 
 	XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, dest_x);
 	XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_rows, dest_y);

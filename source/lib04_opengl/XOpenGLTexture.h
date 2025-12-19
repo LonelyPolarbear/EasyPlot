@@ -1,6 +1,7 @@
 #pragma once
 #include "XOpenglApi.h"
 #include <dataBase/dataobject.h>
+#include <dataBase/XDataArray.h>
 #include "XOpenGLType.h"
 
 class XOpenGLBuffer;
@@ -370,7 +371,10 @@ public:
 
 	XOpenGLTexture::PixelType getInputDataPixelType() const;
 
-	sptr<XOpenGLBuffer> map();
+	//2d纹理的数据映射
+	sptr<XOpenGLBuffer> map(int alignment = 1);
+
+	sptr<XOpenGLBuffer> map(int pboWidth,int pboHeight,int x,int y);
 
 	sptr<XOpenGLBuffer> mapMultiSampleColor(unsigned int fboId);
 

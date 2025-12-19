@@ -75,6 +75,21 @@ void* XOpenGLBuffer::map(XOpenGLBuffer::Access access)
 	return result;
 }
 
+sptr<XUCharArray> XOpenGLBuffer::map2cpu()
+{
+	auto totalSzie =bufferSize();
+	if(totalSzie ==0)
+		return nullptr;
+	auto ret = makeShareDbObject<XUCharArray>();
+	ret->setComponent(1);
+	ret->setNumOfTuple(totalSzie);
+	void *d = map(ReadOnly);
+	auto dest = ret->data(0);
+	memcpy(dest,d,totalSzie);
+	unmap();
+	return ret;
+}
+
 bool XOpenGLBuffer::unmap()
 {
 	bind();
