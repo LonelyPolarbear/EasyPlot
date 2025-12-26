@@ -14,6 +14,10 @@ class XDataArray : public DataBaseObject
 {
  protected:
     XDataArray():DataBaseObject(){}
+    XDataArray( int tupleNum,int componentNum=1) :DataBaseObject() {
+        setComponent(componentNum);
+        setNumOfTuple(tupleNum);
+    }
     ~XDataArray(){}
 public:
      T* data(int tupleIdx)  {
@@ -126,7 +130,17 @@ public:
 		return dest;
 	}
     #endif
+	template<typename ...Args>
+	void setRowData(Args&& ...args) {
+		setRowDataImpl(std::make_index_sequence<sizeof...(Args)>{}, std::forward_as_tuple(args...));
+	}
 
+private:
+	template<size_t...Is, typename Tuple>
+	void setRowDataImpl(std::index_sequence<Is...>, Tuple&& args) {
+		auto dest = data(0);
+		((dest[Is] = std::get<Is>(std::forward<Tuple>(args))), ...);
+	}
 private:
     std::vector<T>  d;
     unsigned int component =1;
@@ -156,6 +170,12 @@ class XDataArray2D : public DataBaseObject
     XDataArray2D() {
         mData = makeShareDbObject<XDataArray<T>>();
     }
+
+	XDataArray2D(int width, int height,int component=1 ) {
+		mData = makeShareDbObject<XDataArray<T>>();
+		setComponent(component);
+        setDimensions(width,height);
+	}
     ~XDataArray2D() {}
 public:
 	void setName(const std::string& n) {
@@ -223,6 +243,19 @@ public:
         auto src = inputData->data(0);
         memcpy(dest, src, copyBytenum);
     }
+
+    template<typename ...Args>
+    void setRowData(Args&& ...args) {
+        setRowDataImpl(std::make_index_sequence<sizeof...(Args)>{}, std::forward_as_tuple(args...));
+    }
+
+private:
+	template<size_t...Is, typename Tuple>
+	void setRowDataImpl(std::index_sequence<Is...>, Tuple&& args) {
+        auto dest = data(0, 0);
+		((dest[Is] = std::get<Is>(std::forward<Tuple>(args))), ...);
+	}
+ public:
 
     /// <summary>
     /// 克隆一个区域数据
@@ -372,6 +405,13 @@ private:
      XDataArray3D() {
 		 mData = makeShareDbObject<XDataArray<T>>();
 	 }
+
+	 XDataArray3D(int width,int height,int zlen,int component=1) {
+		 mData = makeShareDbObject<XDataArray<T>>();
+         setComponent(1);
+         setDimensions(width,height,zlen);
+	 }
+
 	 ~XDataArray3D() {}
 public:
 	void setName(const std::string& n) {
@@ -533,7 +573,17 @@ public:
 		return dest;
 	}
     #endif
+	template<typename ...Args>
+	void setRowData(Args&& ...args) {
+		setRowDataImpl(std::make_index_sequence<sizeof...(Args)>{}, std::forward_as_tuple(args...));
+	}
 
+private:
+	template<size_t...Is, typename Tuple>
+	void setRowDataImpl(std::index_sequence<Is...>, Tuple&& args) {
+		auto dest = data(0);
+		((dest[Is] = std::get<Is>(std::forward<Tuple>(args))), ...);
+	}
  private:
 	 std::shared_ptr<XDataArray<T>> mData;        //实际存储的数据
  private:

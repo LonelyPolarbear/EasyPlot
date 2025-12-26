@@ -16,9 +16,17 @@ public:
 	GLint lastFBO =0;
 };
 
-XOpenGLFramebufferObject::XOpenGLFramebufferObject():
+XOpenGLFramebufferObject::XOpenGLFramebufferObject(int width,int height):
     d(new Internal)
 {
+	d->width = width;
+	d->height = height;
+}
+
+XOpenGLFramebufferObject::XOpenGLFramebufferObject() :
+	d(new Internal)
+{
+	
 }
 
 XOpenGLFramebufferObject::~XOpenGLFramebufferObject()
@@ -171,8 +179,11 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment, sptr<XOpenGL
 		if (attachment == Attachment::Depth) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
 		}
-		else {
+		else if(attachment == Attachment::stencil) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
+		}
+		else {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
 		}
 	}
 }
@@ -224,8 +235,11 @@ int index)
 		if (attachment == Attachment::Depth) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
 		}
-		else {
+		else if(attachment == Attachment::stencil) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
+		}
+		else {
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
 		}
 		XOpenGLFuntion::checkGLError();
 	}

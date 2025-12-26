@@ -1387,31 +1387,21 @@ void easyPlotWidget::slotFboTest()
 		{
 			int rowNUm = 4;
 			int colNum = 5;
-			auto cpuData = makeShareDbObject<XUIntArray2D>();
-			cpuData->setComponent(1);
-			cpuData->setDimensions(colNum, rowNUm);
+			auto cpuData = makeShareDbObject<XUIntArray2D>(colNum,rowNUm,1);
 
 			std::cout << "[1]\n从CPU读取数据到纹理\n";
 			{
 				*cpuData->data(0, 0) = 0x12345601;
 				*cpuData->data(0, 1) = 0x23456702;
 
-				/*for (int row = 0; row < rowNUm; row++) {
-					for (int col = 0; col < colNum; col++) {
-						*cpuData->data(row, col) = row * colNum + col;
-					}
-				}*/
-
 				std::cout << "cpuData\n";
 				cpuData->dump(true);
 			}
 
-			auto array3D =makeShareDbObject<XUCharArray3D>();
-			array3D->setComponent(1);
-			int w =20;		//每一行5个颜色数据
+			int w = 20;		//每一行5个颜色数据
 			int h = rowNUm;
-			int z =2;
-			array3D->setDimensions(w,h,z);
+			int z = 2;
+			auto array3D =makeShareDbObject<XUCharArray3D>(w,h,z,1);
 			array3D->memCopy(0,cpuData);
 			array3D->forEach(1, [](unsigned char* data) {
 				*data+=0x123456;
@@ -1449,20 +1439,13 @@ void easyPlotWidget::slotFboTest()
 				//5*4的二维纹理数组
 				auto row = 4;
 				auto col = 5;
-				auto cpuDepthData = makeShareDbObject<XFloatArray2D>();
-				cpuDepthData->setComponent(1);
-				cpuDepthData->setDimensions(5, 4);
-				std::vector<std::vector<float>> depth{
-					{0.1,0.2,0.3,0.4,1.0},
-					{0.5,0.6,0.7,0.8,1.0},
-					{0.8,0.9,0.8,0.6,1,.0},
-					{0.5,0.4,0.3,0.2,1.0},
-				};
-				for (int r = 0; r < row; r++) {
-					for (int c = 0; c < col; c++) {
-						cpuDepthData->setData(c, r, depth[r][c]);
-					}
-				}
+				auto cpuDepthData = makeShareDbObject<XFloatArray2D>(5,4,1);
+				cpuDepthData->setRowData(
+					0.1, 0.2, 0.3, 0.4, 1.0,
+					0.5, 0.6, 0.7, 0.8, 1.0,
+					0.8, 0.9, 0.8, 0.6, 1,
+					0.5, 0.4, 0.3, 0.2, 1.0
+				);
 
 				XQ::print("cpu端预设深度");
 				cpuDepthData->dump();
@@ -1493,20 +1476,13 @@ void easyPlotWidget::slotFboTest()
 				//5*4的二维纹理数组
 				auto row = 4;
 				auto col = 5;
-				auto cpuStencilData = makeShareDbObject<XUCharArray2D>();
-				cpuStencilData->setComponent(1);
-				cpuStencilData->setDimensions(5, 4);
-				std::vector<std::vector<unsigned char>> depth{
-					{1,2,3,4,5},
-					{6,7,8,9,10},
-					{11,12,13,14,15},
-					{16,17,18,19,20},
-				};
-				for (int r = 0; r < row; r++) {
-					for (int c = 0; c < col; c++) {
-						cpuStencilData->setData(c, r, depth[r][c]);
-					}
-				}
+				auto cpuStencilData = makeShareDbObject<XUCharArray2D>(5,4,1);
+				cpuStencilData->setRowData(
+					1, 2, 3, 4, 5,
+					6, 7, 8, 9, 10,
+					11, 12, 13, 14, 15,
+					16, 17, 18, 19, 20
+				);
 
 				XQ::print("cpu端预设模板");
 				cpuStencilData->dump();
@@ -1536,21 +1512,13 @@ void easyPlotWidget::slotFboTest()
 			{
 				auto row = 4;
 				auto col = 5;
-				auto cpuDepthData = makeShareDbObject<XUIntArray2D>();
-				cpuDepthData->setComponent(1);
-				cpuDepthData->setDimensions(5, 4);
-				std::vector<std::vector<unsigned int>> depth{
-					{combine(0.1,1),combine(0.2,2),combine(0.3,3),combine(0.4,4),combine(0.5,5)},
-					{combine(0.6,6),combine(0.7,7),combine(0.8,8),combine(0.9,9),combine(0.8,10)},
-					{combine(0.1,1),combine(0.2,2),combine(0.3,3),combine(0.4,4),combine(0.5,5)},
-					{combine(0.1,1),combine(0.2,2),combine(0.3,3),combine(0.4,4),combine(0.5,5)},
-					
-				};
-				for (int r = 0; r < row; r++) {
-					for (int c = 0; c < col; c++) {
-						cpuDepthData->setData(c, r, depth[r][c]);
-					}
-				}
+				auto cpuDepthData = makeShareDbObject<XUIntArray2D>(5,4,1);
+				cpuDepthData->setRowData(
+					 combine(0.1,1),combine(0.2,2),combine(0.3,3),combine(0.4,4),combine(0.5,5) ,
+					 combine(0.6,6),combine(0.7,7),combine(0.8,8),combine(0.9,9),combine(0.8,10) ,
+					 combine(0.7,11),combine(0.6,12),combine(0.5,13),combine(0.4,14),combine(0.3,15) ,
+					 combine(0.2,16),combine(0.1,17),combine(0.0,18),combine(0.1,19),combine(0.2,20) 
+				);
 				XQ::print("cpu端预设深度模板");
 				std::cout << std::hex;
 				cpuDepthData->dump();
@@ -1569,14 +1537,48 @@ void easyPlotWidget::slotFboTest()
 				auto pbo = depthTexture->map(1);
 				auto pbo2cpuData = pbo->map2cpu();
 
-				auto gpuDepthData = makeShareDbObject<XUIntArray2D>();
-				gpuDepthData->setComponent(1);
-				gpuDepthData->setDimensions(5, 4);
+				auto gpuDepthData = makeShareDbObject<XUIntArray2D>(5,4,1);
 				gpuDepthData->memCopy(pbo2cpuData);
 				std::cout<<std::hex;
 				gpuDepthData->dump();
 				std::cout << std::dec;
 				depthTexture->release();
+
+				XQ::print("读取深度模板纹理分离读取");
+				{	
+					int w=5,h=4;
+					auto seprateDepthFloat = makeShareDbObject<XFloatArray2D>(w,h,1);
+
+					auto seprateDepthU32 = makeShareDbObject<XUIntArray2D>(w,h,1);
+
+					auto seprateStencil = makeShareDbObject<XUCharArray2D>(w,h,1);
+
+					auto fbo =makeShareDbObject<XOpenGLFramebufferObject>(w,h);
+					fbo->create();
+					fbo->bind();
+					fbo->addAttachment(XOpenGLFramebufferObject::CombinedDepthStencil,depthTexture);
+					if(fbo->isComplete()){
+						std::cout<<"fbo is complete\n";
+					}else
+						std::cout << "fbo no complete\n";
+					auto oldAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment,1);
+					XOpenGLFuntion::xglReadPixels(0, 0, 5, 4, XOpenGL::TextureExternalFormat::Depth, XOpenGL::DataType::float_, seprateDepthFloat->data());
+					//GL_UNSIGNED_INT读取24位深度时，深度值被左对齐到32位整数的高24位，低8位是未定义的垃圾数据
+					XOpenGLFuntion::xglReadPixels(0, 0, 5, 4, XOpenGL::TextureExternalFormat::Depth, XOpenGL::DataType::unsigned_int, seprateDepthU32->data());
+					XOpenGLFuntion::xglReadPixels(0, 0, 5, 4, XOpenGL::TextureExternalFormat::Stencil, XOpenGL::DataType::unsigned_byte, seprateStencil->data());
+					oldAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, oldAlignment);
+
+					XQ::print("分离的浮点深度");
+					seprateDepthFloat->dump();
+					
+					XQ::print("分离的UInt深度");
+					std::cout << std::hex;
+					seprateDepthU32->dump();
+					std::cout << std::dec;
+
+					XQ::print("分离的模板");
+					seprateStencil->dump();
+				}
 
 			}
 		}

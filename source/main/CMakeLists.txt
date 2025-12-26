@@ -62,6 +62,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 							${CMAKE_SOURCE_DIR}/source
 							${CMAKE_SOURCE_DIR}/3rdParty/glew/include
 							${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
+							${CMAKE_SOURCE_DIR}/3rdParty/boost/include
 	)
 
 #-------------------------------------------------------

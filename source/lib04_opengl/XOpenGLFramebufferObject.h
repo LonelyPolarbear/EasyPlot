@@ -25,8 +25,9 @@ public:
 	};
 
 protected:
-		XOpenGLFramebufferObject();
-		~XOpenGLFramebufferObject();
+	XOpenGLFramebufferObject(int width, int height);
+	XOpenGLFramebufferObject();
+	~XOpenGLFramebufferObject();
 public:
 	bool create();
 	void bind(XOpenGL::FrameBufferType type = XOpenGL::FrameBufferType::framebuffer);

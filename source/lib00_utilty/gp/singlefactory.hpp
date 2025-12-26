@@ -3,7 +3,6 @@
 * @brief       泛型工厂模板类，实现泛型工厂模式
 * @author     宋伟军
 * @date        2025.6.27
-* @license Copyright(c)2023, 英特工程仿真技术(大连)有限公司版权所有
 */
 
 #ifndef SFACTORY_HPP
@@ -15,7 +14,7 @@
 #include <functional>
 
 namespace TL_singleFactory {
-	
+
 	struct empty_type {};
 	template<size_t... Is, typename Tuple>
 	auto extract_front_impl(std::index_sequence<Is...>, Tuple&& all_args) {
@@ -51,6 +50,7 @@ class SFactory;     //主模版
 template<typename product, typename identifier, typename... ctorTypes, typename... initTypes>
 class SFactory<identifier, product(ctorTypes...), void(initTypes...)> {
 	using createFun = product * (*)(ctorTypes...);
+	using createSharedFun = std::shared_ptr<product>(*)(ctorTypes...);
 	using initFn = std::function< void(product*, initTypes...)>;
 public:
 	static SFactory& Instance() {
@@ -88,10 +88,16 @@ private:
 		auto ctor_args = TL_singleFactory::extract_front_impl(std::make_index_sequence<N>{}, all_args);
 		auto init_args = TL_singleFactory::extract_back_impl<N>(std::make_index_sequence<rest>{}, all_args);
 
-		product* p = std::apply(s_NewMethod[id], ctor_args);
-		auto result = std::shared_ptr<product>(p);
+		std::shared_ptr<product> result;
+		if (s_NewMethod.find(id) != s_NewMethod.end()) {
+			product* p = std::apply(s_NewMethod[id], ctor_args);
+			result = std::shared_ptr<product>(p);
+		}
+		else {
+			result = std::apply(s_NewSharedMethod[id], ctor_args);
+		}
 
-		if (!std::apply([this, id, p](auto&&... init_args) {
+		if (!std::apply([this, id, p = result.get()](auto&&... init_args) {
 			return this->init(id, p, std::forward<decltype(init_args)>(init_args)...);
 			}, init_args)) {
 			return nullptr;
@@ -118,7 +124,7 @@ public:
 
 			std::unique_ptr<product> p(std::apply(s_NewMethod[id], ctor_args));
 
-			if (!std::apply([this, id, p=p.get()](auto&&... init_args) {
+			if (!std::apply([this, id, p = p.get()](auto&&... init_args) {
 				return this->init(id, p, std::forward<decltype(init_args)>(init_args)...);
 				}, init_args)) {
 
@@ -133,7 +139,8 @@ public:
 	template<typename ... Args>
 	std::shared_ptr<product> makeShare(identifier id, Args&&...args) {
 		std::lock_guard<std::mutex> lock(s_mutex);
-		if (s_NewMethod.find(id) == s_NewMethod.end()) return nullptr;
+		if (s_NewMethod.find(id) == s_NewMethod.end() && s_NewSharedMethod.find(id) == s_NewSharedMethod.end())
+			return nullptr;
 		auto ss = TL_singleFactory::empty_type();
 		return makeShareImpl(id, ss, std::forward<Args>(args)...);
 	}
@@ -141,14 +148,16 @@ public:
 	template<typename ... Args>
 	std::shared_ptr<product> makeShare_strong(identifier id, Args&&...args) {
 		std::lock_guard<std::mutex> lock(s_mutex);
-		if (s_NewMethod.find(id) == s_NewMethod.end()) return nullptr;
+		if (s_NewMethod.find(id) == s_NewMethod.end() && s_NewSharedMethod.find(id) == s_NewSharedMethod.end())
+			return nullptr;
 		return makeShareImpl(id, s_products_strong, std::forward<Args>(args)...);
 	}
 
 	template<typename ... Args>
 	std::shared_ptr<product> makeShare_weak(identifier id, Args&&...args) {
 		std::lock_guard<std::mutex> lock(s_mutex);
-		if (s_NewMethod.find(id) == s_NewMethod.end()) return nullptr;
+		if (s_NewMethod.find(id) == s_NewMethod.end() && s_NewSharedMethod.find(id) == s_NewSharedMethod.end())
+			return nullptr;
 		return makeShareImpl(id, s_products_weak, std::forward<Args>(args)...);
 	}
 
@@ -157,36 +166,52 @@ public:
 	>
 	bool RegisterTofactory(identifier id, initFn f = {}) {
 		std::lock_guard<std::mutex> lock(s_mutex);
-		createFun fun = &policy<product, ConcreateProduct, ctorTypes...>::crateSelf;
-
-		if (s_NewMethod.find(id) == s_NewMethod.end()) {
-			s_NewMethod.insert(std::pair<identifier, createFun>(id, fun));
-			s_initFns.insert(std::pair<identifier, initFn>(id, f));
-			return true;
+		auto fun = &policy<product, ConcreateProduct, ctorTypes...>::crateSelf;
+		using return_type = typename TL_singleFactory::getReturnType<decltype(policy<product, ConcreateProduct, ctorTypes...>::crateSelf)>::type;
+		if constexpr (std::is_same_v<product*, return_type  >) {
+			if (s_NewMethod.find(id) == s_NewMethod.end()) {
+				s_NewMethod.insert(std::pair<identifier, createFun>(id, fun));
+				s_initFns.insert(std::pair<identifier, initFn>(id, f));
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
 		else {
-			return false;
+			if (s_NewSharedMethod.find(id) == s_NewSharedMethod.end()) {
+				s_NewSharedMethod.insert(std::pair<identifier, createSharedFun>(id, fun));
+				s_initFns.insert(std::pair<identifier, initFn>(id, f));
+				return true;
+			}
+			else {
+				return false;
+			}
 		}
+
 	}
-	
+
 	bool UnRegisterTofactory(identifier id) {
 		std::lock_guard<std::mutex> lock(s_mutex);
-		if (s_NewMethod.find(id) != s_NewMethod.end()) {
-			s_NewMethod.erase(id);
+
+		bool found = false;
+		if (s_NewMethod.erase(id) > 0) found = true;
+		if (s_NewSharedMethod.erase(id) > 0) found = true;
+		if (found) {
 			s_initFns.erase(id);
 			s_products_strong.erase(id);
 			s_products_weak.erase(id);
-			return true;
 		}
-		else {
-			return false;
-		}
+		return found;
 	}
-	
+
 	std::list<identifier> getIdentifiers() {
 		std::lock_guard<std::mutex> lock(s_mutex);
 		std::list<identifier> keys;
 		for (auto iter = s_NewMethod.begin(); iter != s_NewMethod.end(); iter++) {
+			keys.push_back(iter->first);
+		}
+		for (auto iter = s_NewSharedMethod.begin(); iter != s_NewSharedMethod.end(); iter++) {
 			keys.push_back(iter->first);
 		}
 		return keys;
@@ -206,7 +231,6 @@ private:
 		try
 		{
 			f(p, std::forward<Args>(values)...);
-			//((*p).*f)();
 			return true;
 		}
 		catch (...)
@@ -217,17 +241,18 @@ private:
 private:
 	std::map<identifier, initFn> s_initFns;
 	std::map<identifier, product* (*)(ctorTypes...)> s_NewMethod;
+	std::map<identifier, std::shared_ptr< product>(*)(ctorTypes...)> s_NewSharedMethod;
 	std::map<identifier, std::shared_ptr<product>> s_products_strong;
 	std::map<identifier, std::weak_ptr<product>> s_products_weak;
 	std::mutex s_mutex;
 };
 
-//template<typename ctorType>
-//using IGPFactory = class SFactory<int, ctorType>;
-//
-//template<typename ctorType>
-//using UGPFactory = class SFactory<unsigned int, ctorType>;
-//
-//template<typename ctorType>
-//using SGPFactory = class SFactory<std::string, ctorType>;
+template<typename ctorType>
+using IGPFactory = class SFactory<int, ctorType>;
+
+template<typename ctorType>
+using UGPFactory = class SFactory<unsigned int, ctorType>;
+
+template<typename ctorType>
+using SGPFactory = class SFactory<std::string, ctorType>;
 #endif // SFACTORY_HPP
