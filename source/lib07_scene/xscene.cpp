@@ -112,19 +112,19 @@ class XScene::Internal {
 public:
 	std::set<std::shared_ptr<XShape>> shapes;                               //3D物体集合
 	std::set<std::shared_ptr<XGraphicsItem>> shapes2D;              //2D物体集合
-	std::shared_ptr<xShaderManger> shaderManger;
-	std::shared_ptr<xcamera> camera;
-	std::shared_ptr<XViewSelection> viewSelection;
-	std::shared_ptr<XViewSelection2D> viewSelection2D;
-    std::shared_ptr<XOpenGLContext> context;
+	std::shared_ptr<xShaderManger> shaderManger;                     //着色器管理类
+	std::shared_ptr<xcamera> camera;                                            //相机
+	std::shared_ptr<XViewSelection> viewSelection;                      //3D拾取
+	std::shared_ptr<XViewSelection2D> viewSelection2D;             //2D拾取
+    std::shared_ptr<XOpenGLContext> context;                              //opengl上下文
 
-    std::shared_ptr < XOpenGLTexture> fontTexture;
+    std::shared_ptr < XOpenGLTexture> fontTexture;                     //字体纹理
 
-    std::shared_ptr<SceneUbo> sceneUbo;
+    std::shared_ptr<SceneUbo> sceneUbo;                                     //ubo
 
-	std::shared_ptr<XShape> gridShape;
-	std::shared_ptr<XGraphicsItem> gridShape2d;
-	std::shared_ptr<XShape> axisShape;
+	std::shared_ptr<XShape> gridShape;                                       //三维网格
+	std::shared_ptr<XGraphicsItem> gridShape2d;                       //二维网格
+	std::shared_ptr<XShape> axisShape;                                        //左下角坐标轴
 
     bool fontinitialized{ false };
     std::future<std::tuple<int, int, std::vector<const void*>>> result_future;
@@ -440,7 +440,7 @@ std::vector<XViewSelection::SelectData> XScene::getPointSelection(int x, int y)
 std::vector<XViewSelection2D::SelectData> XScene::getPointSelection2D(int x, int y)
 {
 	makeCurrent();
-    d->createViewSelection2D(this->shared_from_this(),&XScene::sceneScreenPos2ScenePosMat);
+    d->createViewSelection2D(this->asDerived<DataBaseObject>(),&XScene::sceneScreenPos2ScenePosMat);
 	d->viewSelection2D->update(d->shapes2D, d->camera, Eigen::Matrix4f::Identity());
 	auto selectData = d->viewSelection2D->getAllPointSelection(x - d->startx, y - d->starty, d->width, d->height);
 	doneCurrent();
@@ -460,7 +460,7 @@ std::vector<std::vector<XViewSelection::SelectData>> XScene::getBoxSelection(int
 std::vector<std::vector<XViewSelection2D::SelectData>> XScene::getBoxSelection2D(int x, int y, int w, int h)
 {
 	makeCurrent();
-	d->createViewSelection2D(this->shared_from_this(), &XScene::sceneScreenPos2ScenePosMat);
+	d->createViewSelection2D(this->asDerived<DataBaseObject>(), &XScene::sceneScreenPos2ScenePosMat);
 	d->viewSelection2D->update(d->shapes2D, d->camera,  Eigen::Matrix4f::Identity());
 	auto r = d->viewSelection2D->getBoxSelection(x, y, w, h, getViewportWidth(), getViewportHeight());
 	doneCurrent();

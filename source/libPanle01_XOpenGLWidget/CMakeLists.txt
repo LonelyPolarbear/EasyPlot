@@ -1,5 +1,7 @@
+#set(CMAKE_PROJECT_NAME "XGLWidget")
 project(libPanle01_XOpenGLWidget)
 set(proName libPanle01_XOpenGLWidget)
+
 
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/qt.cmake)
@@ -11,14 +13,17 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
 include_directories(${PROJECT_SOURCE_DIR}/source/libPanle01_XOpenGLWidget)
 
 #递归目录获取所有源文件
-set(SOURCES_FILES	    XOpenGLWidget.cpp)
-set(HERDERS_FILES		XOpenGLWidget.h)
+#set(SOURCES_FILES	    XOpenGLWidget.cpp)
+#set(HERDERS_FILES		XOpenGLWidget.h)
+
+file(GLOB_RECURSE HERDERS_FILES *.h)
+file(GLOB_RECURSE SOURCES_FILES *.cpp)
 
 #-------------------------------------------------------
 #Qt支持
 #-------------------------------------------------------
 #查找所有的需要moc预处理的文件
-set(MOC_FILES XOpenGLWidget.h)
+set(MOC_FILES XOpenGLWidget.h XGLWidget.h)
 
 #GLOB_RECURSE 
 FILE(GLOB UI_FILES "ui/*.ui")
@@ -61,6 +66,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 							${CMAKE_SOURCE_DIR}/source
 							${CMAKE_SOURCE_DIR}/3rdParty/glew/include
 							${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
+							${CMAKE_SOURCE_DIR}/3rdParty/boost/include
 	)
 
 #-------------------------------------------------------
@@ -74,6 +80,7 @@ SET(LIB_NAMES
 				xopengl${DLL_DEBUG_POSTFIX}
 				myUtilty${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
+				xrender${DLL_DEBUG_POSTFIX}
 
 	)
 

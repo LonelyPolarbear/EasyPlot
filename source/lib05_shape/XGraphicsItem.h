@@ -167,7 +167,8 @@ public:
 	virtual ~XGraphicsItem();
 
 	int64_t getID() const;
-	sptr< XGraphicsItem> getChildByID(int64_t id) const;
+	sptr< const XGraphicsItem> getChildByID(int64_t id) const;
+	sptr< XGraphicsItem> getChildByID(int64_t id);
 	void bindSSBO();
 	virtual void draw(const Eigen::Matrix4f& m = Eigen::Matrix4f::Identity());
 	virtual void pickBorderDraw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& m);

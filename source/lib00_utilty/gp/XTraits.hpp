@@ -37,6 +37,10 @@ namespace XTraits {
 		return a > b ? a : b;
 	}
 
+	constexpr int min_value(int a, int b) {
+		return a < b ? a : b;
+	}
+
 	template<typename... Args>
 	constexpr int max_value(int a, int b, Args... args) {
 		return max_value(a, max_value(b, args...));

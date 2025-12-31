@@ -5,6 +5,12 @@
 #include <boost/signals2.hpp>
 
 namespace xsig {
+	struct NoMutex {
+		void lock() {}
+		void unlock() {}
+		bool try_lock() { return true; }
+	};
+
 	template<typename T>
 	struct traits_class {
 		using classType = T;
@@ -175,6 +181,12 @@ namespace xsig {
 
 
 	struct xconnection {
+		xconnection()=default;
+
+		explicit xconnection(boost::signals2::connection con) {
+			handle = con;
+		}
+		
 		void disconnect() {
 			handle.disconnect();
 		}
@@ -187,6 +199,10 @@ namespace xsig {
 		explicit operator bool() const {
 			return connected();
 		}
+
+		 operator boost::signals2::connection() const {
+			return handle;
+		}
 	};
 
 	template<typename F>
@@ -194,7 +210,7 @@ namespace xsig {
 
 	template<typename R, typename... Args>
 	struct xsignal<R(Args...)> {
-		using bsignal = boost::signals2::signal<R(Args...), xoptional_all_value<R>>;
+		using bsignal = boost::signals2::signal<R(Args...)/*, xoptional_all_value<R>*/>;
 		bsignal signal;
 
 		template<typename ...types>
@@ -207,8 +223,11 @@ namespace xsig {
 			return operator()(std::forward<types>(args)...);
 		}
 
-		template<class desttype, typename ...types>
-		xconnection connect(desttype pclass, R(traits_class_t<std::remove_pointer_t<desttype>>::* f)(types...)) {
+
+		//连接成员函数
+		template<class desttype,typename ...types>
+		xconnection connect(desttype pclass, R(traits_class_t<std::remove_pointer_t<desttype>>::* f)(types...))
+		{
 			auto origin_ptr = extract_origin_pointer(pclass);
 			if (origin_ptr) {
 				auto fun = [pclass, f](Args... args)->R {
@@ -223,9 +242,29 @@ namespace xsig {
 			else {
 				return {};
 			}
-			
 		}
 
+		//连接信号
+		template<class desttype>
+		xconnection connect(desttype pclass, xsignal<R(Args...)> traits_class_t<std::remove_pointer_t<desttype>>::* signalObj) 
+		{
+			auto origin_ptr = extract_origin_pointer(pclass);
+			if (origin_ptr) {
+				auto fun = [pclass, signalObj](Args... args)->R {
+					auto origin_ptr = extract_origin_pointer(pclass);
+					if (origin_ptr)
+						return *(origin_ptr->*signalObj)(args...);
+					};
+				xconnection connection;
+				connection.handle = signal.connect(fun);
+				return connection;
+			}
+			else {
+				return {};
+			}
+		}
+		
+		//连接全局函数和仿函数
 		template<typename F>
 		xconnection connect(F&& f)
 		{
@@ -246,6 +285,13 @@ namespace xsig {
 	template<typename R, typename... Args>
 	struct is_xsignal<xsignal<R(Args...)>> : std::true_type {
 		using function_type = R(Args...);
+		static constexpr bool isBoostSig = false;
+	};
+
+	template<typename R, typename... Args>
+	struct is_xsignal<boost::signals2::signal<R(Args...)>> : std::true_type {
+		using function_type = R(Args...);
+		static constexpr bool isBoostSig = true;
 	};
 
 	template<typename classType,typename FunType>
@@ -256,22 +302,99 @@ namespace xsig {
 		using type = R(classType::*)(Args...);
 	};
 
-	template <typename sendertype, typename signaltype, typename recivertype,
-		typename senderClass= traits_class_t<     xsig::remove_cvref_t< std::remove_pointer_t<sendertype>   >   >,
-		typename reciverClass= traits_class_t<     xsig::remove_cvref_t< std::remove_pointer_t<recivertype>   >   >,
-		typename slottype = typename  trait_member_fun_type<  reciverClass, typename is_xsignal<signaltype>::function_type  >::type,
-		typename T = std::enable_if_t<
-			std::is_class_v<senderClass>&&
-			std::is_class_v<reciverClass>&&
-			std::is_member_function_pointer_v<slottype>&&
-			is_xsignal<signaltype>::value
+
+	template<typename T>
+	struct boost_sig_connect;
+
+	template<typename R, typename...Args>
+	struct boost_sig_connect<R(Args...)> {
+		//连接成员函数
+		template<typename signaltype, typename recivertype>
+		static decltype(auto) connect(signaltype* signalObj, recivertype pclass, R(traits_class_t<std::remove_pointer_t<recivertype>>::* f)(Args...)) {
+			auto origin_ptr = extract_origin_pointer(pclass);
+			if (origin_ptr) {
+				auto fun = [pclass, f](Args... args)->R {
+					auto origin_ptr = extract_origin_pointer(pclass);
+					if (origin_ptr)
+						return (origin_ptr->*f)(args...);
+					};
+				return signalObj->connect(fun);
+			}
+		}
+
+		//连接信号
+		template<typename signaltype, typename recivertype>
+		static decltype(auto) connect(signaltype* signalObj, recivertype pclass, xsignal<R(Args...)> traits_class_t<std::remove_pointer_t<recivertype>>::* signalObj2) {
+			auto origin_ptr = extract_origin_pointer(pclass);
+			if (origin_ptr) {
+				auto fun = [pclass, signalObj2](Args... args)->R {
+					auto origin_ptr = extract_origin_pointer(pclass);
+					if (origin_ptr)
+						return *(origin_ptr->*signalObj2)(args...);
+					};
+				return signalObj->connect(fun);
+			}
+		}
+
+		//连接仿函数和全局函数
+		template<typename signaltype, typename slottype>
+		static decltype(auto) connect(signaltype* signalObj, slottype f) {
+			return signalObj->connect(f);
+		}
+	};
+
+	template<typename signaltype,
+		typename recivertype,
+		typename reciverClass = traits_class_t<     xsig::remove_cvref_t< std::remove_pointer_t<recivertype>   >   >,
+		typename slottype /*= typename  trait_member_fun_type<  reciverClass, typename is_xsignal<signaltype>::function_type  >::type*/,
+		typename T = std::enable_if_t <
+		std::is_class_v<reciverClass>&&
+		(std::is_member_function_pointer_v<slottype> || std::is_member_object_pointer_v<slottype>)&&
+		is_xsignal<signaltype>::value&&
+		is_xsignal<signaltype>::isBoostSig
 		>
 	>
-	xconnection connect(sendertype sender, signaltype senderClass::*signalObj, recivertype recv, slottype f)
+	 decltype(auto) bSigConnect(signaltype* signalObj, recivertype pclass, slottype f) {
+		 return boost_sig_connect<typename is_xsignal<signaltype>::function_type>::connect(signalObj, pclass, f);
+	}
+
+	//连接仿函数和全局函数
+	 template<typename signaltype,
+		 typename slottype = std::function< typename is_xsignal<signaltype>::function_type>,
+		 typename T = std::enable_if_t <
+		 is_xsignal<signaltype>::value&&
+		 is_xsignal<signaltype>::isBoostSig
+	 > >
+	 static decltype(auto) bSigConnect(signaltype* signalObj, slottype f) {
+		 return boost_sig_connect<typename is_xsignal<signaltype>::function_type>::connect(signalObj, f);
+	 }
+
+
+	template <typename sendertype, typename signaltype, typename recivertype,
+		typename senderClass = traits_class_t<     xsig::remove_cvref_t< std::remove_pointer_t<sendertype>   >   >,
+		typename reciverClass = traits_class_t<     xsig::remove_cvref_t< std::remove_pointer_t<recivertype>   >   >,
+		typename slottype /*= typename  trait_member_fun_type<  reciverClass, typename is_xsignal<signaltype>::function_type  >::type*/,
+		typename T = std::enable_if_t<
+		std::is_class_v<senderClass>&&
+		std::is_class_v<reciverClass>&&
+		(std::is_member_function_pointer_v<slottype>  || std::is_member_object_pointer_v<slottype>) &&
+		is_xsignal<signaltype>::value
+		>
+	>
+	xconnection connect(sendertype sender, signaltype senderClass::* signalObj, recivertype recv, slottype f)
 	{
 		auto origin_ptr = extract_origin_pointer(sender);
-		if(origin_ptr)
-			return (origin_ptr->*signalObj).connect(recv, f);
+		if (origin_ptr) {
+			if constexpr (is_xsignal<signaltype>::isBoostSig) {
+				auto con = bSigConnect(&(origin_ptr->*signalObj), recv, f);
+				xconnection ret;
+				ret.handle = con;
+				return ret;
+			}
+			else {
+				return (origin_ptr->*signalObj).connect(recv, f);
+			}
+		}	
 		return {};
 	}
 
@@ -286,8 +409,16 @@ namespace xsig {
 	xconnection connect(sendertype sender, signaltype senderClass::* signalObj, slottype f)
 	{
 		auto origin_ptr = extract_origin_pointer(sender);
-		if (origin_ptr)
-			return (origin_ptr->*signalObj).connect(f);
+		if (origin_ptr) {
+			if constexpr (!is_xsignal<signaltype>::isBoostSig)
+				return (origin_ptr->*signalObj).connect(f);
+			else {
+				auto con =  bSigConnect(&(origin_ptr->*signalObj),f);
+				xconnection ret;
+				ret.handle = con;
+				return ret;
+			}
+		}		
 		return {};
 	}
 }

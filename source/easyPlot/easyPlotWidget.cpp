@@ -322,6 +322,8 @@ void easyPlotWidget::mousePressEvent(QMouseEvent* event)
 		d->mIsMouseRightPressMoved = false;
 		d->mIsMouseRightPress = true;
 	}
+
+	return XOpenGLWidget::mousePressEvent(event);
 }
 
 void easyPlotWidget::mouseMoveEvent(QMouseEvent* event)
@@ -390,6 +392,7 @@ void easyPlotWidget::mouseMoveEvent(QMouseEvent* event)
 			d->scene->addGraphicsItem(d->screenTextItemMousePos);
 		}
 	}
+	return XOpenGLWidget::mouseMoveEvent(event);
 }
 
 void easyPlotWidget::mouseReleaseEvent(QMouseEvent* event)
@@ -459,11 +462,13 @@ void easyPlotWidget::mouseReleaseEvent(QMouseEvent* event)
 			}
 		}
 	}
+	return XOpenGLWidget::mouseReleaseEvent(event);
 }
 
 void easyPlotWidget::mouseDoubleClickEvent(QMouseEvent* event)
 {
 	d->scene->mouseDoublePressEvent(event->pos().x(), mHeight - event->pos().y(), event->button());
+	return XOpenGLWidget::mouseDoubleClickEvent(event);
 }
 
 void easyPlotWidget::wheelEvent(QWheelEvent* event)
@@ -484,8 +489,7 @@ void easyPlotWidget::wheelEvent(QWheelEvent* event)
 					factor = 1. / 1.1;
 				}
 
-				chart->chartSale(factor, factor);
-				return;
+				chart->chartSale(factor, factor);;
 			}
 		}
 	}
@@ -493,6 +497,8 @@ void easyPlotWidget::wheelEvent(QWheelEvent* event)
 	//std::cout << std::dec << "滚轮滚动: " << angle << std::endl;
 	auto pos = event->pos();
 	d->scene->wheelEvent(angle, event->pos().x(), mHeight - event->pos().y());
+
+	return XOpenGLWidget::wheelEvent(event);
 }
 
 void easyPlotWidget::resizeEvent(QResizeEvent* event)
@@ -500,6 +506,8 @@ void easyPlotWidget::resizeEvent(QResizeEvent* event)
 	XOpenGLWidget::resizeEvent(event);
 	
 	d->scene->resizeEvent(0, 0, mWidth,  mHeight);
+
+	return XOpenGLWidget::resizeEvent(event);
 }
 
 void easyPlotWidget::contextMenuEvent(QContextMenuEvent* event)
@@ -533,6 +541,7 @@ void easyPlotWidget::contextMenuEvent(QContextMenuEvent* event)
 	menu->show();
 	//d->mouseMoveRealTimePos = event->globalPos();
 	menu->exec(event->globalPos()); // event->pos()是相对于当前控件的位置
+
 }
 
 void easyPlotWidget::timerOut()

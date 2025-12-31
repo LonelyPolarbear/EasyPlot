@@ -41,11 +41,10 @@ XGraphicsItem::~XGraphicsItem()
 int64_t XGraphicsItem::getID() const {
 	return d->m_id;
 }
-sptr<XGraphicsItem> XGraphicsItem::getChildByID(int64_t id) const
+sptr<const XGraphicsItem> XGraphicsItem::getChildByID(int64_t id) const
 {
 	if (getID() == id) {
-		sptr<DataBaseObject> ss = std::const_pointer_cast<DataBaseObject>( shared_from_this());
-		return std::dynamic_pointer_cast<XGraphicsItem>(ss);
+		return asDerived<XGraphicsItem>();
 	}
 	for (auto item : m_childItems) {
 		if (item->getID() == id) {
@@ -53,6 +52,22 @@ sptr<XGraphicsItem> XGraphicsItem::getChildByID(int64_t id) const
 		}
 		else {
 			if(auto ret = item->getChildByID(id))
+				return ret;
+		}
+	}
+	return nullptr;
+}
+sptr<XGraphicsItem> XGraphicsItem::getChildByID(int64_t id)
+{
+	if (getID() == id) {
+		return asDerived<XGraphicsItem>();
+	}
+	for (auto item : m_childItems) {
+		if (item->getID() == id) {
+			return item;
+		}
+		else {
+			if (auto ret = item->getChildByID(id))
 				return ret;
 		}
 	}

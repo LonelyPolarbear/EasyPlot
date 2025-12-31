@@ -80,7 +80,7 @@ namespace XQ {
 
 		template<unsigned int N2, typename U, typename = std::enable_if_t< std::is_arithmetic_v<U>>>
 		Vector(const Vector<N2, U>& v) {
-			constexpr int num = std::min(N, N2);
+			constexpr int num =XTraits::min_value(N, N2);
 			setValuesImpl(std::make_index_sequence<num>{}, v.data);
 		}
 

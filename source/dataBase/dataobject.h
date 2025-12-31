@@ -83,13 +83,29 @@ std::shared_ptr<object> makeShareDbObject(Args&& ...args) {
 	//return std::make_shared<helper>(std::forward<Args>(args)...);
 }
 
+/// <summary>
+/// 所有类的基类，仅用来统一设计
+/// </summary>
 class database_API XBaseObject : public std::enable_shared_from_this<XBaseObject> {
 protected:
 	XBaseObject(){}
 	virtual ~XBaseObject(){}
+public:
+	template<typename Derived>
+	sptr<const Derived> asDerived() const {
+		return std::dynamic_pointer_cast<const Derived>(this->shared_from_this());
+	}
+
+	template<typename Derived>
+	sptr<Derived> asDerived() {
+		return std::dynamic_pointer_cast<Derived>(this->shared_from_this());
+	}
 };
 
-class database_API DataBaseObject :public std::enable_shared_from_this<DataBaseObject> {
+/// <summary>
+/// 数据基类
+/// </summary>
+class database_API DataBaseObject :public XBaseObject {
 protected:
 	DataBaseObject();
 	virtual ~DataBaseObject();
@@ -104,9 +120,4 @@ public:
 	}
 
 	virtual void Init();
-
-	template<typename T>
-	sptr<T> asDerived() {
-		return std::dynamic_pointer_cast<T>(this->shared_from_this());
-	}
 };

@@ -166,33 +166,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::contextMenuEvent(QContextMenuEvent* event)
 {
-#if 0
-	if (!easyPlot->isAllowContextmenu()) {
-		return;
-	}
 
-	QMenu* menu = new QMenu(this);
-
-	// 2. 添加菜单项（QAction）
-	QAction* ActFitView = menu->addAction(QIcon(":/icon/fitView.svg"), "FitView3D");
-	QAction* ActFitView2D = menu->addAction(QIcon(":/icon/fitView.svg"), "FitView2D");
-	QAction* ActDelete = menu->addAction(QIcon(":/icon/deleteObj.svg"), "DeleteSelect");
-	QAction* ActDeleteAll = menu->addAction(QIcon(":/icon/clearAll.svg"), "DeleteAll");
-	QAction* ActVisibleAll = menu->addAction(QIcon(":/icon/visible.svg"), "visible");
-	QAction* ActInvisible = menu->addAction(QIcon(":/icon/invisible.svg"), "invisible");
-
-	// 3. 绑定菜单项的点击信号到槽函数
-	//connect(ActFitView, &QAction::triggered, this, &easyPlotWidget::slotFitView3D);
-	//connect(ActFitView2D, &QAction::triggered, this, &easyPlotWidget::slotFitView2D);
-	//connect(ActDelete, &QAction::triggered, this, &easyPlotWidget::slotDelete);
-	//connect(ActDeleteAll, &QAction::triggered, this, &easyPlotWidget::slotDeleteAll);
-	//connect(ActVisibleAll, &QAction::triggered, this, &easyPlotWidget::slotVisibleAll);
-	//connect(ActInvisible, &QAction::triggered, this, &easyPlotWidget::slotInvisible);
-
-	// 4. 在鼠标点击位置显示菜单（exec()会阻塞，直到菜单关闭）
-	menu->show();
-	menu->exec(event->globalPos()); // event->pos()是相对于当前控件的位置
-#endif
 }
 
 void MainWindow::slotOpenMesh()
