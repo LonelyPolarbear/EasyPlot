@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.8)
 project(QtOpenGL)		#放在根目录下可以理解为解决方案的名称
 
-
+# 使用全局属性收集所有lib以便示例项目正确依赖
+set_property(GLOBAL PROPERTY MY_PROJECT_LIB_TARGETS "")
+set_property(GLOBAL PROPERTY MY_PROJECT_LIBS "")
 add_subdirectory(source/lib00_utilty)
 add_subdirectory(source/lib01_shader)
 add_subdirectory(source/lib02_camera)
@@ -36,3 +38,13 @@ add_dependencies(XOpenGLWidget  lib00_utilty lib01_shader lib02_camera lib04_ope
 add_dependencies(easyPlot  XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel render)
 add_dependencies(lib09_panel  lib00_utilty)
 add_dependencies(main easyPlot lib09_panel)
+
+
+
+# examples
+set_property(GLOBAL PROPERTY MY_EXAMPLE_TARGETS "")
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+option(BUILD_EXAMPLES "Build the test suite" ON)		#用于定义可以被用户配置的布尔选项
+if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+endif()

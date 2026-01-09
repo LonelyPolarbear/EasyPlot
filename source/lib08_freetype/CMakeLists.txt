@@ -35,7 +35,7 @@ SET(LIB_NAMES
 	glew32
 	opengl32
 	freetype
-	myUtilty${DLL_DEBUG_POSTFIX}
+	XUtilty${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}
 	Qt5::Core
 	Qt5::Gui
@@ -53,6 +53,8 @@ target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HERDERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB08_FREETYPE_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "xfreetype")
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "xfreetype")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})											#库目录

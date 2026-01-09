@@ -3,6 +3,7 @@
 //#include <glm/gtc/matrix_transform.hpp>
 #include "xcamera.h"
 #include "lib00_utilty/XUtilty.h"
+#include <dataBase/XVector.h>
 #include<iostream>
 
 xcamera::xcamera()

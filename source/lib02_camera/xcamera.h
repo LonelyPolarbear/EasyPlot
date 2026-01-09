@@ -9,6 +9,7 @@
 #include <Eigen/Eigen>
 #include <dataBase/dataobject.h>
 #include <lib00_utilty/XUtilty.h>
+#include <dataBase/XVector.h>
 class lib02_CAMERA_API xcamera:public DataBaseObject
 {
 public:

@@ -19,6 +19,7 @@ SET(LIB_INCLUDE_DIRECTORY
 #设置依赖的动态库名称
 #-------------------------------------------------------
 SET(LIB_NAMES 	
+	#XUtilty${DLL_DEBUG_POSTFIX}
 )
 
 set(LIB_DIRECTORIES 

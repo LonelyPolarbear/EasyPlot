@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <lib00_utilty/XUtilty.h>
+#include <dataBase/XVector.h>
 #include "XPanleApi.h"
 
 namespace Ui {

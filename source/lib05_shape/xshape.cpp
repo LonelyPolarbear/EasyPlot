@@ -5,6 +5,7 @@
 
 #include <Eigen/Eigen>
 #include <lib00_utilty/XUtilty.h>
+#include <dataBase/XVector.h>
 #include <lib01_shader/xshaderManger.h>
 
 #include <glew/glew.h>

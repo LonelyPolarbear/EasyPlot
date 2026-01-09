@@ -8,6 +8,7 @@
 
 #include <QWidget>
 #include <lib00_utilty/XUtilty.h>
+#include <dataBase/XVector.h>
 
 class QOpenGLContext;
 class QWindow;

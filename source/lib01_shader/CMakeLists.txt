@@ -31,7 +31,7 @@ SET(LIB_NAMES
 					glew32
 					opengl32
 					dataBase${DLL_DEBUG_POSTFIX}
-					myUtilty${DLL_DEBUG_POSTFIX}
+					XUtilty${DLL_DEBUG_POSTFIX}
 )
 
 set(LIB_DIRECTORIES 
@@ -45,6 +45,8 @@ target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HERDERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB01_SHADER_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "xshader")
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "xshader")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})											#库目录

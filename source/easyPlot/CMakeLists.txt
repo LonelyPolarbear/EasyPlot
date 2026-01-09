@@ -72,7 +72,7 @@ SET(LIB_NAMES
 				Qt5::Concurrent
 				glew32
 				opengl32
-				myUtilty${DLL_DEBUG_POSTFIX}
+				XUtilty${DLL_DEBUG_POSTFIX}
 				xshader${DLL_DEBUG_POSTFIX}
 				xcamera${DLL_DEBUG_POSTFIX}
 				XOpenGLWidget${DLL_DEBUG_POSTFIX}

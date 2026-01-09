@@ -1,4 +1,5 @@
 #include "xcylinderSource.h"
+#include "dataBase/XVector.h"
 
 XCylinderSource::XCylinderSource()
 {

@@ -78,7 +78,7 @@ SET(LIB_NAMES
 				glew32
 				opengl32
 				xopengl${DLL_DEBUG_POSTFIX}
-				myUtilty${DLL_DEBUG_POSTFIX}
+				XUtilty${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
 				xrender${DLL_DEBUG_POSTFIX}
 				xshape${DLL_DEBUG_POSTFIX}
@@ -97,6 +97,8 @@ target_link_libraries(${proName} ${LIB_NAMES})									#库名称
 
 target_compile_definitions(${proName} PRIVATE LIBPANEL01_XOPENGLWIDGET_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "XOpenGLWidget")
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "XOpenGLWidget")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
 #cmake -B build -DCMAKE_BUILD_TYPE=Debug -G  "Visual Studio 17 2022"

@@ -3,6 +3,7 @@
 #include "XRenderType.h"
 #include "XInteractionEventHandler.h"
 #include <dataBase/dataobject.h>
+#include <dataBase/XVector.h>
 #include <lib00_utilty/XUtilty.h>
 #include <xsignal/XSignal.h>
 

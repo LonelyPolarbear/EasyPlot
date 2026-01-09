@@ -41,6 +41,8 @@ target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HERDERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB03_STBIMAGE_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "stbImage")
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "stbImage")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
 target_compile_definitions(${proName} PRIVATE STB_IMAGE_IMPLEMENTATION)							#该宏会使得编译器编译stb_image.h文件

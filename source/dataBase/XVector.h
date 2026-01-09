@@ -292,3 +292,15 @@ namespace XQ {
 	using Recti = Vec4i;
 	using Rectu = Vec4u;
 }
+
+namespace XQ::math {
+	/// <summary>
+			/// 分割单位圆
+			/// </summary>
+			/// <param name="num">分割数量</param>
+			/// <param name="angle">被分割的圆的度数，单位角度 起始为X正半轴</param>
+			/// <returns></returns>
+	extern std::vector<XQ::Vec2f> database_API circleSplit(int num, float angle);
+
+	extern std::vector<XQ::Vec2f> database_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2);
+}

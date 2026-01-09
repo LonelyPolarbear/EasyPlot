@@ -4,6 +4,7 @@
 #include <Eigen/Eigen>
 #include <dataBase/XTimeStamp.h>
 #include <lib00_utilty/XUtilty.h>
+#include <dataBase/XVector.h>
 #include <mutex>
 #include <dataBase/XDataArray.h>
 #include <glew/glew.h>

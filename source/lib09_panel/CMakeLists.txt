@@ -70,7 +70,7 @@ SET(LIB_NAMES
 				Qt5::Widgets
 				Qt5::Core
 				glew32
-				myUtilty${DLL_DEBUG_POSTFIX}
+				XUtilty${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
 	)
 
@@ -85,6 +85,8 @@ target_link_libraries(${proName} ${LIB_NAMES})									#库名称
 
 target_compile_definitions(${proName} PRIVATE LIBPANEL09_XPANEL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "xpanel")
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "xpanel")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
 #cmake -B build -DCMAKE_BUILD_TYPE=Debug -G  "Visual Studio 17 2022"

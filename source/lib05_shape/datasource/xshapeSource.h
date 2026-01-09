@@ -5,6 +5,7 @@
 #include <dataBase/XDataArray.h>
 
 #include <lib00_utilty/XUtilty.h>
+#include <dataBase/XVector.h>
 
 class LIB05_SHAPE_API XShapeSource:public DataBaseObject {
 protected:

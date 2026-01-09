@@ -19,8 +19,7 @@ group_source_files_by_directory(${ALL_SOURCES})
 #-------------------------------------------------------
 #设置依赖的动态库头文件目录
 #-------------------------------------------------------
-SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source 
-														${CMAKE_SOURCE_DIR}/3rdParty/glm/include
+SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source 							
 														${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
 )
 
@@ -28,8 +27,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #设置依赖的动态库名称
 #-------------------------------------------------------
 SET(LIB_NAMES 	
-	dataBase${DLL_DEBUG_POSTFIX}
-	
+	#dataBase${DLL_DEBUG_POSTFIX}
 )
 
 set(LIB_DIRECTORIES 
@@ -41,8 +39,10 @@ add_library(${proName}  SHARED)
 target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HEADERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB00_UTILTY_DLL)
-set_target_properties(${proName} PROPERTIES OUTPUT_NAME "myUtilty")
+set_target_properties(${proName} PROPERTIES OUTPUT_NAME "XUtilty")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "XUtilty")
 
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})											#库目录
 target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})							#包含目录

@@ -29,7 +29,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 SET(LIB_NAMES 	
 	glew32
 	opengl32
-	myUtilty${DLL_DEBUG_POSTFIX}
+	XUtilty${DLL_DEBUG_POSTFIX}
 	xshader${DLL_DEBUG_POSTFIX}
 	stbImage${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}
@@ -49,6 +49,8 @@ target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HERDERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB_XRENDER_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "xrender")
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "xrender")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
 #target_compile_definitions(${proName} PRIVATE STB_IMAGE_IMPLEMENTATION)				#该宏会使得编译器编译stb_image.h文件

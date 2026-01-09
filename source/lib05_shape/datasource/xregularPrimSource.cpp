@@ -1,4 +1,5 @@
 #include "xregularPrimSource.h"
+#include <dataBase/XVector.h>
 
 XRegularPrimSource::XRegularPrimSource()
 {

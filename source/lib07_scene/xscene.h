@@ -7,6 +7,7 @@
 #include "lib00_utilty/XUtilty.h"
 #include<Eigen/Eigen>
 #include <dataBase/XDataArray.h>
+#include <dataBase/XVector.h>
 class XShape;
 class xcamera;
 class xshader;

@@ -1,5 +1,5 @@
-#ifndef __myutilty_hpp
-#define __myutilty_hpp
+#ifndef __XUtilty_hpp
+#define __XUtilty_hpp
 
 #ifdef  LIB00_UTILTY_DLL
 #define lib00_utilty_API __declspec(dllexport)
@@ -16,7 +16,7 @@
 #include <any>
 #include <iostream>
 
-#include <dataBase/XVector.h>
+//#include <dataBase/XVector.h>
 namespace render {
 	enum  class lib00_utilty_API graphicsItemType{
 		none,
@@ -279,16 +279,6 @@ namespace XQ {
 		int signbit(T a) {
 			return std::signbit(a) ? -1:1;
 		}
-
-		/// <summary>
-		/// 分割单位圆
-		/// </summary>
-		/// <param name="num">分割数量</param>
-		/// <param name="angle">被分割的圆的度数，单位角度 起始为X正半轴</param>
-		/// <returns></returns>
-		extern std::vector<XQ::Vec2f> lib00_utilty_API circleSplit(int num, float angle);
-
-		extern std::vector<XQ::Vec2f> lib00_utilty_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2);
 
 		static double randon_color() {
 			static std::random_device rd;

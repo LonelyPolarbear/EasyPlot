@@ -2,6 +2,7 @@
 #include "../xshapeApi.h"
 #include "xshapeSource.h"
 #include <lib00_utilty/XUtilty.h>
+#include <dataBase/XVector.h>
 #include <vector>
 #include "xrotateLoftedGeometrySource.h"
 
