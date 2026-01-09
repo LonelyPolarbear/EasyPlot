@@ -9,9 +9,10 @@ class  LIB_XRENDER_API XRenderCamera : public DataBaseObject {
 protected:
     XRenderCamera();
     ~XRenderCamera();
-
-    void Init() override;
     void render(sptr< XRender> render);
+public:
+    sptr<xcamera> getInnerCamera() const;
+    void Init() override;
  protected:
     sptr<xcamera> mCamera;
 };

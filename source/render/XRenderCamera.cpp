@@ -18,3 +18,8 @@ void XRenderCamera::Init()
 void XRenderCamera::render(sptr<XRender> render)
 {
 }
+
+sptr<xcamera> XRenderCamera::getInnerCamera() const
+{
+	return mCamera;
+}

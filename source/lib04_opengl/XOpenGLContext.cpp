@@ -106,19 +106,23 @@ XOpenGLContext::~XOpenGLContext()
 
 bool XOpenGLContext::makeCurrent()
 {
-	return wglMakeCurrent((HDC)nativeDisplay, (HGLRC)nativeContext);
+	if(isValid())
+		return wglMakeCurrent((HDC)nativeDisplay, (HGLRC)nativeContext);
+	return false;
 }
 
 void XOpenGLContext::doneCurrent()
 {
-	wglMakeCurrent(nullptr, nullptr);
+	if (isValid())
+		wglMakeCurrent(nullptr, nullptr);
 	//wglDeleteContext((HGLRC)nativeContext);
 	//ReleaseDC((HWND)winId(), (HDC)nativeDisplay);
 }
 
 void XOpenGLContext::swapBuffers()
 {
-	SwapBuffers((HDC)nativeDisplay);
+	if (isValid())
+		SwapBuffers((HDC)nativeDisplay);
 }
 
 void XOpenGLContext::setNativeContext(void* context)

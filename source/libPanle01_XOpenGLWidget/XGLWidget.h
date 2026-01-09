@@ -31,37 +31,22 @@ public:
 
 	~XGLWidget();
 public:
-	bool initOpenglContext();
-
-	void virtual initGLResource(){}
-
-	WId nativeHandle();
-
-	bool makeCurrent();
-
-	void doneCurrent();
-
-	void swapBuffers();
-
-	void resizeEvent(QResizeEvent* event) override;
-
-	void timerEvent(QTimerEvent* event) override;
-
-	void showEvent(QShowEvent* event) override;
-
+	std::shared_ptr<XOpenGLRenderWindow> getRenderWindow();
+	void renderTest();
+protected:
 	QPaintEngine* paintEngine()  const override;
 
 	void virtual render();
-
-	std::shared_ptr<XOpenGLContext> getContext() const;
 
 	//将窗口坐标转换为左下角屏幕坐标系列
 	XQ::Vec2u mapToGLScreen(const QPoint& point) const;
 
 	XQ::Vec2f mapToNormGLScreen(const QPoint& point) const;
 
+	bool initOpenglContext();
+protected:
 	//事件重写
-
+	void timerEvent(QTimerEvent* event) override;
 	void enterEvent(QEvent* event) override;
 	void leaveEvent(QEvent* event) override;
 	void mousePressEvent(QMouseEvent* event) override;
@@ -72,11 +57,12 @@ public:
 	void focusInEvent(QFocusEvent* event) override;
 	void focusOutEvent(QFocusEvent* event) override;
 	void wheelEvent(QWheelEvent* event) override;
+	void resizeEvent(QResizeEvent* event) override;
+	void showEvent(QShowEvent* event) override;
 protected:
 	bool m_isInit = false;
 	int mWidth =0;
 	int mHeight = 0;
 
-	//std::shared_ptr<XOpenGLContext> mContext;
 	std::shared_ptr<XOpenGLRenderWindow> mRenderWindow;
 };

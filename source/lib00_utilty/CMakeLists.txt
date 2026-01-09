@@ -1,17 +1,20 @@
 project(lib00_utilty)
 set(proName lib00_utilty)
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
+include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
 
-#递归目录获取所有c文件
-#file(GLOB_RECURSE SOURCES  *.cpp *.c *.h *.hpp)
-#SET(HERDERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/myUtilty.h)
-#SET(SOURECS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/myUtilty.cpp)
+file(GLOB_RECURSE HEADERS_FILES *.h *.hpp)
+file(GLOB_RECURSE SOURECS_FILES *.cpp)
 
-file(GLOB HEADERS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.h 
-																${CMAKE_CURRENT_SOURCE_DIR}/*.hpp
-															${CMAKE_CURRENT_SOURCE_DIR}/gp/*.hpp
-																)
-file(GLOB SOURECS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+#[[ //3.0引入
+file(GLOB_RECURSE ALL_SOURCES 
+    "*.cpp" "*.cxx" "*.cc" 
+    "*.h" "*.hpp" "*.hxx" "*.inl"
+)
+]]
+# 调用函数进行分组
+set(ALL_SOURCES ${HEADERS_FILES} ${SOURECS_FILES}) 
+group_source_files_by_directory(${ALL_SOURCES})
 
 #-------------------------------------------------------
 #设置依赖的动态库头文件目录
@@ -25,6 +28,8 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #设置依赖的动态库名称
 #-------------------------------------------------------
 SET(LIB_NAMES 	
+	dataBase${DLL_DEBUG_POSTFIX}
+	
 )
 
 set(LIB_DIRECTORIES 

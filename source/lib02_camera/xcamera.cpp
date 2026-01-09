@@ -29,8 +29,9 @@ Eigen::Matrix4f xcamera::perspective() const
 
 Eigen::Matrix4f xcamera::ortho() const
 {
-    float width = m_aspect * m_height;
-    return XQ::Matrix::ortho(-0.5*width,0.5*width,-0.5*m_height,0.5*m_height, m_znear, m_zfar);
+    auto height = getHeight();
+    float width = m_aspect * height;
+    return XQ::Matrix::ortho(-0.5*width,0.5*width,-0.5* height,0.5* height, m_znear, m_zfar);
 }
 
 //boundBox 是世界坐标系下的位置
@@ -84,8 +85,12 @@ void xcamera::resetCamera(const double boundBox[6])
     m.block(0, 3, 3, 1) = position;
     m_transform.matrix() = m;
 
-    m_height = radius;
-
+    //此处应该根据宽高比设置
+    //应该保证最小的宽或者高 >radius
+    if(m_aspect >1)    
+        setHeight(1.1 * radius);
+    else
+        setHeight(1.1 * radius / m_aspect);
     //near far调整
     if (m_type == cameraType::ortho) {
         m_zfar = radius * 2 + m_znear;
@@ -157,7 +162,7 @@ void xcamera::scale(float sacleFactor, bool isLast)
     }
     else {
 		//如果是正交投影,则需要修改m_height
-		m_height /= sacleFactor;
+        setHeight(m_height / sacleFactor);
     } 
 }
 
@@ -390,7 +395,7 @@ Eigen::Vector3f xcamera::billboard(float screenw, float screenh, float posx, flo
 float xcamera::scaleFactorH(float zValue, float screenw)
 {
     if (m_type == cameraType::ortho) {
-        float width = m_aspect * m_height;
+        float width = m_aspect * getHeight();
         return width / screenw;
     }
     else {
@@ -409,7 +414,7 @@ float xcamera::scaleFactorHZnear(float screenw)
 float xcamera::scaleFactorV(float zValue, float screenh)
 {
     if (m_type == cameraType::ortho) {
-        return m_height / screenh;
+        return getHeight() / screenh;
     }
     else {
         float half_height = zValue * tanf(XQ::Matrix::radian(0.5 * m_fovy));

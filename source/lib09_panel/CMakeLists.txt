@@ -71,6 +71,7 @@ SET(LIB_NAMES
 				Qt5::Core
 				glew32
 				myUtilty${DLL_DEBUG_POSTFIX}
+				dataBase${DLL_DEBUG_POSTFIX}
 	)
 
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin

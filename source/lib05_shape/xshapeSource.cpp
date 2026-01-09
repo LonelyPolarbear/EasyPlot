@@ -114,3 +114,8 @@ void XShapeSource::writeToFile(const std::string& filename)
 	
 	file.close();
 }
+
+void XShapeSource::Init()
+{
+	update();
+}

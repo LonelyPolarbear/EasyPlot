@@ -27,6 +27,7 @@ add_subdirectory(source/easyPlot)
 add_subdirectory(source/xsignal)
 
 add_dependencies(lib01_shader  dataBase)
+add_dependencies(lib00_utilty  dataBase)
 add_dependencies(lib02_camera  lib00_utilty)
 add_dependencies(lib04_opengl  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase)
 add_dependencies(render  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase lib04_opengl)

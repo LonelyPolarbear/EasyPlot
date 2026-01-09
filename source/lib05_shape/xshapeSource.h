@@ -41,6 +41,8 @@ public:
 
 	void writeToFile(const std::string& filename);
 
+	void Init() override;
+
 protected:
 	bool isNeedUpdate() { return m_DataModifyTime > m_updateTime; }
 	void setHasUpdated(){m_updateTime.Modified();}

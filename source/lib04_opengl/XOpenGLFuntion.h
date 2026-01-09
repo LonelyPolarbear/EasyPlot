@@ -2,6 +2,7 @@
 #include "XOpenglApi.h"
 #include "XOpenGLType.h"
 #include "dataBase/dataobject.h"
+#include "dataBase/XVector.h"
 
 class XOpenGLFramebufferObject;
 
@@ -112,4 +113,8 @@ public:
 	static std::vector<std::string> xglGetExtensions();
 
 	static bool xisExtensionSupported(const std::string& extensionName);
+
+	static XQ::Recti xglViewport(XQ::Recti rect);
+
+	static XQ::Recti xglglScissor(XQ::Recti rect);
 };

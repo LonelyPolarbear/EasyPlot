@@ -11,7 +11,8 @@ file(GLOB_RECURSE SOURECS_FILES  *.cpp *.c)
 #-------------------------------------------------------
 #设置依赖的动态库头文件目录
 #-------------------------------------------------------
-SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source 
+SET(LIB_INCLUDE_DIRECTORY 	
+													${CMAKE_SOURCE_DIR}/source 
 )
 
 #-------------------------------------------------------
@@ -26,7 +27,7 @@ set(LIB_DIRECTORIES
 														
 #生成动态库
 add_library(${proName}  SHARED)
-target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HERDERS_FILES})
+target_sources(${proName} PRIVATE  ${SOURECS_FILES} ${HERDERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE DATABASE_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "dataBase")

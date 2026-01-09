@@ -235,6 +235,26 @@ bool XOpenGLFuntion::xisExtensionSupported(const std::string& extensionName)
 	return false;
 }
 
+XQ::Recti XOpenGLFuntion::xglViewport(XQ::Recti rect)
+{
+	//读取之前的视口参数
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	glViewport(rect[0],rect[1],rect[2],rect[3]);
+	checkGLError();
+	return XQ::Recti(viewport[0],viewport[1],viewport[2],viewport[3]);
+}
+
+XQ::Recti XOpenGLFuntion::xglglScissor(XQ::Recti rect)
+{
+	//读取之前的视口参数
+	GLint scissor[4];
+	glGetIntegerv(GL_SCISSOR_BOX, scissor);
+	glScissor(rect[0], rect[1], rect[2], rect[3]);
+	checkGLError();
+	return XQ::Recti(scissor[0],scissor[1],scissor[2],scissor[3]);
+}
+
 /*
 最大本地工作组大小限制
 glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &maxLocalWorkGroupSize[0]); // X维度

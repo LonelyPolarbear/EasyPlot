@@ -148,9 +148,27 @@ easyPlotWidget::~easyPlotWidget()
 
 void easyPlotWidget::render()
 {
+#if 1
 	d->scene->render();
+	swapBuffers();
+#else
+	makeCurrent();
+	glViewport(0, 0, 300, 300);
+
+	GLint vp[4];
+	glGetIntegerv(GL_VIEWPORT, vp);
+	glClearColor(1.0f, 0.0f, 0.0f, 1.0f); 
+	glClear(GL_COLOR_BUFFER_BIT); 
+
+	glViewport(300, 0, 300, 300);
+
+	glGetIntegerv(GL_VIEWPORT, vp);
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT);  
 
 	swapBuffers();
+	doneCurrent();
+#endif
 }
 
 void easyPlotWidget::initGLResource()

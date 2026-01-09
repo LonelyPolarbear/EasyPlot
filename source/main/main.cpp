@@ -67,8 +67,9 @@ int main(int argc, char** argv) {
 	QApplication a(argc, argv);
 
 	QLoggingCategory::setFilterRules("qt.qpa.window.setGeometry=false");
-#if 0
+#if 1
 	XGLWidget w(nullptr);
+	w.renderTest();
 	w.resize(400, 300);
 	w.show();
 #else

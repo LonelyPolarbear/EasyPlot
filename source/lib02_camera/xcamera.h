@@ -110,8 +110,60 @@ public:
 
 	Eigen::Vector3f getPosition() const;
 
+	bool checkFloatWithEpsilon(double a, double b, double epsilon = 1e-9) {
+		// 排除等于1的情况（考虑精度）
+		auto notEqualToOne = [epsilon](double x) {
+			return std::abs(x - 1.0) > epsilon;
+			};
+
+		return notEqualToOne(a) && notEqualToOne(b) &&
+			((a > 1.0 && b < 1.0) || (a < 1.0 && b > 1.0));
+	}
+
 	void setAspect(float aspect) {
 		m_aspect = aspect;
+
+		//更新宽高比
+		
+		if (checkFloatWithEpsilon(aspect, m_HeightWithAspect)) {
+			//此时需要更改高度值
+			if (aspect > 1) {
+				//此时窗口属于宽窗口，原来是窄窗口
+				auto minWidth =getHeight() * m_HeightWithAspect;
+				setHeight(minWidth);
+			}
+			else {
+				//当前窗口属于窄窗口，原来是宽窗口
+				auto minHeight = getHeight();
+				setHeight(minHeight/aspect);
+			}
+		}
+		else {
+			#if 0
+			//同类变化，需要处理更窄或者更低的情况
+			if (aspect > 1) {
+				//说明都是宽屏，此时需要处理高度
+				if (m_HeightWithAspect < aspect) {
+					//说明宽屏在垂直方向压缩，需要处理，为了防止看不到，应该放大区域
+
+					
+				}
+				else {
+					//说明宽屏在水平方向压缩，不需要处理
+				}
+			}
+			else {
+				//说明都是窄屏，此时需要处理高度
+				if (m_HeightWithAspect > aspect) {
+					//说明窄屏在水平方向压缩，需要处理
+				}
+				else {
+					//说明窄屏在垂直方向压缩，不需要处理
+				}
+			}
+			#endif
+		}
+		
 	}
 
 	float getAspect() const {
@@ -140,6 +192,7 @@ public:
 
 	void setHeight(float height) {
 		m_height = height;
+		m_HeightWithAspect = m_aspect;
 	}
 public:
 	//透视投影
@@ -149,7 +202,8 @@ public:
 	float m_aspect = 4. / 3.;
 
 	//正交投影时候使用 m_znear m_zfar  m_aspect m_height
-	float m_height = 500;		
+	float m_height = 500;		//应该记录一下更改m_height时候宽高比
+	float m_HeightWithAspect = 4. / 3.;
 
 	cameraType m_type = cameraType::ortho;
 	

@@ -9,7 +9,7 @@
 //ubo，存储所有着色器需要的常量，且常量与具体模型无关，如当前鼠标的位置、屏幕大小等
 layout (std140, binding = 2) uniform ubo_fs
 {
-    vec2 screenSize;																									//屏幕大小
+    vec2 screenSize;																									//屏幕大小,是当前render的窗口大小
     vec2 setRealTimeMousePos;																				//鼠标实时位置，用于预选
 	vec4 sceneRect;																									//场景矩形,当前场景的位置，x y width height
 };
@@ -44,6 +44,7 @@ in vec4 in_color;
 
 void main()
 {	
+	#if 1
 	if(polygonMode == POLYGONMODE_FILL){
 			uint objectId = texelFetch( objectIdSample,ivec2(setRealTimeMousePos.x,setRealTimeMousePos.y),0).r;
 			uint primitiveId = texelFetch( objectIdSample,ivec2(setRealTimeMousePos.x,setRealTimeMousePos.y),0).g;
@@ -83,10 +84,12 @@ void main()
 	if(polygonMode == POLYGONMODE_LINE){
 		FragColor = vec4(0.0, 0.0, 1.0, 1.0);
 	}
-		
+	#endif
 	#if 0
 		vec2 coord = vec2( gl_FragCoord.x / float(screenSize.x), gl_FragCoord.y / float( screenSize.y));
 		float depthValue = texture(depthSample, coord.xy).r;
 		FragColor = vec4(vec3(depthValue), 1.0);
 	#endif
+
+	//FragColor = vec4(0.0, 0.0, 1.0, 1.0);
 }

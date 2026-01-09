@@ -6,15 +6,19 @@
 #include <QWindow>
 #include <QResizeEvent>
 
-#include <QDebug>
 #include <iostream>
 #include <chrono>
 
 #include <glew/wglew.h>
 #include "lib04_opengl/XOpenGLContext.h"
+#include "lib02_camera/xcamera.h"
+#include "lib05_shape/xchamferCubeSource.h"
+#include "lib05_shape/xconeSource.h"
+#include "lib05_shape/xshape.h"
 #include "render/XOpenGLRenderWindow.h"
-#include "render/XRenderWindowInteractor.h"
+#include "render/XRenderWindowEventDispatch.h"
 #include "render/XRender.h"
+#include "render/XRenderCamera.h"
 
 using namespace std::chrono_literals;
 
@@ -25,84 +29,76 @@ XGLWidget::XGLWidget(QWidget* parent) :QWidget(parent)
 	setAttribute(Qt::WA_NativeWindow, true);	// 强制使用原生窗口句柄
 	setAttribute(Qt::WA_NoSystemBackground, true);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
-
+	this->setMouseTracking(true);
 	this->startTimer(60ms);
 
 	mRenderWindow = makeShareDbObject<XOpenGLRenderWindow>();
-	auto render =makeShareDbObject<XRender>();
-	mRenderWindow->addRender(render);
-	render->setRenderWindow(mRenderWindow);
 }
 
 XGLWidget::~XGLWidget()
 {
-	/*makeCurrent();
-	doneCurrent();*/
 }
 
-bool XGLWidget::initOpenglContext()
+std::shared_ptr<XOpenGLRenderWindow> XGLWidget::getRenderWindow()
 {
-	mRenderWindow->SetWindowId(winId());
-	return true;
+	return mRenderWindow;
 }
 
-WId XGLWidget::nativeHandle()
+void XGLWidget::renderTest()
 {
-	return winId();
-}
+#if 1
+	{
+		auto render = makeShareDbObject<XRender>();
+		render->setActive(false);
+		render->setBackGroundColor1(255, 0, 0, 255);
+		render->setViewPort(0, 0, 0.5, 1);
+		mRenderWindow->addRender(render);
 
-bool XGLWidget::makeCurrent()
-{
-	return mRenderWindow->makeCurrent();
-}
+		sptr<xchamferCubeSource> cubeSource = makeShareDbObject<xchamferCubeSource>();
 
-void XGLWidget::doneCurrent()
-{
-	return mRenderWindow->doneCurrent();
-}
+		sptr<XShape> cubeActor = makeShareDbObject<XShape>();
 
-void XGLWidget::swapBuffers()
-{
-	return mRenderWindow->swapBuffers();
-}
+		cubeActor->setColorMode(ColorMode::FaceColor);
 
-void XGLWidget::resizeEvent(QResizeEvent* event)
-{
-	// 窗口大小改变事件处理
-	mWidth = event->size().width();
-	mHeight = event->size().height();
-	if (m_isInit) {
-		/*makeCurrent();
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glViewport(0, 0, event->size().width(), event->size().height());
-		doneCurrent();*/
+		cubeActor->setPolygonMode(PolygonMode::fill);
 
-		if (mRenderWindow) {
-			auto interactor = mRenderWindow->getInteractor();
-			interactor->SigResize(XQ::Vec2i(event->size().width(), event->size().height()));
-		}
+		cubeActor->setSingleColor(XQ::Vec4f(0, 0, 1, 1));
+
+		cubeActor->setInput(cubeSource);
+
+		cubeSource->Modified();
+
+		render->addActor3D(cubeActor);
+
+		render->fitView();
 	}
+#endif
+#if 1
+	{
+		auto render2 = makeShareDbObject<XRender>();
+		render2->setActive(false);
+		render2->setBackGroundColor1(0, 255, 0, 255);
+		render2->setViewPort(0.5, 0, 0.5, 1);
+		render2->getCamera()->getInnerCamera()->setType(xcamera::cameraType::perspective);
+		mRenderWindow->addRender(render2);
 
-	return QWidget::resizeEvent(event);
-}
+		sptr<xchamferCubeSource> cubeSource = makeShareDbObject<xchamferCubeSource>();
 
-void XGLWidget::timerEvent(QTimerEvent* event)
-{
-	// 定时器事件处理
-	if (!m_isInit)
-		return;
+		sptr<XShape> cubeActor = makeShareDbObject<XShape>();
 
-	render();
-}
+		cubeActor->setColorMode(ColorMode::SingleColor);
 
-void XGLWidget::showEvent(QShowEvent* event)
-{
-	if (m_isInit == false) {
-		initOpenglContext();
-		m_isInit = true;
-		initGLResource();
+		cubeActor->setSingleColor(XQ::Vec4f(0, 0, 1, 1));
+
+		cubeActor->setInput(cubeSource);
+
+		cubeSource->Modified();
+
+		render2->addActor3D(cubeActor);
+
+		render2->fitView();
 	}
-	return QWidget::showEvent(event);
+#endif
 }
 
 //QWidget::paintEngine: Should no longer be called
@@ -112,13 +108,10 @@ QPaintEngine* XGLWidget::paintEngine() const
 }
 
 void XGLWidget::render()
-{
+{	
 	mRenderWindow->render();
 }
 
-std::shared_ptr<XOpenGLContext> XGLWidget::getContext() const{
-	return mRenderWindow->getContext();
-}
 
 XQ::Vec2u  XGLWidget::mapToGLScreen(const QPoint& point) const{
 	XQ::Vec2u p;
@@ -134,11 +127,17 @@ XQ::Vec2f  XGLWidget::mapToNormGLScreen(const QPoint& point) const{
 	return p;
 }
 
+bool XGLWidget::initOpenglContext()
+{
+	mRenderWindow->SetWindowId(winId());
+	return true;
+}
+
 void XGLWidget::enterEvent(QEvent* event)
 {
 	if (mRenderWindow) {
-		auto interactor = mRenderWindow->getInteractor();
-		interactor->SigEnter();
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		eventDispatcher->SigEnter();
 	}
 	return QWidget::enterEvent(event);
 }
@@ -146,8 +145,8 @@ void XGLWidget::enterEvent(QEvent* event)
 void XGLWidget::leaveEvent(QEvent* event)
 {
 	if (mRenderWindow) {
-		auto interactor = mRenderWindow->getInteractor();
-		interactor->SigLeave();
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		eventDispatcher->SigLeave();
 	}
 	return QWidget::leaveEvent(event);
 }
@@ -158,19 +157,19 @@ void XGLWidget::mousePressEvent(QMouseEvent* event)
 		const QEvent::Type t = event->type();
 		auto modifiers =(uint32_t) event->modifiers();
 		XQ::KeyboardModifier m =(XQ::KeyboardModifier) modifiers;
-		auto interactor = mRenderWindow->getInteractor();
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
 		switch (event->button())
 		{
 		case Qt::LeftButton:
-			interactor->SigLeftButtonPress(mapToGLScreen(event->pos()),m);
+			eventDispatcher->SigLeftButtonPress(mapToGLScreen(event->pos()),m);
 			break;
 
 		case Qt::MidButton:
-			interactor->SigMiddleButtonPress(mapToGLScreen(event->pos()),m );
+			eventDispatcher->SigMiddleButtonPress(mapToGLScreen(event->pos()),m );
 			break;
 
 		case Qt::RightButton:
-			interactor->SigRightButtonPress(mapToGLScreen(event->pos()), m);
+			eventDispatcher->SigRightButtonPress(mapToGLScreen(event->pos()), m);
 			break;
 
 		default:
@@ -186,7 +185,7 @@ void XGLWidget::mouseMoveEvent(QMouseEvent* event)
 		const QEvent::Type t = event->type();
 		auto modifiers = (uint32_t)event->modifiers();
 		XQ::KeyboardModifier m = (XQ::KeyboardModifier)modifiers;
-		mRenderWindow->getInteractor()->SigMouseMove(mapToGLScreen(event->pos()), m);
+		mRenderWindow->getEventDispatcher()->SigMouseMove(mapToGLScreen(event->pos()), m);
 	}
 }
 
@@ -196,19 +195,19 @@ void XGLWidget::mouseReleaseEvent(QMouseEvent* event)
 		const QEvent::Type t = event->type();
 		auto modifiers = (uint32_t)event->modifiers();
 		XQ::KeyboardModifier m = (XQ::KeyboardModifier)modifiers;
-		auto interactor = mRenderWindow->getInteractor();
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
 		switch (event->button())
 		{
 		case Qt::LeftButton:
-			interactor->SigLeftButtonRelease(mapToGLScreen(event->pos()), m);
+			eventDispatcher->SigLeftButtonRelease(mapToGLScreen(event->pos()), m);
 			break;
 
 		case Qt::MidButton:
-			interactor->SigMiddleButtonRelease(mapToGLScreen(event->pos()), m);
+			eventDispatcher->SigMiddleButtonRelease(mapToGLScreen(event->pos()), m);
 			break;
 
 		case Qt::RightButton:
-			interactor->SigRightButtonRelease(mapToGLScreen(event->pos()), m);
+			eventDispatcher->SigRightButtonRelease(mapToGLScreen(event->pos()), m);
 			break;
 
 		default:
@@ -223,8 +222,8 @@ void XGLWidget::keyPressEvent(QKeyEvent* event)
 	XQ::Key key= (XQ::Key)((uint32_t)event->key());
 	XQ::KeyboardModifier modifiers = (XQ::KeyboardModifier)( (uint32_t)event->modifiers());
 	if (mRenderWindow) {
-		auto interactor = mRenderWindow->getInteractor();
-		interactor->SigKeyPress(key, modifiers);
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		eventDispatcher->SigKeyPress(key, modifiers);
 	}
 	return QWidget::keyPressEvent(event);
 }
@@ -234,8 +233,8 @@ void XGLWidget::keyReleaseEvent(QKeyEvent* event)
 	XQ::Key key = (XQ::Key)((uint32_t)event->key());
 	XQ::KeyboardModifier modifiers = (XQ::KeyboardModifier)((uint32_t)event->modifiers());
 	if (mRenderWindow) {
-		auto interactor = mRenderWindow->getInteractor();
-		interactor->SigKeyRelease(key, modifiers);
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		eventDispatcher->SigKeyRelease(key, modifiers);
 	}
 	return QWidget::keyReleaseEvent(event);
 }
@@ -243,8 +242,8 @@ void XGLWidget::keyReleaseEvent(QKeyEvent* event)
 void XGLWidget::focusInEvent(QFocusEvent* event)
 {
 	if (mRenderWindow) {
-		auto interactor = mRenderWindow->getInteractor();
-		interactor->SigFoucsIn();
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		eventDispatcher->SigFoucsIn();
 	}
 	return QWidget::focusInEvent(event);
 }
@@ -252,8 +251,8 @@ void XGLWidget::focusInEvent(QFocusEvent* event)
 void XGLWidget::focusOutEvent(QFocusEvent* event)
 {
 	if (mRenderWindow) {
-		auto interactor = mRenderWindow->getInteractor();
-		interactor->SigFoucsOut();
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		eventDispatcher->SigFoucsOut();
 	}
 	return QWidget::focusOutEvent(event);
 }
@@ -263,14 +262,48 @@ void XGLWidget::wheelEvent(QWheelEvent* event)
 	auto angle = event->angleDelta().y();
 	if (mRenderWindow) {
 		XQ::KeyboardModifier modifiers = (XQ::KeyboardModifier)((uint32_t)event->modifiers());
-		auto interactor = mRenderWindow->getInteractor();
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
 		if (angle > 0) {
-			interactor->SigMouseWheelForward(mapToGLScreen(event->pos()),modifiers);
+			eventDispatcher->SigMouseWheelForward(mapToGLScreen(event->pos()),modifiers);
 		}
 		else {
-			interactor->SigMouseWheelBackward(mapToGLScreen(event->pos()), modifiers);
+			eventDispatcher->SigMouseWheelBackward(mapToGLScreen(event->pos()), modifiers);
 		}
 	}
-
 	return QWidget::wheelEvent(event);
+}
+
+void XGLWidget::resizeEvent(QResizeEvent* event)
+{
+	// 窗口大小改变事件处理
+	mWidth = event->size().width();
+	mHeight = event->size().height();
+	if (m_isInit) {
+		if (mRenderWindow) {
+			auto interactor = mRenderWindow->getEventDispatcher();
+			interactor->SigResize(XQ::Vec2i(event->size().width(), event->size().height()));
+		}
+	}
+	return QWidget::resizeEvent(event);
+}
+
+void XGLWidget::timerEvent(QTimerEvent* event)
+{
+	if (!m_isInit)
+		return;
+
+	render();
+}
+
+void XGLWidget::showEvent(QShowEvent* event)
+{
+	if (m_isInit == false) {
+		initOpenglContext();
+		m_isInit = true;
+	}
+	if (mRenderWindow) {
+		auto interactor = mRenderWindow->getEventDispatcher();
+		interactor->SigResize(XQ::Vec2i(width(), height()));
+	}
+	return QWidget::showEvent(event);
 }
