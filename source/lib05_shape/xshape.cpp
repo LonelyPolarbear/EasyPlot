@@ -9,7 +9,7 @@
 
 #include <glew/glew.h>
 
-#include "xshapeSource.h"
+#include "datasource/xshapeSource.h"
 
 static std::atomic< uint64_t>  object_id_counter(0);
 

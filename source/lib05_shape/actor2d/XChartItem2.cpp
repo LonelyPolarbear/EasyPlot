@@ -1,14 +1,14 @@
 #include "XChartItem2.h"
 #include "XGridItem.h"
 #include <lib04_opengl/XOpenGLBuffer.h>
-#include "lib05_shape/XPolyline.h"
+#include "lib05_shape/actor2d/XPolyline.h"
 #include <Eigen/Eigen>
 
 #include <lib04_opengl/XOpenGLEnable.h>
-#include "lib05_shape/XTextItem.h"
-#include "lib05_shape/XAxisItem.h"
-#include "lib05_shape/XLineItem.h"
-#include "lib05_shape/XLegendItem.h"
+#include "lib05_shape/actor2d/XTextItem.h"
+#include "lib05_shape/actor2d/XAxisItem.h"
+#include "lib05_shape/actor2d/XLineItem.h"
+#include "lib05_shape/actor2d/XLegendItem.h"
 #include <Eigen/Eigen>
 
 

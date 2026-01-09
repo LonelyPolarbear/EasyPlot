@@ -1,5 +1,5 @@
 #pragma once
-#include "XGraphicsItem.h"
+#include "../XGraphicsItem.h"
 #include "XCompositeItem.h"
 #include "XRectItem.h"
 class LIB05_SHAPE_API XLegendRowItem :public XRectItem {

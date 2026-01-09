@@ -2,7 +2,7 @@
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <lib01_shader/xshaderManger.h>
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
-#include <lib05_shape/XTransformItem.h>
+#include "lib05_shape/actor2d/XTransformItem.h"
 
 XGridItem::XGridItem(std::shared_ptr< XGraphicsItem> parent):XGraphicsItem(parent)
 {

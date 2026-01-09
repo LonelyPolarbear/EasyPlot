@@ -1,5 +1,5 @@
 #pragma once
-#include "XGraphicsItem.h"
+#include "../XGraphicsItem.h"
 #include "XTextItem.h"
 
 

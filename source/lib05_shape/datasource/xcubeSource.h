@@ -1,12 +1,12 @@
 #pragma once
-#include "xshapeApi.h"
+#include "../xshapeApi.h"
 #include "xshapeSource.h"
 
-class LIB05_SHAPE_API xchamferCubeSource : public XShapeSource {
+class LIB05_SHAPE_API XCubeSource : public XShapeSource {
 protected:
-	xchamferCubeSource();
+	XCubeSource();
 
-	~xchamferCubeSource();
+	~XCubeSource();
 
 public:
 	void updateVertextCoordArray() override;

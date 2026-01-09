@@ -1,5 +1,5 @@
 #pragma once
-#include "XGraphicsItem.h"
+#include "../XGraphicsItem.h"
 
 
 class LIB05_SHAPE_API XLineItem :public XGraphicsItem {

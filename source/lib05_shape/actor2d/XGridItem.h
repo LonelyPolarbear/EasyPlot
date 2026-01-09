@@ -1,5 +1,5 @@
 #pragma once
-#include "XGraphicsItem.h"
+#include "../XGraphicsItem.h"
 #include <lib00_utilty/myUtilty.h>
 #include <Eigen/Eigen>
 

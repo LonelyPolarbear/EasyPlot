@@ -7,6 +7,10 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 file(GLOB_RECURSE HERDERS_FILES *.h)
 file(GLOB_RECURSE SOURECS_FILES *.cpp)
 
+# 调用函数进行分组
+set(ALL_SOURCES ${HERDERS_FILES} ${SOURECS_FILES}) 
+group_source_files_by_directory(${ALL_SOURCES})
+
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
 SET(DLL_DEBUG_POSTFIX "_d")  
 else() 

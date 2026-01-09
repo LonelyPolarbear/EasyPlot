@@ -1,5 +1,4 @@
 #pragma once
-#include "XGraphicsItem.h"
 #include "XRectItem.h"
 class LIB05_SHAPE_API XCheckBoxItem :public XRectItem {
 public:

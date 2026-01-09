@@ -1,4 +1,4 @@
-#include "xshape.h"
+//#include "xshape.h"
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
 #include <lib00_utilty/myUtilty.h>
