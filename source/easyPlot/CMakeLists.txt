@@ -17,7 +17,7 @@ file(GLOB_RECURSE SOURCES_FILES *.cpp)
 #Qt支持
 #-------------------------------------------------------
 #查找所有的需要moc预处理的文件
-set(MOC_FILES easyPlotWidget.h)
+set(MOC_FILES easyPlotWidget.h XEasyPlotWidget.h)
 
 #GLOB_RECURSE 
 FILE(GLOB UI_FILES "ui/*.ui")
@@ -84,6 +84,7 @@ SET(LIB_NAMES
 				xfreetype${DLL_DEBUG_POSTFIX}
 				stbImage${DLL_DEBUG_POSTFIX}
 				xpanel${DLL_DEBUG_POSTFIX}
+				xrender${DLL_DEBUG_POSTFIX}
 	)
 
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin

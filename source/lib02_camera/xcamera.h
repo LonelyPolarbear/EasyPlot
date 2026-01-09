@@ -8,7 +8,7 @@
 
 #include <Eigen/Eigen>
 #include <dataBase/dataobject.h>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 class lib02_CAMERA_API xcamera:public DataBaseObject
 {
 public:

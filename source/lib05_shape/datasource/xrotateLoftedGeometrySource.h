@@ -1,7 +1,7 @@
 #pragma once
 #include "../xshapeApi.h"
 #include "xshapeSource.h"
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 #include <vector>
 
 

@@ -2,7 +2,7 @@
 #define FONTSETDLG_H
 
 #include <QDialog>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 #include "XPanleApi.h"
 
 namespace Ui {

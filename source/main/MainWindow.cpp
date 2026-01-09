@@ -7,7 +7,7 @@
 #include<easyPlot/easyPlotWidget.h>
 
 #include <qtoolbutton.h>
-#include <lib05_shape/XRectItem.h>
+#include "lib05_shape/actor2d/XRectItem.h"
 #include <lib09_panel/ColorPickButton.h>
 #include <lib09_panel/CustomToolButton.h>
 

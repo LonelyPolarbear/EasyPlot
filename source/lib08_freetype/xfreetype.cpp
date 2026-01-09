@@ -13,7 +13,7 @@
 #include <QImage>
 #include <QString>
 #include <regex>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 
 FT_Library ft;
 FT_Face face;

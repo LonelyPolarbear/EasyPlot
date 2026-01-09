@@ -1,7 +1,7 @@
 #pragma once
 #include "XRenderApi.h"
 #include <dataBase/dataobject.h>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 #include <lib01_shader/xshaderManger.h>
 
 class XOpenGLContext;

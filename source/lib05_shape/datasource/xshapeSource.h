@@ -4,7 +4,7 @@
 #include <dataBase/dataobject.h>
 #include <dataBase/XDataArray.h>
 
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 
 class LIB05_SHAPE_API XShapeSource:public DataBaseObject {
 protected:

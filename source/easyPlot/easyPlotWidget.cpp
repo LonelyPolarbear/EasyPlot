@@ -9,7 +9,7 @@
 #include <lib01_shader/XComputeShader.h>
 #include <lib01_shader/xshaderManger.h>
 #include <lib02_camera/xcamera.h>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 
 #include <QMouseEvent> 
 #include <QWheelEvent> 
@@ -23,28 +23,28 @@
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
 #include <lib04_opengl/XOpenGLFramebufferObject.h>
 
-#include <lib05_shape/xsphereSource.h>
-#include <lib05_shape/xfileSource.h>
-#include <lib05_shape/xcubeSource.h>
-#include <lib05_shape/xchamferCubeSource.h>
-#include <lib05_shape/xregularPrimSource.h>
-#include <lib05_shape/xcylinderSource.h>
-#include <lib05_shape/xconeSource.h>
+#include <lib05_shape/datasource/xsphereSource.h>
+#include <lib05_shape/datasource/xfileSource.h>
+#include <lib05_shape/datasource/xcubeSource.h>
+#include <lib05_shape/datasource/xchamferCubeSource.h>
+#include <lib05_shape/datasource/xregularPrimSource.h>
+#include <lib05_shape/datasource/xcylinderSource.h>
+#include <lib05_shape/datasource/xconeSource.h>
 #include <lib05_shape/xshape.h>
 #include <lib05_shape/XGraphicsItem.h>
-#include <lib05_shape/XRectItem.h>
-#include <lib05_shape/XLineItem.h>
-#include <lib05_shape/XBarItem.h>
-#include <lib05_shape/XChartItem.h>
-#include <lib05_shape/XChartItem2.h>
-#include <lib05_shape/XPolyline.h>
-#include <lib05_shape/XTextItem.h>
-#include <lib05_shape/XScreenTextItem.h>
-#include <lib05_shape/XAxisItem.h>
-#include <lib05_shape/XGridItem.h>
-#include <lib05_shape/XCheckBoxItem.h>
-#include <lib05_shape/XLegendRowItem.h>
-#include <lib05_shape/XLegendItem.h>
+#include <lib05_shape/actor2d/XRectItem.h>
+#include <lib05_shape/actor2d/XLineItem.h>
+#include <lib05_shape/actor2d/XBarItem.h>
+#include <lib05_shape/actor2d/XChartItem.h>
+#include <lib05_shape/actor2d/XChartItem2.h>
+#include <lib05_shape/actor2d/XPolyline.h>
+#include <lib05_shape/actor2d/XTextItem.h>
+#include <lib05_shape/actor2d/XScreenTextItem.h>
+#include <lib05_shape/actor2d/XAxisItem.h>
+#include <lib05_shape/actor2d/XGridItem.h>
+#include <lib05_shape/actor2d/XCheckBoxItem.h>
+#include <lib05_shape/actor2d/XLegendRowItem.h>
+#include <lib05_shape/actor2d/XLegendItem.h>
 
 #include <lib06_select/xviewselection.h>
 #include <lib07_scene/xscene.h>

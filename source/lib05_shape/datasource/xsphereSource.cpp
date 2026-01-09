@@ -1,7 +1,7 @@
 //#include "xshape.h"
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 #include <lib01_shader/xshader.h>
 #include <glew/glew.h>
 

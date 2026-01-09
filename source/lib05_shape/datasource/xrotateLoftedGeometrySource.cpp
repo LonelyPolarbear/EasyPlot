@@ -1,5 +1,5 @@
 #include "xrotateLoftedGeometrySource.h"
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 
 XRotateLoftedgeometrySource::XRotateLoftedgeometrySource()
 {

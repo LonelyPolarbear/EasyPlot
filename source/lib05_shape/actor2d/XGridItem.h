@@ -1,6 +1,6 @@
 #pragma once
 #include "../XGraphicsItem.h"
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 #include <Eigen/Eigen>
 
 class XTransformItem;

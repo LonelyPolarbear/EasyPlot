@@ -4,7 +4,7 @@
 #include "lib04_opengl/XOpenGLFramebufferObject.h"
 #include "lib06_select/xviewselection.h"
 #include "lib06_select/xviewselection2d.h"
-#include "lib00_utilty/myUtilty.h"
+#include "lib00_utilty/XUtilty.h"
 #include<Eigen/Eigen>
 #include <dataBase/XDataArray.h>
 class XShape;

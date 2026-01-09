@@ -1,6 +1,6 @@
 #include "xshaderManger.h"
 #include "xshader.h"
-#include "lib00_utilty/myUtilty.h"
+#include "lib00_utilty/XUtilty.h"
 
 class xShaderManger::Interal {
 	std::map<int,std::shared_ptr<xshader>> shaders3D;			//针对不同的图元类型，保存对应的着色器

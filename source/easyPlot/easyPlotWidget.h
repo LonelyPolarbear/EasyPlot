@@ -5,8 +5,8 @@
 #define lib06_easyplot_API __declspec(dllimport)
 #endif 
 
-#include <libPanle01_XOpenGLWidget/XOpenGLWidget.h>
-#include <lib00_utilty/myUtilty.h>
+#include <XOpenGLWidget/XOpenGLWidget.h>
+#include <lib00_utilty/XUtilty.h>
 #include <dataBase/XDataArray.h>
 
 class QOpenGLContext;

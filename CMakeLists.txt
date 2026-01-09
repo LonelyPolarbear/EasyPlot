@@ -15,11 +15,7 @@ add_subdirectory(source/lib07_scene)
 add_subdirectory(source/lib08_freetype)
 add_subdirectory(source/lib09_panel)
 
-add_subdirectory(source/libPanle01_XOpenGLWidget)
-#add_subdirectory(source/libPanle02_OpenGLWidget1)
-#add_subdirectory(source/libPanle03_OpenGLWidget2)
-#add_subdirectory(source/libPanle04_OpenGLWidgetCube)
-#add_subdirectory(source/libPanle05_multiPolygonMode)
+add_subdirectory(source/XOpenGLWidget)
 
 add_subdirectory(source/main)
 
@@ -30,21 +26,13 @@ add_dependencies(lib01_shader  dataBase)
 add_dependencies(lib00_utilty  dataBase)
 add_dependencies(lib02_camera  lib00_utilty)
 add_dependencies(lib04_opengl  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase)
-add_dependencies(render  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase lib04_opengl)
+add_dependencies(render  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase lib04_opengl lib05_shape)
 add_dependencies(lib05_shape  lib04_opengl)
 add_dependencies(lib06_select  lib04_opengl lib02_camera lib01_shader lib00_utilty lib05_shape)
 add_dependencies(lib07_scene  lib04_opengl lib02_camera lib01_shader lib00_utilty lib06_select lib05_shape)
 add_dependencies(lib08_freetype   lib00_utilty dataBase)
-add_dependencies(libPanle01_XOpenGLWidget  lib00_utilty lib01_shader lib02_camera lib04_opengl render)
-#add_dependencies(libPanle02_OpenGLWidget1  libPanle01_XOpenGLWidget)
-#add_dependencies(libPanle03_OpenGLWidget2  libPanle01_XOpenGLWidget)
-#add_dependencies(libPanle04_OpenGLWidgetCube  libPanle01_XOpenGLWidget)
+add_dependencies(XOpenGLWidget  lib00_utilty lib01_shader lib02_camera lib04_opengl render)
 
-#add_dependencies(libPanle05_multiPolygonMode  libPanle01_XOpenGLWidget)
-add_dependencies(easyPlot  libPanle01_XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel)
+add_dependencies(easyPlot  XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel render)
 add_dependencies(lib09_panel  lib00_utilty)
-#									libPanle02_OpenGLWidget1 
-#									libPanle03_OpenGLWidget2
-#									libPanle04_OpenGLWidgetCube
-#									libPanle05_multiPolygonMode
 add_dependencies(main easyPlot lib09_panel)

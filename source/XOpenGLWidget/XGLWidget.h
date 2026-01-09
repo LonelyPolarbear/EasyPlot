@@ -7,7 +7,7 @@
 #endif 
 
 #include <QWidget>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 
 class QOpenGLContext;
 class QWindow;
@@ -32,7 +32,6 @@ public:
 	~XGLWidget();
 public:
 	std::shared_ptr<XOpenGLRenderWindow> getRenderWindow();
-	void renderTest();
 protected:
 	QPaintEngine* paintEngine()  const override;
 

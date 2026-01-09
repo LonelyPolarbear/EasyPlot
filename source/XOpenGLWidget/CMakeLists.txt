@@ -1,6 +1,6 @@
 #set(CMAKE_PROJECT_NAME "XGLWidget")
-project(libPanle01_XOpenGLWidget)
-set(proName libPanle01_XOpenGLWidget)
+project(XOpenGLWidget)
+set(proName XOpenGLWidget)
 
 
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
@@ -10,7 +10,7 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
 #-------------------------------------------------------
 #设置包含的头文件
 #-------------------------------------------------------
-include_directories(${PROJECT_SOURCE_DIR}/source/libPanle01_XOpenGLWidget)
+include_directories(${PROJECT_SOURCE_DIR}/source/XOpenGLWidget)
 
 #递归目录获取所有源文件
 #set(SOURCES_FILES	    XOpenGLWidget.cpp)

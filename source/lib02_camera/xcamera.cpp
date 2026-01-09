@@ -2,7 +2,7 @@
 //#include <glm/glm.hpp>
 //#include <glm/gtc/matrix_transform.hpp>
 #include "xcamera.h"
-#include "lib00_utilty/myUtilty.h"
+#include "lib00_utilty/XUtilty.h"
 #include<iostream>
 
 xcamera::xcamera()

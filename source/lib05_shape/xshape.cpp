@@ -4,7 +4,7 @@
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
 
 #include <Eigen/Eigen>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 #include <lib01_shader/xshaderManger.h>
 
 #include <glew/glew.h>

@@ -2,7 +2,7 @@
 #include "XRenderApi.h"
 #include "XRenderType.h"
 #include <dataBase/dataobject.h>
-#include <lib00_utilty/myUtilty.h>
+#include <lib00_utilty/XUtilty.h>
 #include <xsignal/XSignal.h>
 
 class XInteractionEventHandler : public DataBaseObject{

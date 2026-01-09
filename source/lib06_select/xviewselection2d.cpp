@@ -5,7 +5,7 @@
 #include "lib01_shader/xshader.h"
 #include <glew/glew.h>
 #include <lib05_shape/XGraphicsItem.h>
-#include <lib05_shape/XScreenTextItem.h>
+#include <lib05_shape/actor2d/XScreenTextItem.h>
 #include <lib02_camera/xcamera.h>
 
 class XViewSelection2D::Internal {

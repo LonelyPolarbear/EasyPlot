@@ -12,14 +12,14 @@
 #include <glew/glew.h>
 #include <lib05_shape/xshape.h>
 #include <lib05_shape/XGraphicsItem.h>
-#include <lib05_shape/XRectItem.h>
-#include <lib05_shape/XGridItem.h>
-#include <lib05_shape/XScreenTextItem.h>
+#include <lib05_shape/actor2d/XRectItem.h>
+#include <lib05_shape/actor2d/XGridItem.h>
+#include <lib05_shape/actor2d/XScreenTextItem.h>
 #include <lib02_camera/xcamera.h>
 #include <set>
 #include <iostream>
-#include <lib05_shape/xCustomSource.h>
-#include <lib05_shape/xchamferCubeSource.h>
+#include <lib05_shape/datasource/xCustomSource.h>
+#include <lib05_shape/datasource/xchamferCubeSource.h>
 
 #include <dataBase/XDataArray.h>
 

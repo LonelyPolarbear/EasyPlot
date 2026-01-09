@@ -2,11 +2,12 @@
 #include <QApplication>
 #include <filesystem>
 #include <thread>
-#include<lib00_utilty/myUtilty.h>
+#include<lib00_utilty/XUtilty.h>
 #include<dataBase/dataobject.h>
 #include<dataBase/XDataArray.h>
-#include<libPanle01_XOpenGLWidget/XGLWidget.h>
-#include<libPanle01_XOpenGLWidget/XOpenGLWidget.h>
+#include<XOpenGLWidget/XGLWidget.h>
+#include<XOpenGLWidget/XOpenGLWidget.h>
+#include <easyPlot/XEasyPlotWidget.h>
 #include "mainwindow.h"
 
 #include <QLoggingCategory>
@@ -68,8 +69,7 @@ int main(int argc, char** argv) {
 
 	QLoggingCategory::setFilterRules("qt.qpa.window.setGeometry=false");
 #if 1
-	XGLWidget w(nullptr);
-	w.renderTest();
+	XEasyPlotWidget w(nullptr);
 	w.resize(400, 300);
 	w.show();
 #else
