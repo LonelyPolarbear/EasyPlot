@@ -5,7 +5,7 @@
 #include <lib02_camera/xcamera.h>
 
 #include <glew/glew.h>
-#include "xshape.h"
+#include "XGeometryNode.h"
 
 #include <lib04_opengl/XOpenGLEnable.h>
 #include <lib01_shader/xshaderManger.h>

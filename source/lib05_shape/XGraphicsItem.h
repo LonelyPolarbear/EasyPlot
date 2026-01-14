@@ -7,7 +7,7 @@
 #include <dataBase/XVector.h>
 #include <mutex>
 #include <dataBase/XDataArray.h>
-#include "xshape.h"
+#include "XGeometryNode.h"
 
 class xshader;
 class xcamera;

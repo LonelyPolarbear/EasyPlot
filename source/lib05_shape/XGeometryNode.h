@@ -9,34 +9,16 @@
 #include <dataBase/XDataArray.h>
 #include <glew/glew.h>
 #include <lib01_shader/xshader.h>
+#include "XRenderNode.h"
 
-class XOpenGLVertexArrayObject;
-class XOpenGLBuffer;
-class XShapeSource;
+#include "mapper/XPolyDataMapper.h"
+
 class xShaderManger;
 
-enum class LIB05_SHAPE_API  ColorMode {
-	SingleColor =1,
-	VertexColor =2,
-	FaceColor =3,
-	textureColor =4,
-	SelectTest=5						//用于拾取判断
-};
-
-enum class LIB05_SHAPE_API  PolygonMode {
-	point =1,
-	line =2,
-	fill =3,
-	line_fill =4
-};
-
-/// <summary>
-/// XShape是所有自定义图形的基类，它提供了一些基本的接口，包括初始化资源、绘制、修改标志位等。
-/// </summary>
-class LIB05_SHAPE_API XShape:public DataBaseObject {
+class LIB05_SHAPE_API XGeometryNode:public XRenderNode3D {
 public:
-    XShape();
-    virtual ~XShape();
+    XGeometryNode();
+    virtual ~XGeometryNode();
 
     /// <summary>
     /// 由外部指定的着色器进行绘制
@@ -51,13 +33,7 @@ public:
 
 	virtual void drawInstance() {};
 
-    virtual void initResource();
-
-	virtual void initiallize();
-
 	int64_t getID() const;
-
-	void bindSSBO();
 
 	void translate(float x, float y, float z);
 	void setPosition(float x, float y, float z);
@@ -101,39 +77,13 @@ public:
 
 	std::shared_ptr<xShaderManger> getShaderManger() const;
 
-	//CPU端数据输入
-	std::shared_ptr<XFloatArray> getCoordAarray() const;
-	std::shared_ptr<XFloatArray> getNormalArray() const;
-	std::shared_ptr<XFloatArray> getVertexColorArray() const;
-	std::shared_ptr<XFloatArray> getFaceColorArray() const;
-	std::shared_ptr<XUIntArray> getIndexsArray() const;
-
-	//GPU端数据更新
-	virtual void updateData();
-
-	void setInput(std::shared_ptr<XShapeSource> input);
-
-	std::shared_ptr<XShapeSource> getInput() const {
-		return m_Input;
-	}
-
 	XQ::BoundBox getBoundBox() const;
+
+	void setPolyDataMapper(sptr<XPolyDataMapper> mapper);
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;
  protected:
-	//GPU端对象
-	sptr<XOpenGLVertexArrayObject> m_vao;					//VAO
-	sptr<XOpenGLBuffer> m_vbo_coord;							//顶点坐标，必须有
-	sptr<XOpenGLBuffer> m_vbo_normal;						//法线
-	sptr<XOpenGLBuffer> m_vbo_color;							//颜色
-	sptr<XOpenGLBuffer> m_ssbo_color;							//每个片元的颜色
-	sptr<XOpenGLBuffer> m_ebo;										//EBO
-	
-	//CPU端数据
-	sptr<XShapeSource> m_Input;;
-
-	//着色器相关设置
 	ColorMode m_colorMode = ColorMode::FaceColor;
 	PrimitveType m_drawType = PrimitveType::triangle;
 	PolygonMode m_polygonMode = PolygonMode::line_fill;
@@ -145,4 +95,5 @@ private:
 	XTimeStamp m_UpdateTime;
 	bool m_visible = true;
 	sptr<xShaderManger> m_shaderManger;
+	sptr<XPolyDataMapper> m_polyMapper;
 };
