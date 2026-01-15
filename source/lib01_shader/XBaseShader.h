@@ -3,7 +3,7 @@
 
 #include<string>
 #include <Eigen/Eigen>
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include "xshaderApi.h"
 
 //着色器类
@@ -22,7 +22,7 @@ enum class lib01_shader_API  PrimitveType {
 	polygon = 0x0009,					                //GL_POLYGON = 0x0009;			 核心模式中已被移除（仅兼容模式支持），不推荐使用：
 };
 
-class lib01_shader_API XBaseShader:public DataBaseObject{
+class lib01_shader_API XBaseShader:public XDataBaseObject{
     public:
     enum class ShaderType {
         VERTEX,

@@ -1,9 +1,9 @@
 #pragma once
 #include "XOpenglApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <glew/glew.h>
 
-class LIB04_OPENGL_API XOpenGLEnable :public DataBaseObject {
+class LIB04_OPENGL_API XOpenGLEnable :public XDataBaseObject {
 public:
 enum class EnableType:unsigned int {
 	DEPTH_TEST = 0x0B71,							//GL_DEPTH_TEST

@@ -122,13 +122,7 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 		auto curpos = getRender()->window2render(windowpos);
 		auto viewport = getRender()->getConvertViewPort();
 		
-		getRender()->getCamera()->getInnerCamera()->transformTrackball(
-			Eigen::Vector2f(curpos[0], curpos[1]),
-			Eigen::Vector2f(mData->mouseLstPos[0], mData->mouseLstPos[1]),
-			viewport[2],
-			viewport[3],
-			true,true
-		);
+		getRender()->getCamera()->rotate(curpos,mData->mouseLstPos,viewport[2],viewport[3]);
 
 		//更新位置
 		mData->mouseLstPos = getRender()->window2render(windowpos);
@@ -138,13 +132,7 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 		auto curpos = getRender()->window2render(windowpos);
 		auto viewport = getRender()->getConvertViewPort();
 
-		getRender()->getCamera()->getInnerCamera()->transformTrackball(
-			Eigen::Vector2f(curpos[0], curpos[1]),
-			Eigen::Vector2f(mData->mouseLstPos[0], mData->mouseLstPos[1]),
-			viewport[2],
-			viewport[3],
-			false, true
-		);
+		getRender()->getCamera()->translate(curpos, mData->mouseLstPos, viewport[2], viewport[3]);
 
 		//更新位置
 		mData->mouseLstPos = getRender()->window2render(windowpos);
@@ -157,7 +145,7 @@ void CameraNavigationHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::Ke
 		return;
 	
 	double factor = 1.1;
-	auto c = getRender()->getCamera()->getInnerCamera();
+	auto c = getRender()->getCamera();
 	c->scale(factor);
 }
 
@@ -167,7 +155,7 @@ void CameraNavigationHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::K
 		return;
 
 	double factor = 1/1.1;
-	auto c = getRender()->getCamera()->getInnerCamera();
+	auto c = getRender()->getCamera();
 	c->scale(factor);
 }
 

@@ -1,6 +1,6 @@
 #pragma once
 #include "XRenderApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
 #include <lib01_shader/xshaderManger.h>
@@ -10,7 +10,7 @@ class XOpenGLBuffer;
 class XRenderWindowEventDispatch;
 class XRender;
 
-class LIB_XRENDER_API RenderWindowUbo :public DataBaseObject {
+class LIB_XRENDER_API RenderWindowUbo :public XDataBaseObject {
 protected:
 	RenderWindowUbo();
 	~RenderWindowUbo();
@@ -34,7 +34,7 @@ protected:
 };
 
 
-class LIB_XRENDER_API XOpenGLRenderWindow :public DataBaseObject {
+class LIB_XRENDER_API XOpenGLRenderWindow :public XDataBaseObject {
 protected:
 	XOpenGLRenderWindow();
 	virtual ~XOpenGLRenderWindow();

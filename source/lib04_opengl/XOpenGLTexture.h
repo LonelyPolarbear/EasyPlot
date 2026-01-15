@@ -1,11 +1,11 @@
 #pragma once
 #include "XOpenglApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <dataBase/XDataArray.h>
 #include "XOpenGLType.h"
 
 class XOpenGLBuffer;
-class LIB04_OPENGL_API XOpenGLTexture :DataBaseObject{
+class LIB04_OPENGL_API XOpenGLTexture :XDataBaseObject{
 public:
 	enum Target {
 		Target1D = 0x0DE0,									// GL_TEXTURE_1D

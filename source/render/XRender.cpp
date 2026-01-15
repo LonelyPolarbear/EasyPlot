@@ -8,7 +8,8 @@
 #include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib04_opengl/XOpenGLEnable.h"
 #include "lib04_opengl/XOpenGLFuntion.h"
-#include <lib05_shape/xshape.h>
+#include <lib05_shape/XGeometryNode.h>
+#include <lib05_shape/datasource/xCustomSource.h>
 #include <lib05_shape/XGraphicsItem.h>
 #include <lib02_camera/xcamera.h>
 
@@ -23,7 +24,7 @@ struct XRender::Internal {
 	sptr<XInteractionEventHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
 	
-	std::vector<sptr<XShape>> m_actor3DList;
+	std::vector<sptr<XGeometryNode>> m_actor3DList;
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
 	XQ::Vec2f m_mousePos; //鼠标在窗口中的位置，未做变换
@@ -39,7 +40,7 @@ struct XRender::Internal {
 		getUbo()->create();
 		//!
 		//! 
-		auto camera = m_camera->getInnerCamera();
+		auto camera = m_camera;
 		getUbo()->writeVS( camera->getViewMatrix(), camera->projectionMatrix());
 
 		//!
@@ -189,20 +190,20 @@ bool XRender::connectToRenderWindowSignals()
 	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigTimeOut, handler, &XInteractionEventHandler::TimeEvent);
 }
 
-void XRender::addActor3D(sptr<XShape>s)
+void XRender::addRenderNode3D(sptr<XGeometryNode>s)
 {
 	s->setShaderManger(getRenderWindow()->getShaderManger());
 	mData->m_actor3DList.push_back(s);
 }
 
-void XRender::addActor2D(sptr<XGraphicsItem>)
+void XRender::addRenderNode2D(sptr<XGraphicsItem>)
 {
 }
 
 void XRender::fitView()
 {
 	auto boundbox = computeBoundBox();
-	getCamera()->getInnerCamera()->resetCamera((double*)&boundbox);
+	getCamera()->resetCamera(boundbox);
 }
 
 XQ::Vec2i XRender::window2render(const XQ::Vec2i& windowPos)
@@ -257,7 +258,7 @@ void XRender::updateViewPort()
 	auto oldViewport = XOpenGLFuntion::xglViewport(rect);
 	auto oldScissor = XOpenGLFuntion::xglglScissor(rect);
 
-	getCamera()->getInnerCamera()->setAspect(rect[2]/(double)rect[3]);
+	getCamera()->setAspect(rect[2]/(double)rect[3]);
 
 	auto c = getBackGroundColor1();
 	auto r = c.r2();

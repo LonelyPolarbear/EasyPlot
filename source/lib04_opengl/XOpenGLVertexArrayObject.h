@@ -1,11 +1,11 @@
 #pragma once
 
 #include "XOpenglApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include "XOpenGLType.h"
 
 class XOpenGLBuffer;
-class LIB04_OPENGL_API XOpenGLVertexArrayObject:public DataBaseObject
+class LIB04_OPENGL_API XOpenGLVertexArrayObject:public XDataBaseObject
 {
 protected:
     XOpenGLVertexArrayObject();

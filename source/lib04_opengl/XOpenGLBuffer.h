@@ -1,6 +1,6 @@
 #pragma once
 #include "XOpenglApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <dataBase/XDataArray.h>
 #include "XOpenGLType.h"
 
@@ -32,7 +32,7 @@ enum class LIB04_OPENGL_API XOpenGLValueType {
 	Float32_D32_UInt32_S8_X24 = 0x8DAD // GL_FLOAT_32_UNSIGNED_INT_24_8_REV
 };
 
-class LIB04_OPENGL_API XOpenGLBuffer:public DataBaseObject {
+class LIB04_OPENGL_API XOpenGLBuffer:public XDataBaseObject {
 public:
 	enum Access {
 		ReadOnly= 0x88B8,				//GL_READ_ONLY

@@ -12,8 +12,12 @@ template<typename T>
 using sptr = std::shared_ptr<T>;
 
 template<typename T>
+using csptr =const std::shared_ptr<T>;
+
+template<typename T>
 using wptr = std::weak_ptr<T>;
 
+#if 0
 template<typename Fn>
 struct dataObjectFactory;
 
@@ -30,7 +34,7 @@ public:
 		return p;
 	}
 };
-
+#endif
 template<typename object>
 struct dataObjectShare:public object {
 public:
@@ -105,10 +109,10 @@ public:
 /// <summary>
 /// 数据基类
 /// </summary>
-class database_API DataBaseObject :public XBaseObject {
+class database_API XDataBaseObject :public XBaseObject {
 protected:
-	DataBaseObject();
-	virtual ~DataBaseObject();
+	XDataBaseObject();
+	virtual ~XDataBaseObject();
 	XTimeStamp m_DataModifyTime;
 public:
 	void Modified() {
@@ -120,4 +124,12 @@ public:
 	}
 
 	virtual void Init();
+};
+
+enum class database_API XDataChangeType {
+	ItemDataModified,
+	ItemVisibleModified,
+	DataModified,
+	VisibleModified,
+	Update,
 };

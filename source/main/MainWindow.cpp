@@ -13,11 +13,11 @@
 
 easyPlotWidget * easyPlot = nullptr;
 
-void setDarwType(render::graphicsItemType type, int method, easyPlotWidget* p, bool flag) {
+void setDarwType(graphicsItemType type, int method, easyPlotWidget* p, bool flag) {
 	if (flag)
 		p->slotSetDarwItemType((int)type,method);
 	else
-		p->slotSetDarwItemType((int)render::graphicsItemType::none,method);
+		p->slotSetDarwItemType((int)graphicsItemType::none,method);
 }
 
 
@@ -49,15 +49,15 @@ MainWindow::MainWindow(QWidget* parent) :QMainWindow(parent)
 	connect(ui->ActRectPick, &QAction::triggered, easyPlot, &easyPlotWidget::slotRectPickEnable);
 
 	connect(ui->ActCornerRect, &QAction::triggered, [this](bool flag) {
-		setDarwType(render::graphicsItemType::rect, (int)XRectItem::RectType::diagonal_rect, easyPlot, flag);
+		setDarwType(graphicsItemType::rect, (int)XRectItem::RectType::diagonal_rect, easyPlot, flag);
 	});
-	connect(ui->ActCenterRect, &QAction::triggered, [this](bool flag) {setDarwType(render::graphicsItemType::rect, (int)XRectItem::RectType::center_rect, easyPlot, flag); });
+	connect(ui->ActCenterRect, &QAction::triggered, [this](bool flag) {setDarwType(graphicsItemType::rect, (int)XRectItem::RectType::center_rect, easyPlot, flag); });
 
-	connect(ui->ActLine, &QAction::triggered, [this](bool flag) {setDarwType(render::graphicsItemType::line, -1, easyPlot, flag); });
+	connect(ui->ActLine, &QAction::triggered, [this](bool flag) {setDarwType(graphicsItemType::line, -1, easyPlot, flag); });
 
-	connect(ui->ActCircle, &QAction::triggered, [this](bool flag) {setDarwType(render::graphicsItemType::circle, -1, easyPlot, flag); });
+	connect(ui->ActCircle, &QAction::triggered, [this](bool flag) {setDarwType(graphicsItemType::circle, -1, easyPlot, flag); });
 
-	connect(ui->Acttraiangle, &QAction::triggered, [this](bool flag) {setDarwType(render::graphicsItemType::triangle, -1, easyPlot, flag); });
+	connect(ui->Acttraiangle, &QAction::triggered, [this](bool flag) {setDarwType(graphicsItemType::triangle, -1, easyPlot, flag); });
 	
 	connect(ui->ActshowGrid, &QAction::triggered, easyPlot, &easyPlotWidget::slotShowGrid2D);
 	connect(ui->ActshowGrid3d, &QAction::triggered, easyPlot, &easyPlotWidget::slotShowGrid3D);

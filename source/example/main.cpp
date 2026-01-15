@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <thread>
 #include<lib00_utilty/XUtilty.h>
-#include<dataBase/dataobject.h>
+#include<dataBase/XDataBaseObject.h>
 #include<dataBase/XDataArray.h>
 #include<XOpenGLWidget/XGLWidget.h>
 #include<XOpenGLWidget/XOpenGLWidget.h>

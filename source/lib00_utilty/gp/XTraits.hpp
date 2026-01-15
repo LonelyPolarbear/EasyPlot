@@ -207,6 +207,29 @@ DEFINE_FUN_ARGUMENT_MAX_NUM(funName, n)
 
 
 namespace XTraits {
+	template<typename T>
+	struct traits_class {
+		using classType = T;
+	};
+
+	template<typename T>
+	struct traits_class<std::shared_ptr<T>> {
+		using classType = T;
+	};
+
+	template<typename T>
+	struct traits_class<std::unique_ptr<T>> {
+		using classType = T;
+	};
+
+	template<typename T>
+	struct traits_class<std::weak_ptr<T>> {
+		using classType = T;
+	};
+
+	template<typename T>
+	using traits_class_t = typename traits_class<T>::classType;
+
 	template<typename ... Args>
 	struct conjunction {
 		static constexpr bool value = TL::TL_is<TL::typelsit<Args...>,std::is_arithmetic>::value;

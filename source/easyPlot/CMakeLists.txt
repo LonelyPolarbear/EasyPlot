@@ -67,6 +67,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #设置依赖的动态库名称
 #-------------------------------------------------------
 SET(LIB_NAMES 	
+				PRIVATE MyLib::HeaderOnly
 				Qt5::Widgets
 				Qt5::Core
 				Qt5::Concurrent
@@ -85,6 +86,7 @@ SET(LIB_NAMES
 				stbImage${DLL_DEBUG_POSTFIX}
 				xpanel${DLL_DEBUG_POSTFIX}
 				xrender${DLL_DEBUG_POSTFIX}
+				xalgo${DLL_DEBUG_POSTFIX}
 	)
 
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin

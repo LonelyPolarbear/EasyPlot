@@ -1,6 +1,6 @@
 #pragma once
 #include <lib05_shape/xshapeApi.h>
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <lib05_shape/XRenderNode.h>
 #include <lib01_shader/XBaseShader.h>
 
@@ -8,7 +8,7 @@ class XOpenGLVertexArrayObject;
 class XOpenGLBuffer;
 class XShapeSource;
 class xshader;
-class LIB05_SHAPE_API XPolyDataMapper :public DataBaseObject {
+class LIB05_SHAPE_API XPolyDataMapper :public XDataBaseObject {
 protected:
 	XPolyDataMapper();
 	~XPolyDataMapper();

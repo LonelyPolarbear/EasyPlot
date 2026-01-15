@@ -11,15 +11,14 @@
 #include <glew/glew.h>
 
 #include "datasource/xshapeSource.h"
+#include "XGeometryNode.h"
 
-static std::atomic< uint64_t>  object_id_counter(0);
+
 
 class XGeometryNode::Internal {
 public:
 	Eigen::Affine3f m_transform = Eigen::Affine3f::Identity();
 	std::mutex m_mutex;
-	uint64_t m_id = ++object_id_counter;
-	bool isInitResource = false;
 };
 XGeometryNode::XGeometryNode():d(new Internal)
 {
@@ -41,7 +40,7 @@ void XGeometryNode::draw(std::shared_ptr<xshader> shader)
 	shader->use();
 
 	shader->setModelMatrix(this->getMatrix());
-	shader->setObjectID(d->m_id);
+	shader->setObjectID(getID());
 	shader->setPreSelectColor(m_preSelectColor.x(), m_preSelectColor.y(), m_preSelectColor.z(), m_preSelectColor.w());
 	shader->setColorMode((int)m_colorMode);
 	shader->setPolygonMode((int)m_polygonMode);
@@ -52,13 +51,7 @@ void XGeometryNode::draw(std::shared_ptr<xshader> shader)
 
 void XGeometryNode::draw()
 {
-	auto shader = m_shaderManger->getShader3D(m_drawType);
-	draw(shader);
-}
-
-int64_t XGeometryNode::getID() const
-{
-	return d->m_id;
+	draw(m_shaderManger->getShader3D(m_drawType));
 }
 
 void XGeometryNode::translate(float x, float y, float z)
@@ -160,32 +153,18 @@ XQ::Vec4f XGeometryNode::getPreSelectColor() const {
 	return m_preSelectColor;
 }
 
-XQ::Vec4f XGeometryNode::computeSelectTestColor()
-{
-	int32_t id = d->m_id;
-
-	int32_t a = (id >> 24) & 0xff;
-	int32_t b = (id >> 16) & 0xff;
-	int32_t g = (id >> 8) & 0xff;
-	int32_t r = id & 0xff;
-	a = 255;
-
-	return XQ::Vec4f((float)r / 255.0f, (float)g / 255.0f, (float)b / 255.0f, (float)a / 255.0f);
-
-}
-
-uint64_t XGeometryNode::colorToUInt(XQ::Vec4f color)
-{
-	uint64_t a = (uint64_t)(color.x() * 255.0f);
-	uint64_t b = (uint64_t)(color.y() * 255.0f);
-	uint64_t g = (uint64_t)(color.z() * 255.0f);
-	uint64_t r = (uint64_t)(color.w() * 255.0f);
-	return (r << 24) | (g << 16) | (b << 8) | a;
-}
+//uint64_t XGeometryNode::colorToUInt(XQ::Vec4f color)
+//{
+//	uint64_t a = (uint64_t)(color.x() * 255.0f);
+//	uint64_t b = (uint64_t)(color.y() * 255.0f);
+//	uint64_t g = (uint64_t)(color.z() * 255.0f);
+//	uint64_t r = (uint64_t)(color.w() * 255.0f);
+//	return (r << 24) | (g << 16) | (b << 8) | a;
+//}
 
 bool XGeometryNode::isSelf(uint64_t id)
 {
-	return d->m_id == id;
+	return getID() == id;
 }
 
 void XGeometryNode::setShaderManger(std::shared_ptr<xShaderManger> shaderManger) {
@@ -205,4 +184,25 @@ XQ::BoundBox XGeometryNode::getBoundBox() const
 void XGeometryNode::setPolyDataMapper(sptr<XPolyDataMapper> mapper)
 {
 	m_polyMapper = mapper;
+}
+
+sptr<XPolyDataMapper> XGeometryNode::getPolyDataMapper() const
+{
+	return m_polyMapper;
+}
+
+sptr<XPolyDataMapper> XGeometryNode::getOrCreateMapper()
+{
+	if (getPolyDataMapper()) {
+		return getPolyDataMapper();
+	}
+	else {
+		setPolyDataMapper(makeShareDbObject<XPolyDataMapper>());
+		return getPolyDataMapper();
+	}
+}
+
+void XGeometryNode::setInput(sptr<XShapeSource> input)
+{
+	getOrCreateMapper()->setInput(input);
 }

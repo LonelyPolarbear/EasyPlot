@@ -5,6 +5,11 @@ namespace XQ {
 		mData.setValues(r, g, b, a);
 	}
 
+	XColor::XColor(const Vec4u8& c)
+	{
+		mData.setValues(c[0], c[1], c[2], c[3]);
+	}
+
 	XColor::XColor(const XColor& other)
 	{
 		mData.setValues(other.r(), other.g(), other.b(), other.a());
@@ -15,9 +20,19 @@ namespace XQ {
 		return XColor(r, g, b, a);
 	}
 
+	XColor XColor::from_ucolor(const Vec4u8& c)
+	{
+		return XColor(c[0],c[1],c[2],c[3]);
+	}
+
 	XColor XColor::from_normalcolor(double r, double g, double b, double a)
 	{
 		return XColor(r * 255, g * 255, b * 255, a * 255);
+	}
+
+	XColor XColor::from_normalcolor(const Vec4d& c)
+	{
+		return XColor(c[0] * 255, c[1] * 255, c[2] * 255, c[3] * 255);
 	}
 
 	int XColor::r() const

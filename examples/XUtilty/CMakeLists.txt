@@ -20,7 +20,6 @@ add_dependencies(${proName} ${ALL_LIB_TARGETS})
 
 SET(LIB_INCLUDE_DIRECTORY 	
 														${CMAKE_SOURCE_DIR}/source 
-														${CMAKE_SOURCE_DIR}/3rdParty/glm/include
 														${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
 )
 

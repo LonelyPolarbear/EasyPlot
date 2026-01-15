@@ -17,15 +17,14 @@ endif()
 #设置依赖的动态库头文件目录
 #-------------------------------------------------------
 SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source 
-														${CMAKE_SOURCE_DIR}/3rdParty/glm/include
 														${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
-														
 )
 
 #-------------------------------------------------------
 #设置依赖的动态库名称
 #-------------------------------------------------------
 SET(LIB_NAMES 	
+	PRIVATE MyLib::HeaderOnly
 	XUtilty${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}
 )

@@ -21,7 +21,6 @@ endif()
 SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source 
 														${CMAKE_SOURCE_DIR}/3rdParty/glew/include
 														${CMAKE_SOURCE_DIR}/3rdParty/stb_image/
-														${CMAKE_SOURCE_DIR}/3rdParty/boost/include
 														${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
 														
 )
@@ -30,6 +29,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #设置依赖的动态库名称
 #-------------------------------------------------------
 SET(LIB_NAMES 	
+	PRIVATE MyLib::HeaderOnly
 	glew32
 	opengl32
 	XUtilty${DLL_DEBUG_POSTFIX}

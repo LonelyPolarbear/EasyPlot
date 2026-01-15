@@ -1,5 +1,5 @@
-project(dataBase)
-set(proName dataBase)
+project(xalgo)
+set(proName xalgo)
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 
 #递归目录获取所有c文件
@@ -11,17 +11,17 @@ file(GLOB_RECURSE SOURECS_FILES  *.cpp *.c)
 #-------------------------------------------------------
 SET(LIB_INCLUDE_DIRECTORY 	
 													${CMAKE_SOURCE_DIR}/source 
-													${CMAKE_SOURCE_DIR}/3rdParty/boost/include
 )
 
 #-------------------------------------------------------
 #设置依赖的动态库名称
 #-------------------------------------------------------
 SET(LIB_NAMES 	
-	#XUtilty${DLL_DEBUG_POSTFIX}
+	dataBase${DLL_DEBUG_POSTFIX}
 )
 
 set(LIB_DIRECTORIES 
+	PRIVATE MyLib::HeaderOnly
 	#${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 )
 														
@@ -29,9 +29,10 @@ set(LIB_DIRECTORIES
 add_library(${proName}  SHARED)
 target_sources(${proName} PRIVATE  ${SOURECS_FILES} ${HERDERS_FILES})
 #将动态库名字设为add
-target_compile_definitions(${proName} PRIVATE DATABASE_DLL)
-set_target_properties(${proName} PROPERTIES OUTPUT_NAME "dataBase")
+target_compile_definitions(${proName} PRIVATE XALGO_DLL)
+set_target_properties(${proName} PROPERTIES OUTPUT_NAME "xalgo")
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
+set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "xalgo")
 
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})											#库目录
 target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})							#包含目录

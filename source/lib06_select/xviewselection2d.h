@@ -1,6 +1,6 @@
 #pragma once
 #include "xselectApi.h"
-#include < dataBase/dataobject.h>
+#include < dataBase/XDataBaseObject.h>
 #include <set>
 #include "lib04_opengl/XOpenGLFramebufferObject.h"
 class XGraphicsItem;
@@ -8,7 +8,7 @@ class xcamera;
 class xshader;
 #include <Eigen/Eigen>
 
-class LIB06_SELECT_API XViewSelection2D :public DataBaseObject {
+class LIB06_SELECT_API XViewSelection2D :public XDataBaseObject {
 public:
 	struct SelectData {
 		uint32_t objectId{0};
@@ -22,9 +22,9 @@ void setPickShader(std::shared_ptr<xshader> shader);
 
 void setPickFillShader(std::shared_ptr<xshader> shader);
 
-void setScene(std::shared_ptr<DataBaseObject> scene);
+void setScene(std::shared_ptr<XDataBaseObject> scene);
 
-void setGetMatrixforScreen2Scene(std::function<Eigen::Matrix4f(std::shared_ptr<DataBaseObject>)> fn);
+void setGetMatrixforScreen2Scene(std::function<Eigen::Matrix4f(std::shared_ptr<XDataBaseObject>)> fn);
 
 bool create();
 

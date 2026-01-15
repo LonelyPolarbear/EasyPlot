@@ -1,6 +1,6 @@
 #pragma once
 #include "xshapeApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <Eigen/Eigen>
 #include <dataBase/XTimeStamp.h>
 #include <lib00_utilty/XUtilty.h>
@@ -155,7 +155,7 @@ struct LIB05_SHAPE_API LocalCoordCompute {
 	double scaley =1;		//Y÷·Àı∑≈±»¿˝
 };
 
-class LIB05_SHAPE_API XGraphicsItem :public DataBaseObject {
+class LIB05_SHAPE_API XGraphicsItem :public XDataBaseObject {
 public:
 	enum class PenStyle {
 		Solid,

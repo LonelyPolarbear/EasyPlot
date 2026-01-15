@@ -22,8 +22,8 @@ public:
 	int currentPass = 1;		//当前的有效层数
 	std::vector<unsigned int> queryHandles;
 
-	std::weak_ptr<DataBaseObject> scene;	//拾取记录场景的weakptr，对于一些屏幕显示对象，需要获取场景到屏幕的变换矩阵，该信息在拾取时需要使用
-	std::function<Eigen::Matrix4f(std::shared_ptr<DataBaseObject>)> screenPos2ScenePosFn;
+	std::weak_ptr<XDataBaseObject> scene;	//拾取记录场景的weakptr，对于一些屏幕显示对象，需要获取场景到屏幕的变换矩阵，该信息在拾取时需要使用
+	std::function<Eigen::Matrix4f(std::shared_ptr<XDataBaseObject>)> screenPos2ScenePosFn;
 };
 
 XViewSelection2D::XViewSelection2D():d(new Internal())
@@ -44,12 +44,12 @@ void XViewSelection2D::setPickFillShader(std::shared_ptr<xshader> shader)
 	d->pickFillShader = shader;
 }
 
-void XViewSelection2D::setScene(std::shared_ptr<DataBaseObject> scene)
+void XViewSelection2D::setScene(std::shared_ptr<XDataBaseObject> scene)
 {
 	d->scene = scene;
 }
 
-void XViewSelection2D::setGetMatrixforScreen2Scene(std::function<Eigen::Matrix4f(std::shared_ptr<DataBaseObject>)> fn)
+void XViewSelection2D::setGetMatrixforScreen2Scene(std::function<Eigen::Matrix4f(std::shared_ptr<XDataBaseObject>)> fn)
 {
 	d->screenPos2ScenePosFn = fn;
 }

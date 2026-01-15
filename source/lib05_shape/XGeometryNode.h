@@ -1,6 +1,6 @@
 #pragma once
 #include "xshapeApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <Eigen/Eigen>
 #include <dataBase/XTimeStamp.h>
 #include <lib00_utilty/XUtilty.h>
@@ -14,7 +14,7 @@
 #include "mapper/XPolyDataMapper.h"
 
 class xShaderManger;
-
+class XShapeSource;
 class LIB05_SHAPE_API XGeometryNode:public XRenderNode3D {
 public:
     XGeometryNode();
@@ -32,8 +32,6 @@ public:
 	virtual void draw();
 
 	virtual void drawInstance() {};
-
-	int64_t getID() const;
 
 	void translate(float x, float y, float z);
 	void setPosition(float x, float y, float z);
@@ -61,15 +59,12 @@ public:
 
 	void setColorMode(ColorMode mode);
 	ColorMode getColorMode() const;
+
 	void setSingleColor(XQ::Vec4f color);
 	XQ::Vec4f getSingleColor() const;
 
 	void setPreSelectColor(XQ::Vec4f color);
 	XQ::Vec4f getPreSelectColor() const;
-
-	XQ::Vec4f computeSelectTestColor();
-
-	static uint64_t colorToUInt(XQ::Vec4f color);
 
 	bool isSelf(uint64_t id);
 
@@ -80,20 +75,22 @@ public:
 	XQ::BoundBox getBoundBox() const;
 
 	void setPolyDataMapper(sptr<XPolyDataMapper> mapper);
+	sptr<XPolyDataMapper> getPolyDataMapper() const;
+
+	sptr<XPolyDataMapper> getOrCreateMapper();
+
+	void setInput(sptr<XShapeSource> input);
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;
  protected:
 	ColorMode m_colorMode = ColorMode::FaceColor;
 	PrimitveType m_drawType = PrimitveType::triangle;
-	PolygonMode m_polygonMode = PolygonMode::line_fill;
+	PolygonMode m_polygonMode = PolygonMode::fill;
 	XQ::Vec4f m_singleColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	XQ::Vec4f m_preSelectColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-	XQ::Vec4f m_selectTestColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-
-	//同步CPU和GPU端数据的时间戳
-	XTimeStamp m_UpdateTime;
 	bool m_visible = true;
+
 	sptr<xShaderManger> m_shaderManger;
 	sptr<XPolyDataMapper> m_polyMapper;
 };

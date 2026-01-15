@@ -6,9 +6,12 @@ namespace XQ {
 	public:
 		XColor() = default;
 		XColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
+		XColor(const Vec4u8& c);
 		XColor(const XColor& other);
 		static XColor from_ucolor(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+		static XColor from_ucolor(const Vec4u8& c);
 		static XColor from_normalcolor(double r, double g, double b, double a);
+		static XColor from_normalcolor(const Vec4d& c);
 
 		int r() const;
 		int g() const;
@@ -21,5 +24,10 @@ namespace XQ {
 		double a2() const;
 	protected:
 		XQ::Vec4u8 mData = XQ::Vec4u8(0,0,0,255);		//ÑÕÉ«·¶Î§0-255
+	public:
+		friend std::ostream& operator<<(std::ostream& os, const XColor& obj) {
+			os<<"("<<obj.r() << " " << obj.g() << " " << obj.b() << " " << obj.a() << ")";
+			return os;
+		}
 	};
 }

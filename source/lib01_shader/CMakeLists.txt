@@ -28,6 +28,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #设置依赖的动态库名称
 #-------------------------------------------------------
 SET(LIB_NAMES 	
+					PRIVATE MyLib::HeaderOnly
 					glew32
 					opengl32
 					dataBase${DLL_DEBUG_POSTFIX}

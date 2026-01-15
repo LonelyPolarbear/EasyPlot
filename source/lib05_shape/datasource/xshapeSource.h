@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../xshapeApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <dataBase/XDataArray.h>
 
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
 
-class LIB05_SHAPE_API XShapeSource:public DataBaseObject {
+class LIB05_SHAPE_API XShapeSource:public XDataBaseObject {
 protected:
     XShapeSource();
     virtual ~XShapeSource();

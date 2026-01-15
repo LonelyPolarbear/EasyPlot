@@ -1,14 +1,14 @@
 #pragma once
 #include "XRenderApi.h"
 #include "XRenderType.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <dataBase/XVector.h>
 #include <lib00_utilty/XUtilty.h>
 #include <xsignal/XSignal.h>
 
 //需要定义窗口信号
 class XOpenGLRenderWindow;
-class LIB_XRENDER_API XRenderWindowEventDispatch :public DataBaseObject {
+class LIB_XRENDER_API XRenderWindowEventDispatch :public XDataBaseObject {
 protected:
 	XRenderWindowEventDispatch();
 	virtual ~XRenderWindowEventDispatch();

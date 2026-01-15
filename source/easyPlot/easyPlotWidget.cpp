@@ -30,7 +30,7 @@
 #include <lib05_shape/datasource/xregularPrimSource.h>
 #include <lib05_shape/datasource/xcylinderSource.h>
 #include <lib05_shape/datasource/xconeSource.h>
-#include <lib05_shape/xshape.h>
+#include <lib05_shape/XGeometryNode.h>
 #include <lib05_shape/XGraphicsItem.h>
 #include <lib05_shape/actor2d/XRectItem.h>
 #include <lib05_shape/actor2d/XLineItem.h>
@@ -104,7 +104,7 @@ struct easyPlotWidget::Internal {
 	bool mIsMouseRightPressMoved = false;
 	bool mIsMouseRightPress = false;
 
-	render::graphicsItemType mDrawItemType = render::graphicsItemType::none;
+	graphicsItemType mDrawItemType = graphicsItemType::none;
 	int mDrawItemMethod = -1;
 
 	//当前绘制的数据和类型
@@ -322,7 +322,7 @@ void easyPlotWidget::mousePressEvent(QMouseEvent* event)
 		d->mIsMouseLeftPress = true;
 
 		//如果启用了绘制，则左键按下时不启用相机交互
-		if(d->mDrawItemType ==render::graphicsItemType::none)
+		if(d->mDrawItemType ==graphicsItemType::none)
 			d->cameraAction = CameraAction::Rotate;	
 		else {
 			//创建一个Item
@@ -420,7 +420,7 @@ void easyPlotWidget::mouseReleaseEvent(QMouseEvent* event)
 		d->mIsMouseLeftPress = false;
 		d->mDrawItemData.item = nullptr;
 		d->mDrawItemData.coordArray = nullptr;	
-		d->mDrawItemData.type = render::graphicsItemType::none;
+		d->mDrawItemData.type = graphicsItemType::none;
 	}
 
 	if (event->button() == Qt::RightButton) {
@@ -592,10 +592,10 @@ void easyPlotWidget::timerOut()
 	#endif
 }
 
-DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
+DarwItemData easyPlotWidget::createItem(graphicsItemType type)
 {
 	DarwItemData result;
-	if (type == render::graphicsItemType::rect)
+	if (type == graphicsItemType::rect)
 	{
 		makeCurrent();
 		auto item = makeShareDbObject<XRectItem>();
@@ -633,7 +633,7 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 		doneCurrent();
 	}
 
-	if (type == render::graphicsItemType::line)
+	if (type == graphicsItemType::line)
 	{
 		makeCurrent();
 		auto item = makeShareDbObject<XLineItem>(nullptr);
@@ -655,8 +655,8 @@ DarwItemData easyPlotWidget::createItem(render::graphicsItemType type)
 void easyPlotWidget::slotSaveFile( const QString& fileName)
 {
 	auto s = d->scene->getShape(d->mSelectId);
-	if(s)
-		s->getInput()->writeToFile(fileName.toUtf8().constData());
+	/*if(s)
+		s->getInput()->writeToFile(fileName.toUtf8().constData());*/
 }
 
 void easyPlotWidget::slotOpenFile(const QString& fileName)
@@ -727,7 +727,7 @@ void easyPlotWidget::slotCreateCube()
 {
 	makeCurrent();
 	std::shared_ptr<xchamferCubeSource> cubeSource = makeShareDbObject<xchamferCubeSource>();
-	std::shared_ptr<XShape> cubeActor = makeShareDbObject<XShape>();
+	std::shared_ptr<XGeometryNode> cubeActor = makeShareDbObject<XGeometryNode>();
 
 	//cubeActor->initResource();
 	cubeActor->setInput(cubeSource);
@@ -742,7 +742,7 @@ void easyPlotWidget::slotCreateSphere()
 {
 	makeCurrent();
 	std::shared_ptr<XSphereSource> sphereSource = makeShareDbObject<XSphereSource>();
-	std::shared_ptr<XShape> sphereActor = makeShareDbObject<XShape>();
+	std::shared_ptr<XGeometryNode> sphereActor = makeShareDbObject<XGeometryNode>();
 
 	//sphereActor->initResource();
 	sphereActor->setInput(sphereSource);
@@ -761,7 +761,7 @@ void easyPlotWidget::slotCreateCone()
 {
 	makeCurrent();
 	std::shared_ptr<XConeSource> coneSource = makeShareDbObject<XConeSource>();
-	std::shared_ptr<XShape> coneActor = makeShareDbObject<XShape>();
+	std::shared_ptr<XGeometryNode> coneActor = makeShareDbObject<XGeometryNode>();
 	//coneActor->initResource();
 	coneActor->setInput(coneSource);
 	coneActor->translate(0, 0, 4);
@@ -855,7 +855,7 @@ void easyPlotWidget::slotFileLoadFinished()
 {
 	makeCurrent();
 	//创建一个新的shape
-	auto shape = makeShareDbObject<XShape>();
+	auto shape = makeShareDbObject<XGeometryNode>();
 	//shape->initResource();
 
 	auto source =d->mFutureWatcher->result();
@@ -913,7 +913,7 @@ void easyPlotWidget::slotRectPickEnable(bool flag)
 
 void easyPlotWidget::slotSetDarwItemType(int type,int method)
 {
-	d->mDrawItemType = (render::graphicsItemType)type;
+	d->mDrawItemType = (graphicsItemType)type;
 	d->mDrawItemMethod = method;
 }
 
@@ -939,7 +939,7 @@ void easyPlotWidget::updateItem()
 
 		//d->mDrawItemData.item->resetTransform();
 		d->mDrawItemData.item->setVisible(true);
-		if (d->mDrawItemType == render::graphicsItemType::rect) {
+		if (d->mDrawItemType == graphicsItemType::rect) {
 			auto rect = std::dynamic_pointer_cast<XRectItem>(d->mDrawItemData.item); {
 				rect->resetTransform();
 				auto scalex = (firstPos - secondPos).x();
@@ -949,7 +949,7 @@ void easyPlotWidget::updateItem()
 				rect->scale(abs(0.5*scalex), abs(0.5*scaley));
 			}
 		}
-		if (d->mDrawItemType == render::graphicsItemType::line) {
+		if (d->mDrawItemType == graphicsItemType::line) {
 			
 			auto line = std::dynamic_pointer_cast<XLineItem>(d->mDrawItemData.item);
 			line->resetTransform();

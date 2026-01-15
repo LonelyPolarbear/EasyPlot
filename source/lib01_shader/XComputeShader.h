@@ -3,7 +3,7 @@
 
 #include<string>
 #include <Eigen/Eigen>
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include "xshaderApi.h"
 #include "XBaseShader.h"
 

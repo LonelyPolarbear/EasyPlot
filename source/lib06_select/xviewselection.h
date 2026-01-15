@@ -1,12 +1,12 @@
 #pragma once
 #include "xselectApi.h"
-#include < dataBase/dataobject.h>
+#include < dataBase/XDataBaseObject.h>
 #include <set>
 #include "lib04_opengl/XOpenGLFramebufferObject.h"
-class XShape;
+class XGeometryNode;
 class xcamera;
 class xshader;
-class LIB06_SELECT_API XViewSelection :public DataBaseObject {
+class LIB06_SELECT_API XViewSelection :public XDataBaseObject {
 public:
 	struct SelectData {
 		uint32_t objectId{0};
@@ -36,9 +36,9 @@ std::vector< std::vector<XViewSelection::SelectData>> getBoxSelection(int posx, 
 /// <param name="objects"></param>
 /// <param name="camera"></param>
 /// <returns></returns>
- bool update(std::set<std::shared_ptr<XShape>> objects, std::shared_ptr<xcamera> camera);
+ bool update(std::set<std::shared_ptr<XGeometryNode>> objects, std::shared_ptr<xcamera> camera);
 
- bool renderLayer(std::set<std::shared_ptr<XShape>> objects, std::shared_ptr<xcamera> camera,int layer);
+ bool renderLayer(std::set<std::shared_ptr<XGeometryNode>> objects, std::shared_ptr<xcamera> camera,int layer);
 
  int getPeelLayerNum()const;
 private:

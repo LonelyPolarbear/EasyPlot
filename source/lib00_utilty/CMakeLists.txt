@@ -28,6 +28,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #-------------------------------------------------------
 SET(LIB_NAMES 	
 	#dataBase${DLL_DEBUG_POSTFIX}
+	PRIVATE MyLib::HeaderOnly
 )
 
 set(LIB_DIRECTORIES 

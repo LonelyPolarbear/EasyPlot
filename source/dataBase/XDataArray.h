@@ -3,18 +3,18 @@
 #include <vector>
 #include <string>
 #include <iostream>
-#include "dataobject.h"
+#include "XDataBaseObject.h"
 #include "databaseApi.h"
 #include "XTimeStamp.h"
 /// <summary>
 /// 一维数组
 /// </summary>
 template<typename T>
-class XDataArray : public DataBaseObject
+class XDataArray : public XDataBaseObject
 {
  protected:
-    XDataArray():DataBaseObject(){}
-    XDataArray( int tupleNum,int componentNum=1) :DataBaseObject() {
+    XDataArray():XDataBaseObject(){}
+    XDataArray( int tupleNum,int componentNum=1) :XDataBaseObject() {
         setComponent(componentNum);
         setNumOfTuple(tupleNum);
     }
@@ -164,7 +164,7 @@ using XCharArray = XDataArray<char>;
 /// 二维数组
 /// </summary>
 template<typename T>
-class XDataArray2D : public DataBaseObject
+class XDataArray2D : public XDataBaseObject
 {
  protected:
     XDataArray2D() {
@@ -225,7 +225,7 @@ public:
 	}
 
     void Modified() {
-        DataBaseObject::Modified();
+        XDataBaseObject::Modified();
     }
 
 	template<typename ... types>
@@ -399,7 +399,7 @@ private:
 /// 三维数组
 /// </summary>
  template<typename T>
- class XDataArray3D : public DataBaseObject
+ class XDataArray3D : public XDataBaseObject
  {
  protected:
      XDataArray3D() {

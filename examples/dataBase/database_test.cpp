@@ -1,6 +1,6 @@
 #include <iostream>
 #include <dataBase/XVector.h>
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataObject.h>
 #include <dataBase/XDataArray.h>
 #include <lib00_utilty/XUtilty.h>
 #include <numeric>

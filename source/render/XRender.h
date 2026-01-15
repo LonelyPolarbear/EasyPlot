@@ -1,12 +1,12 @@
 #pragma once
 #include "XRenderApi.h"
 #include "XRenderPort.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <lib00_utilty/XUtilty.h>
 class XOpenGLRenderWindow;
 class XRenderCamera;
 class XInteractionEventHandler;
-class XShape;
+class XGeometryNode;
 class XGraphicsItem;
 class LIB_XRENDER_API XRender :public XRenderPort {
 protected:
@@ -38,9 +38,9 @@ public:
 	bool connectToRenderWindowSignals();
 
 	//
-	void addActor3D(sptr<XShape>);
+	void addRenderNode3D(sptr<XGeometryNode>);
 
-	void addActor2D(sptr<XGraphicsItem>);
+	void addRenderNode2D(sptr<XGraphicsItem>);
 
 	void fitView();
 

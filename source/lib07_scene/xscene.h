@@ -1,6 +1,6 @@
 #pragma once
 #include "xsceneApi.h"
-#include < dataBase/dataobject.h>
+#include < dataBase/XDataBaseObject.h>
 #include "lib04_opengl/XOpenGLFramebufferObject.h"
 #include "lib06_select/xviewselection.h"
 #include "lib06_select/xviewselection2d.h"
@@ -8,7 +8,7 @@
 #include<Eigen/Eigen>
 #include <dataBase/XDataArray.h>
 #include <dataBase/XVector.h>
-class XShape;
+class XGeometryNode;
 class xcamera;
 class xshader;
 class xShaderManger;
@@ -16,18 +16,18 @@ class XGraphicsItem;
 class XOpenGLContext;
 
 //Xscne输入的一切坐标都是屏幕坐标系下的值，其中坐标原点在左下角，向右为x轴正方向，向上为y轴正方向。
-class LIB07_SCENE_API XScene :public DataBaseObject {
+class LIB07_SCENE_API XScene :public XDataBaseObject {
 protected:
 	XScene();
 	 ~XScene();
 
 	 public:
-		 bool addShape(std::shared_ptr<XShape> shape);
+		 bool addShape(std::shared_ptr<XGeometryNode> shape);
 		 bool addGraphicsItem(std::shared_ptr<XGraphicsItem> shape);
-		 bool removeShape(std::shared_ptr<XShape> shape);
+		 bool removeShape(std::shared_ptr<XGeometryNode> shape);
 		 bool removeGraphicsItem(std::shared_ptr<XGraphicsItem> shape);
 		 void removeAll();
-		 std::shared_ptr<XShape> getShape(uint64_t id);
+		 std::shared_ptr<XGeometryNode> getShape(uint64_t id);
 		 std::shared_ptr<XGraphicsItem> getGraphicsItem(uint64_t id);
 
 		void setCamera(std::shared_ptr<xcamera> camera);
@@ -139,7 +139,7 @@ protected:
 		/// <returns></returns>
 		Eigen::Matrix4f sceneScreenPos2ScenePos();
 
-		static Eigen::Matrix4f sceneScreenPos2ScenePosMat(std::shared_ptr<DataBaseObject> scene);
+		static Eigen::Matrix4f sceneScreenPos2ScenePosMat(std::shared_ptr<XDataBaseObject> scene);
 
 		//判断点是否在视口内(点是屏幕坐标系下的点，原点左下角 向右为x轴正方向，向上为y轴正方向)
 		bool isBelongtoViewPort(int x, int y);

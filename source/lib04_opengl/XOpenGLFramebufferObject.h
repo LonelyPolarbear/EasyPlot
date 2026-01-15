@@ -1,10 +1,10 @@
 #pragma once
 #include "XOpenglApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include "XOpenGLType.h"
 #include "XOpenGLTexture.h"
 
-class LIB04_OPENGL_API XOpenGLFramebufferObject :DataBaseObject {
+class LIB04_OPENGL_API XOpenGLFramebufferObject :XDataBaseObject {
 public:
 	/*enum AttachmentDSMode {
 		DepthStencil,

@@ -1,22 +1,11 @@
-#include <iostream>
-#include <QApplication>
 #include <filesystem>
-#include <thread>
-#include<lib00_utilty/XUtilty.h>
-#include<dataBase/dataobject.h>
 
-#include<XOpenGLWidget/XGLWidget.h>
-#include<XOpenGLWidget/XOpenGLWidget.h>
-#include <easyPlot/XEasyPlotWidget.h>
-#include "mainwindow.h"
-
+#include <QApplication>
 #include <QLoggingCategory>
-#include <lib00_utilty/gp/XTraits.hpp>
 
-#include <Eigen/Eigen>
+#include <easyPlot/XEasyPlotWidget.h>
 
-#include <boost/signals2.hpp>
-#include <xsignal/XSignal.h>
+#include "mainwindow.h"
 
 
 int main(int argc, char** argv) {

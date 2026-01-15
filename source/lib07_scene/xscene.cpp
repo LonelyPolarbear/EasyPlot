@@ -10,7 +10,7 @@
 #include "lib06_select/xviewselection.h"
 #include "lib06_select/xviewselection2d.h"
 #include <glew/glew.h>
-#include <lib05_shape/xshape.h>
+#include <lib05_shape/XGeometryNode.h>
 #include <lib05_shape/XGraphicsItem.h>
 #include <lib05_shape/actor2d/XRectItem.h>
 #include <lib05_shape/actor2d/XGridItem.h>
@@ -29,7 +29,7 @@
 #include <future>
 #include <limits.h>
 bool isScreenRender = true;
-class SceneUbo:public DataBaseObject{
+class SceneUbo:public XDataBaseObject{
 protected:
     SceneUbo(){}
     ~SceneUbo(){}
@@ -110,7 +110,7 @@ protected:
 
 class XScene::Internal {
 public:
-	std::set<std::shared_ptr<XShape>> shapes;                               //3D物体集合
+	std::set<std::shared_ptr<XGeometryNode>> shapes;                               //3D物体集合
 	std::set<std::shared_ptr<XGraphicsItem>> shapes2D;              //2D物体集合
 	std::shared_ptr<xShaderManger> shaderManger;                     //着色器管理类
 	std::shared_ptr<xcamera> camera;                                            //相机
@@ -122,18 +122,18 @@ public:
 
     std::shared_ptr<SceneUbo> sceneUbo;                                     //ubo
 
-	std::shared_ptr<XShape> gridShape;                                       //三维网格
+	std::shared_ptr<XGeometryNode> gridShape;                                       //三维网格
 	std::shared_ptr<XGraphicsItem> gridShape2d;                       //二维网格
-	std::shared_ptr<XShape> axisShape;                                        //左下角坐标轴
+	std::shared_ptr<XGeometryNode> axisShape;                                        //左下角坐标轴
 
     bool fontinitialized{ false };
     std::future<std::tuple<int, int, std::vector<const void*>>> result_future;
 
 	void createGrid() {
 		if (!gridShape) {
-			gridShape = makeShareDbObject<XShape>();
+			gridShape = makeShareDbObject<XGeometryNode>();
             gridShape->setVisible(false);
-			gridShape->initResource();
+			//gridShape->initResource();
             auto gridSource = makeShareDbObject<XCustomSource>();
             auto coord = gridSource->getVertextCoordArray();
             coord->setNumOfTuple(4);
@@ -171,9 +171,9 @@ public:
 
 	void createAxisShape() {
 		if (!axisShape) {
-            axisShape = makeShareDbObject<XShape>();
+            axisShape = makeShareDbObject<XGeometryNode>();
             axisShape->setVisible(false);
-            axisShape->initResource();
+            //axisShape->initResource();
 			auto axisSource = makeShareDbObject<xchamferCubeSource>();
             axisShape->setColorMode(ColorMode::FaceColor);
             axisShape->setInput(axisSource);
@@ -190,7 +190,7 @@ public:
 		}
     }
 
-	void createViewSelection2D(std::shared_ptr<DataBaseObject> scene,std::function<Eigen::Matrix4f(std::shared_ptr<DataBaseObject>)> f ) {
+	void createViewSelection2D(std::shared_ptr<XDataBaseObject> scene,std::function<Eigen::Matrix4f(std::shared_ptr<XDataBaseObject>)> f ) {
 		if (!viewSelection2D) {
             viewSelection2D = makeShareDbObject<XViewSelection2D>();
             viewSelection2D->create();
@@ -215,7 +215,7 @@ public:
     int startx = 0;                                                             //场景的起始x坐标
     int starty = 0;                                                             //场景的起始y坐标
    
-    bool addShape(std::shared_ptr<XShape> shape)
+    bool addShape(std::shared_ptr<XGeometryNode> shape)
     {
         return shapes.insert(shape).second;
     }
@@ -225,7 +225,7 @@ public:
 		return shapes2D.insert(shape).second;
 	}
 
-    bool removeShape(std::shared_ptr<XShape> shape)
+    bool removeShape(std::shared_ptr<XGeometryNode> shape)
     {
         return shapes.erase(shape) > 0;
     }
@@ -235,7 +235,7 @@ public:
 		return shapes2D.erase(shape) > 0;
 	}
 
-    std::shared_ptr<XShape> getShape(uint64_t id) {
+    std::shared_ptr<XGeometryNode> getShape(uint64_t id) {
         for (auto& shape : shapes) {
             if (shape->getID() == id) {
                 return shape;
@@ -311,7 +311,7 @@ XScene::~XScene()
 {
 }
 
-bool XScene::addShape(std::shared_ptr<XShape> shape)
+bool XScene::addShape(std::shared_ptr<XGeometryNode> shape)
 {
     if (shape) {
         shape->setShaderManger(d->shaderManger);
@@ -328,7 +328,7 @@ bool XScene::addGraphicsItem(std::shared_ptr<XGraphicsItem> shape)
     return d->addGraphicsItem(shape);
 }
 
-bool XScene::removeShape(std::shared_ptr<XShape> shape)
+bool XScene::removeShape(std::shared_ptr<XGeometryNode> shape)
 {
     return d->removeShape(shape);
 }
@@ -348,7 +348,7 @@ void XScene::removeAll() {
 	}
 }
 
-std::shared_ptr<XShape> XScene::getShape(uint64_t id)
+std::shared_ptr<XGeometryNode> XScene::getShape(uint64_t id)
 {
     return d->getShape(id);
 }
@@ -440,7 +440,7 @@ std::vector<XViewSelection::SelectData> XScene::getPointSelection(int x, int y)
 std::vector<XViewSelection2D::SelectData> XScene::getPointSelection2D(int x, int y)
 {
 	makeCurrent();
-    d->createViewSelection2D(this->asDerived<DataBaseObject>(),&XScene::sceneScreenPos2ScenePosMat);
+    d->createViewSelection2D(this->asDerived<XDataBaseObject>(),&XScene::sceneScreenPos2ScenePosMat);
 	d->viewSelection2D->update(d->shapes2D, d->camera, Eigen::Matrix4f::Identity());
 	auto selectData = d->viewSelection2D->getAllPointSelection(x - d->startx, y - d->starty, d->width, d->height);
 	doneCurrent();
@@ -460,7 +460,7 @@ std::vector<std::vector<XViewSelection::SelectData>> XScene::getBoxSelection(int
 std::vector<std::vector<XViewSelection2D::SelectData>> XScene::getBoxSelection2D(int x, int y, int w, int h)
 {
 	makeCurrent();
-	d->createViewSelection2D(this->asDerived<DataBaseObject>(), &XScene::sceneScreenPos2ScenePosMat);
+	d->createViewSelection2D(this->asDerived<XDataBaseObject>(), &XScene::sceneScreenPos2ScenePosMat);
 	d->viewSelection2D->update(d->shapes2D, d->camera,  Eigen::Matrix4f::Identity());
 	auto r = d->viewSelection2D->getBoxSelection(x, y, w, h, getViewportWidth(), getViewportHeight());
 	doneCurrent();
@@ -901,8 +901,8 @@ void XScene::mouseDoublePressEvent(int x, int y, int type)
             //获取面片的法向，然后让相机指向该法向
             auto shape = d->axisShape;
             if (shape) {        
-                auto normal = shape->getInput()->getFaceNormal(selectData.primitiveId);
-                d->camera->setEyeDir(normal);
+                //auto normal = shape->getInput()->getFaceNormal(selectData.primitiveId);
+                //d->camera->setEyeDir(normal);
             }
         }
     }
@@ -1108,7 +1108,7 @@ Eigen::Matrix4f XScene::sceneScreenPos2ScenePos()
     return d->sceneFrameInVirtualWorld.inverse() * screen2viewPort;
 }
 
-Eigen::Matrix4f XScene::sceneScreenPos2ScenePosMat(std::shared_ptr<DataBaseObject> scene)
+Eigen::Matrix4f XScene::sceneScreenPos2ScenePosMat(std::shared_ptr<XDataBaseObject> scene)
 {
     if (auto s = std::dynamic_pointer_cast<XScene>(scene)) {
         return s->sceneScreenPos2ScenePos();

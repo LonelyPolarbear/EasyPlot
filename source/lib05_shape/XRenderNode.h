@@ -1,18 +1,18 @@
 #pragma once
 #include "xshapeApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 
 
 enum  class LIB05_SHAPE_API graphicsItemType {
-		none,
-		rect,
-		line,
-		triangle,
-		circle,
-		ellipse,
-		polyline,
-		polygon,
-		text
+	none,
+	rect,
+	line,
+	triangle,
+	circle,
+	ellipse,
+	polyline,
+	polygon,
+	text
 };
 
 
@@ -27,14 +27,19 @@ enum class LIB05_SHAPE_API  ColorMode {
 enum class LIB05_SHAPE_API  PolygonMode {
 	point = 1,
 	line = 2,
-	fill = 3,
-	line_fill = 4
+	fill = 3
 };
 
-class LIB05_SHAPE_API XRenderNode :public DataBaseObject {
+class LIB05_SHAPE_API XRenderNode :public XDataBaseObject {
 
 };
 
 class LIB05_SHAPE_API XRenderNode3D :public XRenderNode {
-
+protected:
+	XRenderNode3D();
+	~XRenderNode3D();
+public:
+	int64_t getID() const;
+protected:
+	uint64_t m_id;
 };

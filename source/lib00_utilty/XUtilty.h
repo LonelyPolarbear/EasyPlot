@@ -16,21 +16,6 @@
 #include <any>
 #include <iostream>
 
-//#include <dataBase/XVector.h>
-namespace render {
-	enum  class lib00_utilty_API graphicsItemType{
-		none,
-		rect,
-		line,
-		triangle,
-		circle,
-		ellipse,
-		polyline,
-		polygon,
-		text
-	};
-}
-
 namespace XQ {
 	extern lib00_utilty_API double PI;
 	

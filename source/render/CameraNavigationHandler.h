@@ -2,7 +2,7 @@
 #include "XRenderApi.h"
 #include "XRenderType.h"
 #include "XRenderInteractionEventHandler.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <dataBase/XVector.h>
 #include <lib00_utilty/XUtilty.h>
 #include <xsignal/XSignal.h>

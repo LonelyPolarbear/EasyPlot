@@ -7,6 +7,7 @@
 
 #include <XOpenGLWidget/XOpenGLWidget.h>
 #include <lib00_utilty/XUtilty.h>
+#include <lib05_shape/XRenderNode.h>
 #include <dataBase/XDataArray.h>
 
 class QOpenGLContext;
@@ -20,7 +21,7 @@ class QContextMenuEvent;
 class XGraphicsItem;
 struct DarwItemData {
 	std::shared_ptr<XGraphicsItem> item;
-	render::graphicsItemType type;
+	graphicsItemType type;
 	std::shared_ptr< XFloatArray> coordArray;
 };
 
@@ -59,7 +60,7 @@ protected:
 
 	virtual void contextMenuEvent(QContextMenuEvent* event)override;
 	void timerOut();
-	DarwItemData createItem(render::graphicsItemType type);
+	DarwItemData createItem(graphicsItemType type);
 public slots:
 	void slotSaveFile(const QString& fileName);
 	void slotOpenFile(const QString& fileName);

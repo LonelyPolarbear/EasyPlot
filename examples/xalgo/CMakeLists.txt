@@ -1,5 +1,5 @@
-SET(proName dataBase_example)
-SET(libName dataBase)
+SET(proName xalgo_example)
+SET(libName xalgo)
 
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
@@ -14,7 +14,7 @@ foreach(lib ${ALL_LIBS})
      list(APPEND MAPPED_LIBS ${lib}${DLL_DEBUG_POSTFIX})
 endforeach()
 
-add_executable(${proName} database_test.cpp)
+add_executable(${proName} xalgo_test.cpp)
 set_target_properties(${proName} PROPERTIES FOLDER ${EXAMPLES_TOP_FOLDER})
 
 # 将目标添加到全局属性
@@ -26,9 +26,10 @@ add_dependencies(${proName} ${ALL_LIB_TARGETS})
 
 SET(LIB_NAMES 	
 	#${MAPPED_LIBS}
+	PRIVATE MyLib::HeaderOnly
 	${libName}${DLL_DEBUG_POSTFIX}
 	XUtilty${DLL_DEBUG_POSTFIX}
-	PRIVATE MyLib::HeaderOnly
+	dataBase${DLL_DEBUG_POSTFIX}
 )
 
 SET(LIB_INCLUDE_DIRECTORY 	

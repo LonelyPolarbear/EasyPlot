@@ -1,8 +1,8 @@
 #pragma once
 #include "XOpenglApi.h"
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 
-class LIB04_OPENGL_API XOpenGLShareContext :public DataBaseObject {
+class LIB04_OPENGL_API XOpenGLShareContext :public XDataBaseObject {
 protected:
 	XOpenGLShareContext();
 	virtual ~XOpenGLShareContext();
@@ -24,7 +24,7 @@ private:
 	void* nativeDisplay = nullptr;
 };
 
-class LIB04_OPENGL_API XOpenGLContext :public DataBaseObject {
+class LIB04_OPENGL_API XOpenGLContext :public XDataBaseObject {
 protected:
 	XOpenGLContext();
 	virtual ~XOpenGLContext();

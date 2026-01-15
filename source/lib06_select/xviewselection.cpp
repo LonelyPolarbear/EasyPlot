@@ -4,7 +4,7 @@
 #include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib01_shader/xshader.h"
 #include <glew/glew.h>
-#include <lib05_shape/xshape.h>
+#include <lib05_shape/XGeometryNode.h>
 #include <lib02_camera/xcamera.h>
 
 
@@ -161,7 +161,7 @@ std::vector< std::vector<XViewSelection::SelectData>> XViewSelection::getBoxSele
 	return result;
 }
 
-bool XViewSelection::update(std::set<std::shared_ptr<XShape>> objects, std::shared_ptr<xcamera> camera)
+bool XViewSelection::update(std::set<std::shared_ptr<XGeometryNode>> objects, std::shared_ptr<xcamera> camera)
 {
 	if (d->isPeeling) {
 		for (int i = 0; i < d->PeelLayerNum; i++) {
@@ -174,7 +174,7 @@ bool XViewSelection::update(std::set<std::shared_ptr<XShape>> objects, std::shar
 	return true;
 }
 
-bool XViewSelection::renderLayer(std::set<std::shared_ptr<XShape>> objects, std::shared_ptr<xcamera> camera, int layer)
+bool XViewSelection::renderLayer(std::set<std::shared_ptr<XGeometryNode>> objects, std::shared_ptr<xcamera> camera, int layer)
 {
 	auto fbo = d->fboPeeling[layer];
 	fbo->bind();

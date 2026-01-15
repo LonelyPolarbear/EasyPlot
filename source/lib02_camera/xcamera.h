@@ -7,10 +7,10 @@
 #endif // LIB02_SHADER_DLL
 
 #include <Eigen/Eigen>
-#include <dataBase/dataobject.h>
+#include <dataBase/XDataBaseObject.h>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
-class lib02_CAMERA_API xcamera:public DataBaseObject
+class lib02_CAMERA_API xcamera:public XDataBaseObject
 {
 public:
 	enum class cameraType {

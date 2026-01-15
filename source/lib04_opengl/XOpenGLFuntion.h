@@ -1,7 +1,7 @@
 #pragma once
 #include "XOpenglApi.h"
 #include "XOpenGLType.h"
-#include "dataBase/dataobject.h"
+#include "dataBase/XDataBaseObject.h"
 #include "dataBase/XVector.h"
 
 class XOpenGLFramebufferObject;
