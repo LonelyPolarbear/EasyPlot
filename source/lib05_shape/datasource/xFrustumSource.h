@@ -1,0 +1,27 @@
+#pragma once
+#include "../xshapeApi.h"
+#include "xshapeSource.h"
+#include <lib00_utilty/XUtilty.h>
+#include <vector>
+#include "xrotateLoftedGeometrySource.h"
+
+
+class LIB05_SHAPE_API xfrustumSource : public XRotateLoftedgeometrySource {
+protected:
+	xfrustumSource();
+
+	~xfrustumSource();
+	virtual std::vector<XQ::Vec3f> getBottomPoints();
+	virtual std::vector<XQ::Vec3f> getTopPoints();
+public:
+	void setFarPlanePoints(std::vector<XQ::Vec3f> p);	//远平面
+	void setNearPlanePoints(std::vector<XQ::Vec3f> p);	//近平面
+	void updateVertextCoordArray() override;
+protected:
+	bool hasPoint() const {
+		return mFarPlanePoint.size() >0;
+	}
+protected:
+	std::vector<XQ::Vec3f> mFarPlanePoint;  //远平面N个点
+	std::vector<XQ::Vec3f> mNearPlanePoint;	//近平面的N个点
+};

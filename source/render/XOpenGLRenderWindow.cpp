@@ -191,6 +191,11 @@ void XOpenGLRenderWindow::addRender(sptr<XRender> ren)
 	ren->connectToRenderWindowSignals();
 }
 
+std::vector<sptr<XRender>> XOpenGLRenderWindow::getRenders() const
+{
+	return m_renders;
+}
+
 sptr<xShaderManger> XOpenGLRenderWindow::getShaderManger() const
 {
 	return m_shaderManger;

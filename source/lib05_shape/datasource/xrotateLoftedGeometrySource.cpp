@@ -13,12 +13,11 @@ void XRotateLoftedgeometrySource::updateVertextCoordArray()
 {
 	//更新顶点
 	//前面的四个坐标点
-	std::vector<XQ::Vec2f> points;
-	if (isClosed()) {
-		points = XQ::math::circleSplit(m_NumVertices, m_angle);
-	}
-	else
-		points = XQ::math::circleSplit(m_NumVertices - 1, m_angle);
+	auto bottomPoints = getBottomPoints();
+	auto topPoints = getTopPoints();
+
+	if (bottomPoints.size() == 0)
+		return;
 
 	auto singleSurfacenum = m_NumVertices;
 	if (isClosed()) {
@@ -26,9 +25,6 @@ void XRotateLoftedgeometrySource::updateVertextCoordArray()
 	}
 
 	auto rowLen = singleSurfacenum + 1;
-
-	auto bottomPoints = getBottomPoints();
-	auto topPoints = getTopPoints();
 
 	m_coord->setNumOfTuple(singleSurfacenum * 2 + 2);		//上下圆心
 	int idx = 0;
@@ -48,6 +44,12 @@ void XRotateLoftedgeometrySource::updateVertextCoordArray()
 
 void XRotateLoftedgeometrySource::updateIndexArray()
 {
+	auto bottomPoints = getBottomPoints();
+	auto topPoints = getTopPoints();
+
+	if (bottomPoints.size() == 0)
+		return;
+
 	auto singleSurfacePointnum = m_NumVertices;
 	if (isClosed()) {
 		singleSurfacePointnum = m_NumVertices + 1;
@@ -104,6 +106,10 @@ void XRotateLoftedgeometrySource::updateIndexArray()
 
 void XRotateLoftedgeometrySource::updateFaceColorArray()
 {
+	auto bottomPoints = getBottomPoints();
+	if (bottomPoints.size() == 0)
+		return;
+
 	auto singleSurfacePointnum = m_NumVertices;
 	if (isClosed()) {
 		singleSurfacePointnum = m_NumVertices + 1;

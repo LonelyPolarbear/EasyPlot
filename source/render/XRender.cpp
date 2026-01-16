@@ -20,18 +20,6 @@ struct XRender::Internal {
 		host = render;
 	}
 
-	wptr<XOpenGLRenderWindow> m_renderWindow;
-	sptr<XInteractionEventHandler> m_multiModeEventHandler;
-	sptr<XRenderCamera> m_camera;
-	
-	std::vector<sptr<XGeometryNode>> m_actor3DList;
-	std::vector<sptr<XGraphicsItem>> m_actor2DList;
-
-	XQ::Vec2f m_mousePos; //鼠标在窗口中的位置，未做变换
-	bool m_isActive = false;
-	XRender *host;
-
-
 	sptr<RenderWindowUbo> getUbo() {
 		return host->getRenderWindow()->getRenderWindowUbo();
 	}
@@ -51,6 +39,19 @@ struct XRender::Internal {
 		renderPos[1] -= view_port[1];
 		getUbo()->writeFS(XQ::Vec2f(view_port[2],view_port[3]), renderPos);		//视口宽高和鼠标位置
 	}
+
+public:
+	XRender* host;
+	wptr<XOpenGLRenderWindow> m_renderWindow;
+	sptr<XInteractionEventHandler> m_multiModeEventHandler;
+	sptr<XRenderCamera> m_camera;
+
+	std::vector<sptr<XGeometryNode>> m_actor3DList;
+	std::vector<sptr<XGraphicsItem>> m_actor2DList;
+
+	XQ::Vec2f m_mousePos;			//鼠标在窗口中的位置，未做变换
+	bool m_isActive = false;
+	std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;	//无限网格平面
 };
 
 XRender::XRender():mData(new Internal(this))
@@ -103,6 +104,8 @@ void XRender::render()
 	//! 渲染
 	auto enable = makeShareDbObject<XOpenGLEnable>();
 	enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
+	enable->enable(XOpenGLEnable::EnableType::BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	XOpenGLFuntion::xglClearDepth(1);
 	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::depth_buffer_bit);
 
@@ -246,6 +249,10 @@ bool XRender::isBelongToRender(const XQ::Vec2i& windowPos) const
 		return true;
 	}
 	return false;
+}
+
+void XRender::addInfinitePlane(Eigen::Matrix4f planeFrame)
+{
 }
 
 void XRender::updateViewPort()

@@ -36,10 +36,11 @@ void XRenderMultiModeInteractionHandler::MiddleButtonPressEvent(XQ::Vec2i p, XQ:
 	mCameraHandler->MiddleButtonPressEvent(p, k);
 }
 
-void XRenderMultiModeInteractionHandler::MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderMultiModeInteractionHandler::MiddleButtonReleaseEvent(XQ::Vec2i p, XQ::KeyboardModifier k)
 {
 	if (!isRenderActive())
 		return;
+	mCameraHandler->MiddleButtonReleaseEvent(p, k);
 }
 
 void XRenderMultiModeInteractionHandler::RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier)

@@ -50,9 +50,5 @@ void main()
    vec4 worldPos = gridPlaneMatInWorld * vec4(fragPos3D, 1.0);
    vec3 worldPos_ = worldPos.xyz / worldPos.w;
 	gl_Position = ProjectionMat*ViewMat*vec4(worldPos_.x, worldPos_.y, worldPos_.z, 1.0);
-
-    //fragPos3D = fragPos3D.xzy;
-
 #endif
-	//gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
 }

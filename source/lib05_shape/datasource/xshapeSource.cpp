@@ -38,18 +38,28 @@ XQ::Vec3f XShapeSource::getFaceNormal(uint32_t index)
 bool XShapeSource::update()
 {
 	//更新数据
-	if (!isNeedUpdate()) {
+	if (initSource = false) {
+		updateFaceColorArray();
+		updateIndexArray();
+		updateVertextCoordArray();
+		updateNormalArray();
+		updateVertexColorArray();
 		return false;
 	}
+	else {
+		if (!isNeedUpdate()) {
+			return false;
+		}
 
-	updateFaceColorArray();
-	updateIndexArray();
-	updateVertextCoordArray();
-	updateNormalArray();
-	updateVertexColorArray();
+		updateFaceColorArray();
+		updateIndexArray();
+		updateVertextCoordArray();
+		updateNormalArray();
+		updateVertexColorArray();
 
-	setHasUpdated();
-	return true;
+		setHasUpdated();
+		return true;
+	}
 }
 
 XQ::BoundBox XShapeSource::getBoundBox()
@@ -118,4 +128,5 @@ void XShapeSource::writeToFile(const std::string& filename)
 void XShapeSource::Init()
 {
 	update();
+	initSource = true;
 }

@@ -28,7 +28,8 @@ void XOpenGLVertexArrayObject::create()
 
 void XOpenGLVertexArrayObject::destroy()
 {
-    glDeleteVertexArrays(1, &d->m_id);
+    if(d->m_id)
+        glDeleteVertexArrays(1, &d->m_id);
 }
 
 void XOpenGLVertexArrayObject::bind()

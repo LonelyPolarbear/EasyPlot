@@ -133,7 +133,6 @@ public:
 		if (!gridShape) {
 			gridShape = makeShareDbObject<XGeometryNode>();
             gridShape->setVisible(false);
-			//gridShape->initResource();
             auto gridSource = makeShareDbObject<XCustomSource>();
             auto coord = gridSource->getVertextCoordArray();
             coord->setNumOfTuple(4);

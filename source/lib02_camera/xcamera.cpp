@@ -110,15 +110,16 @@ std::vector<XQ::Vec3f> xcamera::getFrustumInWorld() const
     Eigen::Matrix4f view = m_transform.matrix().inverse();
     Eigen::Matrix4f proj = projectionMatrix();
     Eigen::Matrix4f viewProj = proj * view;
+    auto ss =  view.inverse() * proj.inverse();
     Eigen::Vector4f points[8] = {
-        viewProj * Eigen::Vector4f(-1, -1, -1, 1),
-        viewProj * Eigen::Vector4f(1, -1, -1, 1),
-        viewProj * Eigen::Vector4f(1, 1, -1, 1),
-        viewProj * Eigen::Vector4f(-1, 1, -1, 1),
-        viewProj * Eigen::Vector4f(-1, -1, 1, 1),
-        viewProj * Eigen::Vector4f(1, -1, 1, 1),
-        viewProj * Eigen::Vector4f(1, 1, 1, 1),
-        viewProj * Eigen::Vector4f(-1, 1, 1, 1)
+        ss* Eigen::Vector4f(-1, -1, -1, 1),
+        ss* Eigen::Vector4f(1, -1, -1, 1),
+        ss* Eigen::Vector4f(1, 1, -1, 1),
+        ss* Eigen::Vector4f(-1, 1, -1, 1),
+        ss* Eigen::Vector4f(-1, -1, 1, 1),
+        ss* Eigen::Vector4f(1, -1, 1, 1),
+        ss* Eigen::Vector4f(1, 1, 1, 1),
+        ss* Eigen::Vector4f(-1, 1, 1, 1)
     };
 
     for (int i = 0; i < 8; i++) {

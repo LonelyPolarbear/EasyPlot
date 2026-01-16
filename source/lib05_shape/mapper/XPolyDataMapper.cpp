@@ -90,7 +90,7 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 	}
 	else if (polygonMode == PolygonMode::line) {
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		//glPolygonOffset(1.0f, 1.0f);
+		glPolygonOffset(1.0f, 1.0f);
 		glDrawElements((unsigned int)drawType, index->getNumOfTuple() * index->getComponent(), GL_UNSIGNED_INT, 0);
 	}
 	else if (polygonMode == PolygonMode::point) {

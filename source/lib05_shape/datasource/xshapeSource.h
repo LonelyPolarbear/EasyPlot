@@ -55,4 +55,7 @@ protected:
 	std::shared_ptr<XUIntArray> m_indexs;
 
 	XTimeStamp m_updateTime;
+	//仅为了在Init调用update，保证source有数据，
+	//有些时候，算法可能需要sourece数据，但是由于未开始绘制，此时renderNode未更新，导致source一直没有数据
+	bool initSource = false;	
 };

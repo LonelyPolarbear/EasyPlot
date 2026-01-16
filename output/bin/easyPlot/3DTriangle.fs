@@ -85,11 +85,10 @@ void main()
 		FragColor = vec4(0.0, 0.0, 1.0, 1.0);
 	}
 	#endif
+
 	#if 0
 		vec2 coord = vec2( gl_FragCoord.x / float(screenSize.x), gl_FragCoord.y / float( screenSize.y));
 		float depthValue = texture(depthSample, coord.xy).r;
 		FragColor = vec4(vec3(depthValue), 1.0);
 	#endif
-
-	//FragColor = vec4(0.0, 0.0, 1.0, 1.0);
 }

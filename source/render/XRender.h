@@ -54,6 +54,8 @@ public:
 	XQ::Recti getConvertViewPort() const;
 
 	bool isBelongToRender(const XQ::Vec2i& windowPos) const;
+
+	void addInfinitePlane(Eigen::Matrix4f planeFrame);
 protected:
 
 	void updateViewPort();

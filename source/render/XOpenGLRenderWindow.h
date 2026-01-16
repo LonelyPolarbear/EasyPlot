@@ -64,6 +64,7 @@ public:
 	sptr<XRenderWindowEventDispatch> getEventDispatcher() const;
 
 	void addRender(sptr<XRender> ren);
+	std::vector<sptr<XRender>> getRenders() const;
 
 	sptr<xShaderManger> getShaderManger()const;
 

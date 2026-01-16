@@ -84,7 +84,7 @@ private:
 	class Internal;
 	std::unique_ptr<Internal> d;
  protected:
-	ColorMode m_colorMode = ColorMode::FaceColor;
+	ColorMode m_colorMode = ColorMode::SingleColor;
 	PrimitveType m_drawType = PrimitveType::triangle;
 	PolygonMode m_polygonMode = PolygonMode::fill;
 	XQ::Vec4f m_singleColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);

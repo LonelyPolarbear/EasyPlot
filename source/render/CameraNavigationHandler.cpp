@@ -47,6 +47,7 @@ void CameraNavigationHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::Ke
 	if (!isRenderActive())
 		return;
 
+	mData->mouseLstPos = getRender()->window2render(windowpos);
 	mData->mouseType = MouseType::middle;
 }
 

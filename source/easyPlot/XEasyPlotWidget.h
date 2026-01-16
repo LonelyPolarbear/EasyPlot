@@ -15,4 +15,8 @@ class lib06_easyplot_API XEasyPlotWidget : public XGLWidget
 public:
 	explicit XEasyPlotWidget(QWidget* parent);
 	~XEasyPlotWidget();
+
+virtual void contextMenuEvent(QContextMenuEvent* event)override;
+public slots:
+	void slotFitView3D();
 };

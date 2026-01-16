@@ -30,7 +30,7 @@ public:
     Eigen::Matrix4f projectionMatrix() const;
     Eigen::Matrix4f getViewMatrix() const;
     void setAspect(float aspect);
-
+    std::vector<XQ::Vec3f> getFrustumInWorld() const;
  protected:
     sptr<xcamera> mCamera;
 public:
