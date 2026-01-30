@@ -29,6 +29,11 @@ protected:
     /// <param name="stride">步长，单位字节</param>
     /// <param name="offset">偏移量，单位字节</param>
     void addBuffer(unsigned int index, std::shared_ptr<XOpenGLBuffer> buffer, unsigned int size, XOpenGL::DataType type, unsigned int stride, unsigned int offset,bool isInstance=false);
+
+    void enableAttribute(unsigned int index);
+    
+    void disableAttribute(unsigned int index);
+    
     public:
     class Internal;
     std::unique_ptr<Internal> d;

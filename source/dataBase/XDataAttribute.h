@@ -4,6 +4,7 @@
 #include <xsignal/XSignal.h>
 #include "XVector.h"
 #include "XClolor.h"
+#include "lib00_utilty/gp/XTraits.hpp"
 class XDataObject;
 class database_API XDataAttribute : public XDataBaseObject {
 protected:
@@ -21,6 +22,11 @@ public:
 
 	void setVisible(bool v);
 
+	void setName(const std::string& name);
+	const std::string& getName() const {
+		return mName;
+	}
+
 	bool isVisible() const {
 		return mVisible;
 	}
@@ -28,6 +34,7 @@ protected:
 	wptr<XDataObject> mParent;
 	uint64_t mUid;
 	bool mVisible = true;
+	std::string mName;
 };
 
 template<typename T>
@@ -37,6 +44,12 @@ protected:
 	~XDataAttributeT()=default;
 public:
 	void setValue(const T& v) {
+		if constexpr (XTraits::has_equal_operator_v<T>) {
+			if (value == v) {
+				return;
+			}
+		}
+		
 		value = v;
 		sigAttrChanged(asDerived<XDataAttribute>(), XDataChangeType::ItemDataModified);
 		callParentSlot(XDataChangeType::ItemDataModified);
@@ -48,7 +61,39 @@ protected:
 	T value{};
 };
 
+class XDataAttributeEnumBase : public XDataAttribute {
+protected:
+	XDataAttributeEnumBase() = default;
+	~XDataAttributeEnumBase() = default;
+public:
+	void setIntValue(unsigned int v) {
+		value = v;
+		sigAttrChanged(asDerived<XDataAttribute>(), XDataChangeType::ItemDataModified);
+		callParentSlot(XDataChangeType::ItemDataModified);
+	}
+	unsigned int getIntValue() const {
+		return value;
+	}
+protected:
+	unsigned int value{};
+};
+
+template<typename T,typename = std::enable_if_t<std::is_enum_v<T>>>
+class XDataAttributeEnum : public XDataAttributeEnumBase {
+protected:
+	XDataAttributeEnum() = default;
+	~XDataAttributeEnum() = default;
+public:
+	void setValue(T v) {
+		setValue((unsigned int)v);
+	}
+	T getValue() const {
+		(T)getIntValue();
+	}
+};
+
 extern template class database_API XDataAttributeT<int>;
+extern template class database_API XDataAttributeT<bool>;
 extern template class database_API XDataAttributeT<unsigned int>;
 extern template class database_API XDataAttributeT<float>;
 extern template class database_API XDataAttributeT<double>;
@@ -79,6 +124,7 @@ extern template class database_API XDataAttributeT<XQ::XColor>;
 
 using XAttr_Color = XDataAttributeT<XQ::XColor>;
 using XAttr_Int = XDataAttributeT<int>;
+using XAttr_Bool = XDataAttributeT<bool>;
 using XAttr_UInt = XDataAttributeT<unsigned int>;
 using XAttr_Float = XDataAttributeT<float>;
 using XAttr_Double = XDataAttributeT<double>;
@@ -135,5 +181,6 @@ do { \
 		auto& __tmp__ = const_cast<std::shared_ptr<_class_>&>(_name_); \
 		__tmp__ = makeShareDbObject<_class_>(); \
 		__tmp__->setValue(_val_); \
+		__tmp__->setName(#_name_); \
 		addAttribute(__tmp__); \
 } while (false);

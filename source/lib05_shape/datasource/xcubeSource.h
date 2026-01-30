@@ -11,11 +11,17 @@ protected:
 public:
 	void updateVertextCoordArray() override;
 
-	void updateIndexArray()override;
+	void updateFaceIndexArray()override;
 
 	void updateFaceColorArray()override;
 
-	void updateNormalArray()override;
+	void updateVertextNormalArray()override;
 
 	void updateVertexColorArray()override;
+
+	void updateLineIndexArray() override;
+
+	void updateLineColorArray() override;
+
+	void updateVertexIndexArray() override;
 };

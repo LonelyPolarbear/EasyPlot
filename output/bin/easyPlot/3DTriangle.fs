@@ -24,7 +24,7 @@ const int COLOMODE_SELECT_TEST_COLOR = 5;							//每个片元一个颜色
 
 const int POLYGONMODE_POINT = 1;
 const int POLYGONMODE_LINE = 2;
-const int POLYGONMODE_FILL = 3;
+const int POLYGONMODE_FACE = 4;
 
 uniform int polygonMode;
 
@@ -45,7 +45,7 @@ in vec4 in_color;
 void main()
 {	
 	#if 1
-	if(polygonMode == POLYGONMODE_FILL){
+	if(polygonMode == POLYGONMODE_FACE){
 			uint objectId = texelFetch( objectIdSample,ivec2(setRealTimeMousePos.x,setRealTimeMousePos.y),0).r;
 			uint primitiveId = texelFetch( objectIdSample,ivec2(setRealTimeMousePos.x,setRealTimeMousePos.y),0).g;
 			if(objectId == objectID){
@@ -82,7 +82,11 @@ void main()
 		}
 	
 	if(polygonMode == POLYGONMODE_LINE){
-		FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+		FragColor = singleColor;
+	}
+
+	if(polygonMode == POLYGONMODE_POINT){
+		FragColor = singleColor;
 	}
 	#endif
 

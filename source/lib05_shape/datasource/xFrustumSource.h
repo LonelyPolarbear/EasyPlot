@@ -17,6 +17,7 @@ public:
 	void setFarPlanePoints(std::vector<XQ::Vec3f> p);	//远平面
 	void setNearPlanePoints(std::vector<XQ::Vec3f> p);	//近平面
 	void updateVertextCoordArray() override;
+	void updateLineIndexArray() override;
 protected:
 	bool hasPoint() const {
 		return mFarPlanePoint.size() >0;

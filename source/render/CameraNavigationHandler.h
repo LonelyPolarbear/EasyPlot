@@ -33,6 +33,8 @@ public:
 
 	void setRender(sptr< XRender> render) override;
 protected:
+	void slotRenderActiveChanged(bool active) override;
+protected:
 	struct Internal;
 	sptr< Internal> mData;
 };

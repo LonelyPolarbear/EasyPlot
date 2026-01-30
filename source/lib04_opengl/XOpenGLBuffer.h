@@ -116,6 +116,7 @@ public:
 	void destroy();
 
 	bool setBufferBindIdx(unsigned int idx);
+	bool setFeedbackBufferBindIdx(unsigned int idx,sptr<XOpenGLBuffer> vbo);
 
 	unsigned int bufferId();
 

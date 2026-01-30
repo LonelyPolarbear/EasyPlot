@@ -294,7 +294,7 @@ void XGraphicsItem::initResource()
 
 	m_vbo_coord->create();
 
-	m_vbo_coord->bind();
+	//m_vbo_coord->bind();
 
 	m_ssbo_len->setBufferType(XOpenGLBuffer::ShaderStorageBuffer);
 
@@ -315,7 +315,7 @@ void XGraphicsItem::initResource()
 	//ÉèÖÃ¶¥µãÊôĞÔ
 	m_vao->addBuffer(0, m_vbo_coord, 3, XOpenGL::DataType::float_, sizeof(XQ::Vec3f), 0);
 
-	m_vbo_coord->release();
+	//m_vbo_coord->release();
 
 	m_vao->release();
 	//return;

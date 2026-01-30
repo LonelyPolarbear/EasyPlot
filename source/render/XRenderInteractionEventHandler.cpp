@@ -142,6 +142,17 @@ bool XRenderInteractionEventHandler::isRenderActive() const
 void XRenderInteractionEventHandler::setRender(sptr<XRender> render)
 {
 	m_render = render;
+	//ÐÅºÅ°ó¶¨
+	if (auto attr = render->getAttribute("AttrActive")) {
+		xsig::connect(attr,&XDataAttribute::sigAttrChanged,[this](sptr<XDataAttribute> attr, XDataChangeType type){
+			if (type == XDataChangeType::ItemDataModified) {
+				if (auto a = attr->asDerived<XAttr_Bool>()) {
+					bool flag = a->getValue();
+					slotRenderActiveChanged(flag);
+				}
+			}
+		});
+	}
 }
 
 sptr<XRender> XRenderInteractionEventHandler::getRender() const

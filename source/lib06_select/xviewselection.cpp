@@ -211,7 +211,7 @@ bool XViewSelection::renderLayer(std::set<std::shared_ptr<XGeometryNode>> object
 
 
 	for (auto shape : objects) {
-		shape->setPolygonMode(PolygonMode::fill);
+		shape->setPolygonMode(PolygonMode::face);
 		shape->draw(d->pickShader);
 	}
 

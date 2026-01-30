@@ -4,11 +4,17 @@
 
 XShapeSource::XShapeSource()
 {
-	m_coord = makeShareDbObject<XFloatArray>(); m_coord->setComponent(3);
-	m_normal = makeShareDbObject<XFloatArray>(); m_normal->setComponent(3);
-	m_VertexColor = makeShareDbObject<XFloatArray>(); m_coord->setComponent(3);
+	m_VertexCoord = makeShareDbObject<XFloatArray>(); m_VertexCoord->setComponent(3);
+	m_VertexNormal = makeShareDbObject<XFloatArray>(); m_VertexNormal->setComponent(3);
+	m_VertexColor = makeShareDbObject<XFloatArray>(); m_VertexCoord->setComponent(3);
+
 	m_FaceColor = makeShareDbObject<XFloatArray>(); m_FaceColor->setComponent(4);
-	m_indexs = makeShareDbObject<XUIntArray>(); m_indexs->setComponent(3);
+	m_FaceIndexs = makeShareDbObject<XUIntArray>(); m_FaceIndexs->setComponent(3);
+
+	m_LineIndexs = makeShareDbObject<XUIntArray>(); m_LineIndexs->setComponent(2);
+	m_LineColor = makeShareDbObject<XFloatArray>(); m_LineColor->setComponent(4);
+
+	m_VertexIndexs = makeShareDbObject<XUIntArray>(); m_VertexIndexs->setComponent(1);
 
 	//更新时间戳，确保数据更新
 	Modified();
@@ -20,10 +26,10 @@ XShapeSource::~XShapeSource()
 
 XQ::Vec3f XShapeSource::getFaceNormal(uint32_t index)
 {
-	uint32_t* pIndex = m_indexs->data(index);
-	Eigen::Vector3f v1(m_coord->data(pIndex[0])[0], m_coord->data(pIndex[0])[1], m_coord->data(pIndex[0])[2]);
-	Eigen::Vector3f v2(m_coord->data(pIndex[1])[0], m_coord->data(pIndex[1])[1], m_coord->data(pIndex[1])[2]);
-	Eigen::Vector3f v3(m_coord->data(pIndex[2])[0], m_coord->data(pIndex[2])[1], m_coord->data(pIndex[2])[2]);
+	uint32_t* pIndex = m_FaceIndexs->data(index);
+	Eigen::Vector3f v1(m_VertexCoord->data(pIndex[0])[0], m_VertexCoord->data(pIndex[0])[1], m_VertexCoord->data(pIndex[0])[2]);
+	Eigen::Vector3f v2(m_VertexCoord->data(pIndex[1])[0], m_VertexCoord->data(pIndex[1])[1], m_VertexCoord->data(pIndex[1])[2]);
+	Eigen::Vector3f v3(m_VertexCoord->data(pIndex[2])[0], m_VertexCoord->data(pIndex[2])[1], m_VertexCoord->data(pIndex[2])[2]);
 	
 	Eigen::Vector3f e1 = v2 - v1;
 	Eigen::Vector3f e2 = v3 - v1;
@@ -40,10 +46,13 @@ bool XShapeSource::update()
 	//更新数据
 	if (initSource = false) {
 		updateFaceColorArray();
-		updateIndexArray();
+		updateFaceIndexArray();
 		updateVertextCoordArray();
-		updateNormalArray();
+		updateVertextNormalArray();
 		updateVertexColorArray();
+		updateLineIndexArray();
+		updateLineColorArray();
+		updateVertexIndexArray();
 		return false;
 	}
 	else {
@@ -52,10 +61,13 @@ bool XShapeSource::update()
 		}
 
 		updateFaceColorArray();
-		updateIndexArray();
+		updateFaceIndexArray();
 		updateVertextCoordArray();
-		updateNormalArray();
+		updateVertextNormalArray();
 		updateVertexColorArray();
+		updateLineIndexArray();
+		updateLineColorArray();
+		updateVertexIndexArray();
 
 		setHasUpdated();
 		return true;
@@ -69,11 +81,11 @@ XQ::BoundBox XShapeSource::getBoundBox()
 	XQ::Vec3d minBound = XQ::Vec3d(limitMax, limitMax, limitMax);
 	XQ::Vec3d maxBound = XQ::Vec3d(limitMin, limitMin, limitMin);
 
-	if (m_coord->size() == 0)
+	if (m_VertexCoord->size() == 0)
 		return XQ::BoundBox{ minBound.x(), maxBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
-	float* pData = m_coord->data(0);
-	for (int i = 0; i < m_coord->getNumOfTuple(); i++) {
+	float* pData = m_VertexCoord->data(0);
+	for (int i = 0; i < m_VertexCoord->getNumOfTuple(); i++) {
 
 		XQ::Vec3d pos = XQ::Vec3d(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
 		minBound = XQ::Vec3d(std::min(minBound.x(), pos.x()), std::min(minBound.y(), pos.y()), std::min(minBound.z(), pos.z()));
@@ -89,11 +101,11 @@ XQ::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 	XQ::Vec3d minBound = XQ::Vec3d(limitMax, limitMax, limitMax);
 	XQ::Vec3d maxBound = XQ::Vec3d(limitMin, limitMin, limitMin);
 
-	if (m_coord->size() == 0)
+	if (m_VertexCoord->size() == 0)
 		return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
-	float* pData = m_coord->data(0);
-	for (int i = 0; i < m_coord->getNumOfTuple(); i++) {
+	float* pData = m_VertexCoord->data(0);
+	for (int i = 0; i < m_VertexCoord->getNumOfTuple(); i++) {
 
 		Eigen::Vector3f pos = Eigen::Vector3f(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
 		pos = mat * pos;
@@ -106,20 +118,20 @@ XQ::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 
 void XShapeSource::writeToFile(const std::string& filename)
 {
-	m_coord->getNumOfTuple();
+	m_VertexCoord->getNumOfTuple();
 
 	std::ofstream file(filename);
 
-	file<< m_coord->getNumOfTuple() << std::endl;
+	file<< m_VertexCoord->getNumOfTuple() << std::endl;
 
-	for (int i = 0; i < m_coord->getNumOfTuple(); i++) {
-		file << m_coord->data(i)[0] <<" "<< m_coord->data(i)[1]<<" " <<m_coord->data(i)[2]<<std::endl;
+	for (int i = 0; i < m_VertexCoord->getNumOfTuple(); i++) {
+		file << m_VertexCoord->data(i)[0] <<" "<< m_VertexCoord->data(i)[1]<<" " <<m_VertexCoord->data(i)[2]<<std::endl;
 	}
 
-	file << m_indexs->getNumOfTuple() << std::endl;
+	file << m_FaceIndexs->getNumOfTuple() << std::endl;
 
-	for (int i = 0; i < m_indexs->getNumOfTuple(); i++) {
-		file << m_indexs->data(i)[0] << " " << m_indexs->data(i)[1] << " " << m_indexs->data(i)[2] << std::endl;
+	for (int i = 0; i < m_FaceIndexs->getNumOfTuple(); i++) {
+		file << m_FaceIndexs->data(i)[0] << " " << m_FaceIndexs->data(i)[1] << " " << m_FaceIndexs->data(i)[2] << std::endl;
 	}
 	
 	file.close();

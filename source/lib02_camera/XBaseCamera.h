@@ -1,15 +1,13 @@
 #pragma once
 
 #include "XCameraApi.h"
+
 #include <Eigen/Eigen>
 #include <dataBase/XDataBaseObject.h>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
 
-/// <summary>
-/// 该类是最初的设计，后续会丢弃
-/// </summary>
-class lib02_CAMERA_API xcamera:public XDataBaseObject
+class lib02_CAMERA_API XBaseCmaera:public XDataBaseObject
 {
 public:
 	enum class cameraType {
@@ -25,25 +23,29 @@ public:
 		center
 	};
 public:
-	xcamera();
-	~xcamera();
+	XBaseCmaera();
+	~XBaseCmaera();
 
-	Eigen::Matrix4f projectionMatrix() const;
+	virtual void scale(float sacleFactor) =0;
 
-	void scale(float sacleFactor,bool isLast = true);
-
-	void transform(float picth, float yaw, float roll,  float tx, float ty, float tz);
-
-	void setEyeDir(const XQ::Vec3f &dir);
+	virtual void setEyeDir(const XQ::Vec3f &dir) =0;
 
 	/**
 	 * @brief 
 	 * @param curPointNorm 屏幕坐标系0-1
 	 * @param lastPointNorm 屏幕坐标系0-1
 	 */
-	void transformFreely(Eigen::Vector2f curPoint, Eigen::Vector2f lastPoint, float width, float height, bool isRotate, bool isYUP = false);
+	virtual void transformFreely(Eigen::Vector2f curPoint, Eigen::Vector2f lastPoint, float width, float height, bool isRotate, bool isYUP = false) = 0;
 
-	void transformUpright(Eigen::Vector2f curPoint, Eigen::Vector2f lastPoint, float width, float height, bool isRotate, bool isYUP = false);
+	virtual void transformUpright(Eigen::Vector2f curPoint, Eigen::Vector2f lastPoint, float width, float height, bool isRotate, bool isYUP = false) = 0;
+
+	virtual void resetCamera(const double boundBox[6]) = 0;
+
+	virtual Eigen::Matrix4f getViewMatrix() const;
+
+	virtual Eigen::Affine3f getCameraFrame() const = 0;
+
+	virtual Eigen::Affine3f& getCameraFrame() =0;
 
 	//获取始终面对相机方向,位于近平面的一个点
 	Eigen::Vector3f billboard(float screenw,float screenh, float posx, float posy, float minus_zInCamera,oriention orien = oriention::leftBottom);
@@ -58,22 +60,110 @@ public:
 
 	float scaleFactorVZnear( float screenh);
 
-	Eigen::Matrix4f perspective() const;
+	Eigen::Matrix4f perspective() const;		//透视投影
 
-	Eigen::Matrix4f ortho() const;
+	Eigen::Matrix4f ortho() const;					//正交投影
 
-	void resetCamera(const double boundBox[6]);
+	Eigen::Matrix4f projectionMatrix() const;
 
 	std::vector<XQ::Vec3f> getFrustumInWorld() const;
+
 	XQ::Vec3f getNearPointInWorld() const;
+
 	XQ::Vec3f getFarPointInWorld() const;
-private:
-	void transformImpl(float picth, float yaw, float roll, float tx, float ty, float tz);
 public:
-	void setTranslate(float x, float y, float z);
 	void setRotateCenter(float x, float y, float z);
+
 	Eigen::Vector3f getRotateCenter() const;
-	Eigen::Matrix4f getViewMatrix() const;
+
+	Eigen::Vector3f getPosition() const;
+
+	bool checkFloatWithEpsilon(double a, double b, double epsilon = 1e-9) {
+		// 排除等于1的情况（考虑精度）
+		auto notEqualToOne = [epsilon](double x) {
+			return std::abs(x - 1.0) > epsilon;
+			};
+
+		return notEqualToOne(a) && notEqualToOne(b) &&
+			((a > 1.0 && b < 1.0) || (a < 1.0 && b > 1.0));
+	}
+
+	void setAspect(float aspect) {
+		m_aspect = aspect;
+
+		//更新宽高比
+
+		if (checkFloatWithEpsilon(aspect, m_HeightWithAspect)) {
+			//此时需要更改高度值
+			if (aspect > 1) {
+				//此时窗口属于宽窗口，原来是窄窗口
+				auto minWidth = getHeight() * m_HeightWithAspect;
+				setHeight(minWidth);
+			}
+			else {
+				//当前窗口属于窄窗口，原来是宽窗口
+				auto minHeight = getHeight();
+				setHeight(minHeight / aspect);
+			}
+		}
+		else {
+#if 0
+			//同类变化，需要处理更窄或者更低的情况
+			if (aspect > 1) {
+				//说明都是宽屏，此时需要处理高度
+				if (m_HeightWithAspect < aspect) {
+					//说明宽屏在垂直方向压缩，需要处理，为了防止看不到，应该放大区域
+
+
+				}
+				else {
+					//说明宽屏在水平方向压缩，不需要处理
+				}
+			}
+			else {
+				//说明都是窄屏，此时需要处理高度
+				if (m_HeightWithAspect > aspect) {
+					//说明窄屏在水平方向压缩，需要处理
+				}
+				else {
+					//说明窄屏在垂直方向压缩，不需要处理
+				}
+			}
+#endif
+		}
+
+	}
+
+	float getAspect() const {
+		return m_aspect;
+	}
+
+	float getZnear() const {
+		return m_znear;
+	}
+
+	float getZfar() const {
+		return m_zfar;
+	}
+
+	cameraType getType() const {
+		return m_type;
+	}
+
+	void setType(cameraType type) {
+		m_type = type;
+	}
+
+	float getHeight() const {
+		return m_height;
+	}
+
+	void setHeight(float height) {
+		m_height = height;
+		m_HeightWithAspect = m_aspect;
+	}
+
+public:
 
 	/// <summary>
 	/// 屏幕坐标到NDC坐标，屏幕坐标系为左手坐标系，原点位于屏幕左下角，X轴向右，Y轴向上,Z轴朝向屏幕里，范围[-1,1]
@@ -110,95 +200,7 @@ public:
 
 	Eigen::Vector3f ComputeCameraToWorld(Eigen::Vector3f input) const;
 
-	Eigen::Vector3f getPosition() const;
-
-	bool checkFloatWithEpsilon(double a, double b, double epsilon = 1e-9) {
-		// 排除等于1的情况（考虑精度）
-		auto notEqualToOne = [epsilon](double x) {
-			return std::abs(x - 1.0) > epsilon;
-			};
-
-		return notEqualToOne(a) && notEqualToOne(b) &&
-			((a > 1.0 && b < 1.0) || (a < 1.0 && b > 1.0));
-	}
-
-	void setAspect(float aspect) {
-		m_aspect = aspect;
-
-		//更新宽高比
-		
-		if (checkFloatWithEpsilon(aspect, m_HeightWithAspect)) {
-			//此时需要更改高度值
-			if (aspect > 1) {
-				//此时窗口属于宽窗口，原来是窄窗口
-				auto minWidth =getHeight() * m_HeightWithAspect;
-				setHeight(minWidth);
-			}
-			else {
-				//当前窗口属于窄窗口，原来是宽窗口
-				auto minHeight = getHeight();
-				setHeight(minHeight/aspect);
-			}
-		}
-		else {
-			#if 0
-			//同类变化，需要处理更窄或者更低的情况
-			if (aspect > 1) {
-				//说明都是宽屏，此时需要处理高度
-				if (m_HeightWithAspect < aspect) {
-					//说明宽屏在垂直方向压缩，需要处理，为了防止看不到，应该放大区域
-
-					
-				}
-				else {
-					//说明宽屏在水平方向压缩，不需要处理
-				}
-			}
-			else {
-				//说明都是窄屏，此时需要处理高度
-				if (m_HeightWithAspect > aspect) {
-					//说明窄屏在水平方向压缩，需要处理
-				}
-				else {
-					//说明窄屏在垂直方向压缩，不需要处理
-				}
-			}
-			#endif
-		}
-		
-	}
-
-	float getAspect() const {
-		return m_aspect;
-	}
-
-	float getZnear() const {
-		return m_znear;
-	}
-
-	float getZfar() const {
-		return m_zfar;
-	}
-
-	cameraType getType() const {
-		return m_type;
-	}
-
-	void setType(cameraType type) {
-		m_type = type;
-	}
-
-	float getHeight() const {
-		return m_height;
-	}
-
-	void setHeight(float height) {
-		m_height = height;
-		m_HeightWithAspect = m_aspect;
-	}
 protected:
-	void updateCameraFrame();		//更新相机姿态
-public:
 	//透视投影
 	float m_fovy = 45;
 	float m_znear = 0.1;
@@ -212,12 +214,5 @@ public:
 	cameraType m_type = cameraType::ortho;
 	
 private:
-	//旧的方案用m_transform维护相机位姿
-	Eigen::Affine3f m_transform = Eigen::Affine3f::Identity();
-	Eigen::Vector3f rotate_center{ 0,0,0 };		//在新的方案中，将其理解为焦点
-
-	//新方案用m_cameraPos维护相机位置，m_cameraPos和rotate_center维护相机姿态
-	Eigen::Vector3f m_cameraPos{0,1,1};	//默认在地平面上方一点
-
-public:
+	Eigen::Vector3f rotate_center{ 0,0,0 };
 };

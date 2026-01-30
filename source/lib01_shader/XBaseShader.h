@@ -81,6 +81,8 @@ class lib01_shader_API XBaseShader:public XDataBaseObject{
 public:
     // utility function for checking shader compilation/linking errors.
     // ------------------------------------------------------------------------
+    void addFeedbackShader(const std::vector<std::string>& variables);
+
     static void checkCompileErrors(unsigned int shader, unsigned int type);  
 
     static unsigned int compileShader(ShaderType type, const std::string& shaderCode);

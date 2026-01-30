@@ -12,6 +12,7 @@
 #include <lib05_shape/datasource/xCustomSource.h>
 #include <lib05_shape/XGraphicsItem.h>
 #include <lib02_camera/xcamera.h>
+#include <lib05_shape/renderNode3d/XInfinitePlaneRenderNode.h>
 
 
 struct XRender::Internal {
@@ -38,6 +39,8 @@ struct XRender::Internal {
 		renderPos[0] -= view_port[0];
 		renderPos[1] -= view_port[1];
 		getUbo()->writeFS(XQ::Vec2f(view_port[2],view_port[3]), renderPos);		//视口宽高和鼠标位置
+
+		getUbo()->writeCamera((int)camera->getProjectionType(),camera->getNear(),m_camera->getFar());
 	}
 
 public:
@@ -50,7 +53,7 @@ public:
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
 	XQ::Vec2f m_mousePos;			//鼠标在窗口中的位置，未做变换
-	bool m_isActive = false;
+	//bool m_isActive = false;
 	std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;	//无限网格平面
 };
 
@@ -65,6 +68,8 @@ XRender::~XRender()
 
 void XRender::Init()
 {
+	XRenderPort::Init();
+	XQ_ATTR_ADD_INIT(AttrActive, false);
 	getOrCreateMultiModeEventHandler();
 }
 
@@ -138,14 +143,14 @@ void XRender::doneCurrent()
 
 bool XRender::setActive(bool isActive)
 {
-	bool tmp = mData->m_isActive;
-	mData->m_isActive = isActive;
+	bool tmp = AttrActive->getValue();
+	AttrActive->setValue(isActive);
 	return tmp;
 }
 
 bool XRender::isActive() const
 {
-	return mData->m_isActive;
+	return AttrActive->getValue();
 }
 
 void XRender::setCameraNavigationHandler(sptr<XInteractionEventHandler> interactionEventHandler)
@@ -301,6 +306,9 @@ XQ::BoundBox  XRender::computeBoundBox() {
 	constexpr double limitMin = std::numeric_limits<double>::lowest();;
 	XQ::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
 	for (auto& shape : mData->m_actor3DList) {
+		if (shape->asDerived<XInfinitePlaneRenderNode>()) {
+			continue;
+		}
 		auto shapeBoundBox = shape->getBoundBox();
 		boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);
 		boundBox.xmax = std::max(boundBox.xmax, shapeBoundBox.xmax);

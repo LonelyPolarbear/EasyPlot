@@ -124,6 +124,8 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 		auto viewport = getRender()->getConvertViewPort();
 		
 		getRender()->getCamera()->rotate(curpos,mData->mouseLstPos,viewport[2],viewport[3]);
+		auto ss = getRender()->getCamera()->getViewMatrix().inverse();
+		std::cout<<"camera:"<<ss(0,2) <<" " << ss(1, 2) << " " << ss(2, 2)<<std::endl;
 
 		//¸üÐÂÎ»ÖÃ
 		mData->mouseLstPos = getRender()->window2render(windowpos);
@@ -172,4 +174,11 @@ bool CameraNavigationHandler::isRenderActive() const
 void CameraNavigationHandler::setRender(sptr<XRender> render)
 {
 	XRenderInteractionEventHandler::setRender(render);
+}
+
+void CameraNavigationHandler::slotRenderActiveChanged(bool active)
+{
+	if (active == false) {
+		mData->mouseType = MouseType::none;
+	}
 }

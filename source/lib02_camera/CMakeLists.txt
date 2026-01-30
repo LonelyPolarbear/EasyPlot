@@ -4,8 +4,8 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 
 #递归目录获取所有c文件
 #file(GLOB_RECURSE SOURCES  *.cpp *.c *.h *.hpp)
-SET(HERDERS_FILES xcamera.h)
-SET(SOURECS_FILES xcamera.cpp)
+file(GLOB_RECURSE HERDERS_FILES *.h)
+file(GLOB_RECURSE SOURECS_FILES *.cpp)
 
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
 SET(DLL_DEBUG_POSTFIX "_d")  

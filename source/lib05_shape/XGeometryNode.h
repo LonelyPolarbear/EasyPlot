@@ -86,7 +86,7 @@ private:
  protected:
 	ColorMode m_colorMode = ColorMode::SingleColor;
 	PrimitveType m_drawType = PrimitveType::triangle;
-	PolygonMode m_polygonMode = PolygonMode::fill;
+	PolygonMode m_polygonMode = PolygonMode::face;
 	XQ::Vec4f m_singleColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	XQ::Vec4f m_preSelectColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
 	bool m_visible = true;

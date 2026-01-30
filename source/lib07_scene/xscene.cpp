@@ -142,7 +142,7 @@ public:
             coord->setTuple(3, -1,1,-1);
             coord->Modified();
 
-            auto index = gridSource->getIndexArray();
+            auto index = gridSource->getFaceIndexArray();
             
             index->setNumOfTuple(6);
             index->setTuple(0, 0,1,2);
@@ -671,12 +671,11 @@ void XScene::render3D()
         Eigen::Affine3f t= Eigen::Affine3f::Identity();
         t.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(90), Eigen::Vector3f::UnitX()));
         Eigen::Matrix4f mat = t.matrix();
-        //mat = Eigen::Matrix4f::Identity();
         shader->setMat4("gridPlaneMatInWorld",mat);
 		auto shape = d->gridShape;
-		shape->setPolygonMode(PolygonMode::fill);
+		shape->setPolygonMode(PolygonMode::face);
 		shape->draw(shader);
-		shape->setPolygonMode(PolygonMode::fill);
+		shape->setPolygonMode(PolygonMode::face);
 		shader->unUse();
 
         glEnableObj->restore();
@@ -709,7 +708,7 @@ if(isScreenRender)
 		fbo->getColorAttachment()->bindUnit(2);
 
 		shader->use();
-		shape->setPolygonMode(PolygonMode::fill);
+		shape->setPolygonMode(PolygonMode::face);
 		shape->draw();
 		shader->unUse();
         fbo->getColorAttachment()->release();
@@ -1009,7 +1008,7 @@ void XScene::rotate(int x1,int y1,int x2,int y2)
         return;
 	Eigen::Vector2f curPos_(x1 - d->startx, y1 - d->starty);
 	Eigen::Vector2f lastPos_(x2 - d->startx, y2 - d->starty);
-    d->camera->transformTrackball(curPos_,lastPos_ ,getViewportWidth(), getViewportHeight(), true,true);
+    d->camera->transformFreely(curPos_,lastPos_ ,getViewportWidth(), getViewportHeight(), true,true);
 }
 
 void XScene::rotate(XQ::Vec2u curpos, XQ::Vec2u lastpos)
@@ -1023,7 +1022,7 @@ void XScene::translate(int x1, int y1, int x2, int y2)
 		return;
 	Eigen::Vector2f curPos_(x1-d->startx, y1-d->starty);
 	Eigen::Vector2f lastPos_(x2 - d->startx, y2 - d->starty);
-	d->camera->transformTrackball(curPos_, lastPos_, getViewportWidth(), getViewportHeight(), false, true);
+	d->camera->transformFreely(curPos_, lastPos_, getViewportWidth(), getViewportHeight(), false, true);
 
     //场景坐标系下的平移
 	auto cur_scenePos = screenPos2ScenePos(XQ::Vec2u(x1, y1));

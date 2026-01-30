@@ -4,6 +4,19 @@
 
  out vec4 FragColor;
 
+ //透视投影相机信息
+
+layout (std140, binding = 5) uniform ubo_cameraData
+{
+    uniform int u_cameraType;
+    uniform float u_near;
+    uniform float u_far;
+    uniform int bak;
+};
+
+const int orothoCamera = 1; //正交投影相机
+const int perspectiveCamera = 2; //透视投影相机
+
  void main()
 {
 #if 0
@@ -31,19 +44,32 @@
     float alpha = 1.0 - min(disToline, 1);
 
     FragColor = vec4(224/225.0, 224/225.0, 224/225.0, alpha);
-    #else
+#else
+    //获取当前的深度
+    float depth = gl_FragCoord.z; //[0-1]
+    float normalizeDepth =0;
+    float fading = 1.0;
+
+    if(u_cameraType == perspectiveCamera){
+        float linearDepth =1.0 /( (1.0/u_far-1.0/u_near)*depth+1.0/u_near);     //范围[n,f]
+        normalizeDepth = (linearDepth-u_near)/(u_far-u_near);  //转为0-1
+        //如果距离过远，则不绘制网格
+        fading = 1-smoothstep(0.5,1.0,normalizeDepth);
+    }else{
+        normalizeDepth=depth;
+    }
 
     //主网格
     float gridSpace = 4;        //网格间距
     float mainGridDensity = 5*gridSpace;        //网格密度
     float mainGridLineWidth = 1;
-    vec2 mainGridFragpos =vec2(fragPos3D.x/mainGridDensity, fragPos3D.y/mainGridDensity);
+    vec2 mainGridFragpos =vec2(fragPos3D.x/mainGridDensity, fragPos3D.z/mainGridDensity);
     vec2 mainGridDerivative = fwidth(mainGridFragpos.xy);
 
     //次网格
     float  subGridDensity = gridSpace;        //网格密度
     float  subGridLineWidth = 1;
-    vec2  subGridFragpos =vec2(fragPos3D.x/subGridDensity, fragPos3D.y/subGridDensity);
+    vec2  subGridFragpos =vec2(fragPos3D.x/subGridDensity, fragPos3D.z/subGridDensity);
     vec2  subGridDerivative = fwidth(subGridFragpos.xy);
 
     vec2 mainGridDisToline_ = abs(fract(mainGridFragpos.xy - 0.5) - 0.5) / mainGridDerivative;
@@ -66,22 +92,21 @@
 
     #if 1
      if(centerAlpha >0){
-        FragColor = vec4(0, 0, 1, centerAlpha);
+        FragColor = vec4(0, 0, 1, centerAlpha*fading);
      }else{
         if(mainGridAlpha<0.01){
             //绘制次网格
-            FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.1*subGridAlpha);
+            FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.1*subGridAlpha*fading);
         }else{
              if(yaxisAlpha >0.01){
-                FragColor = vec4(1, 0, 0, yaxisAlpha);  //会出现锯齿
+                FragColor = vec4(1, 0, 0, yaxisAlpha*fading);  //会出现锯齿
             }else if(xaxisAlpha >0.01){
-                FragColor = vec4(0, 1, 0, xaxisAlpha); //会出现锯齿
+                FragColor = vec4(0, 1, 0, xaxisAlpha*fading); //会出现锯齿
             }else{
-                FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.3*mainGridAlpha);
+                FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.3*mainGridAlpha*fading);
             }
         }
     }
     #endif
-
-    #endif
+#endif
 }

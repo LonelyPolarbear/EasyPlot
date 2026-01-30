@@ -12,27 +12,39 @@ protected:
     XShapeSource();
     virtual ~XShapeSource();
 public:
-	 std::shared_ptr<XFloatArray> getVertextCoordArray(){return m_coord; }
+	 std::shared_ptr<XFloatArray> getVertextCoordArray(){return m_VertexCoord; }
 
-	 std::shared_ptr<XUIntArray> getIndexArray() { return m_indexs; }
+	 std::shared_ptr<XFloatArray> getVertexNormalArray() { return m_VertexNormal; }
+
+	 std::shared_ptr<XFloatArray> getVertexColorArray() { return m_VertexColor; }
+
+	 std::shared_ptr<XUIntArray> getFaceIndexArray() { return m_FaceIndexs; }
 
 	 std::shared_ptr<XFloatArray> getFaceColorArray() { return m_FaceColor; }
 
-	 std::shared_ptr<XFloatArray> getNormalArray() { return m_normal; }
+	 std::shared_ptr<XUIntArray> getLineIndexArray() { return m_LineIndexs; }
 
-	 std::shared_ptr<XFloatArray> getVertexColorArray() { return m_VertexColor; }
+	 std::shared_ptr<XFloatArray> getLineColorArray() { return m_LineColor; }
+
+	 std::shared_ptr<XUIntArray> getVertexIndexArray() { return m_VertexIndexs; }
 
 	 XQ::Vec3f getFaceNormal(uint32_t index);
 
 	 virtual void updateVertextCoordArray() =0;
 
-	 virtual void updateIndexArray() =0;
-
-	 virtual void updateFaceColorArray() =0;
-
-	 virtual void updateNormalArray() =0;
+	 virtual void updateVertextNormalArray() =0;
 
 	 virtual void updateVertexColorArray()=0;
+
+	 virtual void updateFaceIndexArray() = 0;
+
+	 virtual void updateFaceColorArray() = 0;
+
+	 virtual void updateLineIndexArray() = 0;
+
+	 virtual void updateLineColorArray() = 0;
+
+	 virtual void updateVertexIndexArray() = 0;
 
 	virtual bool update();
 
@@ -48,11 +60,21 @@ protected:
 	bool isNeedUpdate() { return m_DataModifyTime > m_updateTime; }
 	void setHasUpdated(){m_updateTime.Modified();}
 protected:
-	std::shared_ptr<XFloatArray> m_coord;
-	std::shared_ptr<XFloatArray> m_normal;
-	std::shared_ptr<XFloatArray> m_VertexColor;
-	std::shared_ptr<XFloatArray> m_FaceColor;
-	std::shared_ptr<XUIntArray> m_indexs;
+	//顶点属性
+	std::shared_ptr<XFloatArray> m_VertexCoord;										//顶点坐标
+	std::shared_ptr<XFloatArray> m_VertexNormal;										//顶点法线
+	std::shared_ptr<XFloatArray> m_VertexColor;										//顶点颜色
+
+	//面单元
+	std::shared_ptr<XFloatArray> m_FaceColor;											//面片颜色
+	std::shared_ptr<XUIntArray> m_FaceIndexs;											//面片索引
+
+	//线单元
+	std::shared_ptr<XFloatArray> m_LineColor;											//线颜色
+	std::shared_ptr<XUIntArray> m_LineIndexs;											//线索引
+
+	//点单元
+	std::shared_ptr<XUIntArray> m_VertexIndexs;										//点索引
 
 	XTimeStamp m_updateTime;
 	//仅为了在Init调用update，保证source有数据，

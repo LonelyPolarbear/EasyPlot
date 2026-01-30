@@ -23,16 +23,6 @@ void RenderWindowUbo::create()
 	uniformBufferVs->setBufferBindIdx(1);
 	uniformBufferVs->release();
 
-	uniformBufferVs2d = makeShareDbObject<XOpenGLBuffer>();
-	uniformBufferVs2d->setBufferType(XOpenGLBuffer::UniformBuffer);
-	uniformBufferVs2d->setUsagePattern(XOpenGLBuffer::UsagePattern::StaticDraw);
-	uniformBufferVs2d->create();
-	uniformBufferVs2d->bind();
-	uniformBufferVs2d->allocate(sizeof(Eigen::Matrix4f) * 2);
-	uniformBufferVs2d->setBufferBindIdx(4);
-	uniformBufferVs2d->release();
-
-
 	uniformBufferFs = makeShareDbObject<XOpenGLBuffer>();
 	uniformBufferFs->setBufferType(XOpenGLBuffer::UniformBuffer);
 	uniformBufferFs->setUsagePattern(XOpenGLBuffer::UsagePattern::StaticDraw);
@@ -50,6 +40,24 @@ void RenderWindowUbo::create()
 	uniformBufferGs->allocate(sizeof(Eigen::Vector2f) * 2 + 4);
 	uniformBufferGs->setBufferBindIdx(3);
 	uniformBufferGs->release();
+
+	uniformBufferVs2d = makeShareDbObject<XOpenGLBuffer>();
+	uniformBufferVs2d->setBufferType(XOpenGLBuffer::UniformBuffer);
+	uniformBufferVs2d->setUsagePattern(XOpenGLBuffer::UsagePattern::StaticDraw);
+	uniformBufferVs2d->create();
+	uniformBufferVs2d->bind();
+	uniformBufferVs2d->allocate(sizeof(Eigen::Matrix4f) * 2);
+	uniformBufferVs2d->setBufferBindIdx(4);
+	uniformBufferVs2d->release();
+
+	uniformBufferCamera = makeShareDbObject<XOpenGLBuffer>();
+	uniformBufferCamera->setBufferType(XOpenGLBuffer::UniformBuffer);
+	uniformBufferCamera->setUsagePattern(XOpenGLBuffer::UsagePattern::StaticDraw);
+	uniformBufferCamera->create();
+	uniformBufferCamera->bind();
+	uniformBufferCamera->allocate(sizeof(int)*4);
+	uniformBufferCamera->setBufferBindIdx(5);
+	uniformBufferCamera->release();
 
 	init_done = true;
 }
@@ -79,6 +87,15 @@ void RenderWindowUbo::writeGS(const Eigen::Vector2f& viewport, float sceneScale)
 	uniformBufferGs->bind();
 	uniformBufferGs->write(0, viewport.data(), 2);
 	uniformBufferGs->write(2, &sceneScale, 1);
+	uniformBufferGs->release();
+}
+
+void RenderWindowUbo::writeCamera(int type, double near, double far)
+{
+	uniformBufferCamera->bind();
+	uniformBufferCamera->write(0, &type, 1);
+	uniformBufferCamera->write(1, &near, 1);
+	uniformBufferCamera->write(2, &far, 1);
 	uniformBufferGs->release();
 }
 

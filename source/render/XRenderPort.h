@@ -1,10 +1,11 @@
 #pragma once
 #include "XRenderApi.h"
 #include <dataBase/XDataBaseObject.h>
+#include <dataBase/XDataObject.h>
 #include <dataBase/XClolor.h>
 #include <lib00_utilty/XUtilty.h>
 
-class LIB_XRENDER_API XRenderPort :public XDataBaseObject {
+class LIB_XRENDER_API XRenderPort :public XDataObject {
 protected:
 	XRenderPort();
 	~XRenderPort();
@@ -27,5 +28,5 @@ public:
 protected:
 	XQ::XColor m_backgroundColor1;
 	XQ::XColor m_backgroundColor2;
-	XQ::Rectd m_viewPort;
+	XQ::Rectd m_viewPort = XQ::Rectd(0,0,1,1);
 };

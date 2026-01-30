@@ -1,6 +1,7 @@
 #pragma once
 #include "xshapeApi.h"
 #include <dataBase/XDataBaseObject.h>
+#include <xsignal/XSignal.h>
 
 
 enum  class LIB05_SHAPE_API graphicsItemType {
@@ -26,8 +27,12 @@ enum class LIB05_SHAPE_API  ColorMode {
 
 enum class LIB05_SHAPE_API  PolygonMode {
 	point = 1,
-	line = 2,
-	fill = 3
+	line = 1 <<1,
+	face = 1<<2,
+	point_and_line = point | line,
+	point_and_face = point | face,
+	line_and_face = line | face,
+	all = point | line | face
 };
 
 class LIB05_SHAPE_API XRenderNode :public XDataBaseObject {
@@ -42,4 +47,7 @@ public:
 	int64_t getID() const;
 protected:
 	uint64_t m_id;
+public:
+	XSIGNAL(void(sptr<XRenderNode>)) sigBeginRender;
+	XSIGNAL(void(sptr<XRenderNode>)) sigEndRender;
 };

@@ -27,7 +27,13 @@ void XOpenGLBuffer::setBufferType(XOpenGLBuffer::Type type)
 
 bool XOpenGLBuffer::create()
 {
-	glGenBuffers(1, &d->bufferId);
+	if (d->type == XOpenGLBuffer::TransformFeedbackBuffer) {
+		glGenTransformFeedbacks(1, &d->bufferId);
+	}
+	else {
+		glGenBuffers(1, &d->bufferId);
+	}
+	
 	d->isCreated = glGetError() == GL_NO_ERROR;
 	return d->isCreated;
 }
@@ -150,7 +156,13 @@ bool XOpenGLBuffer::bind()
 
 	d->lastBindBufferId = tmpLastBindBufferId;		//记录之前绑定的buffer
 
-	glBindBuffer(d->type, d->bufferId);
+	if (d->type == XOpenGLBuffer::TransformFeedbackBuffer) {
+		glBindTransformFeedback(d->type, d->bufferId);
+	}
+	else {
+		glBindBuffer(d->type, d->bufferId);
+	}
+	
 	return glGetError() == GL_NO_ERROR;
 }
 
@@ -184,6 +196,15 @@ unsigned int XOpenGLBuffer::bufferId()
 
 bool XOpenGLBuffer::setBufferBindIdx(unsigned int idx)
 {
+	
 	glBindBufferBase(d->type, idx, d->bufferId);
+	
+	
+	return glGetError() == GL_NO_ERROR;
+}
+
+bool XOpenGLBuffer::setFeedbackBufferBindIdx(unsigned int idx, sptr<XOpenGLBuffer> vbo)
+{
+	glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER,idx,vbo->bufferId());
 	return glGetError() == GL_NO_ERROR;
 }

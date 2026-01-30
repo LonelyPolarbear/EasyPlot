@@ -257,4 +257,17 @@ namespace XTraits {
 	auto extract_back_impl(std::index_sequence<Is...>, Tuple&& all_args) {
 		return std::make_tuple(std::get<Offset + Is>(std::forward<Tuple>(all_args))...);
 	}
+
+	template<typename T, typename = void>
+	struct has_equal_operator : std::false_type {};
+
+	// 特化：当表达式 t == u 有效时
+	template<typename T>
+	struct has_equal_operator<T,
+		std::void_t<decltype(std::declval<const T&>() == std::declval<const T&>())>>
+		: std::true_type {};
+
+	// 辅助变量模板（C++17）
+	template<typename T>
+	constexpr bool has_equal_operator_v = has_equal_operator<T>::value;
 }

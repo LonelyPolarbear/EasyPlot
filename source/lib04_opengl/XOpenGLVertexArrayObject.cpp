@@ -52,12 +52,26 @@ unsigned int offset,
 {
     bind();
     buffer->bind();
-    glEnableVertexAttribArray(index);
+   // glEnableVertexAttribArray(index);  首次调用 不启用属性
     glVertexAttribPointer(index, size, (unsigned int)type, GL_FALSE, stride, (void*)offset);
     if (isInstance) {
         glVertexAttribDivisor(index, 1);
     }
     d->m_buffers[index] = buffer;
     buffer->release();
+    release();
+}
+
+void XOpenGLVertexArrayObject::enableAttribute(unsigned int index)
+{
+    bind();
+    glEnableVertexAttribArray(index);
+    release();
+}
+
+void XOpenGLVertexArrayObject::disableAttribute(unsigned int index)
+{
+    bind();
+    glDisableVertexAttribArray(index);
     release();
 }

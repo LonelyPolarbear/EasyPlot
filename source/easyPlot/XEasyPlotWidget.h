@@ -16,7 +16,10 @@ public:
 	explicit XEasyPlotWidget(QWidget* parent);
 	~XEasyPlotWidget();
 
-virtual void contextMenuEvent(QContextMenuEvent* event)override;
+	virtual void contextMenuEvent(QContextMenuEvent* event)override;
+
+	void test1();
+	void test2();
 public slots:
 	void slotFitView3D();
 };

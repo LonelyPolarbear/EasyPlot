@@ -2,8 +2,16 @@
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <lib04_opengl/XOpenGLType.h>
 #include <lib04_opengl/XOpenGLVertexArrayObject.h>
+#include <lib01_shader/xshader.h>
 #include <glew/glew.h>
 #include "../datasource/xshapeSource.h"
+
+#define ATTR_VERTER_COORD 0
+#define ATTR_VERTEX_NORMAL 1
+#define ATTR_VERTEX_COLOR 2
+
+#define SSBO_FACE_COLOR 0
+#define SSBO_LINE_COLOR 1
 
 XPolyDataMapper::XPolyDataMapper()
 {
@@ -24,50 +32,110 @@ void XPolyDataMapper::updateData()
 		return;
 	}
 
-	//顶点数据已经更新
-	auto m_coord = m_Input->getVertextCoordArray();
-	if (m_coord && m_coord->GetTimeStamp() > m_UpdateTime) {
+	//!
+	//! [1] 顶点坐标数据更新
+	auto vertex_coord = m_Input->getVertextCoordArray();
+	if (vertex_coord && vertex_coord->GetTimeStamp() > m_UpdateTime) {
 
-		m_vbo_coord->bind();
+		m_vertex_coord->bind();
 
-		m_vbo_coord->allocate(m_coord->data(0), m_coord->size());
+		m_vertex_coord->allocate(vertex_coord->data(0), vertex_coord->size());
 
-		m_vbo_coord->release();
+		m_vertex_coord->release();
+
+		if (vertex_coord->getNumOfTuple()) {
+			m_vao->enableAttribute(ATTR_VERTER_COORD);
+		}
+		else {
+			m_vao->disableAttribute(ATTR_VERTER_COORD);
+		}
 	}
 
-	//索引数据已经更新
-	auto m_indexs = m_Input->getIndexArray();
-	if (m_indexs && m_indexs->GetTimeStamp() > m_UpdateTime) {
+	//!
+	//! [2] 顶点法向量数据更新
+	auto vertex_normal = m_Input->getVertexNormalArray();
+	if (vertex_normal && vertex_normal->GetTimeStamp() > m_UpdateTime) {
+		m_vertex_normal->bind();
+
+		m_vertex_normal->allocate(vertex_normal->data(0), vertex_normal->size());
+
+		m_vertex_normal->release();
+
+		if (vertex_normal->getNumOfTuple()) {
+			m_vao->enableAttribute(ATTR_VERTEX_NORMAL);
+		}
+		else {
+			m_vao->disableAttribute(ATTR_VERTEX_NORMAL);
+		}
+	}
+
+	//!
+	//! [3] 顶点颜色数据更新
+	auto vertex_color = m_Input->getVertexColorArray();
+	if (vertex_color && vertex_color->GetTimeStamp() > m_UpdateTime) {
+		m_vertex_color->bind();
+
+		m_vertex_color->allocate(vertex_color->data(0), vertex_color->size());
+
+		m_vertex_color->release();
+
+		if (vertex_color->getNumOfTuple()) {
+			m_vao->enableAttribute(ATTR_VERTEX_COLOR);
+		}
+		else {
+			m_vao->disableAttribute(ATTR_VERTEX_COLOR);
+		}
+	}
+
+	//!
+	//! [4] 面索引数据更新
+	auto face_indexs = m_Input->getFaceIndexArray();
+	if (face_indexs && face_indexs->GetTimeStamp() > m_UpdateTime) {
 		//可能需要先激活VAO
 		m_vao->bind();
 
-		m_ebo->bind();
+		m_face_ebo->bind();
 
-		m_ebo->allocate(m_indexs->data(0), m_indexs->size());
+		m_face_ebo->allocate(face_indexs->data(0), face_indexs->size());
 
 		m_vao->release();
 
-		m_ebo->release();
+		m_face_ebo->release();
 	}
 
-	//法向量数据已经更新
-	auto m_normal = m_Input->getNormalArray();
-	if (m_normal && m_normal->GetTimeStamp() > m_UpdateTime) {
 
+	//!
+	//! [5] 面颜色数据更新
+	auto face_color = m_Input->getFaceColorArray();
+	if (face_color && face_color->GetTimeStamp() > m_UpdateTime) {
+		m_face_color->bind();
+		m_face_color->allocate(face_color->data(0), face_color->size());
+		m_face_color->release();
 	}
 
-	////顶点颜色数据已经更新
-	auto m_VertexColor = m_Input->getVertexColorArray();
-	if (m_VertexColor && m_VertexColor->GetTimeStamp() > m_UpdateTime) {
+	//!
+	//! [6] 线索引数据更新
+	auto line_indexs = m_Input->getLineIndexArray();
+	if (line_indexs && line_indexs->GetTimeStamp() > m_UpdateTime) {
+		//可能需要先激活VAO
+		m_vao->bind();
 
+		m_line_ebo->bind();
+
+		m_line_ebo->allocate(line_indexs->data(0), line_indexs->size());
+
+		m_vao->release();
+
+		m_line_ebo->release();
 	}
 
-	//面颜色数据已经更新
-	auto m_FaceColor = m_Input->getFaceColorArray();
-	if (m_FaceColor && m_FaceColor->GetTimeStamp() > m_UpdateTime) {
-		m_ssbo_color->bind();
-		m_ssbo_color->allocate(m_FaceColor->data(0), m_FaceColor->size());
-		m_ssbo_color->release();
+	//!
+	//! [7] 线颜色数据更新
+	auto line_color = m_Input->getLineColorArray();
+	if (line_color && line_color->GetTimeStamp() > m_UpdateTime) {
+		m_line_color->bind();
+		m_line_color->allocate(line_color->data(0), line_color->size());
+		m_line_color->release();
 	}
 
 	//数据已更新，刷新时间戳
@@ -83,21 +151,40 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 	updateData();
 
 	m_vao->bind();
-	auto index = m_Input->getIndexArray();
-	if (polygonMode == PolygonMode::fill) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		glDrawElements((unsigned int)drawType, index->getNumOfTuple() * index->getComponent(), GL_UNSIGNED_INT, 0);
+	auto face_index_num = m_Input->getFaceIndexArray()->size();
+	auto line_index_num = m_Input->getLineIndexArray()->size();
+	auto point_index_num = m_Input->getVertexIndexArray()->size();
+
+	auto hasMode=[&](PolygonMode mode)->bool{
+		return (uint32_t)polygonMode & (uint32_t)mode;
+	};
+
+	if (hasMode(PolygonMode::face)) {
+		//绑定对应的ebo
+		shader->setPolygonMode((int)PolygonMode::face);
+		m_face_ebo->bind();
+		glDrawElements((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0);
 	}
-	else if (polygonMode == PolygonMode::line) {
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		glPolygonOffset(1.0f, 1.0f);
-		glDrawElements((unsigned int)drawType, index->getNumOfTuple() * index->getComponent(), GL_UNSIGNED_INT, 0);
+
+	if (hasMode(PolygonMode::line)) {
+		//绑定对应的ebo
+		shader->setPolygonMode((int)PolygonMode::line);
+		m_line_ebo->bind();
+		glDrawElements((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0);
 	}
-	else if (polygonMode == PolygonMode::point) {
-		
+
+	if (hasMode(PolygonMode::point)) {
+		//绑定对应的ebo
+		m_point_ebo->bind();
+		glDrawElements((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0);
 	}
 
 	m_vao->release();
+	/**************/
+	//ebo是局部状态，隶属于vao，当vao解绑后，如果读取当前绑定的ebo,已经是0，不需要release了
+	//m_face_ebo->release();
+	//m_line_ebo->release();
+	//m_point_ebo->release();
 }
 
 void XPolyDataMapper::initiallize()
@@ -110,56 +197,116 @@ void XPolyDataMapper::initiallize()
 
 void XPolyDataMapper::initGLResource()
 {
+	//!
+	//! [1] VAO 初始化
+	//! 
 	m_vao->create();
-	m_vao->bind();
-
-	m_vbo_coord->setBufferType(XOpenGLBuffer::VertexBuffer);
-
-	m_vbo_coord->setUsagePattern(XOpenGLBuffer::StaticDraw);
-
-	m_vbo_coord->create();
-
-	m_vbo_coord->bind();
-
-	m_ssbo_color->setBufferType(XOpenGLBuffer::ShaderStorageBuffer);
-
-	m_ssbo_color->setUsagePattern(XOpenGLBuffer::StaticDraw);
-
-	m_ssbo_color->create();
-
-	m_ssbo_color->bind();
-
-	//设置顶点属性
-
-	m_vao->addBuffer(0, m_vbo_coord, 3, XOpenGL::DataType::float_, sizeof(XQ::Vec3f), 0);
-
-	m_ebo->setBufferType(XOpenGLBuffer::IndexBuffer);
-
-	m_ebo->setUsagePattern(XOpenGLBuffer::StaticDraw);
-
-	m_ebo->create();
-
-	m_ebo->bind();
 
 	m_vao->bind();
 
-	m_ebo->bind();
+	//!
+	//! [2] VBO 初始化
+	//! 
+	{
+		m_vertex_coord->setBufferType(XOpenGLBuffer::VertexBuffer);
 
-	m_vbo_coord->release();
+		m_vertex_coord->setUsagePattern(XOpenGLBuffer::StaticDraw);
 
-	m_vao->release();
+		m_vertex_coord->create();
+
+		m_vertex_normal->setBufferType(XOpenGLBuffer::VertexBuffer);
+
+		m_vertex_normal->setUsagePattern(XOpenGLBuffer::StaticDraw);
+
+		m_vertex_normal->create();
+
+		m_vertex_color->setBufferType(XOpenGLBuffer::VertexBuffer);
+
+		m_vertex_color->setUsagePattern(XOpenGLBuffer::StaticDraw);
+
+		m_vertex_color->create();
+
+	}
+
+	//!
+	//! [3] SSBO 初始化
+	//!
+	{
+		m_face_color->setBufferType(XOpenGLBuffer::ShaderStorageBuffer);
+
+		m_face_color->setUsagePattern(XOpenGLBuffer::StaticDraw);
+
+		m_face_color->create();
+
+		m_line_color->setBufferType(XOpenGLBuffer::ShaderStorageBuffer);
+
+		m_line_color->setUsagePattern(XOpenGLBuffer::StaticDraw);
+
+		m_line_color->create();
+	}
+	
+
+	//!
+	//! [4] 设置顶点属性
+	//!
+	m_vao->addBuffer(ATTR_VERTER_COORD, m_vertex_coord, 3, XOpenGL::DataType::float_, sizeof(XQ::Vec3f), 0);
+
+	//!
+	//! [5] ebo的创建和关联
+	{
+		m_face_ebo->setBufferType(XOpenGLBuffer::IndexBuffer);
+
+		m_face_ebo->setUsagePattern(XOpenGLBuffer::StaticDraw);
+
+		m_face_ebo->create();
+
+		m_line_ebo->setBufferType(XOpenGLBuffer::IndexBuffer);
+
+		m_line_ebo->setUsagePattern(XOpenGLBuffer::StaticDraw);
+
+		m_line_ebo->create();
+
+		m_point_ebo->setBufferType(XOpenGLBuffer::IndexBuffer);
+
+		m_point_ebo->setUsagePattern(XOpenGLBuffer::StaticDraw);
+
+		m_point_ebo->create();
+
+		//每个vao同一时刻只能绑定一个ebo
+		//m_face_ebo->bind();
+
+		m_vao->bind();
+
+		m_face_ebo->bind();
+
+		m_vao->release();
+
+		m_face_ebo->release();				//ebo的解绑应该在vao解绑之后，否则相当于vao绑定到了index=0的ebo了
+	}
 }
 
 void XPolyDataMapper::bindSSBO()
 {
-	m_ssbo_color->bind();
-	m_ssbo_color->setBufferBindIdx(0);
+	m_face_color->bind();
+	m_face_color->setBufferBindIdx(SSBO_FACE_COLOR);
+
+	m_line_color->bind();
+	m_line_color->setBufferBindIdx(SSBO_LINE_COLOR);
 }
 
 void XPolyDataMapper::Init()
 {
 	m_vao = makeShareDbObject<XOpenGLVertexArrayObject>();
-	m_vbo_coord = makeShareDbObject<XOpenGLBuffer>();
-	m_ebo = makeShareDbObject<XOpenGLBuffer>();
-	m_ssbo_color = makeShareDbObject<XOpenGLBuffer>();
+
+	m_vertex_coord = makeShareDbObject<XOpenGLBuffer>();
+	m_vertex_normal = makeShareDbObject<XOpenGLBuffer>();
+	m_vertex_color = makeShareDbObject<XOpenGLBuffer>();
+
+	m_face_ebo = makeShareDbObject<XOpenGLBuffer>();
+	m_face_color = makeShareDbObject<XOpenGLBuffer>();
+
+	m_line_ebo = makeShareDbObject<XOpenGLBuffer>();
+	m_line_color = makeShareDbObject<XOpenGLBuffer>();
+
+	m_point_ebo = makeShareDbObject<XOpenGLBuffer>();
 }

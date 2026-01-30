@@ -25,11 +25,14 @@ public:
 	void writeFS(const XQ::Vec2f& viewport, const XQ::Vec2f& mousePos) ;
 
 	void writeGS(const Eigen::Vector2f& viewport, float sceneScale);
+
+	void writeCamera(int type,double near,double far);
 protected:
-	std::shared_ptr<XOpenGLBuffer> uniformBufferVs;               //用于传递变换矩阵的缓冲区
-	std::shared_ptr<XOpenGLBuffer> uniformBufferVs2d;           //用于传递变换矩阵的缓冲区
-	std::shared_ptr<XOpenGLBuffer> uniformBufferFs;               //
-	std::shared_ptr<XOpenGLBuffer> uniformBufferGs;               //
+	std::shared_ptr<XOpenGLBuffer> uniformBufferVs;						//用于传递变换矩阵的缓冲区 绑定点1
+	std::shared_ptr<XOpenGLBuffer> uniformBufferVs2d;					//用于传递变换矩阵的缓冲区 绑定点4
+	std::shared_ptr<XOpenGLBuffer> uniformBufferFs;						//绑定点2 视口大小和鼠标位置
+	std::shared_ptr<XOpenGLBuffer> uniformBufferGs;						//绑定点3
+	std::shared_ptr<XOpenGLBuffer> uniformBufferCamera;				//绑定点5,记录相机信息
 	bool init_done = false;
 };
 

@@ -74,6 +74,15 @@ void XDataObject::setParant(sptr<XDataObject> parent)
 	mParent = parent;
 }
 
+sptr<XDataAttribute> XDataObject::getAttribute(const std::string& name) const
+{
+	for (auto s : mAttributes) {
+		if (s->getName() == name)
+			return s;
+	}
+	return nullptr;
+}
+
 void XDataObject::ItemDataChangedCB(sptr<XDataAttribute> attr, XDataChangeType type)
 {
 	//调用响应的事件

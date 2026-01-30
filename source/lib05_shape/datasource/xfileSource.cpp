@@ -51,12 +51,12 @@ XFileSource::~XFileSource()
 
 void XFileSource::updateVertextCoordArray()
 {
-	m_coord->Modified();
+	m_VertexCoord->Modified();
 }
 
-void XFileSource::updateIndexArray()
+void XFileSource::updateFaceIndexArray()
 {
-	m_indexs->Modified();
+	m_FaceIndexs->Modified();
 }
 
 void XFileSource::updateFaceColorArray()
@@ -64,14 +64,26 @@ void XFileSource::updateFaceColorArray()
 	m_FaceColor->Modified();
 }
 
-void XFileSource::updateNormalArray()
+void XFileSource::updateVertextNormalArray()
 {
-	m_normal->Modified();
+	m_VertexNormal->Modified();
 }
 
 void XFileSource::updateVertexColorArray()
 {
 	m_VertexColor->Modified();
+}
+
+void XFileSource::updateLineIndexArray()
+{
+}
+
+void XFileSource::updateLineColorArray()
+{
+}
+
+void XFileSource::updateVertexIndexArray()
+{
 }
 
 void XFileSource::setFilePath(const std::string& filePath)
@@ -115,7 +127,7 @@ void XFileSource::readFile(const std::string& path)
 		std::getline(file, line);
 
 		auto pointNum = std::stoi(line);
-		m_coord->setNumOfTuple(pointNum);
+		m_VertexCoord->setNumOfTuple(pointNum);
 
 		for (int i = 0; i < pointNum; i++) {
 			std::getline(file, line);
@@ -124,13 +136,13 @@ void XFileSource::readFile(const std::string& path)
 			auto x = splitLine[0].toDouble();
 			auto y = splitLine[1].toDouble();
 			auto z = splitLine[2].toDouble();
-			m_coord->setTuple(i, x, y, z);
+			m_VertexCoord->setTuple(i, x, y, z);
 		}
 
 		std::getline(file, line);
 
 		auto indexum = std::stoi(line);
-		m_indexs->setNumOfTuple(indexum);
+		m_FaceIndexs->setNumOfTuple(indexum);
 
 		for (int i = 0; i < indexum; i++) {
 			std::getline(file, line);
@@ -138,7 +150,7 @@ void XFileSource::readFile(const std::string& path)
 			auto v1 = splitLine[0].toInt();
 			auto v2 = splitLine[1].toInt();
 			auto v3 = splitLine[2].toInt();
-			m_indexs->setTuple(i, v1, v2, v3);
+			m_FaceIndexs->setTuple(i, v1, v2, v3);
 		}
 
 		m_FaceColor->setNumOfTuple(indexum);
@@ -164,9 +176,9 @@ void XFileSource::readFile(const std::string& path)
 		auto indexum = /*splitLine[1].toInt();*/num_quad * 2 + num_tri;
 
 		auto nodeidx2Id = makeShareDbObject< XUIntArray>();
-		m_coord->setNumOfTuple(pointNum);
+		m_VertexCoord->setNumOfTuple(pointNum);
 		nodeidx2Id->setNumOfTuple(pointNum);
-		m_indexs->setNumOfTuple(indexum);
+		m_FaceIndexs->setNumOfTuple(indexum);
 
 		for (int i = 0; i < pointNum; i++) {
 			std::getline(file, line);
@@ -177,7 +189,7 @@ void XFileSource::readFile(const std::string& path)
 			auto x = splitLine[1].toDouble();
 			auto y = splitLine[2].toDouble();
 			auto z = splitLine[3].toDouble();
-			m_coord->setTuple(i, x, y, z);
+			m_VertexCoord->setTuple(i, x, y, z);
 		}
 
 		//std::getline(file, line);
@@ -198,7 +210,7 @@ void XFileSource::readFile(const std::string& path)
 				auto v2_idx = std::distance(begin, std::find(begin, begin + pointNum, v2));
 				auto v3_idx = std::distance(begin, std::find(begin, begin + pointNum, v3));
 
-				m_indexs->setTuple(idx++, v1_idx, v2_idx, v3_idx);
+				m_FaceIndexs->setTuple(idx++, v1_idx, v2_idx, v3_idx);
 			}
 			else {
 				auto v1 = splitLine[3].toInt();
@@ -212,8 +224,8 @@ void XFileSource::readFile(const std::string& path)
 				auto v3_idx = std::distance(begin, std::find(begin, begin + pointNum, v3));
 				auto v4_idx = std::distance(begin, std::find(begin, begin + pointNum, v4));
 
-				m_indexs->setTuple(idx++, v1_idx, v2_idx, v3_idx);
-				m_indexs->setTuple(idx++, v1_idx, v3_idx, v4_idx);
+				m_FaceIndexs->setTuple(idx++, v1_idx, v2_idx, v3_idx);
+				m_FaceIndexs->setTuple(idx++, v1_idx, v3_idx, v4_idx);
 			}
 		}
 
@@ -235,10 +247,10 @@ void XFileSource::readFile(const std::string& path)
 
 void XFileSource::transform()
 {
-	auto elemNum =m_indexs->getNumOfTuple();
+	auto elemNum =m_FaceIndexs->getNumOfTuple();
 
-	auto pointNum = m_coord->getNumOfTuple();
-	auto pElemIdx = m_indexs->data(0);
+	auto pointNum = m_VertexCoord->getNumOfTuple();
+	auto pElemIdx = m_FaceIndexs->data(0);
 
 	std::unordered_map<int, std::vector<int>> nodeIdx2ElemIdx;			//顶点的共享单元
 	std::vector<Eigen::Vector3f> elemNormal;											//每个单元的法线
@@ -254,9 +266,9 @@ void XFileSource::transform()
 			auto v2 = pElemIdx[i * 3 + 1];
 			auto v3 = pElemIdx[i * 3 + 2];
 
-			auto e1 = m_coord->data(v1);
-			auto e2 = m_coord->data(v2);
-			auto e3 = m_coord->data(v3);
+			auto e1 = m_VertexCoord->data(v1);
+			auto e2 = m_VertexCoord->data(v2);
+			auto e3 = m_VertexCoord->data(v3);
 
 			Eigen::Vector3f point1(e1[0], e1[1], e1[2]);
 			Eigen::Vector3f point2(e2[0], e2[1], e2[2]);
@@ -280,7 +292,7 @@ void XFileSource::transform()
 	{
 		//获取每个顶点的共享单元
 		for (int i = 0; i < pointNum; i++) {
-			auto x = m_coord->data(i);
+			auto x = m_VertexCoord->data(i);
 
 			//所有共享该节点的单元
 			for (int j = 0; j < elemNum; j++) {
@@ -370,13 +382,13 @@ void XFileSource::transform()
 			auto node_ids = elem_normals[i].keys();
 			//遍历单元，按照顺序生成新的点
 
-			std::vector<unsigned int> ids {m_indexs->data(i)[0],m_indexs->data(i)[1] ,m_indexs->data(i)[2] };
+			std::vector<unsigned int> ids {m_FaceIndexs->data(i)[0],m_FaceIndexs->data(i)[1] ,m_FaceIndexs->data(i)[2] };
 
 
 			for (auto& node_id : ids) {
 				auto normal = elem_normals[i][node_id];
 				//获取该节点的原始位置
-				auto x = m_coord->data(node_id);
+				auto x = m_VertexCoord->data(node_id);
 				Eigen::Vector3f point(x[0], x[1], x[2]);
 
 				//得到新的节点
@@ -406,7 +418,7 @@ void XFileSource::transform()
 			vertexPoints->setComponent(3);
 			vertexPoints->setNumOfTuple(pointNum + elemNum * 3 );	
 			//先拷贝旧的坐标
-			memcpy(vertexPoints->data(0), m_coord->data(0), m_coord->size() * sizeof(float));
+			memcpy(vertexPoints->data(0), m_VertexCoord->data(0), m_VertexCoord->size() * sizeof(float));
 			//拷贝新生成的坐标
 			memcpy(vertexPoints->data(pointNum), generatePoints->data(0), generatePoints->size() * sizeof(float));
 
@@ -416,7 +428,7 @@ void XFileSource::transform()
 			
 			ebo->setNumOfTuple(elemNum*2+ elemNum * 6);		//每一个三角形单元，拉伸后，侧面多了6个三角形，所以需要扩充索引
 			//先拷贝旧的所用
-			memcpy(ebo->data(0), m_indexs->data(0), m_indexs->size() * sizeof(unsigned int));
+			memcpy(ebo->data(0), m_FaceIndexs->data(0), m_FaceIndexs->size() * sizeof(unsigned int));
 			//拷贝新生成的索引
 			memcpy(ebo->data(elemNum), generateIndexs->data(0), generateIndexs->size()*3 * sizeof(unsigned int));
 
@@ -455,8 +467,8 @@ void XFileSource::transform()
 				faceColor->setTuple(i + 2*elemNum, 0, 1, 1, 1.0f);
 			}
 
-			m_coord = vertexPoints;
-			m_indexs = ebo;
+			m_VertexCoord = vertexPoints;
+			m_FaceIndexs = ebo;
 			m_FaceColor = faceColor;
 		}
 	}

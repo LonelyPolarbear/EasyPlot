@@ -17,8 +17,11 @@ protected:
 	bool hasAttribute(sptr<XDataAttribute> attr);
 	void setParant(sptr<XDataObject> parent);
 public:
+	sptr<XDataAttribute> getAttribute(const std::string& name) const;
+public:
 	virtual void ItemDataChangedCB(sptr<XDataAttribute>, XDataChangeType type);
 	virtual void slotItemDataChanged(sptr<XDataAttribute>, XDataChangeType type);
+
 public:
 	XSIGNAL(void(sptr<XDataObject>, XDataChangeType))  sigDataChanged;
 	XSIGNAL(void(sptr<XDataAttribute>, XDataChangeType))  sigItemDataChanged;

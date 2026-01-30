@@ -26,23 +26,23 @@ void XRotateLoftedgeometrySource::updateVertextCoordArray()
 
 	auto rowLen = singleSurfacenum + 1;
 
-	m_coord->setNumOfTuple(singleSurfacenum * 2 + 2);		//上下圆心
+	m_VertexCoord->setNumOfTuple(singleSurfacenum * 2 + 2);		//上下圆心
 	int idx = 0;
 
 	//先下底面
 	for (int i = 0; i < rowLen; i++) {
-		m_coord->setTuple(idx++, bottomPoints[i].x(), bottomPoints[i].y(), -m_height * 0.5);
+		m_VertexCoord->setTuple(idx++, bottomPoints[i].x(), bottomPoints[i].y(), -m_height * 0.5);
 	}
 
 	//上底面
 	for (int i = 0; i < rowLen; i++) {
-		m_coord->setTuple(idx++, topPoints[i].x(), topPoints[i].y(), m_height * 0.5);
+		m_VertexCoord->setTuple(idx++, topPoints[i].x(), topPoints[i].y(), m_height * 0.5);
 	}
 
-	m_coord->Modified();
+	m_VertexCoord->Modified();
 }
 
-void XRotateLoftedgeometrySource::updateIndexArray()
+void XRotateLoftedgeometrySource::updateFaceIndexArray()
 {
 	auto bottomPoints = getBottomPoints();
 	auto topPoints = getTopPoints();
@@ -57,10 +57,10 @@ void XRotateLoftedgeometrySource::updateIndexArray()
 
 	auto singleSurfaceTrianglenum = singleSurfacePointnum - 1;
 	if (isClosed()) {
-		m_indexs->setNumOfTuple(singleSurfaceTrianglenum * 2 + singleSurfaceTrianglenum * 2);
+		m_FaceIndexs->setNumOfTuple(singleSurfaceTrianglenum * 2 + singleSurfaceTrianglenum * 2);
 	}
 	else {
-		m_indexs->setNumOfTuple(singleSurfaceTrianglenum * 2 + singleSurfaceTrianglenum * 2 + 4);
+		m_FaceIndexs->setNumOfTuple(singleSurfaceTrianglenum * 2 + singleSurfaceTrianglenum * 2 + 4);
 	}
 
 
@@ -68,21 +68,21 @@ void XRotateLoftedgeometrySource::updateIndexArray()
 	int satrtIdx = 0;
 	int idx = 0;
 	for (int i = 1; i < singleSurfacePointnum; i++) {
-		m_indexs->setTuple(idx++, satrtIdx, satrtIdx + i, satrtIdx + i + 1);
+		m_FaceIndexs->setTuple(idx++, satrtIdx, satrtIdx + i, satrtIdx + i + 1);
 	}
 
 	//上底面
 	satrtIdx = singleSurfacePointnum + 1;
 	for (int i = 1; i < singleSurfacePointnum; i++) {
-		m_indexs->setTuple(idx++, satrtIdx, satrtIdx + i, satrtIdx + i + 1);
+		m_FaceIndexs->setTuple(idx++, satrtIdx, satrtIdx + i, satrtIdx + i + 1);
 	}
 
 	//1-singleSurfacePointnum
 	for (int i = 0; (i + 1) < singleSurfacePointnum; i++) {
 		auto firstRowStart = i + 1;
 		auto secondRowStart = singleSurfacePointnum + 2 + i;
-		m_indexs->setTuple(idx++, firstRowStart, secondRowStart, secondRowStart + 1);
-		m_indexs->setTuple(idx++, firstRowStart, secondRowStart + 1, firstRowStart + 1);
+		m_FaceIndexs->setTuple(idx++, firstRowStart, secondRowStart, secondRowStart + 1);
+		m_FaceIndexs->setTuple(idx++, firstRowStart, secondRowStart + 1, firstRowStart + 1);
 	}
 
 	if (!isClosed()) {
@@ -94,14 +94,14 @@ void XRotateLoftedgeometrySource::updateIndexArray()
 		auto secondRowStart = rowLen + 1;
 		auto secondRowEnd = 2 * rowLen - 1;
 
-		m_indexs->setTuple(idx++, centerBottomIdx, firstRowStart, secondRowStart);
-		m_indexs->setTuple(idx++, centerBottomIdx, secondRowStart, centerTopIdx);
+		m_FaceIndexs->setTuple(idx++, centerBottomIdx, firstRowStart, secondRowStart);
+		m_FaceIndexs->setTuple(idx++, centerBottomIdx, secondRowStart, centerTopIdx);
 
-		m_indexs->setTuple(idx++, centerBottomIdx, centerTopIdx, secondRowEnd);
-		m_indexs->setTuple(idx++, centerBottomIdx, secondRowEnd, firstRowEnd);
+		m_FaceIndexs->setTuple(idx++, centerBottomIdx, centerTopIdx, secondRowEnd);
+		m_FaceIndexs->setTuple(idx++, centerBottomIdx, secondRowEnd, firstRowEnd);
 	}
 
-	m_indexs->Modified();
+	m_FaceIndexs->Modified();
 }
 
 void XRotateLoftedgeometrySource::updateFaceColorArray()
@@ -125,38 +125,58 @@ void XRotateLoftedgeometrySource::updateFaceColorArray()
 
 	for (int i = 0; i < singleSurfaceTrianglenum; i++)
 	{
-		m_FaceColor->setTuple(i, 1, 0, 0);
+		m_FaceColor->setTuple(i, 1, 0, 0,1);
 	}
 
 	for (int i = 0; i < singleSurfaceTrianglenum; i++)
 	{
-		m_FaceColor->setTuple(i + singleSurfaceTrianglenum, 0, 1, 0);
+		m_FaceColor->setTuple(i + singleSurfaceTrianglenum, 0, 1, 0,1);
 	}
 
 
 	for (int i = 0; i < singleSurfaceTrianglenum * 2; i++)
 	{
-		m_FaceColor->setTuple(i + 2 * singleSurfaceTrianglenum, 0, 0, 1);
+		m_FaceColor->setTuple(i + 2 * singleSurfaceTrianglenum, 0, 0, 1,1);
 	}
 
 	if (!isClosed()) {
-		m_FaceColor->setTuple(4 * singleSurfaceTrianglenum + 0, 1, 1, 1);
-		m_FaceColor->setTuple(4 * singleSurfaceTrianglenum + 1, 1, 1, 1);
-		m_FaceColor->setTuple(4 * singleSurfaceTrianglenum + 2, 0, 1, 1);
-		m_FaceColor->setTuple(4 * singleSurfaceTrianglenum + 3, 0, 1, 1);
+		m_FaceColor->setTuple(4 * singleSurfaceTrianglenum + 0, 1, 1, 1,1);
+		m_FaceColor->setTuple(4 * singleSurfaceTrianglenum + 1, 1, 1, 1,1);
+		m_FaceColor->setTuple(4 * singleSurfaceTrianglenum + 2, 0, 1, 1,1);
+		m_FaceColor->setTuple(4 * singleSurfaceTrianglenum + 3, 0, 1, 1,1);
 	}
 
 	m_FaceColor->Modified();
 }
 
-void XRotateLoftedgeometrySource::updateNormalArray()
+void XRotateLoftedgeometrySource::updateVertextNormalArray()
 {
-	m_normal->Modified();
+	m_VertexNormal->Modified();
 }
 
 void XRotateLoftedgeometrySource::updateVertexColorArray()
 {
 	m_VertexColor->Modified();
+}
+
+void XRotateLoftedgeometrySource::updateLineIndexArray()
+{
+	auto bottomPoints = getBottomPoints();
+	if (bottomPoints.size() == 0)
+		return;
+
+
+	m_LineIndexs->Modified();
+}
+
+void XRotateLoftedgeometrySource::updateLineColorArray()
+{
+	m_LineColor->Modified();
+}
+
+void XRotateLoftedgeometrySource::updateVertexIndexArray()
+{
+	m_VertexIndexs->Modified();
 }
 
 bool XRotateLoftedgeometrySource::isClosed() const

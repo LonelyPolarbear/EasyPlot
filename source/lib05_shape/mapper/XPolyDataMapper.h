@@ -33,15 +33,22 @@ public:
 
 protected:
 	//GPU端对象
-	sptr<XOpenGLVertexArrayObject> m_vao;					//VAO
-	sptr<XOpenGLBuffer> m_vbo_coord;							//顶点坐标，必须有
-	sptr<XOpenGLBuffer> m_vbo_normal;							//法线
-	sptr<XOpenGLBuffer> m_vbo_color;								//颜色
-	sptr<XOpenGLBuffer> m_ssbo_color;							//每个片元的颜色
-	sptr<XOpenGLBuffer> m_ebo;										//EBO
+	sptr<XOpenGLVertexArrayObject> m_vao;						//VAO
+	sptr<XOpenGLBuffer> m_vertex_coord;							//顶点坐标，必须有
+	sptr<XOpenGLBuffer> m_vertex_normal;							//点的法线
+	sptr<XOpenGLBuffer> m_vertex_color;							//点的颜色
 
+	sptr<XOpenGLBuffer> m_face_color;								//每个片元的颜色
+	sptr<XOpenGLBuffer> m_face_ebo;									//面片绘制的索引
+
+	sptr<XOpenGLBuffer> m_line_color;								//每个线的颜色  目前不允许设置线的颜色，直接使用singleColor
+	sptr<XOpenGLBuffer> m_line_ebo;									//线的索引
+
+	sptr<XOpenGLBuffer> m_point_ebo;								//点的索引，默认显示全部点
+	
 	//CPU端数据
 	sptr<XShapeSource> m_Input;
+
 	bool isGLResourceInit = false;
 
 	XTimeStamp m_UpdateTime;

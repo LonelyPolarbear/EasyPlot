@@ -66,7 +66,9 @@ void xfrustumSource::setNearPlanePoints(std::vector<XQ::Vec3f> p)
 void xfrustumSource::updateVertextCoordArray()
 {
 	//更新顶点
-		//前面的四个坐标点
+	//前面的四个坐标点
+	//下底面面中心点 bot[0] bot[1] bot[2] bot[3] bot[0]
+	//上底面面中心点 top[0] top[1] top[2] top[3] top[0]
 	if (!hasPoint())
 		return;
 	auto bottomPoints = getBottomPoints();
@@ -79,18 +81,46 @@ void xfrustumSource::updateVertextCoordArray()
 
 	auto rowLen = singleSurfacenum + 1;
 
-	m_coord->setNumOfTuple(singleSurfacenum * 2 + 2);		//上下圆心
+	m_VertexCoord->setNumOfTuple(singleSurfacenum * 2 + 2);		//上下圆心
 	int idx = 0;
 
 	//先下底面
 	for (int i = 0; i < rowLen; i++) {
-		m_coord->setTuple(idx++, bottomPoints[i].x(), bottomPoints[i].y(), bottomPoints[i].z());
+		m_VertexCoord->setTuple(idx++, bottomPoints[i].x(), bottomPoints[i].y(), bottomPoints[i].z());
 	}
 
 	//上底面
 	for (int i = 0; i < rowLen; i++) {
-		m_coord->setTuple(idx++, topPoints[i].x(), topPoints[i].y(), topPoints[i].z());
+		m_VertexCoord->setTuple(idx++, topPoints[i].x(), topPoints[i].y(), topPoints[i].z());
 	}
 
-	m_coord->Modified();
+	m_VertexCoord->Modified();
+}
+
+void xfrustumSource::updateLineIndexArray()
+{
+	//底面绘制 4条线 8个点
+	//顶面绘制4条线 8个点
+	//侧面绘制4条线 8个点
+	//下底面面中心点 bot[0] bot[1] bot[2] bot[3] bot[0]
+	//上底面面中心点 top[0] top[1] top[2] top[3] top[0]
+	m_LineIndexs->setNumOfTuple(12);
+
+	m_LineIndexs->setTuple(0,1,2);
+	m_LineIndexs->setTuple(1,2,3);
+	m_LineIndexs->setTuple(2, 3, 4);
+	m_LineIndexs->setTuple(3, 4, 1);
+
+	m_LineIndexs->setTuple(4, 1+6, 2+6);
+	m_LineIndexs->setTuple(5, 2+6, 3+6);
+	m_LineIndexs->setTuple(6, 3+6, 4+6);
+	m_LineIndexs->setTuple(7, 4+6, 1+6);
+
+	m_LineIndexs->setTuple(8, 1, 1 + 6);
+	m_LineIndexs->setTuple(9, 2, 2 + 6);
+	m_LineIndexs->setTuple(10, 3, 3 + 6);
+	m_LineIndexs->setTuple(11, 4, 4 + 6);
+
+
+	m_LineIndexs->Modified();
 }

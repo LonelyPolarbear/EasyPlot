@@ -129,6 +129,21 @@ void XBaseShader::setMat4(const std::string& name, float* data)
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, data);
 }
 
+void XBaseShader::addFeedbackShader(const std::vector<std::string>& variables)
+{
+	std::vector<const char*> d;
+	auto str = variables;
+	for (auto& t : str) {
+		d.push_back(t.c_str());
+	}
+
+	glTransformFeedbackVaryings(ID, variables.size(), d.data(), GL_INTERLEAVED_ATTRIBS);
+
+	glLinkProgram(ID);
+
+	checkCompileErrors(ID, GL_PROGRAM);
+}
+
 void XBaseShader::checkCompileErrors(unsigned int shader, unsigned int type)
 {
     std::map<GLuint, std::string> map{

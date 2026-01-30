@@ -4,7 +4,7 @@
 #include <atomic>
 static std::atomic< uint64_t>  object_id_counter(0);
 
-XDataAttribute::XDataAttribute():mUid(object_id_counter++)
+XDataAttribute::XDataAttribute():mUid(object_id_counter++),mName(std::to_string(mUid))
 {
 }
 
@@ -32,6 +32,12 @@ void XDataAttribute::setVisible(bool v)
 	callParentSlot(XDataChangeType::ItemVisibleModified);
 }
 
+void XDataAttribute::setName(const std::string& name)
+{
+	mName = name;
+}
+
+template class database_API XDataAttributeT<bool>;
 template class database_API XDataAttributeT<int>;
 template class database_API XDataAttributeT<unsigned int>;
 template class database_API XDataAttributeT<float>;

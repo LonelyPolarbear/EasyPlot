@@ -1,7 +1,8 @@
 #pragma once
 #include "XRenderApi.h"
 #include "XRenderPort.h"
-#include <dataBase/XDataBaseObject.h>
+#include <dataBase/XDataObject.h>
+#include <dataBase/XDataAttribute.h>
 #include <lib00_utilty/XUtilty.h>
 class XOpenGLRenderWindow;
 class XRenderCamera;
@@ -12,8 +13,8 @@ class LIB_XRENDER_API XRender :public XRenderPort {
 protected:
 	XRender();
 	~XRender();
-	void Init() override;
 public:
+	void Init() override;
 	void setRenderWindow(sptr< XOpenGLRenderWindow> renderWindow);
 	sptr< XOpenGLRenderWindow> getRenderWindow() const;
 
@@ -56,6 +57,9 @@ public:
 	bool isBelongToRender(const XQ::Vec2i& windowPos) const;
 
 	void addInfinitePlane(Eigen::Matrix4f planeFrame);
+protected:
+	// Ù–‘
+	csptr<XAttr_Bool> AttrActive;
 protected:
 
 	void updateViewPort();

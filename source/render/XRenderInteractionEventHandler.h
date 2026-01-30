@@ -30,6 +30,8 @@ protected:
 	virtual void MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
 	virtual void MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
 	bool isRenderActive() const;
+
+	virtual void slotRenderActiveChanged(bool active){}
 public:
 	virtual void setRender(sptr< XRender> render);
 	sptr<XRender> getRender() const;

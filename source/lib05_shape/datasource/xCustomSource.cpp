@@ -19,12 +19,12 @@ XCustomSource::~XCustomSource()
 
 void XCustomSource::updateVertextCoordArray()
 {
-	m_coord->Modified();
+	m_VertexCoord->Modified();
 }
 
-void XCustomSource::updateIndexArray()
+void XCustomSource::updateFaceIndexArray()
 {
-	m_indexs->Modified();
+	m_FaceIndexs->Modified();
 }
 
 void XCustomSource::updateFaceColorArray()
@@ -32,12 +32,24 @@ void XCustomSource::updateFaceColorArray()
 	m_FaceColor->Modified();
 }
 
-void XCustomSource::updateNormalArray()
+void XCustomSource::updateVertextNormalArray()
 {
-	m_normal->Modified();
+	m_VertexNormal->Modified();
 }
 
 void XCustomSource::updateVertexColorArray()
 {
 	m_VertexColor->Modified();
+}
+
+void XCustomSource::updateLineIndexArray()
+{
+}
+
+void XCustomSource::updateLineColorArray()
+{
+}
+
+void XCustomSource::updateVertexIndexArray()
+{
 }

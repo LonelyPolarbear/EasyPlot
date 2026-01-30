@@ -554,16 +554,16 @@ void XSphereSource::updateVertextCoordArray()
 	points.insert(points.end(), restPointsSN.begin(), restPointsSN.end());
 
 
-	m_coord->setNumOfTuple(points.size());
+	m_VertexCoord->setNumOfTuple(points.size());
 
-	float* pVertexData = m_coord->data(0);
+	float* pVertexData = m_VertexCoord->data(0);
 
 	memcpy(pVertexData, points.data(), points.size() * 3 * sizeof(float));
 
-	m_coord->Modified();
+	m_VertexCoord->Modified();
 }
 
-void XSphereSource::updateIndexArray()
+void XSphereSource::updateFaceIndexArray()
 {
 	//获取ebo数据
 	std::vector<XQ::Vec3u> indices = d->generateIndexs();
@@ -576,13 +576,13 @@ void XSphereSource::updateIndexArray()
 
 	indices.insert(indices.end(), restIndicesSN.begin(), restIndicesSN.end());
 
-	m_indexs->setNumOfTuple(indices.size());
+	m_FaceIndexs->setNumOfTuple(indices.size());
 
-	unsigned int* pIndexData = m_indexs->data(0);
+	unsigned int* pIndexData = m_FaceIndexs->data(0);
 
 	memcpy(pIndexData, indices.data(), indices.size() * 3 * sizeof(unsigned int));
 
-	m_indexs->Modified();
+	m_FaceIndexs->Modified();
 }
 
 void XSphereSource::updateFaceColorArray()
@@ -620,11 +620,23 @@ void XSphereSource::updateFaceColorArray()
 	m_FaceColor->Modified();
 }
 
-void XSphereSource::updateNormalArray()
+void XSphereSource::updateVertextNormalArray()
 {
 
 }
 
 void XSphereSource::updateVertexColorArray()
+{
+}
+
+void XSphereSource::updateLineIndexArray()
+{
+}
+
+void XSphereSource::updateLineColorArray()
+{
+}
+
+void XSphereSource::updateVertexIndexArray()
 {
 }
