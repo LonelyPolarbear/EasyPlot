@@ -60,7 +60,7 @@ void XRenderCamera::translate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float wid
 			Eigen::Vector2f(lastPoint[0], lastPoint[1]),
 			width,
 			height,
-			true, true
+			false, true
 		);
 	}
 	else {

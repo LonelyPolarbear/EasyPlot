@@ -1,6 +1,8 @@
 #include "XEasyPlotWidget.h"
 #include "lib05_shape/datasource/xchamferCubeSource.h"
 #include "lib05_shape/datasource/xconeSource.h"
+#include "lib05_shape/datasource/xcylinderSource.h"
+#include "lib05_shape/datasource/xregularPrimSource.h"
 #include "lib05_shape/datasource/xfrustumSource.h"
 #include "render/XRender.h"
 #include "render/XOpenGLRenderWindow.h"
@@ -19,8 +21,8 @@
 
 XEasyPlotWidget::XEasyPlotWidget(QWidget* parent) :XGLWidget(parent)
 {
-	test1();
-	//test2();
+	//test1();
+	test2();
 }
 
 XEasyPlotWidget::~XEasyPlotWidget()
@@ -193,15 +195,34 @@ void XEasyPlotWidget::test2()
 {
 	auto render = makeShareDbObject<XRender>();
 	mRenderWindow->addRender(render);
+	#if 0
 	sptr<XGeometryNode> frustumNode = makeShareDbObject<XGeometryNode>();
 	sptr<xfrustumSource> frustum = makeShareDbObject<xfrustumSource>();
-	frustum->setFarPlanePoints({ {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1} });
-	frustum->setNearPlanePoints({ {-1, 1, -1}, {-1, -1, -1}, {1, -1, -1}, {1, 1, -1} });
+	
+	frustum->setNearPlanePoints({ {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1} });		//上底面
+	frustum->setFarPlanePoints({ { -1, 1, -1 }, { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 } });				//下底面
+
 	frustumNode->setInput(frustum);
 	frustumNode->setSingleColor(XQ::Vec4f(1, 1, 1, 1));
 	frustumNode->setPolygonMode(PolygonMode::line_and_face);
 	frustumNode->setColorMode(ColorMode::FaceColor);
+
 	render->addRenderNode3D(frustumNode);
+	#endif
+
+	sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
+	sptr<XRegularPrimSource> coneSource = makeShareDbObject<XRegularPrimSource>();
+	coneSource->Modified();
+	coneSource->setNumVertices(3);
+	coneSource->setAngle(240);
+
+	coneNode->setInput(coneSource);
+	coneNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+	coneNode->setPolygonMode(PolygonMode::line_and_face);
+	coneNode->setColorMode(ColorMode::FaceColor);
+
+	render->addRenderNode3D(coneNode);
+
 	render->getCamera()->AttrCameraStyle->setValue((uint32_t)XRenderCamera::CameraStyle::freely);
 }
 

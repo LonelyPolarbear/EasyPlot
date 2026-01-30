@@ -4,9 +4,10 @@
 #include <lib00_utilty/XUtilty.h>
 #include <vector>
 #include "xrotateLoftedGeometrySource.h"
+#include "XRegularPrimSource.h"
 
 
-class LIB05_SHAPE_API xfrustumSource : public XRotateLoftedgeometrySource {
+class LIB05_SHAPE_API xfrustumSource : public XRegularPrimSource {
 protected:
 	xfrustumSource();
 
@@ -14,10 +15,10 @@ protected:
 	virtual std::vector<XQ::Vec3f> getBottomPoints();
 	virtual std::vector<XQ::Vec3f> getTopPoints();
 public:
-	void setFarPlanePoints(std::vector<XQ::Vec3f> p);	//远平面
-	void setNearPlanePoints(std::vector<XQ::Vec3f> p);	//近平面
+	void setFarPlanePoints(std::vector<XQ::Vec3f> p);	//远平面 底面
+	void setNearPlanePoints(std::vector<XQ::Vec3f> p);	//近平面 顶面
 	void updateVertextCoordArray() override;
-	void updateLineIndexArray() override;
+	//void updateLineIndexArray() override;
 protected:
 	bool hasPoint() const {
 		return mFarPlanePoint.size() >0;

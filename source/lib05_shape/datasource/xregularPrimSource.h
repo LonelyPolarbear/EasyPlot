@@ -13,6 +13,7 @@ protected:
 	~XRegularPrimSource();
 	virtual std::vector<XQ::Vec3f> getBottomPoints();
 	virtual std::vector<XQ::Vec3f> getTopPoints();
+	void updateLineIndexArray() override;
 public:
 	void setNumVertices(unsigned int numVertices);
 	void setAngle(double angle);

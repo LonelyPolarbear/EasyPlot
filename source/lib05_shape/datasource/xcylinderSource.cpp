@@ -55,7 +55,7 @@ std::vector<XQ::Vec3f> XCylinderSource::getTopPoints() {
 	result.resize(tmp.size() + 1);
 	result[0] = XQ::Vec3f(0, 0, m_height * 0.5);
 	for (int i = 0; i < tmp.size(); i++) {
-		result[i + 1] = XQ::Vec3f(0, 0, m_height * 0.5);
+		result[i + 1] = XQ::Vec3f(tmp[i].x(), tmp[i].y(), m_height * 0.5);
 	}
 
 	return result;

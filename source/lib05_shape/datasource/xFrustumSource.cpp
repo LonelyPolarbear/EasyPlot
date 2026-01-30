@@ -84,19 +84,20 @@ void xfrustumSource::updateVertextCoordArray()
 	m_VertexCoord->setNumOfTuple(singleSurfacenum * 2 + 2);		//上下圆心
 	int idx = 0;
 
-	//先下底面
-	for (int i = 0; i < rowLen; i++) {
-		m_VertexCoord->setTuple(idx++, bottomPoints[i].x(), bottomPoints[i].y(), bottomPoints[i].z());
-	}
-
 	//上底面
 	for (int i = 0; i < rowLen; i++) {
 		m_VertexCoord->setTuple(idx++, topPoints[i].x(), topPoints[i].y(), topPoints[i].z());
 	}
 
+	//先下底面
+	for (int i = 0; i < rowLen; i++) {
+		m_VertexCoord->setTuple(idx++, bottomPoints[i].x(), bottomPoints[i].y(), bottomPoints[i].z());
+	}
+
 	m_VertexCoord->Modified();
 }
 
+#if 0
 void xfrustumSource::updateLineIndexArray()
 {
 	//底面绘制 4条线 8个点
@@ -124,3 +125,4 @@ void xfrustumSource::updateLineIndexArray()
 
 	m_LineIndexs->Modified();
 }
+#endif

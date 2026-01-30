@@ -53,24 +53,6 @@ std::vector<XQ::Vec3f> XBaseCmaera::getFrustumInWorld() const
         ss* Eigen::Vector4f(-1, 1, 1, 1)
     };
 
-    auto ss2= proj.inverse();
-	Eigen::Vector4f points2[8] = {
-		ss2 * Eigen::Vector4f(-1, -1, -1, 1),
-		ss2 * Eigen::Vector4f(1, -1, -1, 1),
-		ss2 * Eigen::Vector4f(1, 1, -1, 1),
-		ss2* Eigen::Vector4f(-1, 1, -1, 1),
-		ss2* Eigen::Vector4f(-1, -1, 1, 1),
-		ss2* Eigen::Vector4f(1, -1, 1, 1),
-		ss2* Eigen::Vector4f(1, 1, 1, 1),
-		ss2* Eigen::Vector4f(-1, 1, 1, 1)
-	};
-
-    std::vector<XQ::Vec3f> frustum2;
-	for (int i = 0; i < 8; i++) {
-		XQ::Vec3f point(points2[i].x() / points2[i].w(), points2[i].y() / points2[i].w(), points2[i].z() / points2[i].w());
-        frustum2.push_back(point);
-	}
-
     for (int i = 0; i < 8; i++) {
         XQ::Vec3f point(points[i].x() / points[i].w(), points[i].y() / points[i].w(), points[i].z() / points[i].w());
         frustum.push_back(point);

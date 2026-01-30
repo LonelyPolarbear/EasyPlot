@@ -78,15 +78,17 @@ void XTrackBallCamera::scale(float sacleFactor)
         //2.相机远离焦点的时候，整个视锥在同步移动，当相机距离焦点太远的时候，可能会导致焦点跑到远平面的后方，导致被裁剪
         auto cameraPos = getPosition();
         auto dis = cameraPos - getRotateCenter();
-        
+        bool isFarAway = sacleFactor < 1 ?true:false;
         auto tmp = cameraPos - dis * (sacleFactor - 1);
         auto newDir =tmp - getRotateCenter();
         if(newDir.dot(dis)>0 &&newDir.norm()>getZnear()){
-            //如果相机在远离，应该增发zfar距离
+            
             cameraPos = tmp;
             m_transform.translation() <<cameraPos;
-            m_zfar = std::max(m_zfar, cameraPos.norm() + 10);
-            //updateCameraFrame();
+            if (isFarAway) {
+                //远离焦点 应该调整zfar距离，否则可能导致场景被视锥裁剪
+                m_zfar = std::max(m_zfar, cameraPos.norm() + 10);
+            }
            
         }else{
             //相机不可以移动到焦点的后方

@@ -45,14 +45,14 @@ bool XShapeSource::update()
 {
 	//更新数据
 	if (initSource = false) {
-		updateFaceColorArray();
-		updateFaceIndexArray();
+		//updateFaceColorArray();
+		//updateFaceIndexArray();
 		updateVertextCoordArray();
-		updateVertextNormalArray();
-		updateVertexColorArray();
-		updateLineIndexArray();
-		updateLineColorArray();
-		updateVertexIndexArray();
+		//updateVertextNormalArray();
+		//updateVertexColorArray();
+		//updateLineIndexArray();
+		//updateLineColorArray();
+		//updateVertexIndexArray();
 		return false;
 	}
 	else {
