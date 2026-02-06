@@ -114,8 +114,8 @@ void XEasyPlotWidget::test1()
 			frustum->setNearPlanePoints({ {-1, 1, -1}, {1, 1, -1}, {1, -1, -1}, {-1, -1, -1} });
 			frustumNode->setInput(frustum);
 			frustumNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
-			frustumNode->setPolygonMode(PolygonMode::line);
-			frustumNode->setColorMode(ColorMode::SingleColor);
+			frustumNode->setPolygonMode(PolygonMode::line_and_face);
+			frustumNode->setColorMode(ColorMode::FaceColor);
 			renders[3]->addRenderNode3D(frustumNode);
 
 			sptr<XRectRenderNode> rectNode = makeShareDbObject<XRectRenderNode>();
@@ -213,12 +213,12 @@ void XEasyPlotWidget::test2()
 	sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
 	sptr<XRegularPrimSource> coneSource = makeShareDbObject<XRegularPrimSource>();
 	coneSource->Modified();
-	coneSource->setNumVertices(3);
+	coneSource->setNumVertices(8);
 	coneSource->setAngle(240);
 
 	coneNode->setInput(coneSource);
 	coneNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
-	coneNode->setPolygonMode(PolygonMode::line_and_face);
+	coneNode->setPolygonMode(PolygonMode::all);
 	coneNode->setColorMode(ColorMode::FaceColor);
 
 	render->addRenderNode3D(coneNode);

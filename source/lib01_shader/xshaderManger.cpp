@@ -203,6 +203,8 @@ void xShaderManger::initGLResource()
 		auto fs_id = shader3D_triangle->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "3DTriangle.fs");
 		shader3D_triangle->link({ vs_id,fs_id });
 		addShader3D(PrimitveType::triangle, shader3D_triangle);
+		addShader3D(PrimitveType::triangle_fan, shader3D_triangle);
+		addShader3D(PrimitveType::triangle_strip, shader3D_triangle);
 	}
 
 	{

@@ -2,6 +2,7 @@ project(lib00_utilty)
 set(proName lib00_utilty)
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
+#include(${CMAKE_SOURCE_DIR}/config_cmake/var.cmake)										#所有预定义的变量
 
 file(GLOB_RECURSE HEADERS_FILES *.h *.hpp)
 file(GLOB_RECURSE SOURECS_FILES *.cpp)
@@ -28,7 +29,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #-------------------------------------------------------
 SET(LIB_NAMES 	
 	#dataBase${DLL_DEBUG_POSTFIX}
-	PRIVATE MyLib::HeaderOnly
+	MyLib::HeaderOnly
 )
 
 set(LIB_DIRECTORIES 
@@ -47,4 +48,4 @@ set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS "XUtilty")
 
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})											#库目录
 target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})							#包含目录
-target_link_libraries(${proName} ${LIB_NAMES})		
+target_link_libraries(${proName}  PRIVATE ${LIB_NAMES})

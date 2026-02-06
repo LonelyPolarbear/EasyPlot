@@ -103,7 +103,6 @@ void XPolyDataMapper::updateData()
 		m_face_ebo->release();
 	}
 
-
 	//!
 	//! [5] 面颜色数据更新
 	auto face_color = m_Input->getFaceColorArray();
@@ -138,6 +137,22 @@ void XPolyDataMapper::updateData()
 		m_line_color->release();
 	}
 
+	//!
+	//! [8] 点索引数据更新
+	auto vertex_indexs = m_Input->getVertexIndexArray();
+	if (vertex_indexs && vertex_indexs->GetTimeStamp() > m_UpdateTime) {
+		//可能需要先激活VAO
+		m_vao->bind();
+
+		m_point_ebo->bind();
+
+		m_point_ebo->allocate(vertex_indexs->data(0), vertex_indexs->size());
+
+		m_vao->release();
+
+		m_point_ebo->release();
+	}
+
 	//数据已更新，刷新时间戳
 	m_UpdateTime.Modified();
 }
@@ -168,6 +183,8 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 
 	if (hasMode(PolygonMode::line)) {
 		//绑定对应的ebo
+		//glEnable(GL_POLYGON_OFFSET_LINE);
+		//glPolygonOffset(0.0f, -0.01f);  // 负值使线更靠近相机
 		shader->setPolygonMode((int)PolygonMode::line);
 		m_line_ebo->bind();
 		glDrawElements((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0);
@@ -175,6 +192,10 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 
 	if (hasMode(PolygonMode::point)) {
 		//绑定对应的ebo
+		//glEnable(GL_POLYGON_OFFSET_POINT);
+		//glPolygonOffset(0.0f, -0.02f);
+		glPointSize(5);
+		shader->setPolygonMode((int)PolygonMode::point);
 		m_point_ebo->bind();
 		glDrawElements((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0);
 	}

@@ -1,4 +1,5 @@
 #include "XAlgo.h"
+#include "dataBase/XDataArray.h"
 namespace XQ::XAlgo {
 	XColor lerp_rgb(const XColor& c1, const XColor& c2, float t)
 	{
@@ -103,4 +104,16 @@ namespace XQ::XAlgo {
 		intersections[3] = XQ::Vec3f(minPt.x(), 0.0, maxPt.z()); // 左上
 		return intersections;
 	}
+
+	extern xalgo_API int next_in_cycle(int x, int m, int n)
+	{
+		// 可选：确保输入合法（调试时有用）
+		//assert(m <= n);
+		//assert(x >= m && x <= n);
+
+		int length = n - m + 1;                // 区间长度
+		return m + (x - m + 1) % length;
+	}
+
+	
 }

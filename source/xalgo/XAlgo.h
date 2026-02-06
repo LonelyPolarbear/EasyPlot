@@ -2,6 +2,7 @@
 #include <optional>
 #include <array>
 #include <dataBase/XClolor.h>
+#include <dataBase/XDataArray.h>
 #include "XAlgoApi.h"
 namespace XQ::XAlgo {
 	extern xalgo_API XColor lerp_rgb(const XColor& c1, const XColor &c2, float t);
@@ -32,4 +33,59 @@ namespace XQ::XAlgo {
 	extern xalgo_API std::array< XQ::Vec3f,4> getFrustumXOZIntersections(XQ::Vec3f near[4],		// near平面 [N1, N2, N3, N4] (按顺序)
 																															XQ::Vec3f far[4]			// far平面 [F1, F2, F3, F4] (按顺序)
 																														);
+
+	extern xalgo_API int next_in_cycle(int x, int m, int n) ;
+
+	/// <summary>
+	///  把做个组分相同的XDataArray合并为一个更大的XDataArray
+	/// </summary>
+	template<typename T>
+	sptr <XDataArray<T>> combineArray(std::vector<sptr< XDataArray<T>>> datas) {
+		auto totalTupleNum = 0;
+		auto component = 1;
+		std::vector<uint32_t> tupleOffset;
+		tupleOffset.push_back(0);
+		for (auto d : datas) {
+			totalTupleNum += d->getNumOfTuple();
+			tupleOffset.push_back(totalTupleNum);
+
+			component = d->getComponent();
+		}
+
+		auto out = makeShareDbObject< XDataArray<T>>();
+		out->setComponent(component);
+		out->setNumOfTuple(totalTupleNum);
+
+		for (int i = 0; i < datas.size(); i++) {
+			auto pcoord = datas[i]->data(0);
+			auto startTupleIdx = tupleOffset[i];
+			auto tupleNum = tupleOffset[i + 1] - tupleOffset[i];
+			out->memCopy(pcoord, tupleNum*component, startTupleIdx);
+		}
+		return out;
+
+	}
+
+	template<typename T>
+	void combineArray(std::vector<sptr< XDataArray<T>>> datas, sptr< XDataArray<T>> out) {
+		auto totalTupleNum = 0;
+		auto component = 1;
+		std::vector<uint32_t> tupleOffset;
+		tupleOffset.push_back(0);
+		for (auto d : datas) {
+			totalTupleNum += d->getNumOfTuple();
+			tupleOffset.push_back(totalTupleNum);
+
+			component = d->getComponent();
+		}
+		if(out->getNumOfTuple() != totalTupleNum )
+			out->setNumOfTuple(totalTupleNum);
+
+		for (int i = 0; i < datas.size(); i++) {
+			auto pcoord = datas[i]->data(0);
+			auto startTupleIdx = tupleOffset[i];
+			auto tupleNum = tupleOffset[i + 1] - tupleOffset[i];
+			out->memCopy(pcoord, tupleNum * component, startTupleIdx);
+		}
+	}
 }

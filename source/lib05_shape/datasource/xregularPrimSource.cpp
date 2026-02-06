@@ -121,3 +121,52 @@ void XRegularPrimSource::updateLineIndexArray()
 		m_LineIndexs->Modified();
 	}
 }
+
+void XRegularPrimSource::updateVertexIndexArray()
+{
+	auto bottomPoints = getBottomPoints();
+	if (bottomPoints.size() == 0)
+		return;
+
+	//如果是闭合，则内部的中心点不需要，一共m_NumVertices个点
+	//顶面中心 0 1 2 3 4 ... n 0   //m_NumVertices+2
+	//底面中心 0 1 2 3 4 ... n 0   //m_NumVertices+2
+	if (isClosed()) {
+		auto pointNum = m_NumVertices * 2;//上下面
+		auto startVertexIdx = 1;
+		m_VertexIndexs->setNumOfTuple(pointNum);
+		auto createPointNum =0;
+		for (int i = 0; i < m_NumVertices + 1; i++) {
+			m_VertexIndexs->setTuple(i + createPointNum, i + startVertexIdx);
+		}
+
+		createPointNum +=m_NumVertices;
+		startVertexIdx +=m_NumVertices;
+		for (int i = 0; i < m_NumVertices + 1; i++) {
+			m_VertexIndexs->setTuple(i + createPointNum, i + startVertexIdx);
+		}
+
+		m_VertexIndexs->Modified();
+	}
+	else {
+		//顶面中心 0 1 2 3 4 ... n   //m_NumVertices+1
+		//底面中心 0 1 2 3 4 ... n   //m_NumVertices+1
+		//不闭合，此时需要中心点
+		//每个面一共m_NumVertices+1个点
+		auto pointNum = (m_NumVertices+1) * 2;//上下面
+		auto startVertexIdx = 0;
+		m_VertexIndexs->setNumOfTuple(pointNum);
+		auto createPointNum = 0;
+		for (int i = 0; i < m_NumVertices + 1; i++) {
+			m_VertexIndexs->setTuple(i + createPointNum, i + startVertexIdx);
+		}
+
+		createPointNum += m_NumVertices+1;
+		startVertexIdx += m_NumVertices+1;
+		for (int i = 0; i < m_NumVertices + 1; i++) {
+			m_VertexIndexs->setTuple(i + createPointNum, i + startVertexIdx);
+		}
+
+		m_VertexIndexs->Modified();
+	}
+}

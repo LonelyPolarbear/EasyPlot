@@ -19,6 +19,7 @@ SET(LIB_INCLUDE_DIRECTORY
 #-------------------------------------------------------
 SET(LIB_NAMES 	
 	#XUtilty${DLL_DEBUG_POSTFIX}
+	PRIVATE MyLib::HeaderOnly
 )
 
 set(LIB_DIRECTORIES 

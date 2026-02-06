@@ -4,7 +4,9 @@
 #include <lib00_utilty/XUtilty.h>
 #include <vector>
 
-
+/// <summary>
+/// »ΨΧͺΜε
+/// </summary>
 class LIB05_SHAPE_API XRotateLoftedgeometrySource : public XShapeSource {
 protected:
 	XRotateLoftedgeometrySource();

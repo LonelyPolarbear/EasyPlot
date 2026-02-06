@@ -6,6 +6,7 @@
 #include "XDataBaseObject.h"
 #include "databaseApi.h"
 #include "XTimeStamp.h"
+#include "lib00_utilty/XUtilty.h"
 /// <summary>
 /// 一维数组
 /// </summary>
@@ -60,11 +61,28 @@ public:
         d.clear();
     }
 
+    //对内部每一个tuple 操作
+    void foreach_tuple(std::function<void(T*)> func) {
+        auto tupleNum = getNumOfTuple();
+        XQ::ParaAlgo::ParallelForeach(0,tupleNum,[&](int i){
+            auto p =this->data(i);
+            func(p);
+        });
+    }
+
+    //左闭右开区间
+	void foreach_tuple_range(int startTupleIdx,int tupleNum,std::function<void(T*)> func) {
+		XQ::ParaAlgo::ParallelForeach(startTupleIdx, startTupleIdx+tupleNum, [&](int i) {
+			auto p = this->data(i);
+			func(p);
+			});
+	}
+
     //单纯内存拷贝
-    template<typename U>
-	void memCopy(U* srcPtr, int numTuple) {
-		auto copyBytenNum = std::min<int>(numTuple*sizeof(U), bytesNum());
-		memcpy(d.data(), srcPtr, copyBytenNum);
+	template<typename U>
+	void memCopy(U* srcPtr, int numOfU, int startTuplePos =0) {
+		auto copyBytenNum = std::min<int>(numOfU * sizeof(U), bytesNum()- startTuplePos *sizeof(T)*component);
+		memcpy(data(startTuplePos), srcPtr, copyBytenNum);
 	}
 
     template<typename U>
@@ -159,6 +177,7 @@ using XFloatArray = XDataArray<float>;
 using XDoubleArray = XDataArray<double>;
 using XUCharArray = XDataArray<unsigned char>;
 using XCharArray = XDataArray<char>;
+
 
 /// <summary>
 /// 二维数组
