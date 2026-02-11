@@ -123,6 +123,15 @@ public:
 		return m_DataModifyTime;
 	}
 
+	//时间戳比较 this的修改时间在other的修改时间之后
+	bool IsModifiedAfter(sptr<XDataBaseObject> other) const {
+		return m_DataModifyTime > other->m_DataModifyTime;
+	}
+
+	bool IsModifiedBefore(sptr<XDataBaseObject> other) const {
+		return m_DataModifyTime < other->m_DataModifyTime;
+	}
+
 	virtual void Init();
 };
 

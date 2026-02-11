@@ -56,6 +56,14 @@ public:
 
 	void Init() override;
 
+	bool isUpdateBefore(sptr<XShapeSource> other) const {
+		return m_updateTime < other->m_updateTime;
+	}
+
+	bool isUpdateAfter(sptr<XShapeSource> other) const {
+		return m_updateTime > other->m_updateTime;
+	}
+
 protected:
 	bool isNeedUpdate() { return m_DataModifyTime > m_updateTime; }
 	void setHasUpdated(){m_updateTime.Modified();}

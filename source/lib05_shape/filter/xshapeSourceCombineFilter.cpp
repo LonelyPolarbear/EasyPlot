@@ -27,11 +27,17 @@ bool XShapeSourceCombineFilter::update()
 {
 	bool updateFlag = false;
 	for (auto i : mData->inputs) {
-		auto r= i->update();
-		updateFlag |= r;
+		auto flag1 = i->update();
+		auto flag2 =isUpdateBefore(i);
+		updateFlag |= (flag1|| flag2);
+		mData->isAckInputAtLeastOnce = true;
 	}
+
 	if (isNeedUpdate() || updateFlag) {
-		return updateSelf();
+		if (mData->isAckInputAtLeastOnce) {
+			return updateSelf();
+		}
+		return false;
 	}
 	return false;
 }
@@ -64,9 +70,10 @@ bool XShapeSourceCombineFilter::updateSelf()
 		//合并坐标
 		std::vector< sptr< XFloatArray>> coords;
 		for (auto d : mData->inputs) {
-			coords.push_back(d->getVertexColorArray());
+			coords.push_back(d->getVertextCoordArray());
 		}
 		XQ::XAlgo::combineArray(coords, m_VertexCoord);
+		m_VertexCoord->Modified();
 	}
 		
 	//顶点法向量和顶点颜色
@@ -78,6 +85,7 @@ bool XShapeSourceCombineFilter::updateSelf()
 				normals.push_back(d->getVertexNormalArray());
 			}
 			XQ::XAlgo::combineArray(normals, m_VertexNormal);
+			m_VertexNormal->Modified();
 		}
 
 		if (totalNumOfVertexColor == totalNumOfVertex) {
@@ -86,6 +94,7 @@ bool XShapeSourceCombineFilter::updateSelf()
 				vertex_color.push_back(d->getVertextCoordArray());
 			}
 			XQ::XAlgo::combineArray(vertex_color, m_VertexColor);
+			m_VertexColor->Modified();
 		}
 	}
 
@@ -96,6 +105,7 @@ bool XShapeSourceCombineFilter::updateSelf()
 			face_index.push_back(d->getFaceIndexArray());
 		}
 		XQ::XAlgo::combineArray(face_index, m_FaceIndexs);
+		m_FaceIndexs->Modified();
 
 		//面索引
 		auto totalNumOfFace = 0;
@@ -120,6 +130,7 @@ bool XShapeSourceCombineFilter::updateSelf()
 				face_color.push_back(d->getFaceColorArray());
 			}
 			XQ::XAlgo::combineArray(face_color, m_FaceColor);
+			m_FaceColor->Modified();
 		}
 	}
 

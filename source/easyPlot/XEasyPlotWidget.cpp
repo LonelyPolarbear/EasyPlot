@@ -4,10 +4,14 @@
 #include "lib05_shape/datasource/xcylinderSource.h"
 #include "lib05_shape/datasource/xregularPrimSource.h"
 #include "lib05_shape/datasource/xfrustumSource.h"
+#include "lib05_shape/filter/xshapeSourceTransformFilter.h"
+#include "lib05_shape/filter/xshapeSourceCombineFilter.h"
+#include "lib05_shape/filter/xshapeSourceCombineFilter.h"
 #include "render/XRender.h"
 #include "render/XOpenGLRenderWindow.h"
 #include "render/XRenderCamera.h"
 #include "lib05_shape/XGeometryNode.h"
+#include "lib05_shape/renderNode3d/XArrowRenderNode.h"
 #include "lib05_shape/mapper/XPolyDataMapper.h"
 #include "lib02_camera/xcamera.h"
 #include <xalgo/XAlgo.h>
@@ -22,7 +26,8 @@
 XEasyPlotWidget::XEasyPlotWidget(QWidget* parent) :XGLWidget(parent)
 {
 	//test1();
-	test2();
+	//test2();
+	test3();
 }
 
 XEasyPlotWidget::~XEasyPlotWidget()
@@ -210,6 +215,7 @@ void XEasyPlotWidget::test2()
 	render->addRenderNode3D(frustumNode);
 	#endif
 
+	#if 1
 	sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
 	sptr<XRegularPrimSource> coneSource = makeShareDbObject<XRegularPrimSource>();
 	coneSource->Modified();
@@ -222,6 +228,68 @@ void XEasyPlotWidget::test2()
 	coneNode->setColorMode(ColorMode::FaceColor);
 
 	render->addRenderNode3D(coneNode);
+
+	render->getCamera()->AttrCameraStyle->setValue((uint32_t)XRenderCamera::CameraStyle::freely);
+	#endif
+}
+
+void XEasyPlotWidget::test3()
+{
+	auto render = makeShareDbObject<XRender>();
+	mRenderWindow->addRender(render);
+	
+	#if 0
+	{
+		sptr<XConeSource> coneSource = makeShareDbObject<XConeSource>();
+		coneSource->Modified();
+		coneSource->setNumVertices(8);
+		coneSource->setAngle(240);
+		sptr<XShapeSourceTransformFilter> transformFilter = makeShareDbObject<XShapeSourceTransformFilter>();
+		transformFilter->setInput(coneSource);
+		sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
+
+
+		sptr<XCylinderSource> primSource = makeShareDbObject<XCylinderSource>();
+		primSource->Modified();
+
+		sptr<XShapeSourceTransformFilter> transformFilter2 = makeShareDbObject<XShapeSourceTransformFilter>();
+		transformFilter2->setInput(primSource);
+		transformFilter2->translate(2, 0, 0);
+
+		sptr<XShapeSourceCombineFilter> combineSource = makeShareDbObject<XShapeSourceCombineFilter>();
+		combineSource->addInput(transformFilter);
+		combineSource->addInput(transformFilter2);
+
+		sptr<XGeometryNode> Node = makeShareDbObject<XGeometryNode>();
+		Node->setInput(combineSource);
+		Node->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		Node->setPolygonMode(PolygonMode::all);
+		Node->setColorMode(ColorMode::FaceColor);
+		render->addRenderNode3D(Node);
+	}
+	#endif
+
+	sptr<XArrowRenderNode> Node = makeShareDbObject<XArrowRenderNode>();
+	Node->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+	Node->setPolygonMode(PolygonMode::all);
+	Node->setColorMode(ColorMode::FaceColor);
+	render->addRenderNode3D(Node);
+
+	Node->setLineSize(2, 20);
+	Node->setArrowSize(3,5);
+
+	{
+		sptr<XArrowRenderNode> Node = makeShareDbObject<XArrowRenderNode>();
+		Node->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		Node->setPolygonMode(PolygonMode::all);
+		Node->setColorMode(ColorMode::FaceColor);
+		render->addRenderNode3D(Node);
+
+		Node->setLineSize(2, 20);
+		Node->setArrowSize(3, 5);
+
+		Node->rotateY(90);
+	}
 
 	render->getCamera()->AttrCameraStyle->setValue((uint32_t)XRenderCamera::CameraStyle::freely);
 }

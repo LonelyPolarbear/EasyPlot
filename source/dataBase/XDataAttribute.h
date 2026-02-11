@@ -43,7 +43,7 @@ protected:
 	XDataAttributeT()=default;
 	~XDataAttributeT()=default;
 public:
-	void setValue(const T& v) {
+	void setValue(const T& v){
 		if constexpr (XTraits::has_equal_operator_v<T>) {
 			if (value == v) {
 				return;
@@ -78,6 +78,7 @@ protected:
 	unsigned int value{};
 };
 
+
 template<typename T,typename = std::enable_if_t<std::is_enum_v<T>>>
 class XDataAttributeEnum : public XDataAttributeEnumBase {
 protected:
@@ -85,12 +86,15 @@ protected:
 	~XDataAttributeEnum() = default;
 public:
 	void setValue(T v) {
-		setValue((unsigned int)v);
+		setIntValue((unsigned int)v);
 	}
 	T getValue() const {
 		(T)getIntValue();
 	}
 };
+
+template<typename T>
+using XAttr_Enum = XDataAttributeEnum<T>;
 
 extern template class database_API XDataAttributeT<int>;
 extern template class database_API XDataAttributeT<bool>;

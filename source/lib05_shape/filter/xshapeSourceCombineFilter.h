@@ -10,11 +10,25 @@ protected:
 
 	~XShapeSourceCombineFilter();
 public:
-	
-	
 	void addInput(sptr<XShapeSource> input);
 
 	bool update() override;
+
+	virtual void updateVertextCoordArray() {};
+
+	virtual void updateVertextNormalArray() {};
+
+	virtual void updateVertexColorArray() {};
+
+	virtual void updateFaceIndexArray() {};
+
+	virtual void updateFaceColorArray() {};
+
+	virtual void updateLineIndexArray() {};
+
+	virtual void updateLineColorArray() {};
+
+	virtual void updateVertexIndexArray() {};
 
 protected:
 	bool updateSelf();

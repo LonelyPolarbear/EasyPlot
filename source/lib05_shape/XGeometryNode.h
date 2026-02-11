@@ -24,12 +24,12 @@ public:
     /// 由外部指定的着色器进行绘制
     /// </summary>
     /// <param name=""></param>
-    virtual void draw(std::shared_ptr<xshader>);
+    virtual void draw(std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix = Eigen::Matrix4f::Identity());
 
 	/// <summary>
 	/// 对外接口，绘制到屏幕
 	/// </summary>
-	virtual void draw();
+	virtual void draw(const Eigen::Matrix4f& parentMatrix = Eigen::Matrix4f::Identity());
 
 	virtual void drawInstance() {};
 

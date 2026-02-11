@@ -20,6 +20,7 @@ public:
 
 	void test1();
 	void test2();
+	void test3();
 public slots:
 	void slotFitView3D();
 };

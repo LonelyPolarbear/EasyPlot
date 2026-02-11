@@ -12,11 +12,11 @@ typedef unsigned long long TimeStampType;
 
         TimeStampType  GetMTime() const { return this->m_modifiedTime; };
 
-        bool operator>(const XTimeStamp& rhs) {
+        bool operator>(const XTimeStamp& rhs) const {
             return (this->m_modifiedTime > rhs.m_modifiedTime);
         };
 
-        bool operator<(const XTimeStamp& rhs) {
+        bool operator<(const XTimeStamp& rhs) const{
             return (this->m_modifiedTime < rhs.m_modifiedTime);
         };
 

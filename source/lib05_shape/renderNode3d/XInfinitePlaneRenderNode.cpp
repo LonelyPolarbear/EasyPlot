@@ -53,9 +53,9 @@ void XInfinitePlaneRenderNode::setFrame(const Eigen::Matrix4f& frame)
 	m_planeFrame = frame;
 }
 
-void XInfinitePlaneRenderNode::draw()
+void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix)
 {
-	sigBeginRender(this->asDerived<XRenderNode>());
+	//sigBeginRender(this->asDerived<XRenderNode>());
 
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
 	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
@@ -80,7 +80,7 @@ void XInfinitePlaneRenderNode::draw()
 	mFeedBackBuffer->bind();																											 //------------------------------ ¼¤»î
 	glBeginTransformFeedback(GL_TRIANGLES);                                                                           //------------------------------ Æô¶¯
 
-	this->draw(shader);
+	this->draw(shader,parentMatrix);
 	shader->unUse();
 
 	glEnableObj->restore();
@@ -93,12 +93,12 @@ void XInfinitePlaneRenderNode::draw()
 	//ss->setNumOfTuple(6);
 	//ss->memCopy(datadd);
 
-	sigEndRender(this->asDerived<XRenderNode>());
+	//sigEndRender(this->asDerived<XRenderNode>());
 }
 
-void XInfinitePlaneRenderNode::draw(std::shared_ptr<xshader> s)
+void XInfinitePlaneRenderNode::draw(std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
 {
-	return XGeometryNode::draw(s);
+	return XGeometryNode::draw(s,parentMatrix);
 }
 
 void XInfinitePlaneRenderNode::createFeedBack()

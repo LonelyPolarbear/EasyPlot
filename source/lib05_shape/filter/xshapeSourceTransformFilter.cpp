@@ -43,6 +43,18 @@ void XShapeSourceTransformFilter::rotate(float angle, XQ::Vec3f dir)
 	mData->transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), axis));
 }
 
+XQ::Vec3f XShapeSourceTransformFilter::getPosition() const
+{
+	Eigen::Vector3f T= mData->transform.translation();
+	return XQ::Vec3f(T[0],T[1],T[2]);
+}
+
+XQ::Vec3f XShapeSourceTransformFilter::getScale() const
+{
+	auto data = XQ::Matrix::transformDecomposition_TRS(mData->transform);
+	return XQ::Vec3f(data.sx, data.sy, data.sz);
+}
+
 void XShapeSourceTransformFilter::rotateX(float angle)
 {
 	mData->transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), Eigen::Vector3f::UnitX()));
@@ -63,6 +75,17 @@ void XShapeSourceTransformFilter::scale(float x, float y, float z)
 	mData->transform.scale(Eigen::Vector3f(x, y, z));
 }
 
+void XShapeSourceTransformFilter::setTransform(const Eigen::Affine3f& trans)
+{
+	mData->transform = trans;
+	Modified();
+}
+
+Eigen::Affine3f XShapeSourceTransformFilter::getTransform() const
+{
+	return mData->transform;
+}
+
 void XShapeSourceTransformFilter::setInput(sptr<XShapeSource> input)
 {
 	mData->input = input;
@@ -72,7 +95,7 @@ bool XShapeSourceTransformFilter::update()
 {
 	if(!mData->input)
 		return false;
-	if (mData->input->update()) {
+	if (mData->input->update() || isUpdateBefore(mData->input)) {
 		//更新自己
 		mData->isAckInputAtLeastOnce = true;
 		//当前输入有效，更新输出
@@ -127,6 +150,13 @@ bool XShapeSourceTransformFilter::updateSelf()
 		m_LineColor = mData	->input->getLineColorArray();
 
 		m_VertexIndexs = mData->input->getVertexIndexArray();
+
+		m_VertexColor->Modified();
+		m_FaceIndexs->Modified();
+		m_FaceColor->Modified();
+		m_LineIndexs->Modified();
+		m_LineColor->Modified();
+		m_VertexIndexs->Modified();
 	}
 	setHasUpdated();
 	return true;

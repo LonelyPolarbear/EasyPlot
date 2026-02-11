@@ -3,6 +3,7 @@
 #include <dataBase/XDataBaseObject.h>
 #include <lib05_shape/XRenderNode.h>
 #include <lib01_shader/XBaseShader.h>
+#include <Eigen/Eigen>
 
 class XOpenGLVertexArrayObject;
 class XOpenGLBuffer;

@@ -29,7 +29,7 @@ XGeometryNode::~XGeometryNode()
 {
 }
 
-void XGeometryNode::draw(std::shared_ptr<xshader> shader)
+void XGeometryNode::draw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& parentMatrix)
 {
 	if(!m_visible)
 		return;
@@ -39,7 +39,8 @@ void XGeometryNode::draw(std::shared_ptr<xshader> shader)
 
 	shader->use();
 
-	shader->setModelMatrix(this->getMatrix());
+	Eigen::Matrix4f matrix = parentMatrix * d->m_transform.matrix();
+	shader->setModelMatrix(matrix.data());
 	shader->setObjectID(getID());
 	shader->setPreSelectColor(m_preSelectColor.x(), m_preSelectColor.y(), m_preSelectColor.z(), m_preSelectColor.w());
 	shader->setColorMode((int)m_colorMode);
@@ -49,9 +50,9 @@ void XGeometryNode::draw(std::shared_ptr<xshader> shader)
 	m_polyMapper->draw(shader,m_polygonMode,m_drawType);
 }
 
-void XGeometryNode::draw()
+void XGeometryNode::draw(const Eigen::Matrix4f& parentMatrix)
 {
-	draw(m_shaderManger->getShader3D(m_drawType));
+	draw(m_shaderManger->getShader3D(m_drawType),parentMatrix);
 }
 
 void XGeometryNode::translate(float x, float y, float z)

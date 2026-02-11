@@ -15,8 +15,8 @@ protected:
 public:
 	void Init() override;
 	void setFrame(const Eigen::Matrix4f& frame);
-	void draw() override;
-	void draw(std::shared_ptr<xshader>) override;
+	void draw(const Eigen::Matrix4f& parentMatrix) override;
+	void draw(std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
 	void createFeedBack();
 	void setRect(std::vector<XQ::Vec3f> points);
 	sptr<XOpenGLBuffer> getFeedBackBuffer();
