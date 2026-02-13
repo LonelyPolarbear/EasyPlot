@@ -89,7 +89,7 @@ public:
 		setIntValue((unsigned int)v);
 	}
 	T getValue() const {
-		(T)getIntValue();
+		return (T)getIntValue();
 	}
 };
 

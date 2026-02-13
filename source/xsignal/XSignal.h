@@ -252,8 +252,13 @@ namespace xsig {
 			if (origin_ptr) {
 				auto fun = [pclass, signalObj](Args... args)->R {
 					auto origin_ptr = extract_origin_pointer(pclass);
-					if (origin_ptr)
-						return *(origin_ptr->*signalObj)(args...);
+					if (origin_ptr) {
+						if constexpr(std::is_void_v<R>)
+							 (origin_ptr->*signalObj)(args...);
+						 else
+							return *(origin_ptr->*signalObj)(args...);
+					}
+						
 					};
 				xconnection connection;
 				connection.handle = signal.connect(fun);

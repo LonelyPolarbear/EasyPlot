@@ -9,6 +9,7 @@ class XRenderCamera;
 class XInteractionEventHandler;
 class XGeometryNode;
 class XGraphicsItem;
+class XRenderNode;
 class LIB_XRENDER_API XRender :public XRenderPort {
 protected:
 	XRender();
@@ -21,7 +22,7 @@ public:
 	void setCamera(sptr<XRenderCamera> camera);
 	sptr<XRenderCamera> getCamera() const;
 
-	virtual void render();
+	virtual void render(bool isNormal = true);
 
 	bool makeCurrent();
 
@@ -38,8 +39,7 @@ public:
 
 	bool connectToRenderWindowSignals();
 
-	//
-	void addRenderNode3D(sptr<XGeometryNode>);
+	void addRenderNode3D(sptr<XRenderNode>);
 
 	void addRenderNode2D(sptr<XGraphicsItem>);
 
@@ -62,7 +62,7 @@ protected:
 	csptr<XAttr_Bool> AttrActive;
 protected:
 
-	void updateViewPort();
+	void updateViewPort(bool isNormal);
 
 	void updateUbo();
 

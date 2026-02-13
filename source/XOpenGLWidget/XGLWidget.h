@@ -63,6 +63,6 @@ protected:
 	bool m_isInit = false;
 	int mWidth =0;
 	int mHeight = 0;
-
+	int mTimerId =0;
 	std::shared_ptr<XOpenGLRenderWindow> mRenderWindow;
 };

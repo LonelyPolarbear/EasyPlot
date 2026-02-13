@@ -13,7 +13,7 @@ XRenderCamera::~XRenderCamera()
 void XRenderCamera::Init()
 {
 	mCamera = makeShareDbObject<XTrackBallCamera>();
-	XQ_ATTR_ADD_INIT(AttrCameraStyle, (uint32_t)CameraStyle::upRight);
+	XQ_ATTR_ADD_INIT(AttrCameraStyle, CameraStyle::upRight);
 
 	sigDataChanged(asDerived<XDataObject>(), XDataChangeType::DataModified);
 }
@@ -30,7 +30,7 @@ void XRenderCamera::setProjectionType(XRenderCamera::ProjectionType type)
 
 void XRenderCamera::rotate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height)
 {
-	if (AttrCameraStyle->getValue() == (uint32_t)CameraStyle::freely) {
+	if (AttrCameraStyle->getValue() == CameraStyle::freely) {
 		mCamera->transformFreely(
 			Eigen::Vector2f(curPoint[0], curPoint[1]),
 			Eigen::Vector2f(lastPoint[0], lastPoint[1]),
@@ -53,7 +53,7 @@ void XRenderCamera::rotate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width,
 
 void XRenderCamera::translate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height)
 {
-	if (AttrCameraStyle->getValue() == (uint32_t)CameraStyle::freely) 
+	if (AttrCameraStyle->getValue() == CameraStyle::freely) 
 	{
 		mCamera->transformFreely(
 			Eigen::Vector2f(curPoint[0], curPoint[1]),

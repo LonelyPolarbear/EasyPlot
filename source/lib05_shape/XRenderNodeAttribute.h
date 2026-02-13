@@ -4,6 +4,7 @@
 #include <dataBase/XDataAttribute.h>
 #include <xsignal/XSignal.h>
 #include <Eigen/Eigen>
+#include <lib01_shader/xshader.h>
 
 enum  class LIB05_SHAPE_API graphicsItemType {
 	none,
@@ -40,12 +41,17 @@ class LIB05_SHAPE_API XRenderNodeAttribute :public XDataObject {
 
 };
 
-class LIB05_SHAPE_API XRenderNode3DAttribute :public XDataObject {
+class LIB05_SHAPE_API XRenderNode3DAttribute :public XRenderNodeAttribute {
 protected:
 	XRenderNode3DAttribute();
 	~XRenderNode3DAttribute();
 public:
 	void Init();
 public:
-	csptr<XAttr_Enum<PolygonMode>>  polygonMode;
+	csptr<XAttr_Enum<PolygonMode>>  AttrPolygonMode;
+	csptr<XAttr_Enum<ColorMode>>  AttrColorMode;
+	csptr<XAttr_Enum<PrimitveType>>  AttrPrimitveType;
+	csptr<XAttr_Color>  AttrSingleColor;
+	csptr<XAttr_Color>  AttrPreSelectColor;
+	csptr<XAttr_Bool>  AttrVisible;
 };

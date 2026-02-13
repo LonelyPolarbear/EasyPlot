@@ -3,25 +3,16 @@
 #include "XRenderType.h"
 #include "XRenderInteractionEventHandler.h"
 #include <dataBase/XDataBaseObject.h>
+#include <dataBase/XVector.h>
 #include <lib00_utilty/XUtilty.h>
 #include <xsignal/XSignal.h>
 
 class XRender;
-class CameraNavigationHandler;
-class XRenderPickHandler;
-class XManipulatorHandler;
-
-enum class InteractMode {
-	none =0,
-	camera = 1,
-	pick = 1<<1,
-	manipulator = 1<<2,
-};
-class XRenderMultiModeInteractionHandler : public XRenderInteractionEventHandler {
+class XManipulatorHandler : public XRenderInteractionEventHandler {
 protected:
-	XRenderMultiModeInteractionHandler();
-	virtual ~XRenderMultiModeInteractionHandler();
-
+	XManipulatorHandler();
+	virtual ~XManipulatorHandler();
+public:
 	virtual void LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
 	virtual void LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
 	virtual void MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
@@ -38,21 +29,12 @@ protected:
 	virtual void MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier);
 	virtual void MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
 	virtual void MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
-public:
+	bool isRenderActive() const;
+
 	void setRender(sptr< XRender> render) override;
-	void setCameraNavigationHandler(sptr<CameraNavigationHandler> cameraHandler);
-	void setPickHandler(sptr<XRenderPickHandler> pickHandler);
-	void setManipulatorHandler(sptr<XManipulatorHandler> manipulatorHandler);
-	sptr<CameraNavigationHandler> getCameraNavigationHandler() const;
-	sptr<XRenderPickHandler> getPickHandler() const;
-	sptr<XManipulatorHandler> getManipulatorHandler() const;
-
-	bool hasMode(InteractMode mode);
 protected:
-	//包含多个模式交互处理器
-	sptr<CameraNavigationHandler> mCameraHandler;					//相机
-	sptr<XRenderPickHandler> mPickHandler;									//拾取
-	sptr<XManipulatorHandler> mManipulatorHandler;					//操作柄
-
-	uint32_t mCurrentMode;
+	void slotRenderActiveChanged(bool active) override;
+protected:
+	struct Internal;
+	sptr< Internal> mData;
 };

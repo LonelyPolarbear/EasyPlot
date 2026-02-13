@@ -7,6 +7,7 @@
 /// ¾ØÐÎäÖÈ¾½Úµã
 /// </summary>
 class XRectRenderNode : public XGeometryNode {
+	REGISTER_CLASS_META_DATA(XRectRenderNode, XGeometryNode);
 protected:
 	XRectRenderNode();
 	virtual ~XRectRenderNode();
@@ -15,7 +16,7 @@ protected:
 public:
 	void Init() override;
 	void setRect(std::vector<XQ::Vec3f> points);
-	void draw(const Eigen::Matrix4f& parentMatrix) override;
+	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
 protected:
 	sptr<XCustomSource> m_inputSource;
 };

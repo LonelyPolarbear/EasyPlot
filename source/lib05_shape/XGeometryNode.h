@@ -16,6 +16,7 @@
 class xShaderManger;
 class XShapeSource;
 class LIB05_SHAPE_API XGeometryNode:public XRenderNode3D {
+	REGISTER_CLASS_META_DATA(XGeometryNode, XRenderNode3D);
 public:
     XGeometryNode();
     virtual ~XGeometryNode();
@@ -24,14 +25,14 @@ public:
     /// 由外部指定的着色器进行绘制
     /// </summary>
     /// <param name=""></param>
-    virtual void draw(std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix = Eigen::Matrix4f::Identity());
+    virtual void draw(std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix);
 
 	/// <summary>
 	/// 对外接口，绘制到屏幕
 	/// </summary>
-	virtual void draw(const Eigen::Matrix4f& parentMatrix = Eigen::Matrix4f::Identity());
+	void draw(const Eigen::Matrix4f& parentMatrix,bool isNormal ) override;
 
-	virtual void drawInstance() {};
+	void drawInstance(const Eigen::Matrix4f& parentMatrix) override {};
 
 	void translate(float x, float y, float z);
 	void setPosition(float x, float y, float z);
@@ -39,7 +40,7 @@ public:
 	void rotate(float angle, XQ::Vec3f dir);
 
 	//按列矩阵形式存储
-	float* getMatrix() const;
+	const float* getMatrix() const;
 
 	void setVisible(bool visible);
 
@@ -57,6 +58,9 @@ public:
 	void setPolygonMode(PolygonMode mode);
 	PolygonMode getPolygonMode() const;
 
+	PrimitveType getDrawType() const;
+	void setDrawType(PrimitveType type);
+
 	void setColorMode(ColorMode mode);
 	ColorMode getColorMode() const;
 
@@ -65,32 +69,24 @@ public:
 
 	void setPreSelectColor(XQ::Vec4f color);
 	XQ::Vec4f getPreSelectColor() const;
+	
 
-	bool isSelf(uint64_t id);
-
-	void setShaderManger(std::shared_ptr<xShaderManger> shaderManger);
-
-	std::shared_ptr<xShaderManger> getShaderManger() const;
-
-	XQ::BoundBox getBoundBox() const;
+	XQ::BoundBox getThisBoundBox(const Eigen::Matrix4f& m)  const override;
 
 	void setPolyDataMapper(sptr<XPolyDataMapper> mapper);
+
 	sptr<XPolyDataMapper> getPolyDataMapper() const;
 
 	sptr<XPolyDataMapper> getOrCreateMapper();
 
 	void setInput(sptr<XShapeSource> input);
+
+	void Init() override;
+public:
+	sptr<XRenderNode3DAttribute> Attribute;
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;
  protected:
-	ColorMode m_colorMode = ColorMode::SingleColor;
-	PrimitveType m_drawType = PrimitveType::triangle;
-	PolygonMode m_polygonMode = PolygonMode::face;
-	XQ::Vec4f m_singleColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-	XQ::Vec4f m_preSelectColor = XQ::Vec4f(1.0f, 1.0f, 1.0f, 1.0f);
-	bool m_visible = true;
-
-	sptr<xShaderManger> m_shaderManger;
 	sptr<XPolyDataMapper> m_polyMapper;
 };

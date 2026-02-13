@@ -88,7 +88,7 @@ void XArrowRenderNode::setLineSize(double r, double h)
 	setArrowSize(coneScale[0], coneScale[2]);
 }
 
-void XArrowRenderNode::draw(const Eigen::Matrix4f& parentMatrix)
+void XArrowRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
-	XGeometryNode::draw(parentMatrix);
+	XGeometryNode::draw(parentMatrix,isNormal);
 }

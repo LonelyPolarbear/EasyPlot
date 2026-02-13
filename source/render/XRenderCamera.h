@@ -42,5 +42,5 @@ public:
  protected:
     sptr<XBaseCmaera> mCamera;
 public:
-    csptr<XAttr_UInt>  AttrCameraStyle;                    //trackball相机或者fps相机
+    csptr<XAttr_Enum<CameraStyle>>  AttrCameraStyle;                    //trackball相机或者fps相机
  };

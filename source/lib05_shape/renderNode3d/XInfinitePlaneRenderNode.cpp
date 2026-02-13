@@ -53,7 +53,7 @@ void XInfinitePlaneRenderNode::setFrame(const Eigen::Matrix4f& frame)
 	m_planeFrame = frame;
 }
 
-void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix)
+void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix,  bool isNormal)
 {
 	//sigBeginRender(this->asDerived<XRenderNode>());
 

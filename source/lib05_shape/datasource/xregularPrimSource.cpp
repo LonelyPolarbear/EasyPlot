@@ -136,13 +136,13 @@ void XRegularPrimSource::updateVertexIndexArray()
 		auto startVertexIdx = 1;
 		m_VertexIndexs->setNumOfTuple(pointNum);
 		auto createPointNum =0;
-		for (int i = 0; i < m_NumVertices + 1; i++) {
+		for (int i = 0; i < m_NumVertices ; i++) {
 			m_VertexIndexs->setTuple(i + createPointNum, i + startVertexIdx);
 		}
 
 		createPointNum +=m_NumVertices;
 		startVertexIdx +=m_NumVertices;
-		for (int i = 0; i < m_NumVertices + 1; i++) {
+		for (int i = 0; i < m_NumVertices; i++) {
 			m_VertexIndexs->setTuple(i + createPointNum, i + startVertexIdx);
 		}
 

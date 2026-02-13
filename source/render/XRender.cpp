@@ -49,7 +49,7 @@ public:
 	sptr<XInteractionEventHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
 
-	std::vector<sptr<XGeometryNode>> m_actor3DList;
+	std::vector<sptr<XRenderNode>> m_actor3DList;
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
 	XQ::Vec2f m_mousePos;			//鼠标在窗口中的位置，未做变换
@@ -93,15 +93,16 @@ sptr<XRenderCamera> XRender::getCamera() const
 	return mData->m_camera;
 }
 
-void XRender::render()
+void XRender::render(bool isNormal)
 {
 	//renderwindow确保opengl上下文有效，因此此处可以不对makeCurrent返回值判断
 	//所以所有actor需要初始化opengl的资源的接口都可以在此处完成
-	makeCurrent();
+	if(!makeCurrent())
+		return;
 	
 	//!
 	//! 
-	updateViewPort();
+	updateViewPort(isNormal);
 
 	updateUbo();
 
@@ -111,16 +112,16 @@ void XRender::render()
 	enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
 	enable->enable(XOpenGLEnable::EnableType::BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if(!isNormal)
+		enable->disable(XOpenGLEnable::EnableType::MULTISAMPLE);
 	XOpenGLFuntion::xglClearDepth(1);
 	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::depth_buffer_bit);
 
 	for (auto actor : mData->m_actor3DList) {
-		actor->draw();
+		actor->draw(Eigen::Matrix4f::Identity(), isNormal);
 	}
 	enable->restore();
 
-
-	//glUseProgram(0);
 	doneCurrent();
 }
 
@@ -179,26 +180,26 @@ bool XRender::connectToRenderWindowSignals()
 		return false;
 	}
 
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonPress, handler,&XInteractionEventHandler::LeftButtonPressEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonRelease, handler,&XInteractionEventHandler::LeftButtonReleaseEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonPress, handler,&XInteractionEventHandler::MiddleButtonPressEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonRelease, handler,&XInteractionEventHandler::MiddleButtonReleaseEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonPress, handler,&XInteractionEventHandler::RightButtonPressEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonRelease, handler,&XInteractionEventHandler::RightButtonReleaseEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigEnter, handler,&XInteractionEventHandler::EnterEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeave, handler,&XInteractionEventHandler::LeaveEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsIn, handler,&XInteractionEventHandler::FoucsInEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsOut, handler,&XInteractionEventHandler::FoucsOutEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigResize, handler,&XInteractionEventHandler::ResizeEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigKeyPress, handler,&XInteractionEventHandler::KeyPressEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigKeyRelease, handler,&XInteractionEventHandler::KeyReleaseEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseMove, handler,&XInteractionEventHandler::MouseMoveEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelForward, handler,&XInteractionEventHandler::MouseWheelForwardEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelBackward, handler, &XInteractionEventHandler::MouseWheelBackwardEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigTimeOut, handler, &XInteractionEventHandler::TimeEvent);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonPress, handler, &XInteractionEventHandler::SigLeftButtonPress);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonRelease, handler,&XInteractionEventHandler::SigLeftButtonRelease);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonPress, handler,&XInteractionEventHandler::SigMiddleButtonPress);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonRelease, handler,&XInteractionEventHandler::SigMiddleButtonRelease);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonPress, handler,&XInteractionEventHandler::SigRightButtonPress);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonRelease, handler,&XInteractionEventHandler::SigRightButtonRelease);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigEnter, handler,&XInteractionEventHandler::SigEnter);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeave, handler,&XInteractionEventHandler::SigLeave);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsIn, handler,&XInteractionEventHandler::SigFoucsIn);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsOut, handler,&XInteractionEventHandler::SigFoucsOut);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigResize, handler,&XInteractionEventHandler::SigResize);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigKeyPress, handler,&XInteractionEventHandler::SigKeyPress);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigKeyRelease, handler,&XInteractionEventHandler::SigKeyRelease);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseMove, handler,&XInteractionEventHandler::SigMouseMove);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelForward, handler,&XInteractionEventHandler::SigMouseWheelForward);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelBackward, handler, &XInteractionEventHandler::SigMouseWheelBackward);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigTimeOut, handler, &XInteractionEventHandler::SigTimeOut);
 }
 
-void XRender::addRenderNode3D(sptr<XGeometryNode>s)
+void XRender::addRenderNode3D(sptr<XRenderNode>s)
 {
 	s->setShaderManger(getRenderWindow()->getShaderManger());
 	mData->m_actor3DList.push_back(s);
@@ -260,7 +261,7 @@ void XRender::addInfinitePlane(Eigen::Matrix4f planeFrame)
 {
 }
 
-void XRender::updateViewPort()
+void XRender::updateViewPort(bool isNormal)
 {
 	XQ::Recti rect = getConvertViewPort();
 	
@@ -277,8 +278,13 @@ void XRender::updateViewPort()
 	auto g = c.g2();
 	auto b = c.b2();
 	auto a = c.a2();
-
-	XOpenGLFuntion::xglClearColor(r, g, b, a);
+	if(isNormal)
+		XOpenGLFuntion::xglClearColor(r, g, b, a);
+	else {
+		GLuint clearValue[4] = { 0, 0, 0, 0 }; 
+		// 清除颜色缓冲（使用无符号整数清除函数）
+		glClearBufferuiv(GL_COLOR, 0, clearValue);
+	}
 	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::color_buffer_bit);
 
 	//XOpenGLFuntion::xglViewport(oldViewport);
@@ -309,7 +315,7 @@ XQ::BoundBox  XRender::computeBoundBox() {
 		if (shape->asDerived<XInfinitePlaneRenderNode>()) {
 			continue;
 		}
-		auto shapeBoundBox = shape->getBoundBox();
+		auto shapeBoundBox = shape->getBoundBox(Eigen::Matrix4f::Identity());
 		boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);
 		boundBox.xmax = std::max(boundBox.xmax, shapeBoundBox.xmax);
 		boundBox.ymin = std::min(boundBox.ymin, shapeBoundBox.ymin);

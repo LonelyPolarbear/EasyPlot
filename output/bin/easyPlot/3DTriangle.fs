@@ -66,7 +66,7 @@ vec4 setColorByOrien(vec4 inputColor){
 	if(gl_FrontFacing){
 		return inputColor;
 	}else{
-		return vec4(1,1,1,1);
+		return vec4(1,0,0,1);
 		vec3 hsv = rgb2hsv(inputColor.xyz);
         hsv.z *= 0.5;								// 明度减半（可调整系数，如 0.6、0.7）
         hsv.z = max(hsv.z, 0.0);				// 防止负值
@@ -125,6 +125,7 @@ void main()
 	}
 
 	FragColor = setColorByOrien(fragcolor_before);
+	//FragColor = vec4(1,0,0,1);
 	#endif
 
 	#if 0

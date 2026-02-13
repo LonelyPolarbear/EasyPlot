@@ -6,6 +6,7 @@
 #include <glew/glew.h>
 #include <lib05_shape/XGeometryNode.h>
 #include <lib02_camera/xcamera.h>
+#include <Eigen/Eigen>
 
 
 class XViewSelection::Internal {
@@ -212,7 +213,7 @@ bool XViewSelection::renderLayer(std::set<std::shared_ptr<XGeometryNode>> object
 
 	for (auto shape : objects) {
 		shape->setPolygonMode(PolygonMode::face);
-		shape->draw(d->pickShader);
+		shape->draw(d->pickShader, Eigen::Matrix4f::Identity());
 	}
 
 	glEndQuery(GL_SAMPLES_PASSED);

@@ -1,25 +1,24 @@
-#include "CameraNavigationHandler.h"
+#include "XManipulatorHandler.h"
 #include "XRender.h"
 #include "lib00_utilty/XUtilty.h"
 #include "lib02_camera/xcamera.h"
 #include "XRenderCamera.h"
 
 
-
-struct CameraNavigationHandler::Internal {
+struct XManipulatorHandler::Internal {
 	XQ::Vec2i mouseLstPos;
 	MouseType mouseType = MouseType::none;
 };
-CameraNavigationHandler::CameraNavigationHandler():mData(new Internal)
-{
-	
-}
 
-CameraNavigationHandler::~CameraNavigationHandler()
+XManipulatorHandler::XManipulatorHandler():mData(new Internal)
 {
 }
 
-void CameraNavigationHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+XManipulatorHandler::~XManipulatorHandler()
+{
+}
+
+void XManipulatorHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if(!isRenderActive())
 		return;
@@ -30,7 +29,7 @@ void CameraNavigationHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::Keyb
 	XQ::print("CameraNavigationHandler LeftButtonPressEvent ", windowpos, mData->mouseLstPos);
 }
 
-void CameraNavigationHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XManipulatorHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
@@ -39,7 +38,7 @@ void CameraNavigationHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::Ke
 	XQ::print("CameraNavigationHandler LeftButtonReleaseEvent");
 }
 
-void CameraNavigationHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XManipulatorHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
@@ -48,70 +47,70 @@ void CameraNavigationHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::Ke
 	mData->mouseType = MouseType::middle;
 }
 
-void CameraNavigationHandler::MiddleButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XManipulatorHandler::MiddleButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::none;
 }
 
-void CameraNavigationHandler::RightButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XManipulatorHandler::RightButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::right;
 }
 
-void CameraNavigationHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XManipulatorHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::none;
 }
 
-void CameraNavigationHandler::EnterEvent()
+void XManipulatorHandler::EnterEvent()
 {
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::LeaveEvent()
+void XManipulatorHandler::LeaveEvent()
 {
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::FoucsInEvent()
+void XManipulatorHandler::FoucsInEvent()
 {
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::FoucsOutEvent()
+void XManipulatorHandler::FoucsOutEvent()
 {
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::ResizeEvent(XQ::Vec2i)
+void XManipulatorHandler::ResizeEvent(XQ::Vec2i)
 {
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier)
+void XManipulatorHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier)
+void XManipulatorHandler::KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XManipulatorHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
@@ -120,7 +119,7 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 		auto curpos = getRender()->window2render(windowpos);
 		auto viewport = getRender()->getConvertViewPort();
 		
-		getRender()->getCamera()->rotate(curpos,mData->mouseLstPos,viewport[2],viewport[3]);
+
 
 		//更新位置
 		mData->mouseLstPos = getRender()->window2render(windowpos);
@@ -130,34 +129,24 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 		auto curpos = getRender()->window2render(windowpos);
 		auto viewport = getRender()->getConvertViewPort();
 
-		getRender()->getCamera()->translate(curpos, mData->mouseLstPos, viewport[2], viewport[3]);
-
 		//更新位置
 		mData->mouseLstPos = getRender()->window2render(windowpos);
 	}
 }
 
-void CameraNavigationHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XManipulatorHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
-	
-	double factor = 1.1;
-	auto c = getRender()->getCamera();
-	c->scale(factor);
 }
 
-void CameraNavigationHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XManipulatorHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
 {
 	if (!isRenderActive())
 		return;
-
-	double factor = 1/1.1;
-	auto c = getRender()->getCamera();
-	c->scale(factor);
 }
 
-bool CameraNavigationHandler::isRenderActive() const
+bool XManipulatorHandler::isRenderActive() const
 {
 	auto render = getRender();
 	if (render) {
@@ -166,13 +155,12 @@ bool CameraNavigationHandler::isRenderActive() const
 	return false;
 }
 
-void CameraNavigationHandler::setRender(sptr<XRender> render)
+void XManipulatorHandler::setRender(sptr<XRender> render)
 {
 	XRenderInteractionEventHandler::setRender(render);
-
 }
 
-void CameraNavigationHandler::slotRenderActiveChanged(bool active)
+void XManipulatorHandler::slotRenderActiveChanged(bool active)
 {
 	if (active == false) {
 		mData->mouseType = MouseType::none;

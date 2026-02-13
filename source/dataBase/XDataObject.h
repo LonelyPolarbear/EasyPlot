@@ -16,15 +16,16 @@ protected:
 	bool hasData(sptr<XDataObject> data);
 	bool hasAttribute(sptr<XDataAttribute> attr);
 	void setParant(sptr<XDataObject> parent);
+	virtual void ItemDataChangedCB(sptr<XDataAttribute>, XDataChangeType type);
 public:
 	sptr<XDataAttribute> getAttribute(const std::string& name) const;
 public:
-	virtual void ItemDataChangedCB(sptr<XDataAttribute>, XDataChangeType type);
 	virtual void slotItemDataChanged(sptr<XDataAttribute>, XDataChangeType type);
-
 public:
 	XSIGNAL(void(sptr<XDataObject>, XDataChangeType))  sigDataChanged;
 	XSIGNAL(void(sptr<XDataAttribute>, XDataChangeType))  sigItemDataChanged;
+public:
+	friend class XDataAttribute;
 protected:
 	uint64_t mUid;
 	std::vector<sptr<XDataObject>> mChilds;

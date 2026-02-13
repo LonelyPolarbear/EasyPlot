@@ -25,13 +25,14 @@ XGLWidget::XGLWidget(QWidget* parent) :QWidget(parent)
 	setAttribute(Qt::WA_NoSystemBackground, true);
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
 	this->setMouseTracking(true);
-	this->startTimer(60ms);
+	mTimerId = this->startTimer(60ms);
 
 	mRenderWindow = makeShareDbObject<XOpenGLRenderWindow>();
 }
 
 XGLWidget::~XGLWidget()
 {
+	this->killTimer(mTimerId);
 }
 
 std::shared_ptr<XOpenGLRenderWindow> XGLWidget::getRenderWindow()

@@ -6,6 +6,7 @@
 /// ¼ýÍ·äÖÈ¾½Úµã
 /// </summary>
 class XArrowRenderNode : public XGeometryNode {
+	REGISTER_CLASS_META_DATA(XArrowRenderNode, XGeometryNode);
 protected:
 	XArrowRenderNode();
 	virtual ~XArrowRenderNode();
@@ -28,7 +29,7 @@ public:
 	/// <param name="h"></param>
 	void setLineSize(double r, double h);
 
-	void draw(const Eigen::Matrix4f& parentMatrix) override;
+	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
 protected:
 	class Internal;
 	sptr<Internal> mData;

@@ -15,6 +15,7 @@
 #include <future>
 #include <any>
 #include <iostream>
+#include <utility>
 
 namespace XQ {
 	extern lib00_utilty_API double PI;
@@ -230,12 +231,21 @@ namespace XQ {
 	};
 	
 	struct lib00_utilty_API BoundBox {
-		double xmin;
-		double ymin;
-		double zmin;
-		double xmax;
-		double ymax;
-		double zmax;
+		double xmin{ 0 };
+		double ymin{ 0 };
+		double zmin{ 0 };
+		double xmax{ 0 };
+		double ymax{ 0 };
+		double zmax{ 0 };
+
+		void merge(const BoundBox& other) {
+			xmin = std::min<double>(xmin, other.xmin);
+			ymin = std::min<double>(ymin, other.ymin);
+			zmin = std::min<double>(zmin, other.zmin);
+			xmax = std::max<double>(xmax, other.xmax);
+			ymax = std::max<double>(ymax, other.ymax);
+			zmax = std::max<double>(zmax, other.zmax);
+		}
 	};
 
 

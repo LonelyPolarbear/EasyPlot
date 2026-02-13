@@ -5,6 +5,22 @@
 #include <dataBase/XDataArray.h>
 #include "XAlgoApi.h"
 namespace XQ::XAlgo {
+	template<typename T>
+	std::vector<T> linspace(T a, T b, int n_points) {
+		// n_points = N + 2，即总点数（含端点）
+		if (n_points <= 1) {
+			if (n_points == 1) return { a };
+			else return {};
+		}
+		std::vector<T> result;
+		result.reserve(n_points);
+		for (int i = 0; i < n_points; ++i) {
+			T t = static_cast<T>(i) / (n_points - 1); // t ∈ [0, 1]
+			result.push_back(a + t * (b - a));
+		}
+		return result;
+	}
+	
 	extern xalgo_API XColor lerp_rgb(const XColor& c1, const XColor &c2, float t);
 
 	struct xalgo_API XGridLayout{

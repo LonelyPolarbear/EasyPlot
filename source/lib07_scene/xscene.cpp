@@ -650,7 +650,7 @@ void XScene::render3D()
 
 
 		for (auto shape : d->shapes) {
-			shape->draw();
+			shape->draw(Eigen::Matrix4f::Identity(),true);
 		}
 
 
@@ -674,7 +674,7 @@ void XScene::render3D()
         shader->setMat4("gridPlaneMatInWorld",mat);
 		auto shape = d->gridShape;
 		shape->setPolygonMode(PolygonMode::face);
-		shape->draw(shader);
+		shape->draw(shader, Eigen::Matrix4f::Identity());
 		shape->setPolygonMode(PolygonMode::face);
 		shader->unUse();
 
@@ -709,7 +709,7 @@ if(isScreenRender)
 
 		shader->use();
 		shape->setPolygonMode(PolygonMode::face);
-		shape->draw();
+		shape->draw(Eigen::Matrix4f::Identity(),true);
 		shader->unUse();
         fbo->getColorAttachment()->release();
 
@@ -1149,7 +1149,7 @@ XQ::BoundBox  XScene::computeBoundBox() {
      constexpr double limitMin = std::numeric_limits<double>::lowest();;
     XQ::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
     for (auto& shape : d->shapes) {
-        auto shapeBoundBox = shape->getBoundBox();
+        auto shapeBoundBox = shape->getBoundBox(Eigen::Matrix4f::Identity());
         boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);
         boundBox.xmax = std::max(boundBox.xmax, shapeBoundBox.xmax);
         boundBox.ymin = std::min(boundBox.ymin, shapeBoundBox.ymin);

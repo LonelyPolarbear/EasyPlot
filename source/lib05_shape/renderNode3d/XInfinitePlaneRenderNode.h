@@ -7,6 +7,7 @@
 /// 无限平面渲染节点
 /// </summary>
 class XInfinitePlaneRenderNode : public XGeometryNode {
+	REGISTER_CLASS_META_DATA(XInfinitePlaneRenderNode, XGeometryNode);
 protected:
 	XInfinitePlaneRenderNode();
 	virtual ~XInfinitePlaneRenderNode();
@@ -15,7 +16,7 @@ protected:
 public:
 	void Init() override;
 	void setFrame(const Eigen::Matrix4f& frame);
-	void draw(const Eigen::Matrix4f& parentMatrix) override;
+	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
 	void draw(std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
 	void createFeedBack();
 	void setRect(std::vector<XQ::Vec3f> points);

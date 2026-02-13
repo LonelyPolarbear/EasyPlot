@@ -869,7 +869,7 @@ void easyPlotWidget::slotFileLoadFinished()
 	d->scene->addShape(shape);
 	doneCurrent();
 
-	auto boundbox = shape->getBoundBox();
+	auto boundbox = shape->getBoundBox(Eigen::Matrix4f::Identity());
 	d->scene->getCamera()->resetCamera((double*)&boundbox);
 }
 

@@ -2,11 +2,83 @@
 
 #include "databaseApi.h"
 #include "XTimeStamp.h"
-#include <memory>
-#include <map>
-#include <functional>
 #include "lib00_utilty/gp/xtypelist.hpp"
 #include "lib00_utilty/gp/XTraits.hpp"
+
+#include <boost/describe.hpp>
+#include <boost/mp11.hpp>
+#include <boost/core/demangle.hpp>
+
+#include <memory>
+#include <map>
+#include <string>
+#include <functional>
+#if 1
+#define REGISTER_CLASS_META_DATA(class_name, ...)  \
+	public:\
+	BOOST_DESCRIBE_CLASS(class_name, (__VA_ARGS__), (), (), ())		\
+	virtual std::vector<std::string> baseClassName() const {	\
+		return XQ_META::get_parent_className<class_name>();		\
+	}	\
+	static std::string className() {					\
+		return XQ_META::clean_type_name(boost::core::demangle(typeid(class_name).name()));\
+	}	\
+	virtual std::string getClassName() const {	\
+		return className();	\
+	}
+
+struct XQ_META {
+	static std::string clean_type_name(const std::string& name) {
+		// 按顺序去掉 C++ 类/结构体/联合体/枚举等关键字
+		constexpr std::string_view prefixes[] = {
+			"class ", "struct ", "union ", "enum "
+		};
+		for (auto p : prefixes) {
+			if (name.substr(0, p.size()) == p)
+				return name.substr(p.size());
+		}
+		return name;   // 无匹配，直接返回原字符串
+	}
+
+	template<typename T>
+	static std::string ClassName(T* pobj) {
+		return clean_type_name(boost::core::demangle(typeid(*pobj).name()));
+	}
+
+	// ------------------------- 辅助函数：将访问修饰符转为字符串 ----------
+	static std::string_view access_modifier_to_string(unsigned mod) {
+		using namespace boost::describe;
+		if (mod & mod_public)    return "public";
+		if (mod & mod_protected) return "protected";
+		if (mod & mod_private)   return "private";
+		return "unknown";
+	}
+
+
+	template <typename T>
+	static std::vector<std::string> get_parent_className() {
+		using namespace boost::describe;
+		using namespace boost::mp11;
+
+		std::vector<std::string> result;
+
+		// 获取所有基类的描述符列表（按任意访问权限）
+		using Bases = describe_bases<T, mod_any_access>;
+
+		// 遍历列表，D 是每个基类的描述符类型
+		mp_for_each<Bases>([&](auto D) {
+			// D::type        - 基类类型
+			// D::modifiers   - 访问权限位掩码
+			// D::basename    - (C++26 提案特性，当前Boost版本可能没有) 这里用 demangle
+
+			access_modifier_to_string(decltype(D)::modifiers);
+			auto name = clean_type_name(boost::core::demangle(typeid(typename decltype(D)::type).name()));
+			result.push_back(name);
+			});
+		return result;
+	}
+};
+#endif
 
 template<typename T>
 using sptr = std::shared_ptr<T>;
@@ -91,6 +163,7 @@ std::shared_ptr<object> makeShareDbObject(Args&& ...args) {
 /// 所有类的基类，仅用来统一设计
 /// </summary>
 class database_API XBaseObject : public std::enable_shared_from_this<XBaseObject> {
+	REGISTER_CLASS_META_DATA(XBaseObject);
 protected:
 	XBaseObject(){}
 	virtual ~XBaseObject(){}
@@ -110,6 +183,7 @@ public:
 /// 数据基类
 /// </summary>
 class database_API XDataBaseObject :public XBaseObject {
+	REGISTER_CLASS_META_DATA(XDataBaseObject,XBaseObject);
 protected:
 	XDataBaseObject();
 	virtual ~XDataBaseObject();

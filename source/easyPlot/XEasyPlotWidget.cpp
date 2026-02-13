@@ -1,33 +1,46 @@
 #include "XEasyPlotWidget.h"
+
+#include "render/XRender.h"
+#include "render/XOpenGLRenderWindow.h"
+#include "render/XRenderCamera.h"
+
+#include "lib02_camera/xcamera.h"
+#include <xalgo/XAlgo.h>
+
+#include "lib05_shape/XGeometryNode.h"
+#include "lib05_shape/renderNode3d/XArrowRenderNode.h"
+#include "lib05_shape/mapper/XPolyDataMapper.h"
+
 #include "lib05_shape/datasource/xchamferCubeSource.h"
 #include "lib05_shape/datasource/xconeSource.h"
 #include "lib05_shape/datasource/xcylinderSource.h"
 #include "lib05_shape/datasource/xregularPrimSource.h"
+#include "lib05_shape/datasource/xTorusSource.h"
 #include "lib05_shape/datasource/xfrustumSource.h"
 #include "lib05_shape/filter/xshapeSourceTransformFilter.h"
 #include "lib05_shape/filter/xshapeSourceCombineFilter.h"
 #include "lib05_shape/filter/xshapeSourceCombineFilter.h"
-#include "render/XRender.h"
-#include "render/XOpenGLRenderWindow.h"
-#include "render/XRenderCamera.h"
-#include "lib05_shape/XGeometryNode.h"
-#include "lib05_shape/renderNode3d/XArrowRenderNode.h"
-#include "lib05_shape/mapper/XPolyDataMapper.h"
-#include "lib02_camera/xcamera.h"
-#include <xalgo/XAlgo.h>
+
+#include <lib05_shape/renderNode3d/XInfinitePlaneRenderNode.h>
+#include <lib05_shape/renderNode3d/XRectRenderNode.h>
+#include <lib05_shape/renderNode3d/XSphereRenderNode.h>
+#include <lib05_shape/renderNode3d/XTransformGizmoRenderNode.h>
+#include <lib05_shape/renderNode3d/XTorusRenderNode.h>
+
+#include <lib04_opengl/XOpenGLBuffer.h>
+
 #include <QMenu>
 #include <QAction>
 #include <QContextMenuEvent>
-#include <lib05_shape/renderNode3d/XInfinitePlaneRenderNode.h>
-#include <lib05_shape/renderNode3d/XRectRenderNode.h>
-#include <lib04_opengl/XOpenGLBuffer.h>
 
 
 XEasyPlotWidget::XEasyPlotWidget(QWidget* parent) :XGLWidget(parent)
 {
 	//test1();
 	//test2();
-	test3();
+	//test3();
+	//test4();
+	test5();
 }
 
 XEasyPlotWidget::~XEasyPlotWidget()
@@ -99,7 +112,7 @@ void XEasyPlotWidget::test1()
 				render->setViewPort(viewport[0], viewport[1], viewport[2], viewport[3]);
 				render->getCamera()->setProjectionType(cmaeraType[y * 2 + x]);
 				auto ss = render->getCamera()->AttrCameraStyle;
-				render->getCamera()->AttrCameraStyle->setValue((uint32_t)cmaeraStyle[y * 2 + x]);
+				render->getCamera()->AttrCameraStyle->setValue(cmaeraStyle[y * 2 + x]);
 				mRenderWindow->addRender(render);
 				renders.push_back(render);
 				render->fitView();
@@ -229,7 +242,7 @@ void XEasyPlotWidget::test2()
 
 	render->addRenderNode3D(coneNode);
 
-	render->getCamera()->AttrCameraStyle->setValue((uint32_t)XRenderCamera::CameraStyle::freely);
+	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
 	#endif
 }
 
@@ -291,7 +304,34 @@ void XEasyPlotWidget::test3()
 		Node->rotateY(90);
 	}
 
-	render->getCamera()->AttrCameraStyle->setValue((uint32_t)XRenderCamera::CameraStyle::freely);
+	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
+}
+
+void XEasyPlotWidget::test4()
+{
+	auto render = makeShareDbObject<XRender>();
+	mRenderWindow->addRender(render);
+	sptr<XTransformGizmoRenderNode> Node = makeShareDbObject<XTransformGizmoRenderNode>();
+	auto n1= Node->getClassName();
+	auto n2= Node->baseClassName();
+	
+	render->addRenderNode3D(Node);
+	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
+}
+
+//‘≤ª∑≤‚ ‘
+void XEasyPlotWidget::test5()
+{
+	auto render = makeShareDbObject<XRender>();
+	mRenderWindow->addRender(render);
+	sptr<XTorusRenderNode> Node = makeShareDbObject<XTorusRenderNode>();
+
+	Node->setColorMode(ColorMode::FaceColor);
+	Node->setSingleColor(XQ::Vec4f(1,0,0,1));
+	Node->setPolygonMode(PolygonMode::face);
+
+	render->addRenderNode3D(Node);
+	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
 }
 
 void XEasyPlotWidget::slotFitView3D()

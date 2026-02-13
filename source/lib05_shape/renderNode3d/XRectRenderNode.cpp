@@ -57,7 +57,7 @@ void XRectRenderNode::setRect(std::vector<XQ::Vec3f> points)
 	m_inputSource->Modified();
 }
 
-void XRectRenderNode::draw(const Eigen::Matrix4f& parentMatrix)
+void XRectRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
-	XGeometryNode::draw(parentMatrix);
+	XGeometryNode::draw(parentMatrix,isNormal);
 }

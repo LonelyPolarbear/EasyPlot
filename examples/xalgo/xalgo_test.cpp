@@ -45,7 +45,16 @@ void test_combineArray() {
 	XQ::XAlgo::combineArray(std::vector<sptr<XIntArray>> {t1, t2},t4);
 	t4->dump();
 }
+
+void test_linespace() {
+	auto out =XQ::XAlgo::linspace<double>(1,10,6);
+	//¥Ú”°
+	std::copy(out.begin(), out.end(), std::ostream_iterator<double>(std::cout, " "));
+	std::cout << std::endl;
+}
+
 int main() {
-	test_combineArray();
+	//test_combineArray();
+	test_linespace();
 	return 1;
 }
