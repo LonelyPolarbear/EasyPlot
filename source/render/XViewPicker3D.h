@@ -2,7 +2,9 @@
 #include "XRenderApi.h"
 #include < dataBase/XDataBaseObject.h>
 #include < dataBase/XVector.h>
-#include "lib04_opengl/XOpenGLFramebufferObject.h"
+#include <lib04_opengl/XOpenGLFramebufferObject.h>
+
+#include "XRenderType.h"
 #include <set>
 
 class XGeometryNode;
@@ -12,10 +14,6 @@ class XRender;
 
 class LIB_XRENDER_API XViewPicker3D :public XDataBaseObject {
 public:
-	struct SelectData {
-		uint32_t objectId{0};
-		uint32_t primitiveId{0};
-	};
 protected:
 	XViewPicker3D();
 	 ~XViewPicker3D();
@@ -25,7 +23,7 @@ bool initGL();
 
 std::shared_ptr< XOpenGLFramebufferObject> getFbo(int index);
 
-SelectData XViewPicker3D::getPointSelection(XQ::Vec2i pos);
+XQ::XSelectData XViewPicker3D::getPointSelection(XQ::Vec2i pos);
 
  bool renderLayer(int layer);
 

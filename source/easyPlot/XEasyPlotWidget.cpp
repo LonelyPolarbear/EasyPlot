@@ -36,11 +36,11 @@
 
 XEasyPlotWidget::XEasyPlotWidget(QWidget* parent) :XGLWidget(parent)
 {
-	//test1();
+	test1();
 	//test2();
 	//test3();
 	//test4();
-	test5();
+	//test5();
 }
 
 XEasyPlotWidget::~XEasyPlotWidget()
@@ -123,6 +123,7 @@ void XEasyPlotWidget::test1()
 		renders[1]->addRenderNode3D(cubeActor);
 		renders[3]->addRenderNode3D(cubeActor);
 
+		#if 1
 		//创建一个视锥
 		{
 			//关联1-3的render
@@ -206,6 +207,7 @@ void XEasyPlotWidget::test1()
 			}
 #endif
 		}
+		#endif
 	}
 }
 

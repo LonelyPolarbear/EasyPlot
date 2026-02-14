@@ -10,9 +10,9 @@ XRenderMultiModeInteractionHandler::XRenderMultiModeInteractionHandler()
 	mCameraHandler = makeShareDbObject<CameraNavigationHandler>();
 	mPickHandler = makeShareDbObject<XRenderPickHandler>();
 	mManipulatorHandler = makeShareDbObject<XManipulatorHandler>();
-	mCurrentMode = (uint32_t)InteractMode::pick | 
+	mCurrentMode =XQ::InteractMode::pick | 
 								/*(uint32_t)InteractMode::manipulator|*/
-								(uint32_t)InteractMode::camera;
+								XQ::InteractMode::camera;
 }
 
 XRenderMultiModeInteractionHandler::~XRenderMultiModeInteractionHandler()
@@ -24,11 +24,11 @@ void XRenderMultiModeInteractionHandler::LeftButtonPressEvent(XQ::Vec2i p, XQ::K
 	if(!isRenderActive())
 		return;
 
-	if(hasMode(InteractMode::camera))
+	if(hasMode(XQ::InteractMode::camera))
 		mCameraHandler->LeftButtonPressEvent(p,k);
-	if(hasMode(InteractMode::pick))
+	if(hasMode(XQ::InteractMode::pick))
 		mPickHandler->LeftButtonPressEvent(p,k);
-	if(hasMode(InteractMode::manipulator))
+	if(hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->LeftButtonPressEvent(p,k);
 }
 
@@ -37,11 +37,11 @@ void XRenderMultiModeInteractionHandler::LeftButtonReleaseEvent(XQ::Vec2i p, XQ:
 	if (!isRenderActive())
 		return;
 
-	if (hasMode(InteractMode::camera))
+	if (hasMode(XQ::InteractMode::camera))
 		mCameraHandler->LeftButtonReleaseEvent(p, k);
-	if (hasMode(InteractMode::pick))
+	if (hasMode(XQ::InteractMode::pick))
 		mPickHandler->LeftButtonReleaseEvent(p, k);
-	if (hasMode(InteractMode::manipulator))
+	if (hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->LeftButtonReleaseEvent(p, k);
 }
 
@@ -50,11 +50,11 @@ void XRenderMultiModeInteractionHandler::MiddleButtonPressEvent(XQ::Vec2i p, XQ:
 	if (!isRenderActive())
 		return;
 
-	if (hasMode(InteractMode::camera))
+	if (hasMode(XQ::InteractMode::camera))
 		mCameraHandler->MiddleButtonPressEvent(p, k);
-	if (hasMode(InteractMode::pick))
+	if (hasMode(XQ::InteractMode::pick))
 		mPickHandler->MiddleButtonPressEvent(p, k);
-	if (hasMode(InteractMode::manipulator))
+	if (hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->MiddleButtonPressEvent(p, k);
 }
 
@@ -63,11 +63,11 @@ void XRenderMultiModeInteractionHandler::MiddleButtonReleaseEvent(XQ::Vec2i p, X
 	if (!isRenderActive())
 		return;
 	
-	if (hasMode(InteractMode::camera))
+	if (hasMode(XQ::InteractMode::camera))
 		mCameraHandler->MiddleButtonReleaseEvent(p, k);
-	if (hasMode(InteractMode::pick))
+	if (hasMode(XQ::InteractMode::pick))
 		mPickHandler->MiddleButtonReleaseEvent(p, k);
-	if (hasMode(InteractMode::manipulator))
+	if (hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->MiddleButtonReleaseEvent(p, k);
 }
 
@@ -109,11 +109,11 @@ void XRenderMultiModeInteractionHandler::FoucsOutEvent()
 
 void XRenderMultiModeInteractionHandler::ResizeEvent(XQ::Vec2i size)
 {
-	if (hasMode(InteractMode::camera))
+	if (hasMode(XQ::InteractMode::camera))
 		mCameraHandler->ResizeEvent(size);
-	if (hasMode(InteractMode::manipulator))
+	if (hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->ResizeEvent(size);
-	if (hasMode(InteractMode::pick))
+	if (hasMode(XQ::InteractMode::pick))
 		mPickHandler->ResizeEvent(size);
 }
 
@@ -142,9 +142,9 @@ void XRenderMultiModeInteractionHandler::MouseWheelForwardEvent(XQ::Vec2i p, XQ:
 	if (!isRenderActive())
 		return;
 	
-	if (hasMode(InteractMode::camera))
+	if (hasMode(XQ::InteractMode::camera))
 		mCameraHandler->MouseWheelForwardEvent(p, k);
-	if (hasMode(InteractMode::manipulator))
+	if (hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->MouseWheelForwardEvent(p, k);
 }
 
@@ -153,9 +153,9 @@ void XRenderMultiModeInteractionHandler::MouseWheelBackwardEvent(XQ::Vec2i p, XQ
 	if (!isRenderActive())
 		return;
 	
-	if (hasMode(InteractMode::camera))
+	if (hasMode(XQ::InteractMode::camera))
 		mCameraHandler->MouseWheelBackwardEvent(p, k);
-	if (hasMode(InteractMode::manipulator))
+	if (hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->MouseWheelBackwardEvent(p, k);
 }
 
@@ -197,7 +197,19 @@ sptr<XManipulatorHandler> XRenderMultiModeInteractionHandler::getManipulatorHand
 	return mManipulatorHandler;
 }
 
-bool XRenderMultiModeInteractionHandler::hasMode(InteractMode mode)
+bool XRenderMultiModeInteractionHandler::hasMode(XQ::InteractMode mode)
 {
-	return (mCurrentMode & (uint32_t)mode) != 0;
+	using T = std::underlying_type_t<XQ::InteractMode>;
+	T v = static_cast<T>(mode);
+	return (v & static_cast<T>(mCurrentMode)) == v;
+}
+
+void XRenderMultiModeInteractionHandler::setMode(XQ::InteractMode mode)
+{
+	mCurrentMode = mode;
+}
+
+XQ::InteractMode XRenderMultiModeInteractionHandler::getMode() const
+{
+	return mCurrentMode;
 }

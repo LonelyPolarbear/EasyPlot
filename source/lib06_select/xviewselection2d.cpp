@@ -88,9 +88,9 @@ std::shared_ptr<XOpenGLFramebufferObject> XViewSelection2D::getFbo(int index)
 	return d->fboPeeling[index];
 }
 
-XViewSelection2D::SelectData XViewSelection2D::getPointSelection(int x, int y, int ViewportWidth, int ViewportHeight,  int layer)
+XViewSelection2D::XSelectData XViewSelection2D::getPointSelection(int x, int y, int ViewportWidth, int ViewportHeight,  int layer)
 {
-	SelectData result;
+	XSelectData result;
 	if (!(x> 0 && x < ViewportWidth && y >0 && y < ViewportHeight)) {
 		return result;
 	}
@@ -124,9 +124,9 @@ XViewSelection2D::SelectData XViewSelection2D::getPointSelection(int x, int y, i
 	return result;
 }
 
-std::vector<XViewSelection2D::SelectData> XViewSelection2D::getAllPointSelection(int posx, int posy, int ViewportWidth, int ViewportHeight)
+std::vector<XViewSelection2D::XSelectData> XViewSelection2D::getAllPointSelection(int posx, int posy, int ViewportWidth, int ViewportHeight)
 {	
-	std::vector<SelectData> results ;
+	std::vector<XSelectData> results ;
 	for (int i = 0; i < d->PeelLayerNum; i++) {
 		if (i <= d->currentPass) {
 			auto select = getPointSelection(posx, posy, ViewportWidth, ViewportHeight, i);
@@ -137,9 +137,9 @@ std::vector<XViewSelection2D::SelectData> XViewSelection2D::getAllPointSelection
 	return results;
 }
 
-std::vector< std::vector<XViewSelection2D::SelectData>> XViewSelection2D::getBoxSelection(int x, int y, int width, int height, int ViewportWidth, int ViewportHeight)
+std::vector< std::vector<XViewSelection2D::XSelectData>> XViewSelection2D::getBoxSelection(int x, int y, int width, int height, int ViewportWidth, int ViewportHeight)
 {	
-	std::vector< std::vector< SelectData>> result;
+	std::vector< std::vector< XSelectData>> result;
 	//先缩小范围
 	//[0-ViewportWidth]
 	//[0-ViewportHeight]
@@ -166,7 +166,7 @@ std::vector< std::vector<XViewSelection2D::SelectData>> XViewSelection2D::getBox
 		}
 		auto fbo = d->fboPeeling[i];
 		//读取当前位置的对象ID
-		std::vector< SelectData> layerSelect;
+		std::vector< XSelectData> layerSelect;
 		auto pbo = fbo->getColorAttachment()->map();
 		if (auto ptrColorTexture = (unsigned int*)pbo->map(XOpenGLBuffer::Access::ReadOnly)) {
 			//采样纹理
@@ -178,7 +178,7 @@ std::vector< std::vector<XViewSelection2D::SelectData>> XViewSelection2D::getBox
 					auto color1 = start + i * 4;
 					auto objectId = color1[0];
 					auto primitiveId = color1[1];
-					SelectData s;
+					XSelectData s;
 					s.objectId = objectId;
 					s.primitiveId = primitiveId;
 					layerSelect.push_back(s);

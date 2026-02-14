@@ -50,12 +50,12 @@ protected:
 
 		void updateViewport();
 
-		std::vector<XViewSelection::SelectData> getPointSelection(int x, int y);
+		std::vector<XViewSelection::XSelectData> getPointSelection(int x, int y);
 
-		std::vector<XViewSelection2D::SelectData> getPointSelection2D(int x, int y);
+		std::vector<XViewSelection2D::XSelectData> getPointSelection2D(int x, int y);
 
-		std::vector<std::vector<XViewSelection::SelectData>> getBoxSelection(int x, int y, int w, int h);
-		std::vector<std::vector<XViewSelection2D::SelectData>> getBoxSelection2D(int x, int y, int w, int h);
+		std::vector<std::vector<XViewSelection::XSelectData>> getBoxSelection(int x, int y, int w, int h);
+		std::vector<std::vector<XViewSelection2D::XSelectData>> getBoxSelection2D(int x, int y, int w, int h);
 
 		void updateUbo2GPU();
 

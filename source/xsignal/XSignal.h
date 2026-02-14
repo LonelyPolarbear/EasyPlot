@@ -1,5 +1,6 @@
 #pragma  once
 
+#include <set>
 #include <memory>
 #include <optional>
 #include <boost/signals2.hpp>
@@ -179,7 +180,6 @@ namespace xsig {
 	//	boost::signals2::mutex	//boost::signals2::dummy_mutex  // 非线程安全，但更快
 	//>;
 
-
 	struct xconnection {
 		xconnection()=default;
 
@@ -204,6 +204,8 @@ namespace xsig {
 			return handle;
 		}
 	};
+
+	using XConnectionContainer = std::set<xconnection>;
 
 	template<typename F>
 	class xsignal;

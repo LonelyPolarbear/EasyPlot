@@ -247,3 +247,19 @@ void XGLWidget::showEvent(QShowEvent* event)
 	}
 	return QWidget::showEvent(event);
 }
+
+void XGLWidget::slotPreDefineEvent(XQ::PreDefineEvent event,void* data)
+{
+	if (mRenderWindow) {
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		eventDispatcher->SigPredefineEvent(event,data);
+	}
+}
+
+void XGLWidget::slotUserEvent(int id,void* data)
+{
+	if (mRenderWindow) {
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		eventDispatcher->SigUserEvent(id, data);
+	}
+}

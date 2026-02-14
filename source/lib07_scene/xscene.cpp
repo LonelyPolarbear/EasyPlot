@@ -425,7 +425,7 @@ void XScene::updateViewport()
 /// <param name="x">屏幕坐标系,原点在左下角</param>
 /// <param name="y">屏幕坐标系,原点在左下角</param>
 /// <returns></returns>
-std::vector<XViewSelection::SelectData> XScene::getPointSelection(int x, int y)
+std::vector<XViewSelection::XSelectData> XScene::getPointSelection(int x, int y)
 {
 	makeCurrent();
     d->createViewSelection3D();
@@ -436,7 +436,7 @@ std::vector<XViewSelection::SelectData> XScene::getPointSelection(int x, int y)
     return selectData;
 }
 
-std::vector<XViewSelection2D::SelectData> XScene::getPointSelection2D(int x, int y)
+std::vector<XViewSelection2D::XSelectData> XScene::getPointSelection2D(int x, int y)
 {
 	makeCurrent();
     d->createViewSelection2D(this->asDerived<XDataBaseObject>(),&XScene::sceneScreenPos2ScenePosMat);
@@ -446,7 +446,7 @@ std::vector<XViewSelection2D::SelectData> XScene::getPointSelection2D(int x, int
 	return selectData;
 }
 
-std::vector<std::vector<XViewSelection::SelectData>> XScene::getBoxSelection(int x, int y, int w, int h)
+std::vector<std::vector<XViewSelection::XSelectData>> XScene::getBoxSelection(int x, int y, int w, int h)
 {
 	makeCurrent();
 	d->createViewSelection3D();
@@ -456,7 +456,7 @@ std::vector<std::vector<XViewSelection::SelectData>> XScene::getBoxSelection(int
    return r;
 }
 
-std::vector<std::vector<XViewSelection2D::SelectData>> XScene::getBoxSelection2D(int x, int y, int w, int h)
+std::vector<std::vector<XViewSelection2D::XSelectData>> XScene::getBoxSelection2D(int x, int y, int w, int h)
 {
 	makeCurrent();
 	d->createViewSelection2D(this->asDerived<XDataBaseObject>(), &XScene::sceneScreenPos2ScenePosMat);

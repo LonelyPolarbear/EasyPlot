@@ -1,5 +1,10 @@
 #pragma once
-
+#include "XRenderApi.h"
+namespace XQ {
+	enum class LIB_XRENDER_API PreDefineEvent {
+		sigEdit,
+	};
+}
 namespace XQ {
 	enum KeyboardModifier {
 		NoModifier = 0x00000000,				//No modifier key is pressed.
@@ -531,5 +536,40 @@ namespace XQ {
 		Key_CameraFocus = 0x01100021,
 
 		Key_unknown = 0x01ffffff
+	};
+
+	enum class InteractMode {
+		none = 0,
+		camera = 1,
+		pick = 1 << 1,
+		manipulator = 1 << 2,
+	};
+
+	constexpr InteractMode operator|(InteractMode a, InteractMode b) {
+		using T = std::underlying_type_t<InteractMode>;
+		return static_cast<InteractMode>(static_cast<T>(a) | static_cast<T>(b));
+	}
+
+	constexpr InteractMode operator&(InteractMode a, InteractMode b) {
+		using T = std::underlying_type_t<InteractMode>;
+		return static_cast<InteractMode>(static_cast<T>(a) & static_cast<T>(b));
+	}
+
+	constexpr InteractMode operator^(InteractMode a, InteractMode b) {
+		using T = std::underlying_type_t<InteractMode>;
+		return static_cast<InteractMode>(static_cast<T>(a) ^ static_cast<T>(b));
+	}
+
+	constexpr InteractMode operator~(InteractMode a) {
+		using T = std::underlying_type_t<InteractMode>;
+		return static_cast<InteractMode>(~static_cast<T>(a));
+	}
+
+	struct LIB_XRENDER_API XSelectData {
+		uint32_t objectId{ 0 };
+		uint32_t primitiveId{ 0 };
+		explicit  operator bool() const {
+			return objectId != 0 && primitiveId != 0;
+		}
 	};
 }

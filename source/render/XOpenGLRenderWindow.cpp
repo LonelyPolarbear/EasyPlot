@@ -1,6 +1,7 @@
 #include "XOpenGLRenderWindow.h"
 #include "lib04_opengl/XOpenGLContext.h"
 #include "lib04_opengl/XOpenGLBuffer.h"
+#include "lib04_opengl/XOpenGLFuntion.h"
 #include "XRenderWindowEventDispatch.h"
 #include "XRender.h"
 
@@ -148,6 +149,8 @@ void XOpenGLRenderWindow::render()
 		return;
 	}
 
+	makeCurrent();
+	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer,0);
 	for (auto r : m_renders) {
 		r->render();
 	}

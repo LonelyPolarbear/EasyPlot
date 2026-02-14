@@ -42,4 +42,7 @@ public:
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigMouseWheelBackward;								//滚轮后退
 
 	XSIGNAL(void(int/*id*/, double/*ms*/)) SigTimeOut;
+
+	XSIGNAL(void(int id, void*/*data*/)) SigUserEvent;																		//用户自定义事件
+	XSIGNAL(void(XQ::PreDefineEvent, void*/*data*/)) SigPredefineEvent;										//预定义业务逻辑事件
  };

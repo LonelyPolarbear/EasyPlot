@@ -18,7 +18,7 @@ public:
 	bool isNearToFar = true;
 	float depthPeelingEpsilon = 0.0001;
 	bool isPeeling = false;
-	int PeelLayerNum = 10;
+	int PeelLayerNum = 2;
 	int currentPass = 1;														//当前的有效层数
 
 	wptr<XRender> render;
@@ -70,9 +70,9 @@ std::shared_ptr<XOpenGLFramebufferObject> XViewPicker3D::getFbo(int index)
 	return mData->fboPeeling[index];
 }
 
-XViewPicker3D::SelectData XViewPicker3D::getPointSelection(XQ::Vec2i pos)
+XQ::XSelectData XViewPicker3D::getPointSelection(XQ::Vec2i pos)
 {
-	return {};
+	//return {};
 	if (!initGL())
 		return {};
 	//需要确保初始化资源成功
@@ -89,14 +89,19 @@ XViewPicker3D::SelectData XViewPicker3D::getPointSelection(XQ::Vec2i pos)
 		return {} ;
 
 	auto render =mData->render.lock();
-	auto point =render->window2render(pos);
+	
 	auto fbo = mData->fboPeeling[0];
 	auto pbo = fbo->getColorAttachment()->map();
-	SelectData result;
 
-	auto ViewportWidth = render->getConvertViewPort()[2];
-	int x = point[0];
-	int y =point[1];
+	XQ::XSelectData result;
+
+	auto windowViewport = render->getConvertViewPort();
+	auto ViewportWidth = fbo->getWidth();
+	
+	//auto point = render->window2render(pos);
+	int x = pos[0];
+	int y = pos[1];
+	auto ddd = pbo->map2cpu();
 	if (auto ptrColorTexture = (unsigned int*)pbo->map(XOpenGLBuffer::Access::ReadOnly)) {
 		//采样纹理
 		auto color1 = ptrColorTexture + (y - 1) * ViewportWidth * 4 + (x - 1) * 4;
@@ -145,6 +150,7 @@ bool XViewPicker3D::renderLayer(int layer)
 	if (auto r = mData->render.lock()) {
 		r->render(false);
 	}
+	fbo->release();
 	return true;
 }
 
@@ -161,11 +167,15 @@ bool XViewPicker3D::slotRenderSizeChanged(XQ::Vec2i size)
 {
 	if(!initGL())
 		return false;
+	makeCurrent();
 	bool result = true;
+	auto render =mData->render.lock();
+	auto v = render->getConvertViewPort();
 	for (auto fbo : mData->fboPeeling)
 	{
-		result &= fbo->updateBufferSize(size[0], size[1]);
+		result &= fbo->updateBufferSize(size[0],size[1]);
 	}
+	doneCurrent();
 	return result;
 }
 

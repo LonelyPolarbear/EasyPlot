@@ -56,12 +56,16 @@ void XInfinitePlaneRenderNode::setFrame(const Eigen::Matrix4f& frame)
 void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix,  bool isNormal)
 {
 	//sigBeginRender(this->asDerived<XRenderNode>());
-
+	if (isNormal == false) {
+		//Ê°È¡²Ù×÷
+		return;
+	}
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
 	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	auto shader = getShaderManger()->getGridShader3D();
+	shader->setObjectID(getID());
 	if (isFeedbackInit == false) {
 		shader->addFeedbackShader({ "fragPos3D" });
 		isFeedbackInit = true;

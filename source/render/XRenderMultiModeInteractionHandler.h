@@ -11,12 +11,6 @@ class CameraNavigationHandler;
 class XRenderPickHandler;
 class XManipulatorHandler;
 
-enum class InteractMode {
-	none =0,
-	camera = 1,
-	pick = 1<<1,
-	manipulator = 1<<2,
-};
 class XRenderMultiModeInteractionHandler : public XRenderInteractionEventHandler {
 protected:
 	XRenderMultiModeInteractionHandler();
@@ -47,12 +41,14 @@ public:
 	sptr<XRenderPickHandler> getPickHandler() const;
 	sptr<XManipulatorHandler> getManipulatorHandler() const;
 
-	bool hasMode(InteractMode mode);
+	bool hasMode(XQ::InteractMode mode);
+	void setMode(XQ::InteractMode mode);
+	XQ::InteractMode getMode() const;
 protected:
 	//包含多个模式交互处理器
 	sptr<CameraNavigationHandler> mCameraHandler;					//相机
 	sptr<XRenderPickHandler> mPickHandler;									//拾取
 	sptr<XManipulatorHandler> mManipulatorHandler;					//操作柄
 
-	uint32_t mCurrentMode;
+	XQ::InteractMode mCurrentMode;
 };

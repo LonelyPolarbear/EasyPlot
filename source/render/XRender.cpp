@@ -3,6 +3,8 @@
 #include "XRenderCamera.h"
 #include "XRenderMultiModeInteractionHandler.h"
 #include "CameraNavigationHandler.h"
+#include "XRenderPickHandler.h"
+#include "XManipulatorHandler.h"
 #include "XRenderWindowEventDispatch.h"
 #include "xsignal/XSignal.h"
 #include "lib04_opengl/XOpenGLBuffer.h"
@@ -46,15 +48,14 @@ struct XRender::Internal {
 public:
 	XRender* host;
 	wptr<XOpenGLRenderWindow> m_renderWindow;
-	sptr<XInteractionEventHandler> m_multiModeEventHandler;
+	sptr<XRenderMultiModeInteractionHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
 
 	std::vector<sptr<XRenderNode>> m_actor3DList;
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
-	XQ::Vec2f m_mousePos;			//鼠标在窗口中的位置，未做变换
-	//bool m_isActive = false;
-	std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;	//无限网格平面
+	XQ::Vec2f m_mousePos;																								//鼠标在窗口中的位置，未做变换
+	//std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;									//无限网格平面
 };
 
 XRender::XRender():mData(new Internal(this))
@@ -70,7 +71,7 @@ void XRender::Init()
 {
 	XRenderPort::Init();
 	XQ_ATTR_ADD_INIT(AttrActive, false);
-	getOrCreateMultiModeEventHandler();
+	auto handler =getOrCreateMultiModeEventHandler();
 }
 
 void XRender::setRenderWindow(sptr<XOpenGLRenderWindow> renderWindow)
@@ -162,11 +163,43 @@ void XRender::setCameraNavigationHandler(sptr<XInteractionEventHandler> interact
 	}
 }
 
+void XRender::setPickHandler(sptr<XInteractionEventHandler> pickEventHandler)
+{
+	auto multiHandler = getOrCreateMultiModeEventHandler()->asDerived<XRenderMultiModeInteractionHandler>();
+	if (multiHandler) {
+		multiHandler->setPickHandler(pickEventHandler->asDerived<XRenderPickHandler>());
+	}
+}
+
+void XRender::setManipulatorHandler(sptr<XInteractionEventHandler> manipulatorHandler)
+{
+	auto multiHandler = getOrCreateMultiModeEventHandler()->asDerived<XRenderMultiModeInteractionHandler>();
+	if (multiHandler) {
+		multiHandler->setManipulatorHandler(manipulatorHandler->asDerived<XManipulatorHandler>());
+	}
+}
+
 sptr<XInteractionEventHandler> XRender::getCameraNavigationHandler()
 {
 	auto multiHandler = getOrCreateMultiModeEventHandler()->asDerived<XRenderMultiModeInteractionHandler>();
 	if (multiHandler) {
 		return multiHandler->getCameraNavigationHandler();
+	}
+}
+
+sptr<XInteractionEventHandler> XRender::getPickHandler()
+{
+	auto multiHandler = getOrCreateMultiModeEventHandler()->asDerived<XRenderMultiModeInteractionHandler>();
+	if (multiHandler) {
+		return multiHandler->getPickHandler();
+	}
+}
+
+sptr<XInteractionEventHandler> XRender::getManipulatorHandler()
+{
+	auto multiHandler = getOrCreateMultiModeEventHandler()->asDerived<XRenderMultiModeInteractionHandler>();
+	if (multiHandler) {
+		return multiHandler->getManipulatorHandler();
 	}
 }
 
@@ -197,6 +230,9 @@ bool XRender::connectToRenderWindowSignals()
 	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelForward, handler,&XInteractionEventHandler::SigMouseWheelForward);
 	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelBackward, handler, &XInteractionEventHandler::SigMouseWheelBackward);
 	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigTimeOut, handler, &XInteractionEventHandler::SigTimeOut);
+
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigUserEvent, this, &XRender::SigUserEvent);
+	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigPredefineEvent, this, &XRender::SigPredefineEvent);
 }
 
 void XRender::addRenderNode3D(sptr<XRenderNode>s)
@@ -261,6 +297,21 @@ void XRender::addInfinitePlane(Eigen::Matrix4f planeFrame)
 {
 }
 
+void XRender::setInteractMode(XQ::InteractMode mode)
+{
+	auto handler =getOrCreateMultiModeEventHandler();
+	if(auto h=handler->asDerived<XRenderMultiModeInteractionHandler>())
+		h->setMode(mode);
+}
+
+XQ::InteractMode XRender::getInteractMode() const
+{
+	if (mData->m_multiModeEventHandler) {
+		return mData->m_multiModeEventHandler->getMode();
+	}
+	return XQ::InteractMode::none;
+}
+
 void XRender::updateViewPort(bool isNormal)
 {
 	XQ::Recti rect = getConvertViewPort();
@@ -278,6 +329,9 @@ void XRender::updateViewPort(bool isNormal)
 	auto g = c.g2();
 	auto b = c.b2();
 	auto a = c.a2();
+
+	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::color_buffer_bit);
+
 	if(isNormal)
 		XOpenGLFuntion::xglClearColor(r, g, b, a);
 	else {
@@ -285,8 +339,7 @@ void XRender::updateViewPort(bool isNormal)
 		// 清除颜色缓冲（使用无符号整数清除函数）
 		glClearBufferuiv(GL_COLOR, 0, clearValue);
 	}
-	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::color_buffer_bit);
-
+	
 	//XOpenGLFuntion::xglViewport(oldViewport);
 	XOpenGLFuntion::xglglScissor(oldScissor);
 	enable->restore();

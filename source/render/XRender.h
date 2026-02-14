@@ -1,9 +1,11 @@
 #pragma once
 #include "XRenderApi.h"
 #include "XRenderPort.h"
+#include "XRenderType.h"
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataAttribute.h>
 #include <lib00_utilty/XUtilty.h>
+#include "xsignal/XSignal.h"
 class XOpenGLRenderWindow;
 class XRenderCamera;
 class XInteractionEventHandler;
@@ -35,7 +37,15 @@ public:
 	// set the camera navigation handler
 	void setCameraNavigationHandler(sptr< XInteractionEventHandler> interactionEventHandler);
 
+	void setPickHandler(sptr< XInteractionEventHandler> pickEventHandler);
+
+	void setManipulatorHandler(sptr< XInteractionEventHandler> manipulatorHandler);
+
 	sptr< XInteractionEventHandler> getCameraNavigationHandler();
+
+	sptr< XInteractionEventHandler> getPickHandler();
+
+	sptr< XInteractionEventHandler> getManipulatorHandler();
 
 	bool connectToRenderWindowSignals();
 
@@ -57,6 +67,13 @@ public:
 	bool isBelongToRender(const XQ::Vec2i& windowPos) const;
 
 	void addInfinitePlane(Eigen::Matrix4f planeFrame);
+
+	void setInteractMode(XQ::InteractMode mode);
+
+	XQ::InteractMode getInteractMode() const;
+public:
+	XSIGNAL(void(int id, void*/*data*/)) SigUserEvent;																		//用户自定义事件
+	XSIGNAL(void(XQ::PreDefineEvent, void*/*data*/)) SigPredefineEvent;										//预定义业务逻辑事件
 protected:
 	//属性
 	csptr<XAttr_Bool> AttrActive;

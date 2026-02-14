@@ -8,7 +8,7 @@ class xcamera;
 class xshader;
 class LIB06_SELECT_API XViewSelection :public XDataBaseObject {
 public:
-	struct SelectData {
+	struct XSelectData {
 		uint32_t objectId{0};
 		uint32_t primitiveId{0};
 	};
@@ -24,11 +24,11 @@ bool updateBufferSize(int width, int height);
 
 std::shared_ptr< XOpenGLFramebufferObject> getFbo(int index);
 
-SelectData getPointSelection(int posx, int posy, int ViewportWidth, int ViewportHeight, int layer = 0);
+XSelectData getPointSelection(int posx, int posy, int ViewportWidth, int ViewportHeight, int layer = 0);
 
-std::vector<SelectData> getAllPointSelection(int posx, int posy, int ViewportWidth, int ViewportHeight);
+std::vector<XSelectData> getAllPointSelection(int posx, int posy, int ViewportWidth, int ViewportHeight);
 
-std::vector< std::vector<XViewSelection::SelectData>> getBoxSelection(int posx, int posy,int width, int height, int ViewportWidth, int ViewportHeight);
+std::vector< std::vector<XViewSelection::XSelectData>> getBoxSelection(int posx, int posy,int width, int height, int ViewportWidth, int ViewportHeight);
 
 /// <summary>
 /// 更新拾取，必须在主线程调用

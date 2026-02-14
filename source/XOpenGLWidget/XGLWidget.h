@@ -9,6 +9,7 @@
 #include <QWidget>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
+#include "render/XRenderType.h"
 
 class QOpenGLContext;
 class QWindow;
@@ -59,6 +60,10 @@ protected:
 	void wheelEvent(QWheelEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void showEvent(QShowEvent* event) override;
+
+public slots:
+	void slotPreDefineEvent(XQ::PreDefineEvent even,void *data);
+	void slotUserEvent(int id, void* data);
 protected:
 	bool m_isInit = false;
 	int mWidth =0;
