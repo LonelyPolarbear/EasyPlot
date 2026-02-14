@@ -1,191 +1,123 @@
+# Easyplot
 
+## 简介
 
-# EasyPlot
+这是一个功能完善、模块化设计的 3D/2D 渲染框架，采用分层架构，从底层基础工具到高层应用逐步构建。框架集成了 OpenGL 资源管理、几何数据处理、相机控制、交互事件处理、拾取、字体渲染、图像加载等功能，并提供了 Qt 集成部件，便于快速开发科学可视化、CAD 或游戏工具。
 
-基于 Qt 和 OpenGL 的图形渲染框架，支持 2D/3D 图形绘制、交互操作及多种可视化效果。
+## 主要特性
 
-## 项目简介
+- **分层模块化**：各模块职责清晰，依赖关系明确，可独立替换或升级。
+- **数据驱动**：基于时间戳的增量更新机制，避免不必要的计算和数据上传。
+- **可观察对象**：统一的属性系统（`XDataAttribute`）和对象树（`XDataObject`），支持属性变化信号。
+- **灵活相机**：支持透视/正交投影、轨道球/直立旋转两种交互风格，并提供丰富的坐标系转换函数。
+- **OpenGL 资源 RAII**：Buffer、Texture、FBO、VAO 等均封装为 RAII 对象，自动管理生命周期，支持状态追踪。
+- **几何管线**：数据源（`XShapeSource`）- 过滤器（变换/合并）- 映射器（`XPolyDataMapper`）- 渲染节点（`XGeometryNode`）的完整管线，支持程序化几何生成。
+- **2D/3D 节点体系**：统一的场景图（父子关系），支持变换、可见性、渲染属性等。
+- **交互事件处理**：多模式事件处理器（相机漫游、拾取、操纵器），支持信号槽连接。
+- **拾取支持**：基于深度剥离的像素级精确拾取，返回对象 ID 和图元 ID。
+- **图像加载**：基于 stb_image 的简单图像加载工具，支持 2D 纹理和立方体贴图。
+- **字体处理**：基于 FreeType 的离线工具，生成普通/SDF 图集，提供字形度量信息。
+- **算法工具**：提供常用数学算法（线性插值、布局计算、几何相交、数组合并等）。
+- **Qt 集成**：`XGLWidget` 作为 Qt 部件，轻松嵌入 Qt 应用程序。
+- **示例应用**：`EasyPlot` 部件展示多视口、实时更新、视锥体可视化等核心能力。
 
-EasyPlot 是一个功能强大的图形渲染框架，基于 Qt 和 OpenGL 技术构建。该项目提供了丰富的图形绘制功能和可视化组件，支持创建复杂的 2D/3D 场景，具备良好的交互性和可扩展性。无论是科学数据可视化、工程制图还是游戏开发，EasyPlot 都能提供灵活的解决方案。
+## 模块列表
 
-## 核心功能
+| 模块 | 描述 |
+|------|------|
+| `lib00_utilty` | 基础工具库：数学工具、并行算法、typelist、工厂模板、类型萃取等 |
+| `xsignal` | 信号槽库，基于 Boost.Signals2，支持智能指针 |
+| `xalgo` | 算法工具：线性插值、布局计算、线段与平面交点、视锥与 XOZ 平面相交、循环索引、数组合并等 |
+| `dataBase` | 数据基础：对象模型、属性系统、多维数组、时间戳、数学向量 |
+| `lib02_camera` | 相机模块：`XBaseCamera` 抽象，`XTrackBallCamera` 实现 |
+| `lib03_stbImage` | 图像加载：基于 stb_image 加载 2D 纹理和立方体贴图，返回 OpenGL 纹理 ID |
+| `lib04_opengl` | OpenGL 资源封装：Buffer、Texture、FBO、VAO、Context |
+| `lib05_shape` | 几何数据与渲染节点：数据源、过滤器、`XGeometryNode`、`XGraphicsItem` |
+| `lib08_freetype` | 字体处理：生成图集，提供字形信息 |
+| `render` | 渲染驱动：窗口、视口、事件分发、拾取 |
+| `XOpenGLWidget` | Qt 集成部件 |
+| `easyPlot` | 示例应用部件，演示框架功能 |
 
-### 图形渲染
-- **2D/3D 图形渲染**：支持二维和三维图形的混合渲染，满足各种复杂场景需求
-- **几何图形绘制**：内置多种基础几何体，包括立方体、圆柱体、圆锥体、球体等
-- **自定义形状**：支持用户自定义顶点数据和纹理，创建独特的图形效果
+## 构建要求
 
-### 数据可视化
-- **折线图**：支持动态数据更新和交互式缩放平移
-- **柱状图**：可配置颜色、间距和动画效果
-- **散点图**：支持大数据量的高效渲染
-- **图表组件**：提供坐标轴、图例、网格线等辅助组件
-
-### 文本与字体
-- **FreeType 字体渲染**：高质量的矢量字体渲染支持
-- **SDF 距离场字体**：支持远处清晰显示的 SDF 技术
-- **中文字体支持**：完善的 Unicode 和中文显示能力
-
-### 图形效果
-- **光照系统**：支持环境光、平行光、点光源等多种光照模型
-- **材质系统**：支持 Phong、PBR 等多种材质效果
-- **着色器编程**：灵活的 GLSL 着色器管理，支持自定义 Shader
-- **计算着色器**：支持 GPU 并行计算加速
-
-### 交互功能
-- **相机控制**：轨道球相机操作，支持旋转、缩放、平移
-- **图形拾选**：鼠标点击精确选择图形对象
-- **UI 组件**：复选框、滑块、按钮等交互控件
-
-## 项目结构
-
-```
-EasyPlot/
-├── 3rdParty/                    # 第三方依赖库
-│   ├── Eigen3/                  # 数学库（矩阵、向量计算）
-│   ├── assimp/                  # 模型加载库（支持多种 3D 格式）
-│   ├── freetype/                # 字体渲染库
-│   ├── glm/                     # OpenGL 数学库
-│   └── stb_image/               # 图像加载库
-├── source/                      # 源代码目录
-│   ├── dataBase/               # 数据基础类和结构
-│   ├── easyPlot/               # 主要可视化组件
-│   ├── lib00_utilty/           # 工具类和辅助函数
-│   ├── lib01_shader/           # 着色器管理系统
-│   ├── lib02_camera/           # 相机控制模块
-│   ├── lib03_stbImage/         # 图像加载封装
-│   ├── lib04_opengl/           # OpenGL 底层封装
-│   └── lib05_shape/            # 图形对象定义
-└── CMakeLists.txt              # CMake 构建配置
-```
-
-## 环境要求
-
-- **Qt5/Qt6**：版本 5.15 或更高
-- **CMake**：版本 3.16 或更高
-- **C++ 编译器**：支持 C++17 的编译器（GCC 9+、MSVC 2019+、Clang 10+）
-- **OpenGL**：支持 OpenGL 3.3 及以上版本
-- **依赖库**：Eigen3、GLM、Assimp、FreeType、GLEW、stb_image
+- **编译器**：支持 C++17 的编译器（如 MSVC 2019+、GCC 9+、Clang 10+）
+- **依赖库**：
+  - Eigen3（数学库）
+  - Boost（仅 Signals2）
+  - GLEW
+  - FreeType（可选，用于字体处理）
+  - stb_image（已包含在 3rdParty 中）
+  - Qt5（Core、Widgets、Concurrent，用于集成层和示例）
+- **构建系统**：CMake 3.12+
 
 ## 快速开始
 
-### 编译项目
-
+### 1. 克隆项目并初始化子模块（如果有）
 ```bash
-# 创建构建目录
-mkdir build && cd build
+git clone <repository-url>
+cd <project-root>
+```
+### 2.配置依赖
+确保已安装上述依赖，并设置好环境变量（如 `Qt5_DIR`、`Boost_ROOT`、`EIGEN3_INCLUDE_DIR` 等）。
 
-# 配置 CMake
+### 3. 使用 CMake 构建
+```bash
+mkdir build
+cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
-
-# 编译项目
 cmake --build . --config Release
 ```
+### 4. 运行示例
 
-### 基础使用示例
+构建后，在 `output/bin` 目录下生成动态库和可执行文件（若存在示例应用程序）。可运行 `easyPlot` 的测试程序查看效果。
 
-```cpp
-#include "easyPlotWidget.h"
-#include <QApplication>
+### 5.创建渲染窗口并添加一个立方体
 
-int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
-    
-    // 创建主窗口
-    easyPlotWidget plotWidget;
-    plotWidget.show();
-    
-    // 添加 3D 立方体
-    plotWidget.slotCreateCube();
-    
-    // 添加 2D 折线图
-    plotWidget.slotAddLine2D(XGL::Line);
-    
-    return app.exec();
-}
+```c++
+#include <XOpenGLWidget/XGLWidget.h>
+#include <render/XRender.h>
+#include <lib05_shape/XGeometryNode.h>
+#include <lib05_shape/datasource/xchamferCubeSource.h>
+// 创建 Qt 部件
+XGLWidget* widget = new XGLWidget(parent);
+auto renderWindow = widget->getRenderWindow();
+// 创建渲染器（视口）
+auto render = makeShareDbObject<XRender>();
+renderWindow->addRender(render);
+// 创建立方体数据源
+auto cubeSource = makeShareDbObject<xchamferCubeSource>();
+cubeSource->Modified();
+// 创建几何节点
+auto cubeNode = makeShareDbObject<XGeometryNode>();
+cubeNode->setInput(cubeSource);
+cubeNode->setColorMode(ColorMode::FaceColor);
+cubeNode->scale(100, 100, 100);
+// 添加到渲染器
+render->addRenderNode3D(cubeNode);
+// 调整相机视角
+render->fitView();
+```
+### 5.响应鼠标事件
+```c++
+// 在自定义部件中连接信号
+connect(renderWindow->getEventDispatcher(), &XRenderWindowEventDispatch::SigMouseMove,
+        [](XQ::Vec2i pos, XQ::KeyboardModifier mod) {
+            // 处理鼠标移动
+        });
 ```
 
-## 示例程序
+### 6.加载纹理
 
-项目包含多个示例程序，展示不同功能：
+```c++
+unsigned int texID = stbImage::loadTexture2D("path/to/image.png");
+```
 
-| 示例 | 功能说明 |
-|------|---------|
-| `01triangle` | 基础三角形渲染入门 |
-| `02cube` | 简单立方体绘制 |
-| `05cube/06cube` | 几何着色器高级效果 |
-| `easyPlot` | 综合可视化示例 |
-| `sdf` | SDF 距离场字体渲染 |
-| `simsun_ttc` | 中文字体渲染示例 |
-
-## API 概览
-
-### 图形创建
-- `slotCreateCube()` - 创建立方体
-- `slotCreateCylinder()` - 创建圆柱体
-- `slotCreateCone()` - 创建圆锥体
-- `slotCreateSphere()` - 创建球体
-
-### 图表操作
-- `slotAddLine2D()` - 添加折线图
-- `slotAddBarChart()` - 添加柱状图
-- `slotSetData()` - 更新图表数据
-- `slotClear()` - 清空所有图形
-
-### 相机控制
-- `camera.setDistance()` - 设置观察距离
-- `camera.setRotation()` - 设置旋转角度
-- `camera.lookAt()` - 设置观察点
-
-## 技术特点
-
-### 高性能渲染
-- **多级缓冲**：支持多级帧缓冲和缓存机制
-- **实例化渲染**：高效渲染大量相同几何体
-- **LOD 支持**：根据距离动态调整细节层次
-
-### 灵活扩展
-- **模块化设计**：各模块独立，可按需使用
-- **插件机制**：支持运行时加载扩展功能
-- **事件系统**：完善的事件处理和分发机制
-
-### 跨平台支持
-- **Windows**：完整的 Visual Studio 支持
-- **Linux**：GCC/Clang 编译器支持
-- **macOS**：Metal 和 OpenGL 双后端支持
-
-## 许可证
-
-本项目采用开源许可证，具体信息请查看项目根目录下的 LICENSE 文件。
-
+### 7.生成字体图集（离线工具）
+```c++
+xfreetype* ft = xfreetype::Instance();
+ft->generateFontSdf("output_font_dir", false, false);  // 生成 SDF 图集
+```
 ## 贡献指南
 
-欢迎社区贡献代码和文档：
+欢迎提交 issue 和 pull request。请确保代码风格一致，并添加必要的单元测试。
 
-1. Fork 本项目
-2. 创建特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交更改 (`git commit -m 'Add amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 创建 Pull Request
-
-## 致谢
-
-感谢以下开源项目为本项目提供的支持：
-
-- [Qt](https://www.qt.io/) - 跨平台 GUI 框架
-- [OpenGL](https://www.opengl.org/) - 图形渲染 API
-- [Eigen](https://eigen.tuxfamily.org/) - C++ 线性代数库
-- [GLM](https://glm.g-truc.net/) - OpenGL 数学库
-- [Assimp](https://github.com/assimp/assimp) - 模型加载库
-- [FreeType](https://www.freetype.org/) - 字体渲染库
-- [GLEW](http://glew.sourceforge.net/) - OpenGL 扩展库
-- [stb](https://github.com/nothings/stb) - 单文件图像库
-
-## 联系方式
-
-- 项目主页：[Gitee - EasyPlot](https://gitee.com/LonelyPolarbear/EasyPlot)
-- 问题反馈：请在项目页面提交 Issue
-
----
-
-*Happy Plotting! 🎨*
