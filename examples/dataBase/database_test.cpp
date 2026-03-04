@@ -1,11 +1,13 @@
 #include <iostream>
 #include <dataBase/XVector.h>
 #include <dataBase/XDataObject.h>
+#include <dataBase/XDataList.h>
 #include <dataBase/XDataArray.h>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataAttribute.h>
 #include <numeric>
+#include <highfive/H5File.hpp>
 
 void testXVector() {
 	XQ::print("Ò»Î¬Êý×é");
@@ -68,8 +70,16 @@ void testXDataObject01() {
 
 	child1->endBatch();
 
-	child1->removeData(child1_1);
+	//child1->removeData(child1_1);
 
+	auto listNode =makeShareDbObject<XDataListT<XDataObject>>();
+	listNode->push_back(makeShareDbObject<XDataObject>());
+	listNode->push_back(makeShareDbObject<XDataObject>());
+
+	root->addData(listNode);
+
+	HighFive::File file("test.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+	root->serialize(file.createGroup(root->getName()));
 }
 
 void testXDataObject02(){
@@ -80,7 +90,7 @@ void testXDataObject02(){
 }
 
 int main() {
-	//testXDataObject01();
-	testXDataObject02();
+	testXDataObject01();
+	//testXDataObject02();
 	return 1;
 }

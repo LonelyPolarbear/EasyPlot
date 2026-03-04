@@ -2,6 +2,7 @@
 #include "XDataObject.h"
 
 #include <atomic>
+#include <highfive/H5File.hpp>
 static std::atomic< uint64_t>  object_id_counter(0);
 
 XDataAttribute::XDataAttribute():mUid(object_id_counter++),mName(std::to_string(mUid))
@@ -59,6 +60,12 @@ void XDataAttribute::setName(const std::string& name)
 	mName = makeUnique(existingNames,name);
 }
 
+void XDataAttribute::serialize(HighFive::Group& group)
+{
+	//group.createAttribute("className", getClassName());
+	group.createAttribute(getName(),"null");
+}
+
 template class database_API XDataAttributeT<bool>;
 template class database_API XDataAttributeT<int>;
 template class database_API XDataAttributeT<unsigned int>;
@@ -88,3 +95,9 @@ template class database_API XDataAttributeT<XQ::Vec4u8>;
 template class database_API XDataAttributeT<XQ::Vec4i8>;
 
 template class database_API XDataAttributeT<XQ::XColor>;
+
+void attrWrite(HighFive::Group& group, const std::string& name, XQ::XColor& value)
+{
+	std::vector<int> data{value.r(), value.g(), value.b(), value.a()};
+	group.createAttribute(name,data);
+}

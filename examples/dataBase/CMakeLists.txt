@@ -26,9 +26,11 @@ add_dependencies(${proName} ${ALL_LIB_TARGETS})
 
 SET(LIB_NAMES 	
 	#${MAPPED_LIBS}
+	PRIVATE
 	${libName}${DLL_DEBUG_POSTFIX}
 	XUtilty${DLL_DEBUG_POSTFIX}
-	PRIVATE MyLib::HeaderOnly
+	 MyLib::HeaderOnly
+	 MyLib::HDF5
 )
 
 SET(LIB_INCLUDE_DIRECTORY 	

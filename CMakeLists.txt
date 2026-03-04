@@ -15,6 +15,30 @@ add_library(mylib_header_only INTERFACE)
 target_include_directories(mylib_header_only INTERFACE ${MYLIB_INCLUDE_DIR})
 add_library(MyLib::HeaderOnly ALIAS mylib_header_only)
 
+
+#--------------------------------------------------------------------------------------------------------------
+# 创建一个hdf5的 INTERFACE 库
+#--------------------------------------------------------------------------------------------------------------
+set(hdf5_DIR ${CMAKE_SOURCE_DIR}/3rdParty/hdf5/cmake)
+# 查找 HDF5（使用 CONFIG 模式）
+find_package(hdf5 REQUIRED CONFIG COMPONENTS C CXX HL HL_CXX)
+#get_property(hdf5_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY IMPORTED_TARGETS)
+#message(STATUS "HDF5 imported targets: ${hdf5_targets}")
+add_library(MyHDF5Deps INTERFACE)
+target_link_libraries(MyHDF5Deps INTERFACE
+    hdf5_hl_cpp-shared   # 高级 C++ 库
+    hdf5_cpp-shared       # C++ 库
+    hdf5_hl-shared        # 高级 C 库
+    hdf5-shared           # 核心 C 库
+)
+
+# 添加 HighFive 头文件路径（如果 HighFive 是 header-only 且未使用 CMake 目标）
+target_include_directories(MyHDF5Deps INTERFACE
+    ${CMAKE_SOURCE_DIR}/3rdParty/highFive/include
+)
+
+add_library(MyLib::HDF5 ALIAS MyHDF5Deps)
+
 #--------------------------------------------------------------------------------------------------------------
 # 使用全局属性收集所有lib以便示例项目正确依赖
 #--------------------------------------------------------------------------------------------------------------
@@ -46,6 +70,7 @@ add_subdirectory(source/xstorage)
 #--------------------------------------------------------------------------------------------------------------
 # 依赖关系
 #--------------------------------------------------------------------------------------------------------------
+add_dependencies(dataBase  xstorage)
 add_dependencies(xalgo  dataBase)
 add_dependencies(lib01_shader  dataBase)
 add_dependencies(lib00_utilty  dataBase)

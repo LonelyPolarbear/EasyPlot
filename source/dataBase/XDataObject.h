@@ -5,7 +5,9 @@
 #include "XDataAttribute.h"
 #include<vector>
 #include "XDataPath.h"
-
+namespace HighFive {
+	class Group;
+}
 class database_API XDataObject : public XDataBaseObject {
 	REGISTER_CLASS_META_DATA(XDataObject, XDataBaseObject);
 protected:
@@ -20,6 +22,9 @@ public:
 	bool getBubble() const;
 	void setName(const std::string& name);
 	std::string getName() const;
+	//序列化
+	virtual void serialize(HighFive::Group& group);
+	virtual void serializeData(HighFive::Group& group);
 protected:
 	template<typename T>
 	friend class XDataListT;
@@ -46,6 +51,9 @@ public:
 	bool isInBatch() const;
 	virtual int childCount() const;
 	virtual sptr<XDataObject> childAt(int index) const;
+
+	virtual int attrCount() const;
+	virtual sptr<XDataAttribute> attrAt(int index) const;
 protected:
 	void setBatchLevel(int level);
 	//测试接口，用于信号发射时打印信息，因此封装为接口

@@ -5,6 +5,7 @@
 namespace XQ {
 	class database_API XDataPath {
 	public:
+		XDataPath();
 		std::string path() const {
 			std::string path = "/";
 

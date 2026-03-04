@@ -23,23 +23,26 @@ group_source_files_by_directory(${ALL_SOURCES})
 list(APPEND LIB_INCLUDE_DIRECTORY 
 	${CMAKE_SOURCE_DIR}/source 	
 	${CMAKE_SOURCE_DIR}/3rdParty/Eigen3	
-	${CMAKE_SOURCE_DIR}/3rdParty/hdf5/include
-	${CMAKE_SOURCE_DIR}/3rdParty/highFive/include
+	#${CMAKE_SOURCE_DIR}/3rdParty/hdf5/include
+	#${CMAKE_SOURCE_DIR}/3rdParty/highFive/include
 )
-set(hdf5_DIR ${CMAKE_SOURCE_DIR}/3rdParty/hdf5/cmake)
+#set(hdf5_DIR ${CMAKE_SOURCE_DIR}/3rdParty/hdf5/cmake)
 #-------------------------------------------------------
 #设置依赖的动态库名称
 #-------------------------------------------------------
-find_package(hdf5 REQUIRED CONFIG COMPONENTS C CXX HL HL_CXX)
-get_property(hdf5_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY IMPORTED_TARGETS)
-message(STATUS "Imported targets: ${hdf5_targets}")
-list(APPEND LIB_NAMES 	
+
+#find_package(hdf5 REQUIRED CONFIG COMPONENTS C CXX HL HL_CXX)
+#get_property(hdf5_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY IMPORTED_TARGETS)
+#message(STATUS "Imported targets: ${hdf5_targets}")
+
+list(APPEND LIB_NAMES 
+					MyLib::HDF5
 					dataBase${DLL_DEBUG_POSTFIX}
 					XUtilty${DLL_DEBUG_POSTFIX}
-					hdf5_hl_cpp-shared
-					hdf5_cpp-shared
-					hdf5_hl-shared
-					hdf5-shared
+					#hdf5_hl_cpp-shared
+					#hdf5_cpp-shared
+					#hdf5_hl-shared
+					#hdf5-shared
 )
 
 
@@ -47,7 +50,7 @@ list(APPEND LIB_NAMES
 list(APPEND LIB_DIRECTORIES 
 	${CMAKE_SOURCE_DIR}/output/bin
 	${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
-	${CMAKE_SOURCE_DIR}/3rdParty/hdf5/lib
+	#${CMAKE_SOURCE_DIR}/3rdParty/hdf5/lib
 )
 
 

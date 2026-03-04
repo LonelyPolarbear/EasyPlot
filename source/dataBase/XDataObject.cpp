@@ -2,6 +2,7 @@
  
 #include <atomic>
 #include<string>
+#include <highfive/H5File.hpp>
 #include "lib00_utilty/XUtilty.h"
 static std::atomic< uint64_t>  object_id_counter(0);
 
@@ -108,6 +109,34 @@ std::string XDataObject::getName() const
 	return AttrName->getValue();
 }
 
+void XDataObject::serialize(HighFive::Group& group/*当前组*/)
+{
+	auto attrNum = attrCount();
+	group.createAttribute("className",getClassName());
+	for (int i = 0; i < attrNum; i++) {
+		auto attr = attrAt(i);
+		//写入属性
+		//auto attrGroup =group.createGroup(attr->getName());
+		attr->serialize(group);
+	}
+
+	auto dataGroup = group.createGroup("__data__");
+	serializeData(dataGroup);
+
+	auto childNum = childCount();
+	for (int i = 0; i<childNum; i++) {
+		auto child = childAt(i);
+		auto subgroup =group.createGroup(child->getName());
+		child->serialize(subgroup);
+	}
+	group.getFile().flush();
+}
+
+void XDataObject::serializeData(HighFive::Group& Datagroup)
+{
+	Datagroup.createDataSet("mUid", mUid);
+}
+
 bool XDataObject::addAttribute(sptr<XDataAttribute> attr)
 {
 	if (hasAttribute(attr)) {
@@ -183,6 +212,16 @@ int XDataObject::childCount() const
 sptr<XDataObject> XDataObject::childAt(int index) const
 {
 	return mChilds[index];
+}
+
+int XDataObject::attrCount() const
+{
+	return mAttributes.size();
+}
+
+sptr<XDataAttribute> XDataObject::attrAt(int index) const
+{
+	return mAttributes[index];
 }
 
 void XDataObject::setBatchLevel(int level)

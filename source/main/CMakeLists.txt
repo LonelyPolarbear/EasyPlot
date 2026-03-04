@@ -70,6 +70,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #-------------------------------------------------------
 SET(LIB_NAMES PRIVATE
 			MyLib::HeaderOnly
+			MyLib::HDF5
 				Qt5::Widgets
 				Qt5::Core
 				Qt5::Concurrent

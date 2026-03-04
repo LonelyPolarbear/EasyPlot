@@ -13,4 +13,4 @@ SET(DLL_DEBUG_POSTFIX)
 endif()
 
 #
-list(APPEND LIB_NAMES MyLib::HeaderOnly)
+list(APPEND LIB_NAMES MyLib::HeaderOnly MyLib::HDF5) 

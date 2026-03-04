@@ -304,3 +304,20 @@ namespace XQ::math {
 
 	extern std::vector<XQ::Vec2f> database_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2);
 }
+
+namespace XTraits {
+	template<typename T, typename = void>
+	struct is_xq_vector_impl : std::false_type {};
+
+	// 部分特化：匹配任何 XQ::Vector<N, T>（忽略 cv 和引用）
+	template<unsigned int N, typename T>
+	struct is_xq_vector_impl<XQ::Vector<N, T>> : std::true_type {};
+
+	// 辅助 trait：先移除 cv 和引用，再检查
+	template<typename T>
+	using is_xq_vector = is_xq_vector_impl<std::remove_cv_t<std::remove_reference_t<T>>>;
+
+	// C++14 起可用的变量模板
+	template<typename T>
+	inline constexpr bool is_xq_vector_v = is_xq_vector<T>::value;
+}

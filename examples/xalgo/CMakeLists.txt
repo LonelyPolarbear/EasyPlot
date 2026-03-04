@@ -27,6 +27,7 @@ add_dependencies(${proName} ${ALL_LIB_TARGETS})
 SET(LIB_NAMES 	
 	#${MAPPED_LIBS}
 	PRIVATE MyLib::HeaderOnly
+	MyLib::HDF5
 	${libName}${DLL_DEBUG_POSTFIX}
 	XUtilty${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}

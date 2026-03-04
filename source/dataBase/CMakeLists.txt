@@ -27,9 +27,12 @@ list(APPEND LIB_INCLUDE_DIRECTORY
 #-------------------------------------------------------
 #设置依赖的动态库名称
 #-------------------------------------------------------
-#list(APPEND LIB_NAMES MyLib::HeaderOnly)
+list(APPEND LIB_NAMES 
+	xstorage${DLL_DEBUG_POSTFIX}
+	MyLib::HDF5
+)
 
-#list(append LIB_DIRECTORIES #${CMAKE_SOURCE_DIR}/3rdParty/glew/lib)
+list(APPEND LIB_DIRECTORIES ${CMAKE_SOURCE_DIR}/output/bin)
 														
 #生成动态库
 add_library(${proName}  SHARED)

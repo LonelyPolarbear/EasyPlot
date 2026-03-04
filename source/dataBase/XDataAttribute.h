@@ -5,6 +5,8 @@
 #include "XVector.h"
 #include "XClolor.h"
 #include "lib00_utilty/gp/XTraits.hpp"
+#include <highfive/H5File.hpp>
+
 class XDataObject;
 class database_API XDataAttribute : public XDataBaseObject {
 	REGISTER_CLASS_META_DATA(XDataAttribute, XDataBaseObject);
@@ -32,12 +34,30 @@ public:
 	bool isVisible() const {
 		return mVisible;
 	}
+
+	virtual void serialize(HighFive::Group& group);
 protected:
 	wptr<XDataObject> mParent;
 	uint64_t mUid;
 	bool mVisible = true;
 	std::string mName;
 };
+
+template<typename T,typename = std::enable_if_t<!XTraits::is_xq_vector_v<T>>>
+void attrWrite(HighFive::Group& group,  const std::string& name,T& value) {
+	group.createAttribute(name, value);
+}
+
+extern void attrWrite(HighFive::Group& group, const std::string& name, XQ::XColor& value);
+
+template<unsigned N, typename T>
+void attrWrite(HighFive::Group& group,const std::string& name, XQ::Vector<N,T> & value) {
+	std::vector<T> vec;
+	for (int i = 0; i < N; i++) {
+		vec.push_back(value[i]);
+	}
+	group.createAttribute(name,vec);
+}
 
 template<typename T>
 class XDataAttributeT : public XDataAttribute {
@@ -61,6 +81,10 @@ public:
 	const T& getValue() const {
 		return value;
 	}
+
+	void serialize(HighFive::Group& group) override {
+		attrWrite(group, getName(), value);
+	}
 protected:
 	T value{};
 };
@@ -82,6 +106,10 @@ public:
 	}
 	unsigned int getIntValue() const {
 		return value;
+	}
+
+	void serialize(HighFive::Group& group) override {
+		attrWrite(group, getName(), value);
 	}
 protected:
 	unsigned int value{};
