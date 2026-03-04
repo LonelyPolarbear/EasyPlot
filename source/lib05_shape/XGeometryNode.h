@@ -83,7 +83,7 @@ public:
 
 	void Init() override;
 public:
-	sptr<XRenderNode3DAttribute> Attribute;
+	csptr<XRenderNode3DAttribute> Attribute;
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;

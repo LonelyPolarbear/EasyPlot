@@ -68,7 +68,8 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #-------------------------------------------------------
 #设置依赖的动态库名称
 #-------------------------------------------------------
-SET(LIB_NAMES 
+SET(LIB_NAMES PRIVATE
+			MyLib::HeaderOnly
 				Qt5::Widgets
 				Qt5::Core
 				Qt5::Concurrent
@@ -76,12 +77,7 @@ SET(LIB_NAMES
 				opengl32
 				XUtilty${DLL_DEBUG_POSTFIX}
 				xshader${DLL_DEBUG_POSTFIX}
-				#xtexture${DLL_DEBUG_POSTFIX}
 				XOpenGLWidget${DLL_DEBUG_POSTFIX}
-				#OpenGLWidget1${DLL_DEBUG_POSTFIX}
-				#OpenGLWidget2${DLL_DEBUG_POSTFIX}
-				#OpenGLWidgetCube${DLL_DEBUG_POSTFIX}
-				#MultiPolygonModeCube${DLL_DEBUG_POSTFIX}
 				xeasyplot${DLL_DEBUG_POSTFIX}
 				xpanel${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}

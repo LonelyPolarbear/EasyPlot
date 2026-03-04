@@ -7,6 +7,7 @@
 #include "lib00_utilty/gp/XTraits.hpp"
 class XDataObject;
 class database_API XDataAttribute : public XDataBaseObject {
+	REGISTER_CLASS_META_DATA(XDataAttribute, XDataBaseObject);
 protected:
 	XDataAttribute();
 	~XDataAttribute();
@@ -23,6 +24,7 @@ public:
 	void setVisible(bool v);
 
 	void setName(const std::string& name);
+
 	const std::string& getName() const {
 		return mName;
 	}
@@ -39,6 +41,7 @@ protected:
 
 template<typename T>
 class XDataAttributeT : public XDataAttribute {
+	REGISTER_CLASS_META_DATA(XDataAttributeT<T>, XDataAttribute);
 protected:
 	XDataAttributeT()=default;
 	~XDataAttributeT()=default;
@@ -51,6 +54,7 @@ public:
 		}
 		
 		value = v;
+		Modified();
 		sigAttrChanged(asDerived<XDataAttribute>(), XDataChangeType::ItemDataModified);
 		callParentSlot(XDataChangeType::ItemDataModified);
 	}
@@ -62,12 +66,17 @@ protected:
 };
 
 class XDataAttributeEnumBase : public XDataAttribute {
+	REGISTER_CLASS_META_DATA(XDataAttributeEnumBase, XDataAttribute);
 protected:
 	XDataAttributeEnumBase() = default;
 	~XDataAttributeEnumBase() = default;
 public:
 	void setIntValue(unsigned int v) {
+		if (value == v) {
+			return;
+		}
 		value = v;
+		Modified();
 		sigAttrChanged(asDerived<XDataAttribute>(), XDataChangeType::ItemDataModified);
 		callParentSlot(XDataChangeType::ItemDataModified);
 	}
@@ -81,6 +90,7 @@ protected:
 
 template<typename T,typename = std::enable_if_t<std::is_enum_v<T>>>
 class XDataAttributeEnum : public XDataAttributeEnumBase {
+	REGISTER_CLASS_META_DATA(XDataAttributeEnum<T>, XDataAttributeEnumBase);
 protected:
 	XDataAttributeEnum() = default;
 	~XDataAttributeEnum() = default;

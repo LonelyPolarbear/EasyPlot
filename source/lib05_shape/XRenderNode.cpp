@@ -3,15 +3,21 @@
 #include <atomic>
 static std::atomic< uint64_t>  object_id_counter(0);
 
+void XRenderNode::Init()
+{
+	XDataObject::Init();
+	XQ_XDATA_ADD(renderNodes);
+}
+
 bool XRenderNode::addChild(sptr<XRenderNode> child)
 {
 	//节点不应该重复
 	if(!child)
 		return false;
-	auto iter =std::find(m_children.begin(), m_children.end(), child );
-	if (iter == m_children.end()) {
-		m_children.push_back(child);
-		child->setParent(asDerived<XRenderNode>());
+	auto iter =std::find(renderNodes->begin(), renderNodes->end(), child );
+	if (iter == renderNodes->end()) {
+		renderNodes->push_back(child);
+		child->setRenderNodeParent(asDerived<XRenderNode>());
 		return true;
 	}
 	return false;
@@ -19,9 +25,9 @@ bool XRenderNode::addChild(sptr<XRenderNode> child)
 
 bool XRenderNode::removeChild(sptr<XRenderNode> child)
 {
-	auto iter = std::find(m_children.begin(), m_children.end(), child);
-	if (iter != m_children.end()) {
-		m_children.erase(iter);
+	auto iter = std::find(renderNodes->begin(), renderNodes->end(), child);
+	if (iter != renderNodes->end()) {
+		renderNodes->erase(iter);
 		return true;
 	}
 	return false;
@@ -29,29 +35,32 @@ bool XRenderNode::removeChild(sptr<XRenderNode> child)
 
 void XRenderNode::clearChildren()
 {
-	m_children.clear();
+	renderNodes->clear();
 }
 
 int XRenderNode::getChildCount() const
 {
-	return m_children.size();
+	return renderNodes->size();
 }
 
 sptr<XRenderNode> XRenderNode::getChild(int index) const
 {
-	if(index < 0 || index >= m_children.size())
+	if(index < 0 || index >= renderNodes->size())
 		return sptr<XRenderNode>();
-	return m_children[index];
+	return (*renderNodes)[index];
 }
 
-sptr<XRenderNode> XRenderNode::getParent() const
+sptr<XRenderNode> XRenderNode::getRenderNodeParent() const
 {
-	return m_parent.lock();
+	auto p=getParent();
+	if(p)
+		return p->asDerived<XRenderNode>();
+	return nullptr;
 }
 
-void XRenderNode::setParent(sptr<XRenderNode> parent)
+void XRenderNode::setRenderNodeParent(sptr<XRenderNode> parent)
 {
-	m_parent = parent;
+	setParent(parent);
 }
 
 void XRenderNode::setShaderManger(std::shared_ptr<xShaderManger> shaderManger)
@@ -65,7 +74,7 @@ std::shared_ptr<xShaderManger> XRenderNode::getShaderManger() const
 		return m_shaderManger;
 	}
 	else {
-		if (auto parent = getParent()) {
+		if (auto parent = getRenderNodeParent()) {
 			return parent->getShaderManger();
 		}
 		return {};
@@ -75,8 +84,8 @@ std::shared_ptr<xShaderManger> XRenderNode::getShaderManger() const
 XQ::BoundBox XRenderNode::getBoundBox(const Eigen::Matrix4f& m) const
 {
 	auto boundBox =getThisBoundBox(m);
-	for (auto c : m_children) {
-		boundBox.merge(c->getThisBoundBox(m * m_transform.matrix()));
+	for (auto iter = renderNodes->begin();iter != renderNodes->end();iter++) {
+		boundBox.merge((*iter)->getThisBoundBox(m * m_transform.matrix()));
 	}
 	return boundBox;
 }

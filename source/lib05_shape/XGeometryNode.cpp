@@ -63,7 +63,7 @@ void XGeometryNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
 	
 
 	Eigen::Matrix4f matrix = parentMatrix * m_transform.matrix();
-	for (auto m : m_children) {
+	for (auto m : *renderNodes) {
 		m->draw(matrix,isNormal);
 	}
 }
@@ -100,11 +100,11 @@ const float* XGeometryNode::getMatrix() const
 }
 
 void XGeometryNode::setVisible(bool visible) {
-	Attribute->AttrVisible->setValue(visible);
+	Attribute->AttrNodeVisible->setValue(visible);
 }
 
 bool XGeometryNode::isVisible() {
-	return Attribute->AttrVisible->getValue();
+	return Attribute->AttrNodeVisible->getValue();
 }
 
 void XGeometryNode::rotateX(float angle)
@@ -215,5 +215,6 @@ void XGeometryNode::setInput(sptr<XShapeSource> input)
 void XGeometryNode::Init()
 {
 	XRenderNode3D::Init();
-	Attribute = makeShareDbObject<XRenderNode3DAttribute>();
+	XQ_XDATA_ADD(Attribute);
+	//Attribute = makeShareDbObject<XRenderNode3DAttribute>();
 }

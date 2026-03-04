@@ -1,6 +1,8 @@
 #pragma once
 #include "xshapeApi.h"
 #include <dataBase/XDataBaseObject.h>
+#include <dataBase/XDataObject.h>
+#include <dataBase/XDataList.h>
 #include <xsignal/XSignal.h>
 #include <lib00_utilty/XUtilty.h>
 
@@ -9,9 +11,10 @@
 
 class xShaderManger;
 class XRenderNodeAttribute;
-class LIB05_SHAPE_API XRenderNode :public XDataBaseObject {
-	REGISTER_CLASS_META_DATA(XRenderNode, XDataBaseObject);
+class LIB05_SHAPE_API XRenderNode :public XDataObject {
+	REGISTER_CLASS_META_DATA(XRenderNode, XDataObject);
 public:
+	void Init() override;
 	virtual void draw(const Eigen::Matrix4f& parentMatrix,bool isNormal/*true表示正常绘制，false表示拾取*/) = 0;
 	virtual void drawInstance(const Eigen::Matrix4f& parentMatrix)=0;
 
@@ -20,8 +23,8 @@ public:
 	void clearChildren();
 	int getChildCount() const;
 	sptr<XRenderNode> getChild(int index) const;
-	sptr<XRenderNode> getParent() const;
-	void setParent(sptr<XRenderNode> parent);
+	sptr<XRenderNode> getRenderNodeParent() const;
+	void setRenderNodeParent(sptr<XRenderNode> parent);
 
 	void setShaderManger(std::shared_ptr<xShaderManger> shaderManger);
 
@@ -38,13 +41,13 @@ public:
 	bool isSelf(uint64_t id) {
 		return getID() == id;
 	}
+public:
+	csptr<XDataListT<XRenderNode>> renderNodes;
 protected:
 	Eigen::Affine3f m_transform = Eigen::Affine3f::Identity();
 	uint64_t m_id;
-	wptr<XRenderNode> m_parent;													//父节点
-	std::vector<sptr<XRenderNode> > m_children;							//子节点
+	//wptr<XRenderNode> m_parent;													//父节点
 	sptr<xShaderManger> m_shaderManger;
-	//sptr<XRenderNodeAttribute> m_attribute;
 };
 
 class LIB05_SHAPE_API XDrawableRenderNode :public XRenderNode {

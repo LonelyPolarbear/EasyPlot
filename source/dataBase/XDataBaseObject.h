@@ -6,13 +6,17 @@
 #include "lib00_utilty/gp/XTraits.hpp"
 
 #include <boost/describe.hpp>
+#include <boost/describe/enum.hpp>
 #include <boost/mp11.hpp>
 #include <boost/core/demangle.hpp>
+
+#include <magic_enum.hpp>
 
 #include <memory>
 #include <map>
 #include <string>
 #include <functional>
+#include <regex>
 #if 1
 #define REGISTER_CLASS_META_DATA(class_name, ...)  \
 	public:\
@@ -30,19 +34,31 @@
 struct XQ_META {
 	static std::string clean_type_name(const std::string& name) {
 		// 按顺序去掉 C++ 类/结构体/联合体/枚举等关键字
-		constexpr std::string_view prefixes[] = {
+		/*constexpr std::string_view prefixes[] = {
 			"class ", "struct ", "union ", "enum "
-		};
-		for (auto p : prefixes) {
+		};*/
+
+		return std::regex_replace(name, std::regex("class |struct |union |enum "), "");
+
+		/*for (auto p : prefixes) {
 			if (name.substr(0, p.size()) == p)
 				return name.substr(p.size());
-		}
-		return name;   // 无匹配，直接返回原字符串
+		}*/
+		//return name;   // 无匹配，直接返回原字符串
 	}
 
 	template<typename T>
 	static std::string ClassName(T* pobj) {
 		return clean_type_name(boost::core::demangle(typeid(*pobj).name()));
+	}
+
+	template<typename E>
+	static std::string enum_to_string(E value) {
+		auto name= magic_enum::enum_name(value);
+		if (name.empty()) {
+			return {};
+		}
+		return std::string(name);
 	}
 
 	// ------------------------- 辅助函数：将访问修饰符转为字符串 ----------
@@ -214,5 +230,7 @@ enum class database_API XDataChangeType {
 	ItemVisibleModified,
 	DataModified,
 	VisibleModified,
+	BatchBegin,											// 批量操作开始（用于抑制信号）
+	BatchEnd,											// 批量操作结束
 	Update,
 };

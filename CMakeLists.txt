@@ -9,6 +9,7 @@ project(QtOpenGL)		                                                        #放�
 set(MYLIB_INCLUDE_DIR 
                 ${CMAKE_SOURCE_DIR}/3rdParty/boost/include
                 ${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
+                ${CMAKE_SOURCE_DIR}/3rdParty/MagicEnum/include
 )
 add_library(mylib_header_only INTERFACE)
 target_include_directories(mylib_header_only INTERFACE ${MYLIB_INCLUDE_DIR})
@@ -40,6 +41,7 @@ add_subdirectory(source/XOpenGLWidget)
 add_subdirectory(source/main)
 add_subdirectory(source/easyPlot)
 add_subdirectory(source/xsignal)
+add_subdirectory(source/xstorage)
 
 #--------------------------------------------------------------------------------------------------------------
 # 依赖关系

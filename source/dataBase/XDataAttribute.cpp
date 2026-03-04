@@ -32,9 +32,31 @@ void XDataAttribute::setVisible(bool v)
 	callParentSlot(XDataChangeType::ItemVisibleModified);
 }
 
+static std::string makeUnique(const std::vector<std::string>& existing, const std::string& base) {
+	if (std::find(existing.begin(), existing.end(), base) == existing.end())
+		return base;
+
+	int suffix = 1;
+	while (true) {
+		std::string candidate = base + "_" + std::to_string(suffix);
+		if (std::find(existing.begin(), existing.end(), candidate) == existing.end())
+			return candidate;
+		++suffix;
+	}
+}
+
 void XDataAttribute::setName(const std::string& name)
 {
-	mName = name;
+	//需要保证属性名的唯一性
+	std::vector<std::string> existingNames;
+	if(auto p = getParent()){
+		for (auto attr : p->mAttributes) {
+			if (attr.get() != this) {
+				existingNames.push_back(attr->getName());
+			}
+		}
+	}
+	mName = makeUnique(existingNames,name);
 }
 
 template class database_API XDataAttributeT<bool>;
