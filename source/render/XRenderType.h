@@ -1,7 +1,8 @@
 #pragma once
-#include "XRenderApi.h"
+#include "renderApi.h"
+#include <type_traits>
 namespace XQ {
-	enum class LIB_XRENDER_API PreDefineEvent {
+	enum class RENDER_API PreDefineEvent {
 		sigEdit,
 	};
 }
@@ -565,7 +566,7 @@ namespace XQ {
 		return static_cast<InteractMode>(~static_cast<T>(a));
 	}
 
-	struct LIB_XRENDER_API XSelectData {
+	struct RENDER_API XSelectData {
 		uint32_t objectId{ 0 };
 		uint32_t primitiveId{ 0 };
 		explicit  operator bool() const {

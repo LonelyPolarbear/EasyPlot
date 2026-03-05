@@ -1,5 +1,5 @@
 #pragma once
-#include "XRenderApi.h"
+#include "renderApi.h"
 #include < dataBase/XDataBaseObject.h>
 #include < dataBase/XVector.h>
 #include <lib04_opengl/XOpenGLFramebufferObject.h>
@@ -12,7 +12,7 @@ class xcamera;
 class xshader;
 class XRender;
 
-class LIB_XRENDER_API XViewPicker3D :public XDataBaseObject {
+class RENDER_API XViewPicker3D :public XDataBaseObject {
 public:
 protected:
 	XViewPicker3D();

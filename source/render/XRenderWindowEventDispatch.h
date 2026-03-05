@@ -1,5 +1,5 @@
 #pragma once
-#include "XRenderApi.h"
+#include "renderApi.h"
 #include "XRenderType.h"
 #include <dataBase/XDataBaseObject.h>
 #include <dataBase/XVector.h>
@@ -8,7 +8,7 @@
 
 //需要定义窗口信号
 class XOpenGLRenderWindow;
-class LIB_XRENDER_API XRenderWindowEventDispatch :public XDataBaseObject {
+class RENDER_API XRenderWindowEventDispatch :public XDataBaseObject {
 protected:
 	XRenderWindowEventDispatch();
 	virtual ~XRenderWindowEventDispatch();

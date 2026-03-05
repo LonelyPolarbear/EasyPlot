@@ -1,6 +1,6 @@
 #pragma once
 
-#include "XRenderApi.h"
+#include "renderApi.h"
 #include <dataBase/XDataBaseObject.h>
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataAttribute.h>
@@ -8,7 +8,7 @@
 
 class XBaseCmaera;
 class XRender;
-class  LIB_XRENDER_API XRenderCamera : public XDataObject {
+class  RENDER_API XRenderCamera : public XDataObject {
 public:
     enum class ProjectionType {
         ortho=1,

@@ -1,5 +1,5 @@
 #pragma once
-#include "XRenderApi.h"
+#include "renderApi.h"
 #include "XRenderPort.h"
 #include "XRenderType.h"
 #include <dataBase/XDataObject.h>
@@ -12,7 +12,7 @@ class XInteractionEventHandler;
 class XGeometryNode;
 class XGraphicsItem;
 class XRenderNode;
-class LIB_XRENDER_API XRender :public XRenderPort {
+class RENDER_API XRender :public XRenderPort {
 protected:
 	XRender();
 	~XRender();

@@ -1,11 +1,11 @@
 #pragma once
-#include "XRenderApi.h"
+#include "renderApi.h"
 #include <dataBase/XDataBaseObject.h>
 #include <dataBase/XDataObject.h>
 #include <dataBase/XClolor.h>
 #include <lib00_utilty/XUtilty.h>
 
-class LIB_XRENDER_API XRenderPort :public XDataObject {
+class RENDER_API XRenderPort :public XDataObject {
 protected:
 	XRenderPort();
 	~XRenderPort();
