@@ -64,7 +64,7 @@ void XGeometryNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
 
 	Eigen::Matrix4f matrix = parentMatrix * m_transform.matrix();
 	for (auto m : *renderNodes) {
-		m->draw(matrix,isNormal);
+		m->asDerived<XRenderNode>()->draw(matrix,isNormal);
 	}
 }
 

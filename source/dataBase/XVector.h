@@ -1,5 +1,5 @@
 #pragma  once
-#include "databaseApi.h"
+#include "dataBaseApi.h"
 #include <type_traits>
 #include <functional>
 #include <iostream>
@@ -7,6 +7,7 @@
 namespace XQ {
 	template<unsigned int N, typename T>
 	struct Vector {
+		using value_type =T;
 		T data[N]{ 0 };
 
 		Vector() {}
@@ -226,26 +227,26 @@ namespace XQ {
 		return res;
 	}
 
-	extern template class database_API Vector<2, char>;
-	extern template class database_API Vector<2, unsigned char>;
-	extern template class database_API Vector<2, float>;
-	extern template class database_API Vector<2, double>;
-	extern template class database_API Vector<2, int>;
-	extern template class database_API Vector<2, unsigned int>;
+	extern template class DATABASE_API Vector<2, char>;
+	extern template class DATABASE_API Vector<2, unsigned char>;
+	extern template class DATABASE_API Vector<2, float>;
+	extern template class DATABASE_API Vector<2, double>;
+	extern template class DATABASE_API Vector<2, int>;
+	extern template class DATABASE_API Vector<2, unsigned int>;
 
-	extern template class database_API Vector<3, char>;
-	extern template class database_API Vector<3, unsigned char>;
-	extern template class database_API Vector<3, float>;
-	extern template class database_API Vector<3, double>;
-	extern template class database_API Vector<3, int>;
-	extern template class database_API Vector<3, unsigned int>;
+	extern template class DATABASE_API Vector<3, char>;
+	extern template class DATABASE_API Vector<3, unsigned char>;
+	extern template class DATABASE_API Vector<3, float>;
+	extern template class DATABASE_API Vector<3, double>;
+	extern template class DATABASE_API Vector<3, int>;
+	extern template class DATABASE_API Vector<3, unsigned int>;
 
-	extern template class database_API Vector<4, char>;
-	extern template class database_API Vector<4, unsigned char>;
-	extern template class database_API Vector<4, float>;
-	extern template class database_API Vector<4, double>;
-	extern template class database_API Vector<4, int>;
-	extern template class database_API Vector<4, unsigned int>;
+	extern template class DATABASE_API Vector<4, char>;
+	extern template class DATABASE_API Vector<4, unsigned char>;
+	extern template class DATABASE_API Vector<4, float>;
+	extern template class DATABASE_API Vector<4, double>;
+	extern template class DATABASE_API Vector<4, int>;
+	extern template class DATABASE_API Vector<4, unsigned int>;
 
 	using Vec2f = Vector<2, float>;
 	using Vec2d = Vector<2, double>;
@@ -300,9 +301,9 @@ namespace XQ::math {
 			/// <param name="num">分割数量(num)</param>
 			/// <param name="angle">被分割的圆的度数，单位角度 起始为X正半轴</param>
 			/// <returns>大小是num+1个</returns>
-	extern std::vector<XQ::Vec2f> database_API circleSplit(int num, float angle);
+	extern std::vector<XQ::Vec2f> DATABASE_API circleSplit(int num, float angle);
 
-	extern std::vector<XQ::Vec2f> database_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2);
+	extern std::vector<XQ::Vec2f> DATABASE_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2);
 }
 
 namespace XTraits {

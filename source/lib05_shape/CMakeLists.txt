@@ -52,9 +52,13 @@ ${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 														
 #生成动态库
 add_library(${proName}  SHARED)
+generate_dllmain_if_needed(${proName})
+generate_dllapi_if_needed(${proName} )
+get_dll_api_macro(${proName} DLL_API_NAME)
+
 target_sources(${proName} PRIVATE ${SOURCES_FILES} ${HEADERS_FILES})
 #将动态库名字设为add
-target_compile_definitions(${proName} PRIVATE LIB05_SHAPE_DLL)
+target_compile_definitions(${proName} PRIVATE ${DLL_API_NAME})
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${outPutName})
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS ${outPutName})

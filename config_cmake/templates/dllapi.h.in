@@ -1,0 +1,6 @@
+#pragma once
+#ifdef  @DLL_MACRO_NAME@
+#define @DLL_API_NAME@ __declspec(dllexport)
+#else
+#define @DLL_API_NAME@ __declspec(dllimport)
+#endif 

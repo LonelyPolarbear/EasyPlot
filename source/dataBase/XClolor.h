@@ -1,8 +1,8 @@
 #pragma once
-#include "databaseApi.h"
+#include "dataBaseApi.h"
 #include "XVector.h"
 namespace XQ {
-	class database_API XColor {
+	class DATABASE_API XColor {
 	public:
 		XColor() = default;
 		XColor(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);

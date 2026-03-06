@@ -3,6 +3,7 @@
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataList.h>
 #include <dataBase/XDataArray.h>
+#include <dataBase/XObjectFactory.h>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataAttribute.h>
@@ -73,8 +74,12 @@ void testXDataObject01() {
 	//child1->removeData(child1_1);
 
 	auto listNode =makeShareDbObject<XDataListT<XDataObject>>();
-	listNode->push_back(makeShareDbObject<XDataObject>());
-	listNode->push_back(makeShareDbObject<XDataObject>());
+	auto subNode1 = makeShareDbObject<XDataObject>(); subNode1->setName("subNode1");
+	auto subNode2 = makeShareDbObject<XDataObject>(); subNode2->setName("subNode2");
+	
+
+	listNode->append(subNode1);
+	listNode->append(subNode2);
 
 	root->addData(listNode);
 
@@ -89,8 +94,153 @@ void testXDataObject02(){
 	XQ::print(attr_point->getClassName());
 }
 
+//序列化和反序列化测试pants jewelry
+//鞋子
+	class Clothes :public XDataObject {
+		REGISTER_CLASS_META_DATA(Clothes, XDataObject);
+	public:
+		void Init() override {
+			XDataObject::Init();
+			AttrName->setValue("UnKnown");
+			XQ_ATTR_ADD_INIT(AttrPrice, 0);
+			XQ_ATTR_ADD_INIT(AttrColor, XQ::XColor(0, 0, 0, 255));
+			XQ_ATTR_ADD_INIT(AttrSize, 0);
+		}
+	public:
+		csptr<XAttr_Double> AttrPrice;									//价格
+		csptr<XAttr_Color> AttrColor;										//颜色
+		csptr<XAttr_UInt> AttrSize;											//尺码
+};
+
+class Shoe:public Clothes {
+	REGISTER_CLASS_META_DATA(Shoe, Clothes);
+public:
+	void Init() override{
+		Clothes::Init();
+	}
+};
+
+//裤子
+class Pants :public Clothes {
+	REGISTER_CLASS_META_DATA(Pants, Clothes);
+public:
+	void Init() override {
+		Clothes::Init();
+	}
+};
+
+//珠宝
+class Jewelry :public XDataObject {
+	REGISTER_CLASS_META_DATA(Jewelry, XDataObject);
+public:
+	void Init() override {
+		XDataObject::Init();
+		AttrName->setValue("Unknown");
+		AttrPrice->setValue(0);
+	}
+public:
+	csptr<XAttr_Double> AttrPrice;									//价格
+};
+
+class Person :public XDataObject {
+	REGISTER_CLASS_META_DATA(Person, XDataObject);
+protected:
+	Person()=default;
+	~Person()=default;
+public:
+	void Init() override{
+		XDataObject::Init();
+		XQ_ATTR_ADD(AttrAge);
+		XQ_ATTR_ADD(AttrWight);
+		XQ_XDATA_ADD(mShoe);
+		XQ_XDATA_ADD(mPants);
+		XQ_XDATA_ADD(mFriends);
+		//XQ_XDATA_ADD(mJewelry);
+
+		AttrName->setValue("Nobody");
+		AttrAge->setValue(25);
+		AttrWight->setValue(70);
+	}
+public:
+	csptr<XAttr_Int> AttrAge;											//年龄
+	csptr<XAttr_Int> AttrWight;										//体重
+public:
+	csptr<Shoe> mShoe;													//鞋子,一个人一双鞋
+	csptr<Pants> mPants;												//裤子,一个人一套裤子
+	//csptr<XDataListT<Jewelry>> mJewelry;					//珠宝,一个人一串珠宝
+	csptr<XDataListT<Person>> mFriends;					//朋友,一个人有多个朋友
+};
+
+sptr<Jewelry> createJewelry(const std::string& name, double price) {
+	auto jewelry = makeShareDbObject<Jewelry>();
+	jewelry->AttrName->setValue(name);
+	jewelry->AttrPrice->setValue(price);
+	return jewelry;
+}
+
+sptr<Person> createPerson(const std::string& name, int age, int wight) {
+	auto person =makeShareDbObject<Person>();
+	person->AttrName->setValue(name);
+	person->AttrAge->setValue(age);
+	person->AttrWight->setValue(wight);
+	return person;
+}
+
+void testSerialization() {
+	//注册的工作
+	XBaseObjectMeta::registerObject<Clothes>();
+	XBaseObjectMeta::registerObject<Shoe>();
+	XBaseObjectMeta::registerObject<Pants>();
+	XBaseObjectMeta::registerObject<Jewelry>();
+	XBaseObjectMeta::registerObject<Person>();
+	XBaseObjectMeta::registerObject<XDataListT<Jewelry>>();
+	XBaseObjectMeta::registerObject<XDataListT<Person>>();
+
+	//创建一个人和他的朋友，然后保存
+	auto me = createPerson("swj",32,70);
+	me->mShoe->AttrName->setValue("NewJean");
+	me->mShoe->AttrPrice->setValue(200);
+	me->mShoe->AttrColor->setValue(XQ::XColor(255, 0, 0, 255));
+	me->mShoe->AttrSize->setValue(42);
+
+	me->mPants->setName("BM");
+
+	me->mFriends->setName("friends");
+	me->mFriends->append(makeShareDbObject<Person>());
+
+	HighFive::File file("me.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+	auto ss = me->getName();
+	me->serialize(file.createGroup(me->getName()));
+}
+
+void testDeserialization() {
+	
+	//注册的工作
+	XBaseObjectMeta::registerObject<Clothes>();
+	XBaseObjectMeta::registerObject<Shoe>();
+	XBaseObjectMeta::registerObject<Pants>();
+	XBaseObjectMeta::registerObject<Jewelry>();
+	XBaseObjectMeta::registerObject<Person>();
+	XBaseObjectMeta::registerObject<XDataListT<Jewelry>>();
+	XBaseObjectMeta::registerObject<XDataListT<Person>>();
+
+	auto me =makeShareDbObject<Person>();
+	{
+		HighFive::File file("me.h5", HighFive::File::ReadOnly);
+		me->deserialize(file.getGroup("swj"));
+	}
+	{
+		HighFive::File file("meCopy.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+		me->serialize(file.createGroup(me->getName()));
+	}
+	
+	int i=0;
+}
+
 int main() {
-	testXDataObject01();
+	//testXDataObject01();
 	//testXDataObject02();
+	//testSerialization();
+	testDeserialization();
 	return 1;
 }

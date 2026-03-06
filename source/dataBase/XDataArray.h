@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include "XDataBaseObject.h"
-#include "databaseApi.h"
+#include "dataBaseApi.h"
 #include "XTimeStamp.h"
 #include "lib00_utilty/XUtilty.h"
 /// <summary>
@@ -165,12 +165,12 @@ private:
     std::string name;
 };
 
-extern  template class database_API XDataArray<int>;
-extern  template class database_API XDataArray<unsigned int>;
-extern  template class database_API XDataArray<float>;
-extern  template class database_API XDataArray<double>;
-extern  template class database_API XDataArray<unsigned char>;
-extern  template class database_API XDataArray<char>;
+extern  template class DATABASE_API XDataArray<int>;
+extern  template class DATABASE_API XDataArray<unsigned int>;
+extern  template class DATABASE_API XDataArray<float>;
+extern  template class DATABASE_API XDataArray<double>;
+extern  template class DATABASE_API XDataArray<unsigned char>;
+extern  template class DATABASE_API XDataArray<char>;
 using XIntArray = XDataArray<int>;
 using XUIntArray = XDataArray<unsigned int>;
 using XFloatArray = XDataArray<float>;
@@ -401,12 +401,12 @@ private:
     //主要设计用于存储图像数据，默认情况下，图像数据是行优先存储的，即一行一行的存储，每一行的长度为列数
  };
 
- extern  template class database_API XDataArray2D<unsigned char>;
- extern  template class database_API XDataArray2D<float>;
- extern  template class database_API XDataArray2D<double>;
- extern  template class database_API XDataArray2D<unsigned int>;
- extern  template class database_API XDataArray2D<int>;
- extern  template class database_API XDataArray2D<char>;
+ extern  template class DATABASE_API XDataArray2D<unsigned char>;
+ extern  template class DATABASE_API XDataArray2D<float>;
+ extern  template class DATABASE_API XDataArray2D<double>;
+ extern  template class DATABASE_API XDataArray2D<unsigned int>;
+ extern  template class DATABASE_API XDataArray2D<int>;
+ extern  template class DATABASE_API XDataArray2D<char>;
  using XUCharArray2D = XDataArray2D<unsigned char>;
  using XUIntArray2D = XDataArray2D<unsigned int>;
  using XIntArray2D = XDataArray2D<int>;
@@ -611,12 +611,12 @@ private:
      unsigned int mLen =0;           //长度
   };
 
-extern  template class database_API XDataArray3D<unsigned char>;
-extern  template class database_API XDataArray3D<float>;
-extern  template class database_API XDataArray3D<double>;
-extern  template class database_API XDataArray3D<unsigned int>;
-extern  template class database_API XDataArray3D<char>;
-extern  template class database_API XDataArray3D<int>;
+extern  template class DATABASE_API XDataArray3D<unsigned char>;
+extern  template class DATABASE_API XDataArray3D<float>;
+extern  template class DATABASE_API XDataArray3D<double>;
+extern  template class DATABASE_API XDataArray3D<unsigned int>;
+extern  template class DATABASE_API XDataArray3D<char>;
+extern  template class DATABASE_API XDataArray3D<int>;
 
 using XUCharArray3D = XDataArray3D<unsigned char>;
 using XUIntArray3D = XDataArray3D<unsigned int>;

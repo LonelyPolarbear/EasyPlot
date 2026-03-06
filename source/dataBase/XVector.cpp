@@ -1,25 +1,25 @@
 #include "XVector.h"
 namespace XQ {
-	template class database_API Vector<2, char>;
-	template class database_API Vector<2, unsigned char>;
-	template class database_API Vector<2, float>;
-	template class database_API Vector<2, double>;
-	template class database_API Vector<2, int>;
-	template class database_API Vector<2, unsigned int>;
+	template class DATABASE_API Vector<2, char>;
+	template class DATABASE_API Vector<2, unsigned char>;
+	template class DATABASE_API Vector<2, float>;
+	template class DATABASE_API Vector<2, double>;
+	template class DATABASE_API Vector<2, int>;
+	template class DATABASE_API Vector<2, unsigned int>;
 
-	template class database_API Vector<3, char>;
-	template class database_API Vector<3, unsigned char>;
-	template class database_API Vector<3, float>;
-	template class database_API Vector<3, double>;
-	template class database_API Vector<3, int>;
-	template class database_API Vector<3, unsigned int>;
+	template class DATABASE_API Vector<3, char>;
+	template class DATABASE_API Vector<3, unsigned char>;
+	template class DATABASE_API Vector<3, float>;
+	template class DATABASE_API Vector<3, double>;
+	template class DATABASE_API Vector<3, int>;
+	template class DATABASE_API Vector<3, unsigned int>;
 
-	template class database_API Vector<4, char>;
-	template class database_API Vector<4, unsigned char>;
-	template class database_API Vector<4, float>;
-	template class database_API Vector<4, double>;
-	template class database_API Vector<4, int>;
-	template class database_API Vector<4, unsigned int>;
+	template class DATABASE_API Vector<4, char>;
+	template class DATABASE_API Vector<4, unsigned char>;
+	template class DATABASE_API Vector<4, float>;
+	template class DATABASE_API Vector<4, double>;
+	template class DATABASE_API Vector<4, int>;
+	template class DATABASE_API Vector<4, unsigned int>;
 
 	static float radian(float v) {
 		double PI = 3.14159265358979323846;
@@ -27,7 +27,7 @@ namespace XQ {
 	}
 
 	namespace math {
-		std::vector<XQ::Vec2f>database_API circleSplit(int num, float angle)
+		std::vector<XQ::Vec2f>DATABASE_API circleSplit(int num, float angle)
 		{
 			//num必须大于等于1
 			if (num < 1) {
@@ -50,7 +50,7 @@ namespace XQ {
 			return ret;
 		}
 
-		std::vector<XQ::Vec2f>database_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2)
+		std::vector<XQ::Vec2f>DATABASE_API getRectCorner(XQ::Vec2f corner1, XQ::Vec2f corner2)
 		{
 			auto  w = std::abs(corner2.x() - corner1.x());
 			auto  h = std::abs(corner2.y() - corner1.y());

@@ -1,5 +1,5 @@
 #pragma once
-#include <lib05_shape/xshapeApi.h>
+#include <lib05_shape/lib05_shapeApi.h>
 #include <dataBase/XDataBaseObject.h>
 #include <lib05_shape/XRenderNode.h>
 #include <lib01_shader/XBaseShader.h>

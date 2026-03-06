@@ -1,6 +1,6 @@
 
 #pragma once
-#include "../xshapeApi.h"
+#include "../lib05_shapeApi.h"
 #include "xshapeSource.h"
 
 class LIB05_SHAPE_API XSphereSource : public XShapeSource

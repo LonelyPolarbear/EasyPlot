@@ -16,7 +16,7 @@ bool XRenderNode::addChild(sptr<XRenderNode> child)
 		return false;
 	auto iter =std::find(renderNodes->begin(), renderNodes->end(), child );
 	if (iter == renderNodes->end()) {
-		renderNodes->push_back(child);
+		renderNodes->append(child);
 		child->setRenderNodeParent(asDerived<XRenderNode>());
 		return true;
 	}
@@ -27,7 +27,7 @@ bool XRenderNode::removeChild(sptr<XRenderNode> child)
 {
 	auto iter = std::find(renderNodes->begin(), renderNodes->end(), child);
 	if (iter != renderNodes->end()) {
-		renderNodes->erase(iter);
+		renderNodes->remove(*iter);
 		return true;
 	}
 	return false;
@@ -47,7 +47,7 @@ sptr<XRenderNode> XRenderNode::getChild(int index) const
 {
 	if(index < 0 || index >= renderNodes->size())
 		return sptr<XRenderNode>();
-	return (*renderNodes)[index];
+	return (*renderNodes)[index]->asDerived<XRenderNode>();
 }
 
 sptr<XRenderNode> XRenderNode::getRenderNodeParent() const
@@ -85,7 +85,7 @@ XQ::BoundBox XRenderNode::getBoundBox(const Eigen::Matrix4f& m) const
 {
 	auto boundBox =getThisBoundBox(m);
 	for (auto iter = renderNodes->begin();iter != renderNodes->end();iter++) {
-		boundBox.merge((*iter)->getThisBoundBox(m * m_transform.matrix()));
+		boundBox.merge((*iter)->asDerived<XRenderNode>()->getThisBoundBox(m * m_transform.matrix()));
 	}
 	return boundBox;
 }

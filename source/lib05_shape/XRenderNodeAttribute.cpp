@@ -1,5 +1,5 @@
 #include "XRenderNodeAttribute.h"
-#include "xshapeApi.h"
+#include "lib05_shapeApi.h"
 
 XRenderNode3DAttribute::XRenderNode3DAttribute()
 {

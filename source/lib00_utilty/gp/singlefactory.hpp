@@ -43,12 +43,21 @@ namespace TL_singleFactory {
 	};
 }
 
-template<typename identifier, typename ctorType, typename initType, typename = std::enable_if_t< std::has_virtual_destructor_v<typename TL_singleFactory::getReturnType<ctorType>::type>>
+template<
+			typename identifier, 
+			typename ctorType, 
+			typename initType, 
+			template<typename, typename, typename ...>
+			class policy = TL_singleFactory::singleFactory_createSelf,
+			typename = std::enable_if_t< std::has_virtual_destructor_v<typename TL_singleFactory::getReturnType<ctorType>::type>>
 >
 class SFactory;     //主模版
 
-template<typename product, typename identifier, typename... ctorTypes, typename... initTypes>
-class SFactory<identifier, product(ctorTypes...), void(initTypes...)> {
+template<typename product, typename identifier, 
+				typename... ctorTypes, typename... initTypes,
+				template<typename, typename, typename ...> class policy
+>
+class SFactory<identifier, product(ctorTypes...), void(initTypes...),policy> {
 	using createFun = product * (*)(ctorTypes...);
 	using createSharedFun = std::shared_ptr<product>(*)(ctorTypes...);
 	using initFn = std::function< void(product*, initTypes...)>;
@@ -89,14 +98,26 @@ private:
 		auto init_args = TL_singleFactory::extract_back_impl<N>(std::make_index_sequence<rest>{}, all_args);
 
 		std::shared_ptr<product> result;
-		if (s_NewMethod.find(id) != s_NewMethod.end()) {
-			product* p = std::apply(s_NewMethod[id], ctor_args);
-			result = std::shared_ptr<product>(p);
+
+		if constexpr (std::is_default_constructible_v<product>) {
+			if (s_NewMethod.find(id) != s_NewMethod.end()) {
+				product* p = std::apply(s_NewMethod[id], ctor_args);
+				result.reset(p);
+			}
+			else {
+				result = std::apply(s_NewSharedMethod[id], ctor_args);
+			}
 		}
 		else {
-			result = std::apply(s_NewSharedMethod[id], ctor_args);
+			//直接去s_NewSharedMethod查找
+			if (s_NewSharedMethod.find(id) != s_NewSharedMethod.end()) {
+				result = std::apply(s_NewSharedMethod[id], ctor_args);
+			}
+			else {
+				return nullptr;
+			}
 		}
-
+		
 		if (!std::apply([this, id, p = result.get()](auto&&... init_args) {
 			return this->init(id, p, std::forward<decltype(init_args)>(init_args)...);
 			}, init_args)) {
@@ -161,8 +182,8 @@ public:
 		return makeShareImpl(id, s_products_weak, std::forward<Args>(args)...);
 	}
 
-	template<typename ConcreateProduct, template<typename, typename>
-	class policy = TL_singleFactory::singleFactory_createSelf
+	template<typename ConcreateProduct/*, template<typename, typename, typename ...>
+	class policy = TL_singleFactory::singleFactory_createSelf*/
 	>
 	bool RegisterTofactory(identifier id, initFn f = {}) {
 		std::lock_guard<std::mutex> lock(s_mutex);
@@ -246,13 +267,4 @@ private:
 	std::map<identifier, std::weak_ptr<product>> s_products_weak;
 	std::mutex s_mutex;
 };
-
-template<typename ctorType>
-using IGPFactory = class SFactory<int, ctorType>;
-
-template<typename ctorType>
-using UGPFactory = class SFactory<unsigned int, ctorType>;
-
-template<typename ctorType>
-using SGPFactory = class SFactory<std::string, ctorType>;
 #endif // SFACTORY_HPP

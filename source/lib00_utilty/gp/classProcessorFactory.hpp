@@ -6,11 +6,11 @@
 #include <stdexcept>
 
 //工厂，根据单元类类型注册不同的处理函数
-template<typename Fn>
+template<unsigned int N, typename Fn>
 class classProcessorFactory;		//根据class类名调用不同的版本
 
-template<typename result_t, typename ...Args>
-class classProcessorFactory<result_t(Args...)> {
+template<unsigned int N, typename result_t, typename ...Args>
+class classProcessorFactory<N,result_t(Args...)> {
 public:
 	using ProcessFunction = std::function<result_t(Args...)>;
 private:
@@ -35,6 +35,12 @@ public:
 			//std::cout<< "Unknown element type: " + name<<std::endl;
 		}
 	}
+	bool hasProcessor(const std::string& name) const {
+		return processors_.find(name)!= processors_.end();
+	}
 private:
 	std::unordered_map<std::string, ProcessFunction> processors_;
 };
+
+#define CLASS_PROCESSOR_FACTORY(Signature) \
+    classProcessorFactory<__COUNTER__, Signature>

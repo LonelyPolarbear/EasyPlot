@@ -1,9 +1,9 @@
 #pragma once
-#include "databaseApi.h"
+#include "dataBaseApi.h"
 
 typedef unsigned long long TimeStampType;
 
-    class database_API XTimeStamp
+    class DATABASE_API XTimeStamp
     {
     public:
         XTimeStamp();

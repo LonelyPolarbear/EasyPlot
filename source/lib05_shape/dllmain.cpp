@@ -7,9 +7,9 @@ BOOL APIENTRY DllMain(HMODULE hmod, DWORD reason, LPVOID reserved) {
     switch (reason) {
     case DLL_PROCESS_ATTACH:
 		std::cout << "----------------------------------------------------" << std::endl;
-		std::cout << "render loaded" << std::endl;
+		std::cout << "lib05_shape loaded" << std::endl;
 		std::cout << "----------------------------------------------------" << std::endl;
-        InitRender();
+        InitRenderNode();
         break;
     case DLL_PROCESS_DETACH:
         // cleanup if needed

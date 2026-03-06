@@ -36,8 +36,8 @@
 
 XEasyPlotWidget::XEasyPlotWidget(QWidget* parent) :XGLWidget(parent)
 {
-	test1();
-	//test2();
+	//test1();
+	test2();
 	//test3();
 	//test4();
 	//test5();
@@ -245,6 +245,10 @@ void XEasyPlotWidget::test2()
 	render->addRenderNode3D(coneNode);
 
 	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
+
+	HighFive::File file("88888test.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+	coneNode->serialize(file.createGroup(coneNode->getName()));
+
 	#endif
 }
 

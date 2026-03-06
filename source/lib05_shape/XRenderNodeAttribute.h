@@ -1,5 +1,5 @@
 #pragma once
-#include "xshapeApi.h"
+#include "lib05_shapeApi.h"
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataAttribute.h>
 #include <xsignal/XSignal.h>
@@ -38,10 +38,11 @@ enum class LIB05_SHAPE_API  PolygonMode {
 };
 
 class LIB05_SHAPE_API XRenderNodeAttribute :public XDataObject {
-
+	REGISTER_CLASS_META_DATA(XRenderNodeAttribute,XDataObject);
 };
 
 class LIB05_SHAPE_API XRenderNode3DAttribute :public XRenderNodeAttribute {
+	REGISTER_CLASS_META_DATA(XRenderNode3DAttribute, XRenderNodeAttribute);
 protected:
 	XRenderNode3DAttribute();
 	~XRenderNode3DAttribute();

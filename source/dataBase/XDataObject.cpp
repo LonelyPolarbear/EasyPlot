@@ -1,9 +1,10 @@
 #include "XDataObject.h"
- 
+ #include "XDataList.h"
 #include <atomic>
 #include<string>
 #include <highfive/H5File.hpp>
 #include "lib00_utilty/XUtilty.h"
+#include "XObjectFactory.h"
 static std::atomic< uint64_t>  object_id_counter(0);
 
 XDataObject::XDataObject(sptr<XDataObject> parent):mUid(object_id_counter++), mParent(parent)
@@ -116,9 +117,15 @@ void XDataObject::serialize(HighFive::Group& group/*当前组*/)
 	for (int i = 0; i < attrNum; i++) {
 		auto attr = attrAt(i);
 		//写入属性
-		//auto attrGroup =group.createGroup(attr->getName());
 		attr->serialize(group);
 	}
+
+	//当前this处于父类的哪个位置
+	auto index = -1;
+	if (getParent()) {
+		 index = getParent()->childIndex(asDerived<XDataObject>());
+	}
+	group.createAttribute("index", index);
 
 	auto dataGroup = group.createGroup("__data__");
 	serializeData(dataGroup);
@@ -135,6 +142,61 @@ void XDataObject::serialize(HighFive::Group& group/*当前组*/)
 void XDataObject::serializeData(HighFive::Group& Datagroup)
 {
 	Datagroup.createDataSet("mUid", mUid);
+}
+
+void XDataObject::deserialize(HighFive::Group& group)
+{
+	//反序列化属性
+	auto attrNum = group.getNumberAttributes();
+	auto thisAttrNum = attrCount();
+	for (int i = 0; i < thisAttrNum; i++) {
+		auto a = attrAt(i);
+		a->deserialize(group);
+	}
+
+	//反序列化数据
+
+	std::string name;
+	auto attr = group.getAttribute("className");
+	attr.read(name);
+	auto parents =XBaseObjectMeta::GetParents(name);
+	if (parents.size() > 0) {
+		if(parents[0] == "XDataList"){
+			//说明当前的节点是list,需要手动的动态添加
+			//获取当前group下的子
+			auto objNum =group.getNumberObjects();
+			for (int i = 0; i < objNum; i++) {
+				auto objName =group.getObjectName(i);
+				if(objName =="__data__")
+					continue;
+				auto subGroup =group.getGroup(objName);
+				std::string className;
+				subGroup.getAttribute("className").read<std::string>(className);
+				auto sub_object =XBaseObjectMeta::CreateObject(className);
+				
+				sub_object->asDerived<XDataObject>()->deserialize(subGroup);
+				asDerived<XDataList>()->append(sub_object->asDerived<XDataObject>());
+			}
+		}
+	}
+
+	//获取子节点
+	auto childNum = childCount();
+
+	auto objNum = group.getNumberObjects();
+	for (int i = 0; i < objNum; i++) {
+		auto objName = group.getObjectName(i);
+		if(objName == "__data__")
+			continue;
+		auto subGroup = group.getGroup(objName);
+		int index =-1;
+
+		subGroup.getAttribute("index").read(index);
+
+		if (index >= 0 && index < childNum) {
+			childAt(index)->deserialize(subGroup);
+		}
+	}
 }
 
 bool XDataObject::addAttribute(sptr<XDataAttribute> attr)
@@ -222,6 +284,16 @@ int XDataObject::attrCount() const
 sptr<XDataAttribute> XDataObject::attrAt(int index) const
 {
 	return mAttributes[index];
+}
+
+int XDataObject::childIndex(sptr<XDataObject> child) const
+{
+	auto num =childCount();
+	for (int i = 0; i < num; i++) {
+		if(childAt(i) == child)
+			return i;
+	}
+	return -1;
 }
 
 void XDataObject::setBatchLevel(int level)

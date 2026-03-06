@@ -1,6 +1,6 @@
 #pragma once
 
-#include "databaseApi.h"
+#include "dataBaseApi.h"
 #include "XTimeStamp.h"
 #include "lib00_utilty/gp/xtypelist.hpp"
 #include "lib00_utilty/gp/XTraits.hpp"
@@ -50,6 +50,11 @@ struct XQ_META {
 	template<typename T>
 	static std::string ClassName(T* pobj) {
 		return clean_type_name(boost::core::demangle(typeid(*pobj).name()));
+	}
+
+	template<typename T>
+	static std::string ClassName() {
+		return clean_type_name(boost::core::demangle(typeid(T).name()));
 	}
 
 	template<typename E>
@@ -178,8 +183,8 @@ std::shared_ptr<object> makeShareDbObject(Args&& ...args) {
 /// <summary>
 /// 所有类的基类，仅用来统一设计
 /// </summary>
-class database_API XBaseObject : public std::enable_shared_from_this<XBaseObject> {
-	REGISTER_CLASS_META_DATA(XBaseObject);
+class DATABASE_API XBaseObject : public std::enable_shared_from_this<XBaseObject> {
+	REGISTER_CLASS_META_DATA(XBaseObject, std::enable_shared_from_this<XBaseObject>);
 protected:
 	XBaseObject(){}
 	virtual ~XBaseObject(){}
@@ -198,7 +203,7 @@ public:
 /// <summary>
 /// 数据基类
 /// </summary>
-class database_API XDataBaseObject :public XBaseObject {
+class DATABASE_API XDataBaseObject :public XBaseObject {
 	REGISTER_CLASS_META_DATA(XDataBaseObject,XBaseObject);
 protected:
 	XDataBaseObject();
@@ -225,7 +230,7 @@ public:
 	virtual void Init();
 };
 
-enum class database_API XDataChangeType {
+enum class DATABASE_API XDataChangeType {
 	ItemDataModified,
 	ItemVisibleModified,
 	DataModified,

@@ -1,9 +1,9 @@
 #pragma  once
-#include "databaseApi.h"
+#include "dataBaseApi.h"
 #include <string>
 #include <vector>
 namespace XQ {
-	class database_API XDataPath {
+	class DATABASE_API XDataPath {
 	public:
 		XDataPath();
 		std::string path() const {

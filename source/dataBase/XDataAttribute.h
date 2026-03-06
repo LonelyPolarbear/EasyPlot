@@ -1,14 +1,15 @@
 #pragma once
-#include "databaseApi.h"
+#include "dataBaseApi.h"
 #include "XDataBaseObject.h"
 #include <xsignal/XSignal.h>
 #include "XVector.h"
 #include "XClolor.h"
 #include "lib00_utilty/gp/XTraits.hpp"
 #include <highfive/H5File.hpp>
+#include <lib00_utilty/gp/classProcessorFactory.hpp>
 
 class XDataObject;
-class database_API XDataAttribute : public XDataBaseObject {
+class DATABASE_API XDataAttribute : public XDataBaseObject {
 	REGISTER_CLASS_META_DATA(XDataAttribute, XDataBaseObject);
 protected:
 	XDataAttribute();
@@ -27,6 +28,10 @@ public:
 
 	void setName(const std::string& name);
 
+	virtual void* getValuePtr()  {
+		return nullptr;
+	}
+
 	const std::string& getName() const {
 		return mName;
 	}
@@ -36,6 +41,7 @@ public:
 	}
 
 	virtual void serialize(HighFive::Group& group);
+	virtual void deserialize(HighFive::Group& group);
 protected:
 	wptr<XDataObject> mParent;
 	uint64_t mUid;
@@ -43,21 +49,11 @@ protected:
 	std::string mName;
 };
 
-template<typename T,typename = std::enable_if_t<!XTraits::is_xq_vector_v<T>>>
-void attrWrite(HighFive::Group& group,  const std::string& name,T& value) {
-	group.createAttribute(name, value);
-}
+extern template class DATABASE_API classProcessorFactory<1, void(HighFive::Group& group,sptr<XDataAttribute>)>;
+using XattrSerializer = classProcessorFactory<1, void(HighFive::Group& group, sptr<XDataAttribute>)>;
 
-extern void attrWrite(HighFive::Group& group, const std::string& name, XQ::XColor& value);
-
-template<unsigned N, typename T>
-void attrWrite(HighFive::Group& group,const std::string& name, XQ::Vector<N,T> & value) {
-	std::vector<T> vec;
-	for (int i = 0; i < N; i++) {
-		vec.push_back(value[i]);
-	}
-	group.createAttribute(name,vec);
-}
+extern template class DATABASE_API classProcessorFactory<2, void(HighFive::Group& group, sptr<XDataAttribute>)>;
+using XattrDeserializer = classProcessorFactory<2, void(HighFive::Group& group, sptr<XDataAttribute>)>;
 
 template<typename T>
 class XDataAttributeT : public XDataAttribute {
@@ -82,8 +78,22 @@ public:
 		return value;
 	}
 
+	void* getValuePtr() override{
+		return &value;
+	}
+
 	void serialize(HighFive::Group& group) override {
-		attrWrite(group, getName(), value);
+		auto name = XQ_META::ClassName<T>();
+		if (XattrSerializer::instance().hasProcessor(name)) {
+			XattrSerializer::instance().process(name , group,asDerived<XDataAttribute>());
+		}
+	}
+
+	void deserialize(HighFive::Group& group) override {
+		auto name = XQ_META::ClassName<T>();
+		if (XattrDeserializer::instance().hasProcessor(name)) {
+			XattrDeserializer::instance().process(name, group, asDerived<XDataAttribute>());
+		}
 	}
 protected:
 	T value{};
@@ -109,7 +119,14 @@ public:
 	}
 
 	void serialize(HighFive::Group& group) override {
-		attrWrite(group, getName(), value);
+		group.createAttribute(getName(), value);
+	}
+	void deserialize(HighFive::Group& group) override {
+		//group.createAttribute(getName(), value);
+		auto h5Attr = group.getAttribute(getName());
+		unsigned int tmp{0};
+		h5Attr.read<unsigned int>(tmp);
+		setIntValue(tmp);
 	}
 protected:
 	unsigned int value{};
@@ -134,35 +151,35 @@ public:
 template<typename T>
 using XAttr_Enum = XDataAttributeEnum<T>;
 
-extern template class database_API XDataAttributeT<int>;
-extern template class database_API XDataAttributeT<bool>;
-extern template class database_API XDataAttributeT<unsigned int>;
-extern template class database_API XDataAttributeT<float>;
-extern template class database_API XDataAttributeT<double>;
-extern template class database_API XDataAttributeT<std::string>;
+extern template class DATABASE_API XDataAttributeT<int>;
+extern template class DATABASE_API XDataAttributeT<bool>;
+extern template class DATABASE_API XDataAttributeT<unsigned int>;
+extern template class DATABASE_API XDataAttributeT<float>;
+extern template class DATABASE_API XDataAttributeT<double>;
+extern template class DATABASE_API XDataAttributeT<std::string>;
 
-extern template class database_API XDataAttributeT<XQ::Vec2f>;
-extern template class database_API XDataAttributeT<XQ::Vec2d>;
-extern template class database_API XDataAttributeT<XQ::Vec2i>;
-extern template class database_API XDataAttributeT<XQ::Vec2u>;
-extern template class database_API XDataAttributeT<XQ::Vec2u8>;
-extern template class database_API XDataAttributeT<XQ::Vec2i8>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec2f>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec2d>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec2i>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec2u>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec2u8>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec2i8>;
 
-extern template class database_API XDataAttributeT<XQ::Vec3f>;
-extern template class database_API XDataAttributeT<XQ::Vec3d>;
-extern template class database_API XDataAttributeT<XQ::Vec3i>;
-extern template class database_API XDataAttributeT<XQ::Vec3u>;
-extern template class database_API XDataAttributeT<XQ::Vec3u8>;
-extern template class database_API XDataAttributeT<XQ::Vec3i8>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec3f>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec3d>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec3i>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec3u>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec3u8>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec3i8>;
 
-extern template class database_API XDataAttributeT<XQ::Vec4f>;
-extern template class database_API XDataAttributeT<XQ::Vec4d>;
-extern template class database_API XDataAttributeT<XQ::Vec4i>;
-extern template class database_API XDataAttributeT<XQ::Vec4u>;
-extern template class database_API XDataAttributeT<XQ::Vec4u8>;
-extern template class database_API XDataAttributeT<XQ::Vec4i8>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec4f>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec4d>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec4i>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec4u>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec4u8>;
+extern template class DATABASE_API XDataAttributeT<XQ::Vec4i8>;
 
-extern template class database_API XDataAttributeT<XQ::XColor>;
+extern template class DATABASE_API XDataAttributeT<XQ::XColor>;
 
 using XAttr_Color = XDataAttributeT<XQ::XColor>;
 using XAttr_Int = XDataAttributeT<int>;

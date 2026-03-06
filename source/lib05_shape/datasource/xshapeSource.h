@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../xshapeApi.h"
+#include "../lib05_shapeApi.h"
 #include <dataBase/XDataBaseObject.h>
 #include <dataBase/XDataArray.h>
 

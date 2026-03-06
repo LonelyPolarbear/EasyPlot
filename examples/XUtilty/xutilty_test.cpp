@@ -39,6 +39,13 @@ std::string ClassName(T* pobj) {
 	return clean_type_name(boost::core::demangle(typeid(*pobj).name()));
 }
 
+
+template<typename T>
+std::string ClassName() {
+	//return clean_type_name(boost::typeindex::type_id_runtime(*pobj).pretty_name());
+	return clean_type_name(boost::core::demangle(typeid(T).name()));
+}
+
 // ------------------------- ¸¨Öúº¯Êý£º½«·ÃÎÊÐÞÊÎ·û×ªÎª×Ö·û´® ----------
 std::string_view access_modifier_to_string(unsigned mod) {
 	using namespace boost::describe;
@@ -91,6 +98,9 @@ namespace XQ {
 		int d;
 		REGISTER_CLASS_META_DATA(goo,foo,zoo)
 	};
+
+	class A{};
+	class B:public A{};
 }
 
 int main() {
@@ -115,6 +125,9 @@ int main() {
 	for (auto n : name) {
 		std::cout << n << std::endl;
 	}
+
+	//auto sss = get_parent_className<XQ::B>;
+	//auto sss2 = ClassName<XQ::B>();
 
 	return 0;
 }
