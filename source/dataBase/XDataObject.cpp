@@ -6,7 +6,8 @@
 #include "lib00_utilty/XUtilty.h"
 #include "XObjectFactory.h"
 static std::atomic< uint64_t>  object_id_counter(0);
-
+static bool s_isDeserializing = false;
+static std::vector<std::function<void()>> s_deserializeFinishedFn;
 XDataObject::XDataObject(sptr<XDataObject> parent):mUid(object_id_counter++), mParent(parent)
 {
 	setBubble(true);
@@ -108,6 +109,92 @@ void XDataObject::setName(const std::string& name)
 std::string XDataObject::getName() const
 {
 	return AttrName->getValue();
+}
+
+XQ::XDataPath XDataObject::getDataPath()
+{
+	XQ::XDataPath path;
+	auto data = asDerived<XDataObject>();
+	while (data)
+	{
+		path.insert(data->getName());
+		data = data->getParent();
+	}
+	return path;
+}
+
+XQ::XDataPath XDataObject::getPathFromThis(sptr<XDataObject> other,bool isAbs)
+{
+	if(other == shared_from_this())
+		return {};
+	auto root2this = getDataPath();
+	auto root2other = other->getDataPath();
+
+	//如果首元素相同，说明二者在同一棵树
+	if (root2this.first() == root2other.first()) {
+		root2this.pop_front();
+		root2this.reverse();
+		if (isAbs == false) {
+			//每一个都替换为..
+			root2other.pop_front();
+			root2this.for_each([](auto& v){
+				v ="..";
+			});
+		}
+		root2this.merge(root2other);
+		return root2this;
+	}
+	else {
+		//说明两者不在同一颗树下
+		if (isAbs) {
+			root2this.push("#");//插入空
+			root2this.reverse();
+			root2this.merge(root2other);
+			return root2this;
+		}
+		else {
+			//相对路径,还是否有意义
+			root2this.reverse();
+			root2this.for_each([](auto& v) {v = "..";});
+			root2this.back() ="#";
+			return root2this;
+		}
+	}
+}
+
+sptr<XDataObject> XDataObject::getFromPathImp(XQ::XDataPath& path)
+{
+	//已知一条相对路径
+	if(path.size() ==0)
+		return asDerived<XDataObject>();
+	
+	auto str = path.first();
+
+	if (str == "..") {
+		if (auto parent = getParent()) {
+			path.pop_front();
+			return parent->getFromPathImp(path);
+		}
+		else {
+			return nullptr;
+		}
+	}
+	else {
+		for (int i = 0; i < childCount(); i++) {
+			auto c = childAt(i);
+			if (c->getName() == str) {
+				path.pop_front();
+				return c->getFromPathImp(path);
+			}
+		}
+		return nullptr;
+	}
+}
+
+sptr<XDataObject> XDataObject::getFromPath(const XQ::XDataPath& path)
+{
+	auto tmp = path;
+	return getFromPathImp(tmp);
 }
 
 void XDataObject::serialize(HighFive::Group& group/*当前组*/)
@@ -303,7 +390,7 @@ void XDataObject::setBatchLevel(int level)
 
 void XDataObject::notify_sigDataAdd(sptr<XDataObject> data)
 {
-	XQ::print(AttrName->getValue(), "addData", data->AttrName->getValue());
+	//XQ::print(AttrName->getValue(), "addData", data->AttrName->getValue());
 	sigDataAdd(data);
 }
 
@@ -312,13 +399,13 @@ void XDataObject::notify_sigDataAdd(const XQ::XDataPath& path, sptr<XDataObject>
 	auto completePath = path;
 	completePath.insert(AttrName->getValue());
 	completePath.push(data->AttrName->getValue());
-	XQ::print("childAddData", "path:", completePath.path());
+	//XQ::print("childAddData", "path:", completePath.path());
 	sigChildDataAdd(path,data);
 }
 
 void XDataObject::notify_sigDataRemove(sptr<XDataObject> data)
 {
-	XQ::print(AttrName->getValue(), "removeData", data->AttrName->getValue());
+	//XQ::print(AttrName->getValue(), "removeData", data->AttrName->getValue());
 	sigDataRemove(data);
 }
 
@@ -327,7 +414,7 @@ void XDataObject::notify_sigDataRemove(const XQ::XDataPath& path, sptr<XDataObje
 	auto completePath = path;
 	completePath.insert(AttrName->getValue());
 	completePath.push(data->AttrName->getValue());
-	XQ::print("childRemoveData", "path:", completePath.path());
+	//XQ::print("childRemoveData", "path:", completePath.path());
 	sigChildDataRemove(path, data);
 }
 
@@ -457,4 +544,28 @@ void XDataObject::ChildDataRemoveChanged(XQ::XDataPath& path, sptr<XDataObject> 
 void XDataObject::slotItemDataChanged(sptr<XDataAttribute>, XDataChangeType type)
 {
 	
+}
+
+bool XDataObject::isDeserializing()
+{
+	return s_isDeserializing;
+}
+
+void XDataObject::setDeserializing(bool flag)
+{
+	if (!flag)
+	{
+		// 读取结束
+		for (auto fun : s_deserializeFinishedFn)
+		{
+			fun();
+		}
+	}
+	s_isDeserializing = flag;
+	s_deserializeFinishedFn.clear();
+}
+
+void XDataObject::addDeserializeFinishedFn(std::function<void()> f)
+{
+	s_deserializeFinishedFn.push_back(f);
 }

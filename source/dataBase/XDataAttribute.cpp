@@ -64,6 +64,17 @@ void XDataAttribute::setName(const std::string& name)
 	mName = makeUnique(existingNames,name);
 }
 
+void XDataAttribute::emit_sigAttrChanged(XDataChangeType type)
+{
+	auto parent = getParent();
+	if (parent && parent->isInBatch()) {
+		//...
+	}
+	else {
+		sigAttrChanged(asDerived<XDataAttribute>(), type);
+	}
+}
+
 void XDataAttribute::serialize(HighFive::Group& group)
 {
 	//group.createAttribute("className", getClassName());

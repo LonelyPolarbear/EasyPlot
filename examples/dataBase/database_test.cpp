@@ -237,10 +237,36 @@ void testDeserialization() {
 	int i=0;
 }
 
+void testXDataPath() {
+	auto createObj = [](const std::string& name) {
+		auto obj = makeShareDbObject<XDataObject>();
+		obj->setName(name);
+		return obj;
+		};
+
+	auto t1 = createObj("1");
+	auto t2 = createObj("2");
+	auto t3 = createObj("3");
+	auto t4 = createObj("4");
+	auto t5 = createObj("5");
+	t1->addData(t2);
+	t1->addData(t4);
+
+	t2->addData(t3);
+	t4->addData(t5);
+
+	auto path1 =t3->getPathFromThis(t2);
+	std::cout << path1.path() << std::endl;
+
+	auto ss = t3->getFromPath(path1);
+	std::cout<<ss->getName()<<std::endl;
+}
+
 int main() {
 	//testXDataObject01();
 	//testXDataObject02();
 	//testSerialization();
-	testDeserialization();
+	//testDeserialization();
+	testXDataPath();
 	return 1;
 }

@@ -40,6 +40,8 @@ public:
 		return mVisible;
 	}
 
+	void emit_sigAttrChanged(XDataChangeType type);
+
 	virtual void serialize(HighFive::Group& group);
 	virtual void deserialize(HighFive::Group& group);
 protected:
@@ -71,7 +73,7 @@ public:
 		
 		value = v;
 		Modified();
-		sigAttrChanged(asDerived<XDataAttribute>(), XDataChangeType::ItemDataModified);
+		emit_sigAttrChanged(XDataChangeType::ItemDataModified);
 		callParentSlot(XDataChangeType::ItemDataModified);
 	}
 	const T& getValue() const {
@@ -111,7 +113,7 @@ public:
 		}
 		value = v;
 		Modified();
-		sigAttrChanged(asDerived<XDataAttribute>(), XDataChangeType::ItemDataModified);
+		emit_sigAttrChanged(XDataChangeType::ItemDataModified);
 		callParentSlot(XDataChangeType::ItemDataModified);
 	}
 	unsigned int getIntValue() const {

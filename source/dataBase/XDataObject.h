@@ -22,12 +22,17 @@ public:
 	bool getBubble() const;
 	void setName(const std::string& name);
 	std::string getName() const;
+	XQ::XDataPath getDataPath();
+	XQ::XDataPath getPathFromThis(sptr<XDataObject> other, bool isAbs=false);
+	
+	sptr<XDataObject> getFromPath(const XQ::XDataPath& path);
 	//序列化
 	virtual void serialize(HighFive::Group& group);
 	virtual void serializeData(HighFive::Group& group);
 	//virtual void deserializeData(HighFive::Group& group);
 	virtual void deserialize(HighFive::Group& group);
 protected:
+	sptr<XDataObject> getFromPathImp(XQ::XDataPath& path);
 	friend class XDataList;
 	bool addAttribute(sptr<XDataAttribute> attr);																																	//属性不允许删除
 	bool hasData(sptr<XDataObject> data);
@@ -87,6 +92,10 @@ protected:
 	bool mEnableBubble = false;													//信号是否向上冒泡传递
 	int m_batchLevel = 0;															// 批量嵌套深度
 	bool m_hasPendingChanges = false;										// 是否有待处理的修改
+public:
+	static bool isDeserializing();
+	static void setDeserializing(bool flag);
+	static void addDeserializeFinishedFn(std::function<void()> f);
 };
 
 #define XQ_XDATA_ADD(_name_) \
