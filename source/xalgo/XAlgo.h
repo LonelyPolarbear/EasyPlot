@@ -56,7 +56,7 @@ namespace XQ::XAlgo {
 	///  把做个组分相同的XDataArray合并为一个更大的XDataArray
 	/// </summary>
 	template<typename T>
-	sptr <XDataArray<T>> combineArray(std::vector<sptr< XDataArray<T>>> datas) {
+	sptr <XDataArray1D<T>> combineArray(std::vector<sptr< XDataArray1D<T>>> datas) {
 		auto totalTupleNum = 0;
 		auto component = 1;
 		std::vector<uint32_t> tupleOffset;
@@ -68,7 +68,7 @@ namespace XQ::XAlgo {
 			component = d->getComponent();
 		}
 
-		auto out = makeShareDbObject< XDataArray<T>>();
+		auto out = makeShareDbObject< XDataArray1D<T>>();
 		out->setComponent(component);
 		out->setNumOfTuple(totalTupleNum);
 
@@ -83,7 +83,7 @@ namespace XQ::XAlgo {
 	}
 
 	template<typename T>
-	void combineArray(std::vector<sptr< XDataArray<T>>> datas, sptr< XDataArray<T>> out) {
+	void combineArray(std::vector<sptr< XDataArray1D<T>>> datas, sptr< XDataArray1D<T>> out) {
 		auto totalTupleNum = 0;
 		auto component = 1;
 		std::vector<uint32_t> tupleOffset;

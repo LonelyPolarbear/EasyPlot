@@ -12,7 +12,7 @@ BOOL APIENTRY DllMain(HMODULE hmod, DWORD reason, LPVOID reserved) {
         XBaseObjectMeta::InitializeCoreTypes();
         break;
     case DLL_PROCESS_DETACH:
-        // cleanup if needed
+        std::cout << "dataBase unLoaded" << std::endl;
         break;
     }
     return TRUE;

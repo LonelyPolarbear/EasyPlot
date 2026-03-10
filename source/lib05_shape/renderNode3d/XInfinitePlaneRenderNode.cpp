@@ -93,7 +93,7 @@ void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix,  bool i
 
 	//mFeedBackBufferVbo->bind();
 	//auto datadd = mFeedBackBufferVbo->map2cpu();
-	//auto ss = makeShareDbObject<XDataArray<XQ::Vec3f>>();
+	//auto ss = makeShareDbObject<XDataArray1D<XQ::Vec3f>>();
 	//ss->setNumOfTuple(6);
 	//ss->memCopy(datadd);
 

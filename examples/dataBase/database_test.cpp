@@ -279,11 +279,134 @@ void testXDataPath() {
 	std::cout<<ss->getName()<<std::endl;
 }
 
+void testDataArraySerialization() {
+	{
+	auto intArray =makeShareDbObject<XUCharArray>();
+	intArray->setName("test");
+	intArray->setNumOfTuple(5);
+	for (int i = 0; i < 5; i++) {
+		intArray->setTuple(i,i);
+	}
+
+	HighFive::File file("array.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+	auto gg =file.createGroup("root");
+	XDataSerializer::instance().process(intArray->getClassName(),gg,"1d",intArray.get());
+	}
+
+	{
+		//二维的序列化
+		auto intArray = makeShareDbObject<XIntArray2D>();
+		intArray->setName("test");
+		intArray->setComponent(2);
+		intArray->setDimensions(5, 2);
+		for (int x = 0; x < 5; x++) {
+			for (int y = 0; y < 2; y++) {
+				intArray->setData(x,y,x,y);
+			}
+		}
+
+		HighFive::File file("array2d.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+		auto gg = file.createGroup("root");
+		XDataSerializer::instance().process(intArray->getClassName(), gg, "2d", intArray.get());
+	}
+
+	{
+		//三维数据的序列化
+		auto intArray3d = makeShareDbObject<XIntArray3D>();
+		intArray3d->setName("test");
+		intArray3d->setComponent(2);
+		intArray3d->setDimensions(5, 2,2);
+		
+		{
+			auto intArray = makeShareDbObject<XIntArray2D>();
+			intArray->setName("test");
+			intArray->setComponent(2);
+			intArray->setDimensions(5, 2);
+			int a =0;
+			
+			for (int y = 0; y < 2; y++) {
+				for (int x = 0; x < 5; x++) {
+					intArray->setData(x, y, a+1, a+2);
+					a+=2;
+				}
+			}
+			intArray3d->memCopy(0,intArray);
+		}
+
+		{
+			auto intArray = makeShareDbObject<XIntArray2D>();
+			intArray->setName("test");
+			intArray->setComponent(2);
+			intArray->setDimensions(5, 2);
+
+			int a = 50;
+			for (int y = 0; y < 2; y++) {
+				for (int x = 0; x < 5; x++) {
+					intArray->setData(x, y, a + 1, a + 2);
+					a += 2;
+				}
+			}
+			intArray3d->memCopy(1, intArray);
+		}
+
+		HighFive::File file("array3d.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+		auto gg = file.createGroup("root");
+		XDataSerializer::instance().process(intArray3d->getClassName(), gg, "3d", intArray3d.get());
+	}
+}
+
+void testDataArrayDeserialization() {
+	HighFive::File file("array.h5", HighFive::File::ReadOnly);
+	 auto group =file.getGroup("root");
+	 auto dataset = group.getDataSet("1d");
+	auto intArray = makeShareDbObject<XUCharArray>();
+
+	XDataDeserializer::instance().process(intArray->getClassName(), dataset, intArray.get());
+	{
+		HighFive::File file("arrayCopy.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+		auto gg = file.createGroup("root");
+		XDataSerializer::instance().process(intArray->getClassName(), gg, "1d", intArray.get());
+	}
+
+	{
+		//二维测试
+		HighFive::File file("array2d.h5", HighFive::File::ReadOnly);
+		auto group = file.getGroup("root");
+		auto dataset = group.getDataSet("2d");
+		auto intArray = makeShareDbObject<XIntArray2D>();
+
+		XDataDeserializer::instance().process(intArray->getClassName(), dataset, intArray.get());
+		{
+			HighFive::File file("arrayCopy2d.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+			auto gg = file.createGroup("root");
+			XDataSerializer::instance().process(intArray->getClassName(), gg, "2d", intArray.get());
+		}
+	}
+
+	{
+		//二维测试
+		HighFive::File file("array3d.h5", HighFive::File::ReadOnly);
+		auto group = file.getGroup("root");
+		auto dataset = group.getDataSet("3d");
+		auto intArray = makeShareDbObject<XIntArray3D>();
+
+		XDataDeserializer::instance().process(intArray->getClassName(), dataset, intArray.get());
+		{
+			HighFive::File file("arrayCopy3d.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+			auto gg = file.createGroup("root");
+			XDataSerializer::instance().process(intArray->getClassName(), gg, "3d", intArray.get());
+		}
+	}
+}
+
 int main() {
 	//testXDataObject01();
 	//testXDataObject02();
 	//testSerialization();
-	testDeserialization();
+	//testDeserialization();
 	//testXDataPath();
+
+	//testDataArraySerialization();
+	testDataArrayDeserialization();
 	return 1;
 }

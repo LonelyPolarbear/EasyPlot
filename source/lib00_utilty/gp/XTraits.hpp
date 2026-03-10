@@ -81,6 +81,8 @@ public: \
 template<typename T, typename Fn>\
 constexpr bool has_##funName##_v = has_##funName<T,Fn>::value;
 
+HAS_MEMBER_FUNCTION(getClassName)
+
 //////////////////////////////////////////////////////////////////////////
 //判断某个成员函数是否具有某个函数，并不关心参数列表
 #if 1

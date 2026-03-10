@@ -3,12 +3,12 @@
 
 #include "XDataArray.h"
 
-template class DATABASE_API XDataArray<int>;
-template class DATABASE_API XDataArray<unsigned int>;
-template class DATABASE_API XDataArray<float>;
-template class DATABASE_API XDataArray<double>;
-template class DATABASE_API XDataArray<unsigned char>;
-template class DATABASE_API XDataArray<char>;
+template class DATABASE_API XDataArray1D<int>;
+template class DATABASE_API XDataArray1D<unsigned int>;
+template class DATABASE_API XDataArray1D<float>;
+template class DATABASE_API XDataArray1D<double>;
+template class DATABASE_API XDataArray1D<unsigned char>;
+template class DATABASE_API XDataArray1D<char>;
 
 template class DATABASE_API XDataArray2D<unsigned char>;
 template class DATABASE_API XDataArray2D<char>;

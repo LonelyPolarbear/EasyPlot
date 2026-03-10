@@ -8,6 +8,10 @@
 static std::atomic< uint64_t>  object_id_counter(0);
 static bool s_isDeserializing = false;
 static std::vector<std::function<void()>> s_deserializeFinishedFn;
+
+template class DATABASE_API classProcessorFactory<1, void(HighFive::Group& group, const std::string& name, void* data)>;
+template class DATABASE_API classProcessorFactory<2, void(HighFive::DataSet& dataSet, void* data)>;
+
 XDataObject::XDataObject(sptr<XDataObject> parent):mUid(object_id_counter++), mParent(parent)
 {
 	setBubble(true);
@@ -228,7 +232,8 @@ void XDataObject::serialize(HighFive::Group& group/*µ±Ç°×é*/)
 
 void XDataObject::serializeData(HighFive::Group& Datagroup)
 {
-	Datagroup.createDataSet("mUid", mUid);
+	auto dataset=Datagroup.createDataSet("mUid", mUid);
+	dataset.createAttribute("test",123);
 }
 
 void XDataObject::deserialize(HighFive::Group& group)

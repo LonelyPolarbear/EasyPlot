@@ -9,6 +9,8 @@
 namespace XBaseObjectMeta {
 	void InitAttrWrite();
 	void InitAttrRead();
+	void InitDataWrite();
+	void InitDataRead();
 }
 namespace XBaseObjectMeta {
 	static std::map<std::string, std::vector<std::string>> xobject_inheritMap;
@@ -133,6 +135,9 @@ namespace XBaseObjectMeta {
 
 		InitAttrWrite();
 		InitAttrRead();
+
+		InitDataWrite();
+		InitDataRead();
 	}
 }
 
@@ -341,5 +346,199 @@ namespace XBaseObjectMeta {
 		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Rectd>(), readAttr<XQ::Rectd>);
 		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Recti>(), readAttr<XQ::Recti>);
 		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Rectu>(), readAttr<XQ::Rectu>);
+	}
+}
+
+//数据写
+namespace XBaseObjectMeta {
+	template<typename T>
+	void writeData(HighFive::Group& group, const std::string&name, void*data) {
+		T *pdata = (T*)(data);
+		auto  dataset =group.createDataSet(name,*pdata);
+		dataset.createAttribute("className", XQ_META::ClassName<T>());
+	}
+
+	template<typename T>
+	void writeDataArrayID(HighFive::Group& group, const std::string& name, void* data) {
+		using value_type = typename T::value_type;
+		T* pdata = (T*)(data);
+		auto size =pdata->size();
+		auto vecPtr =pdata->getPtr();
+		auto  dataset = group.createDataSet(name, HighFive::DataSpace{size,1}, HighFive::create_datatype<value_type>());
+		dataset.write(*vecPtr);
+		dataset.createAttribute("className", XQ_META::ClassName<T>());
+		dataset.createAttribute("component", pdata->getComponent());
+		dataset.createAttribute("name", pdata->getName());
+	}
+
+	template<typename T>
+	void writeDataArray2D(HighFive::Group& group, const std::string& name, void* data) {
+		using value_type = typename T::value_type;
+		T* pdata = (T*)(data);
+		auto size = pdata->size();
+		auto vecPtr = pdata->getPtr();
+		int component = pdata->getComponent();
+		auto row = pdata->getRow();
+		auto col = pdata->getCol();
+
+		//按行存储，每一行存储的数据总长度component*col
+		auto  dataset = group.createDataSet(name, HighFive::DataSpace{ row,component * col }, HighFive::create_datatype<value_type>());
+		dataset.write_raw(vecPtr->data(), HighFive::create_datatype<value_type>());
+		dataset.createAttribute("className", XQ_META::ClassName<T>());
+		dataset.createAttribute("component", component);
+		dataset.createAttribute("row", row);
+		dataset.createAttribute("col", col);
+		dataset.createAttribute("name", pdata->getName());
+	}
+
+	template<typename T>
+	void writeDataArray3D(HighFive::Group& group, const std::string& name, void* data) {
+		using value_type = typename T::value_type;
+		T* pdata = (T*)(data);
+		auto size = pdata->size();
+		auto vecPtr = pdata->getPtr();
+		int component = pdata->getComponent();
+		auto row = pdata->getRow();
+		auto col = pdata->getCol();
+		auto depth = pdata->getDepth();
+
+		//按行存储，每一行存储的数据总长度component*col
+		auto  dataset = group.createDataSet(name, HighFive::DataSpace{ depth,row,component * col }, HighFive::create_datatype<value_type>());
+		dataset.write_raw(vecPtr->data(), HighFive::create_datatype<value_type>());
+		dataset.createAttribute("className", XQ_META::ClassName<T>());
+		dataset.createAttribute("component", component);
+		dataset.createAttribute("row", row);
+		dataset.createAttribute("col", col);
+		dataset.createAttribute("depth", depth);
+		dataset.createAttribute("name", pdata->getName());
+	}
+	
+	void InitDataWrite() {
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<int>(), writeData<int>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<double>(), writeData<double>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<float>(), writeData<float>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<unsigned int>(), writeData<unsigned int>);
+
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XIntArray>(), writeDataArrayID<XIntArray>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray>(), writeDataArrayID<XUIntArray>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray>(), writeDataArrayID<XFloatArray>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray>(), writeDataArrayID<XDoubleArray>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray>(), writeDataArrayID<XUCharArray>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XCharArray>(), writeDataArrayID<XCharArray>);
+
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XIntArray2D>(), writeDataArray2D<XIntArray2D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray2D>(), writeDataArray2D<XUIntArray2D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray2D>(), writeDataArray2D<XFloatArray2D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray2D>(), writeDataArray2D<XDoubleArray2D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray2D>(), writeDataArray2D<XUCharArray2D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XCharArray2D>(), writeDataArray2D<XCharArray2D>);
+
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XIntArray3D>(), writeDataArray3D<XIntArray3D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray3D>(), writeDataArray3D<XUIntArray3D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray3D>(), writeDataArray3D<XFloatArray3D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray3D>(), writeDataArray3D<XDoubleArray3D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray3D>(), writeDataArray3D<XUCharArray3D>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XCharArray3D>(), writeDataArray3D<XCharArray3D>);
+	}
+}
+
+//数据读
+namespace XBaseObjectMeta {
+	template<typename T>
+	void readData(HighFive::DataSet& dataset, void* data) {
+		T* pdata = (T*)(data);
+		dataset.read(*pdata);
+	}
+
+	template<typename T>
+	void readDataArrayID(HighFive::DataSet& dataset, void* data) {
+		using value_type = typename T::value_type;
+		std::vector<value_type> vec;
+		dataset.read(vec);
+		T* pdata = (T*)(data);
+		auto vecPtr = pdata->getPtr();
+		vecPtr->swap(vec);
+
+		int component =1;
+		std::string name;
+		dataset.getAttribute("component").read(component);
+		dataset.getAttribute("name").read(name);
+
+		pdata->setComponent(component);
+		pdata->setName(name);
+	}
+
+	template<typename T>
+	void readDataArray2D(HighFive::DataSet& dataset, void* data) {
+		using value_type = typename T::value_type;
+
+		int component = 1;
+		unsigned int row = 1;
+		unsigned int col = 1;
+		std::string name;
+		dataset.getAttribute("component").read(component);
+		dataset.getAttribute("row").read(row);
+		dataset.getAttribute("col").read(col);
+		dataset.getAttribute("name").read(name);
+
+		T* pdata = (T*)(data);
+		pdata->setComponent(component);
+		pdata->setName(name);
+		pdata->setDimensions(col, row);
+		auto vecPtr = pdata->getPtr();
+
+		dataset.read(vecPtr->data());
+	}
+
+	template<typename T>
+	void readDataArray3D(HighFive::DataSet& dataset, void* data) {
+		using value_type = typename T::value_type;
+
+		int component = 1;
+		unsigned int row = 1;
+		unsigned int col = 1;
+		unsigned int depth = 1;
+		std::string name;
+		dataset.getAttribute("component").read(component);
+		dataset.getAttribute("row").read(row);
+		dataset.getAttribute("col").read(col);
+		dataset.getAttribute("depth").read(depth);
+		dataset.getAttribute("name").read(name);
+
+		T* pdata = (T*)(data);
+		pdata->setComponent(component);
+		pdata->setName(name);
+		pdata->setDimensions(col, row,depth);
+		auto vecPtr = pdata->getPtr();
+
+		dataset.read(vecPtr->data());
+	}
+
+	void InitDataRead() {
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<int>(), readData<int>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<double>(), readData<double>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<float>(), readData<float>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<unsigned int>(), readData<unsigned int>);
+
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XIntArray>(), readDataArrayID<XIntArray>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray>(), readDataArrayID<XUIntArray>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray>(), readDataArrayID<XFloatArray>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray>(), readDataArrayID<XDoubleArray>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray>(), readDataArrayID<XUCharArray>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XCharArray>(), readDataArrayID<XCharArray>);
+
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XIntArray2D>(), readDataArray2D<XIntArray2D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray2D>(), readDataArray2D<XUIntArray2D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray2D>(), readDataArray2D<XFloatArray2D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray2D>(), readDataArray2D<XDoubleArray2D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray2D>(), readDataArray2D<XUCharArray2D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XCharArray2D>(), readDataArray2D<XCharArray2D>);
+
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XIntArray3D>(), readDataArray3D<XIntArray3D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray3D>(), readDataArray3D<XUIntArray3D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray3D>(), readDataArray3D<XFloatArray3D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray3D>(), readDataArray3D<XDoubleArray3D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray3D>(), readDataArray3D<XUCharArray3D>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XCharArray3D>(), readDataArray3D<XCharArray3D>);
 	}
 }

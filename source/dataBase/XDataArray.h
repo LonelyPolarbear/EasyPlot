@@ -11,16 +11,17 @@
 /// 一维数组
 /// </summary>
 template<typename T>
-class XDataArray : public XDataBaseObject
+class XDataArray1D : public XDataBaseObject
 {
-    REGISTER_CLASS_META_DATA(XDataArray<T>, XDataBaseObject);
+    REGISTER_CLASS_META_DATA(XDataArray1D<T>, XDataBaseObject);
+    using value_type = T;
  protected:
-    XDataArray():XDataBaseObject(){}
-    XDataArray( int tupleNum,int componentNum=1) :XDataBaseObject() {
+    XDataArray1D():XDataBaseObject(){}
+    XDataArray1D( int tupleNum,int componentNum=1) :XDataBaseObject() {
         setComponent(componentNum);
         setNumOfTuple(tupleNum);
     }
-    ~XDataArray(){}
+    ~XDataArray1D(){}
 public:
      T* data(int tupleIdx)  {
         return d.data()+tupleIdx*component;
@@ -35,7 +36,8 @@ public:
      }
        
      void setNumOfTuple(int size) {
-        d.resize(size* component,0);
+        if(d.size() != size * component)
+            d.resize(size* component,0);
     }
 
     void setComponent(unsigned int c) {
@@ -87,7 +89,7 @@ public:
 	}
 
     template<typename U>
-    void memCopy(std::shared_ptr< XDataArray<U>> src) {
+    void memCopy(std::shared_ptr< XDataArray1D<U>> src) {
         if(!src)
             return ;
         auto copyBytenNum = std::min<int>(src->bytesNum(), bytesNum());
@@ -119,11 +121,11 @@ public:
     /// 数据不变，数据类型转型
     /// </summary>
     template<typename U>
-    sptr<XDataArray<U>> heteroCast(int componentNum) {
+    sptr<XDataArray1D<U>> heteroCast(int componentNum) {
         auto num = bytesNum()/sizeof(U);//取整
         auto numTuple = num/componentNum;   //进一步取整
 
-        auto dest =makeShareDbObject<XDataArray<U>>();
+        auto dest =makeShareDbObject<XDataArray1D<U>>();
         dest->setComponent(componentNum);
         dest->setNumOfTuple(numTuple);
 
@@ -134,10 +136,10 @@ public:
     
     #if 0
 	template<typename U>
-	sptr<XDataArray<U>> heteroCast() {
+	sptr<XDataArray1D<U>> heteroCast() {
 		auto tupleNum = getNumOfTuple();
 		auto typeNum = size();
-		auto dest = makeShareDbObject<XDataArray<U>>();
+		auto dest = makeShareDbObject<XDataArray1D<U>>();
 		dest->setComponent(component);
 		dest->setNumOfTuple(tupleNum);
 
@@ -154,6 +156,13 @@ public:
 		setRowDataImpl(std::make_index_sequence<sizeof...(Args)>{}, std::forward_as_tuple(args...));
 	}
 
+    const std::vector<T>* getPtr() const {
+        return &d;
+    }
+
+	std::vector<T>* getPtr() {
+		return &d;
+	}
 private:
 	template<size_t...Is, typename Tuple>
 	void setRowDataImpl(std::index_sequence<Is...>, Tuple&& args) {
@@ -166,18 +175,18 @@ private:
     std::string name;
 };
 
-extern  template class DATABASE_API XDataArray<int>;
-extern  template class DATABASE_API XDataArray<unsigned int>;
-extern  template class DATABASE_API XDataArray<float>;
-extern  template class DATABASE_API XDataArray<double>;
-extern  template class DATABASE_API XDataArray<unsigned char>;
-extern  template class DATABASE_API XDataArray<char>;
-using XIntArray = XDataArray<int>;
-using XUIntArray = XDataArray<unsigned int>;
-using XFloatArray = XDataArray<float>;
-using XDoubleArray = XDataArray<double>;
-using XUCharArray = XDataArray<unsigned char>;
-using XCharArray = XDataArray<char>;
+extern  template class DATABASE_API XDataArray1D<int>;
+extern  template class DATABASE_API XDataArray1D<unsigned int>;
+extern  template class DATABASE_API XDataArray1D<float>;
+extern  template class DATABASE_API XDataArray1D<double>;
+extern  template class DATABASE_API XDataArray1D<unsigned char>;
+extern  template class DATABASE_API XDataArray1D<char>;
+using XIntArray = XDataArray1D<int>;
+using XUIntArray = XDataArray1D<unsigned int>;
+using XFloatArray = XDataArray1D<float>;
+using XDoubleArray = XDataArray1D<double>;
+using XUCharArray = XDataArray1D<unsigned char>;
+using XCharArray = XDataArray1D<char>;
 
 
 /// <summary>
@@ -187,13 +196,14 @@ template<typename T>
 class XDataArray2D : public XDataBaseObject
 {
     REGISTER_CLASS_META_DATA(XDataArray2D<T>, XDataBaseObject);
+    using value_type = T;
  protected:
     XDataArray2D() {
-        mData = makeShareDbObject<XDataArray<T>>();
+        mData = makeShareDbObject<XDataArray1D<T>>();
     }
 
 	XDataArray2D(int width, int height,int component=1 ) {
-		mData = makeShareDbObject<XDataArray<T>>();
+		mData = makeShareDbObject<XDataArray1D<T>>();
 		setComponent(component);
         setDimensions(width,height);
 	}
@@ -255,7 +265,7 @@ public:
 	}
 
     template<typename U>
-    void memCopy(sptr<XDataArray<U>> inputData) {
+    void memCopy(sptr<XDataArray1D<U>> inputData) {
         if(!inputData)
             return ;
 
@@ -322,7 +332,7 @@ private:
         auto col = mCol;
         auto size = mData->size();
 
-        auto newData = makeShareDbObject<XDataArray<T>>();
+        auto newData = makeShareDbObject<XDataArray1D<T>>();
         newData->setComponent(component);
         newData->setNumOfTuple(row*col);
        
@@ -394,9 +404,15 @@ private:
 		return dest;
 	}
     #endif
+	const std::vector<T>* getPtr() const {
+		return mData->getPtr();
+	}
 
+	std::vector<T>* getPtr() {
+		return mData->getPtr();
+	}
 private:
-    std::shared_ptr<XDataArray<T>> mData;        //实际存储的数据
+    std::shared_ptr<XDataArray1D<T>> mData;        //实际存储的数据
  private:
     unsigned int mRow = 0;  //行数，从上到下递增
     unsigned int mCol = 0;    //列数，从左到右递增
@@ -423,13 +439,14 @@ private:
  class XDataArray3D : public XDataBaseObject
  {
      REGISTER_CLASS_META_DATA(XDataArray3D<T>, XDataBaseObject);
+     using value_type = T;
  protected:
      XDataArray3D() {
-		 mData = makeShareDbObject<XDataArray<T>>();
+		 mData = makeShareDbObject<XDataArray1D<T>>();
 	 }
 
 	 XDataArray3D(int width,int height,int zlen,int component=1) {
-		 mData = makeShareDbObject<XDataArray<T>>();
+		 mData = makeShareDbObject<XDataArray1D<T>>();
          setComponent(1);
          setDimensions(width,height,zlen);
 	 }
@@ -440,6 +457,9 @@ public:
 		mData->setName(n);
 	}
 
+	std::string getName() const {
+		return mData->getName();
+	}
 	void setComponent(unsigned int com) {
 		mData->setComponent(com);
 	}
@@ -518,7 +538,7 @@ public:
     }
 
     template<typename U>
-	void memCopy(sptr< XDataArray<U>> InputData) {
+	void memCopy(sptr< XDataArray1D<U>> InputData) {
 		if (!InputData)
 			return;
 
@@ -599,7 +619,14 @@ public:
 	void setRowData(Args&& ...args) {
 		setRowDataImpl(std::make_index_sequence<sizeof...(Args)>{}, std::forward_as_tuple(args...));
 	}
+  public:
+		const std::vector<T>* getPtr() const {
+			return mData->getPtr();
+		}
 
+		std::vector<T>* getPtr() {
+			return mData->getPtr();
+		}
 private:
 	template<size_t...Is, typename Tuple>
 	void setRowDataImpl(std::index_sequence<Is...>, Tuple&& args) {
@@ -607,7 +634,7 @@ private:
 		((dest[Is] = std::get<Is>(std::forward<Tuple>(args))), ...);
 	}
  private:
-	 std::shared_ptr<XDataArray<T>> mData;        //实际存储的数据
+	 std::shared_ptr<XDataArray1D<T>> mData;        //实际存储的数据
  private:
 	 unsigned int mRow = 0;         //行数，从上到下递增    高
 	 unsigned int mCol = 0;           //列数，从左到右递增    宽
