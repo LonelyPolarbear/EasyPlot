@@ -64,9 +64,9 @@ public:
 		return mDataList[index];
 	}
 
-	virtual int attrCount() const {return 0;}
+	int attrCount() const override;
 
-	virtual sptr<XDataAttribute> attrAt(int index) const{return {}; }
+	sptr<XDataAttribute> attrAt(int index) const override;
 
 	iterator begin() {
 		return mDataList.begin();
@@ -97,6 +97,9 @@ public:
 			remove(*mDataList.begin());
 		}
 	}
+
+	virtual void serialize(HighFive::Group& group);
+	virtual void deserialize(HighFive::Group& group);
 
 protected:
 	std::vector<sptr<XDataObject>> mDataList;

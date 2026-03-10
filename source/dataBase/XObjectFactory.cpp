@@ -4,6 +4,8 @@
 #include "XDataObject.h"
 #include "XDataList.h"
 #include "XClolor.h"
+#include "XRefAttribute.h"
+#include "XDataArray.h"
 namespace XBaseObjectMeta {
 	void InitAttrWrite();
 	void InitAttrRead();
@@ -58,8 +60,30 @@ namespace XBaseObjectMeta {
 		}
 	}
 
+
 	DATABASE_API void InitializeCoreTypes()
 	{
+		registerObject<XIntArray>();
+		registerObject<XUIntArray>();
+		registerObject<XFloatArray>();
+		registerObject<XDoubleArray>();
+		registerObject<XUCharArray>();
+		registerObject<XCharArray>();
+
+		registerObject<XIntArray2D>();
+		registerObject<XUIntArray2D>();
+		registerObject<XFloatArray2D>();
+		registerObject<XDoubleArray2D>();
+		registerObject<XUCharArray2D>();
+		registerObject<XCharArray2D>();
+
+		registerObject<XIntArray3D>();
+		registerObject<XUIntArray3D>();
+		registerObject<XFloatArray3D>();
+		registerObject<XDoubleArray3D>();
+		registerObject<XUCharArray3D>();
+		registerObject<XCharArray3D>();
+
 		registerObject<XBaseObject>();
 		registerObject<XDataBaseObject>();
 		registerObject<XDataObject>();
@@ -105,6 +129,7 @@ namespace XBaseObjectMeta {
 		registerObject<XAttr_Recti>();
 		registerObject<XAttr_Rectu>();
 		registerObject<XDataListT<XDataObject>>();
+		registerObject<XRefAttribute>();
 
 		InitAttrWrite();
 		InitAttrRead();

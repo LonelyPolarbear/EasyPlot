@@ -13,6 +13,7 @@
 template<typename T>
 class XDataArray : public XDataBaseObject
 {
+    REGISTER_CLASS_META_DATA(XDataArray<T>, XDataBaseObject);
  protected:
     XDataArray():XDataBaseObject(){}
     XDataArray( int tupleNum,int componentNum=1) :XDataBaseObject() {
@@ -185,6 +186,7 @@ using XCharArray = XDataArray<char>;
 template<typename T>
 class XDataArray2D : public XDataBaseObject
 {
+    REGISTER_CLASS_META_DATA(XDataArray2D<T>, XDataBaseObject);
  protected:
     XDataArray2D() {
         mData = makeShareDbObject<XDataArray<T>>();
@@ -420,6 +422,7 @@ private:
  template<typename T>
  class XDataArray3D : public XDataBaseObject
  {
+     REGISTER_CLASS_META_DATA(XDataArray3D<T>, XDataBaseObject);
  protected:
      XDataArray3D() {
 		 mData = makeShareDbObject<XDataArray<T>>();

@@ -204,9 +204,24 @@ void testSerialization() {
 	me->mShoe->AttrSize->setValue(42);
 
 	me->mPants->setName("BM");
+	me->mPants->AttrPrice->setValue(125);
+	me->mPants->AttrSize->setValue(175);
 
 	me->mFriends->setName("friends");
-	me->mFriends->append(makeShareDbObject<Person>());
+	
+	{
+		auto wife =makeShareDbObject<Person>();
+		wife->AttrName->setValue("XQ");
+		wife->mShoe->AttrName->setValue("Shock");
+		wife->mShoe->AttrPrice->setValue(260);
+		wife->mShoe->AttrColor->setValue(XQ::XColor(255, 0, 0, 255));
+		wife->mShoe->AttrSize->setValue(42);
+
+		wife->mPants->setName("BSD");
+		wife->mFriends->setName("NoFriends");
+		me->mFriends->append(wife);
+	}
+	
 
 	HighFive::File file("me.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
 	auto ss = me->getName();
@@ -226,8 +241,10 @@ void testDeserialization() {
 
 	auto me =makeShareDbObject<Person>();
 	{
+		me->beginBatch();
 		HighFive::File file("me.h5", HighFive::File::ReadOnly);
 		me->deserialize(file.getGroup("swj"));
+		me->endBatch();
 	}
 	{
 		HighFive::File file("meCopy.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
@@ -266,7 +283,7 @@ int main() {
 	//testXDataObject01();
 	//testXDataObject02();
 	//testSerialization();
-	//testDeserialization();
-	testXDataPath();
+	testDeserialization();
+	//testXDataPath();
 	return 1;
 }
