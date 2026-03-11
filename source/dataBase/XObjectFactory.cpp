@@ -62,6 +62,28 @@ namespace XBaseObjectMeta {
 		}
 	}
 
+	DATABASE_API bool IsA(const std::string& className, const std::string& baseClassName)
+	{	
+		if(className == baseClassName)
+			return true;
+		auto parents = GetParents(className);
+		if (parents.size() > 0) {
+			if (std::find(parents.begin(), parents.end(), className) != parents.end()) {
+				return true;
+			}
+			else {
+				//遍历每一父类
+				for (auto parent : parents) {
+					if (IsA(parent, baseClassName)) {
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+		return false;
+	}
+
 
 	DATABASE_API void InitializeCoreTypes()
 	{
@@ -352,10 +374,40 @@ namespace XBaseObjectMeta {
 //数据写
 namespace XBaseObjectMeta {
 	template<typename T>
-	void writeData(HighFive::Group& group, const std::string&name, void*data) {
-		T *pdata = (T*)(data);
-		auto  dataset =group.createDataSet(name,*pdata);
-		dataset.createAttribute("className", XQ_META::ClassName<T>());
+	struct writeVecData;
+
+	template<unsigned N, typename T>
+	struct writeVecData<XQ::Vector<N, T>> {
+		static void write(HighFive::Group& group, const std::string&name, void*data) {
+			XQ::Vector<N, T>* pdata = (XQ::Vector<N, T>*)(data);
+
+			auto  dataset = group.createDataSet(name, HighFive::DataSpace{N,1 }, HighFive::create_datatype<T>());
+			dataset.write_raw(pdata->data, HighFive::create_datatype<T>());
+			dataset.createAttribute("className", XQ_META::ClassName<XQ::Vector<N, T>>());
+		}
+	};
+
+	template<typename T>
+	void writeData(HighFive::Group& group, const std::string& name, void* data) {
+		if constexpr (XTraits::is_xq_vector_v<T>) {
+			writeVecData<T>::write(group, name,data);
+		}
+		else {
+			if constexpr (std::is_same_v<T, XQ::XColor>) {
+				XQ::XColor* pdata = (XQ::XColor*)(data);
+
+				XQ::Vec4u8 color(pdata->r(), pdata->g(), pdata->b(), pdata->a() );
+
+				auto  dataset = group.createDataSet(name, HighFive::DataSpace{ 4,1 }, HighFive::create_datatype<unsigned char>());
+				dataset.write_raw(color.data, HighFive::create_datatype<unsigned char>());
+				dataset.createAttribute("className", XQ_META::ClassName<T>());
+			}
+			else {
+				T* pdata = (T*)(data);
+				auto  dataset = group.createDataSet(name, *pdata);
+				dataset.createAttribute("className", XQ_META::ClassName<T>());
+			}
+		}
 	}
 
 	template<typename T>
@@ -419,6 +471,8 @@ namespace XBaseObjectMeta {
 		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<float>(), writeData<float>);
 		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<unsigned int>(), writeData<unsigned int>);
 
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::XColor>(), writeData<XQ::XColor>);
+
 		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XIntArray>(), writeDataArrayID<XIntArray>);
 		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray>(), writeDataArrayID<XUIntArray>);
 		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray>(), writeDataArrayID<XFloatArray>);
@@ -439,15 +493,67 @@ namespace XBaseObjectMeta {
 		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray3D>(), writeDataArray3D<XDoubleArray3D>);
 		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray3D>(), writeDataArray3D<XUCharArray3D>);
 		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XCharArray3D>(), writeDataArray3D<XCharArray3D>);
+
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), writeData<XQ::Vec2f>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), writeData<XQ::Vec2d>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), writeData<XQ::Vec2i>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), writeData<XQ::Vec2u>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), writeData<XQ::Vec2u8>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), writeData<XQ::Vec2i8>);
+
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), writeData<XQ::Vec3f>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), writeData<XQ::Vec3d>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), writeData<XQ::Vec3i>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), writeData<XQ::Vec3u>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), writeData<XQ::Vec3u8>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), writeData<XQ::Vec3i8>);
+
+
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), writeData<XQ::Vec4f>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), writeData<XQ::Vec4d>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), writeData<XQ::Vec4i>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), writeData<XQ::Vec4u>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), writeData<XQ::Vec4u8>);
+		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), writeData<XQ::Vec4i8>);
+
 	}
 }
 
 //数据读
 namespace XBaseObjectMeta {
+
+	template<typename T>
+	struct readVecData;
+
+	template<unsigned N, typename T>
+	struct readVecData<XQ::Vector<N, T>> {
+		static void read(HighFive::DataSet& dataset, void* data) {
+			XQ::Vector<N, T>* pdata = (XQ::Vector<N, T>*)(data);
+			std::vector<T> vec;
+			dataset.read(vec);
+			for (int i = 0; i < N; i++) {
+				pdata->data[i] = vec[i];
+			}
+		}
+	};
+
 	template<typename T>
 	void readData(HighFive::DataSet& dataset, void* data) {
-		T* pdata = (T*)(data);
-		dataset.read(*pdata);
+		if constexpr (XTraits::is_xq_vector_v<T>) {
+			readVecData<T>::read(dataset, data);
+		}
+		else {
+			if constexpr (std::is_same_v<T, XQ::XColor>) {
+				std::vector<unsigned char> vec;
+				dataset.read(vec);
+				XQ::XColor* pdata = (XQ::XColor*)(data);
+				pdata->setData(vec[0], vec[1], vec[2], vec[3]);
+			}
+			else {
+				T* pdata = (T*)(data);
+				dataset.read(*pdata);
+			}
+		}
 	}
 
 	template<typename T>
@@ -520,6 +626,8 @@ namespace XBaseObjectMeta {
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<float>(), readData<float>);
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<unsigned int>(), readData<unsigned int>);
 
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::XColor>(), readData<XQ::XColor>);
+
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XIntArray>(), readDataArrayID<XIntArray>);
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray>(), readDataArrayID<XUIntArray>);
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray>(), readDataArrayID<XFloatArray>);
@@ -540,5 +648,26 @@ namespace XBaseObjectMeta {
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray3D>(), readDataArray3D<XDoubleArray3D>);
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray3D>(), readDataArray3D<XUCharArray3D>);
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XCharArray3D>(), readDataArray3D<XCharArray3D>);
+
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), readData<XQ::Vec2f>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), readData<XQ::Vec2d>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), readData<XQ::Vec2i>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), readData<XQ::Vec2u>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), readData<XQ::Vec2u8>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), readData<XQ::Vec2i8>);
+
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), readData<XQ::Vec3f>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), readData<XQ::Vec3d>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), readData<XQ::Vec3i>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), readData<XQ::Vec3u>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), readData<XQ::Vec3u8>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), readData<XQ::Vec3i8>);
+
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), readData<XQ::Vec4f>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), readData<XQ::Vec4d>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), readData<XQ::Vec4i>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), readData<XQ::Vec4u>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), readData<XQ::Vec4u8>);
+		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), readData<XQ::Vec4i8>);
 	}
 }

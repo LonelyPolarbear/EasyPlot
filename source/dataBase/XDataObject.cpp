@@ -66,8 +66,8 @@ sptr<XDataObject> XDataObject::getParent() const
 void XDataObject::Init()
 {
 	XDataBaseObject::Init();
-	XQ_ATTR_ADD_INIT(AttrVisible, true);
 	XQ_ATTR_ADD_INIT(AttrName, getClassName()+"_"+std::to_string(mUid));
+	XQ_ATTR_ADD_INIT(AttrVisible, true);
 	xsig::connect(this, &XDataObject::sigDataChanged, this, &XDataObject::DataChangedCB);
 }
 

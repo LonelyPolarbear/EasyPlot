@@ -22,6 +22,8 @@ namespace XQ {
 		double g2() const;
 		double b2() const;
 		double a2() const;
+
+		void setData(unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
 	protected:
 		XQ::Vec4u8 mData = XQ::Vec4u8(0,0,0,255);		//ÑÕÉ«·¶Î§0-255
 	public:

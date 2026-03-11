@@ -31,6 +31,8 @@ namespace XBaseObjectMeta {
 
 	extern DATABASE_API std::vector<std::string> GetParents(const std::string& className);
 
+	extern DATABASE_API bool IsA(const std::string& className,const std::string& baseClassName);
+
 	extern "C" {
 		DATABASE_API void InitializeCoreTypes();
 	}

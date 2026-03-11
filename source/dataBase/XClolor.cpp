@@ -74,4 +74,8 @@ namespace XQ {
 	{
 		return mData.a() / 255.;
 	}
+	void XColor::setData(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+	{
+		mData.setValues(r, g, b, a);
+	}
 } // namespace XQ
