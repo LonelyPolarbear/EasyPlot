@@ -1,6 +1,10 @@
 #include "XRenderNodeAttribute.h"
 #include "lib05_shapeApi.h"
 
+template class LIB05_SHAPE_API XDataAttributeEnum<PolygonMode>;
+template class LIB05_SHAPE_API XDataAttributeEnum<PrimitveType>;
+template class LIB05_SHAPE_API XDataAttributeEnum<ColorMode>;
+
 XRenderNode3DAttribute::XRenderNode3DAttribute()
 {
 }

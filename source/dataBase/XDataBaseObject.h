@@ -66,6 +66,18 @@ struct XQ_META {
 		return std::string(name);
 	}
 
+	template<typename E>
+	static std::map< int,std::string> get_enum_map() {
+		std::map< int, std::string> enum_map;
+		auto names = magic_enum::enum_names<E>();
+		auto values = magic_enum::enum_values<E>();
+		auto num = names.size();
+		for (int i = 0; i < num; i++) {
+			enum_map.insert({(int)values[i],std::string(names[i])});
+		}
+		return enum_map;
+	}
+
 	// ------------------------- ¸¨Öúº¯Êý£º½«·ÃÎÊÐÞÊÎ·û×ªÎª×Ö·û´® ----------
 	static std::string_view access_modifier_to_string(unsigned mod) {
 		using namespace boost::describe;

@@ -11,6 +11,7 @@ namespace XBaseObjectMeta {
 	void InitAttrRead();
 	void InitDataWrite();
 	void InitDataRead();
+	void InitAttrToString();
 }
 namespace XBaseObjectMeta {
 	static std::map<std::string, std::vector<std::string>> xobject_inheritMap;
@@ -160,6 +161,8 @@ namespace XBaseObjectMeta {
 
 		InitDataWrite();
 		InitDataRead();
+
+		InitAttrToString();
 	}
 }
 
@@ -669,5 +672,72 @@ namespace XBaseObjectMeta {
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), readData<XQ::Vec4u>);
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), readData<XQ::Vec4u8>);
 		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), readData<XQ::Vec4i8>);
+	}
+}
+
+namespace XBaseObjectMeta {
+	template<typename T>
+	std::string valueToString(const T& value) {
+		if constexpr (std::is_arithmetic_v<T>) {
+			return std::to_string(value);
+		}
+
+		if constexpr (XTraits::is_xq_vector_v<T>) {
+			return "xvector";
+		}
+
+		if constexpr (std::is_same_v<T, XQ::XColor>) {
+			return "xcolor";
+		}
+
+		if constexpr (std::is_same_v<T, std::string>) {
+			return value;
+		}
+
+		return "unKnown";
+	}
+
+	template<typename T>
+	std::string XattrToString(sptr<XDataAttribute> attr_) {
+		auto attr = attr_->asDerived<XDataAttributeT<T>>();
+		const auto& value = attr->getValue();
+		return valueToString(value);
+	}
+
+
+	std::string  XattrEnumBaseToQstring(sptr<XDataAttribute> attr_) {
+		auto attr = attr_->asDerived<XDataAttributeEnumBase>();
+		const auto& value = attr->getIntValue();
+		return valueToString(value);
+	}
+
+	void InitAttrToString() {
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Color>(), XattrToString<XQ::XColor>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Int>(), XattrToString<int>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Bool>(), XattrToString<bool>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_UInt>(), XattrToString<unsigned int>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Float>(), XattrToString<float>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Double>(), XattrToString<double>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_String>(), XattrToString<std::string>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2f>(), XattrToString<XQ::Vec2f>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2d>(), XattrToString<XQ::Vec2d>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2i>(), XattrToString<XQ::Vec2i>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2u>(), XattrToString<XQ::Vec2u>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2u8>(), XattrToString<XQ::Vec2u8>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2i8>(), XattrToString<XQ::Vec2i8>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3f>(), XattrToString<XQ::Vec3f>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3d>(), XattrToString<XQ::Vec3d>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3i>(), XattrToString<XQ::Vec3i>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3u>(), XattrToString<XQ::Vec3u>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3u8>(), XattrToString<XQ::Vec3u8>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3i8>(), XattrToString<XQ::Vec3i8>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4f>(), XattrToString<XQ::Vec4f>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4d>(), XattrToString<XQ::Vec4d>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4i>(), XattrToString<XQ::Vec4i>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4u>(), XattrToString<XQ::Vec4u>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4u8>(), XattrToString<XQ::Vec4u8>);
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4i8>(), XattrToString<XQ::Vec4i8>);
+
+		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XDataAttributeEnumBase>(), XattrEnumBaseToQstring);
 	}
 }

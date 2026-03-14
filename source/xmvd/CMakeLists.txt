@@ -20,7 +20,7 @@ file(GLOB_RECURSE SOURCES_FILES *.cpp)
 #Qt支持
 #-------------------------------------------------------
 #查找所有的需要moc预处理的文件
-set(MOC_FILES  XDataObjectTableModel.h XDataObjectTableView.h XAttrItemDelegate.h XColorCombobox.h)
+set(MOC_FILES  XDataObjectTableModel.h XDataObjectTableView.h XAttrItemDelegate.h XColorCombobox.h XDataObjectTreeModel.h XDataObjectTreeView.h)
 
 #GLOB_RECURSE 
 FILE(GLOB UI_FILES "ui/*.ui")
@@ -71,6 +71,7 @@ LIST(APPEND LIB_NAMES
 				Qt5::Core
 				XUtilty${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
+				xshape${DLL_DEBUG_POSTFIX}
 )
 
 list(APPEND LIB_DIRECTORIES 

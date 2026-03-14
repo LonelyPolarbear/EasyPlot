@@ -3,6 +3,7 @@
 #include "XColorCombobox.h"
 #include <dataBase/XDataAttribute.h>
 #include <QColor>
+#include <lib05_shape/XRenderNodeAttribute.h>
 
 XDataObjectTableModel* getXDataObjectTableModel(const QModelIndex& index) {
 	return const_cast<XDataObjectTableModel*>(qobject_cast<const XDataObjectTableModel*>(index.model()));
@@ -152,13 +153,71 @@ void SetModelData_XAttr_Color(void* model_, QWidget* editor, sptr<XDataAttribute
 	}
 }
 
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+template<typename E>
+QWidget* CreateEditor_XAttr_Enum(QWidget* parent, const QStyleOptionViewItem& option, sptr<XDataAttribute> attr, XAttrItemDelegate* delegate) {
+	auto className = attr->getClassName();
+	if (className == XQ_META::ClassName<XAttr_Enum<E>>()) {
+		QComboBox* editor = new QComboBox(parent);
+
+		auto map = XQ_META::get_enum_map<E>();
+		for (auto s : map) {
+			editor->addItem(QString::fromStdString(s.second), s.first);
+		}
+
+		// 连接信号槽，当编辑完成时提交数据
+		QObject::connect(editor, qOverload<int>(&QComboBox::currentIndexChanged),
+			[delegate, editor](int index) {
+				QVariant currentValue = editor->itemData(index);
+				delegate->eimtCommitData(editor);
+				delegate->emitCloseEditor(editor);
+			});
+
+		return editor;
+	}
+	return nullptr;
+}
+
+template<typename E>
+void SetEditorData_XAttr_Enum(QWidget* editor, sptr<XDataAttribute> attr) {
+	auto color_attr = attr->asDerived<XAttr_Enum<E>>();
+	auto mode = color_attr->getValue();
+	QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
+
+	comboBox->setCurrentText( QString::fromStdString(XQ_META::enum_to_string(mode)) );
+}
+
+void SetModelData_XAttr_Enum(void* model_, QWidget* editor, sptr<XDataAttribute>, const QModelIndex& index) {
+	QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
+	XDataObjectTableModel* model = (XDataObjectTableModel*)model_;
+	if (comboBox) {
+		auto i = comboBox->currentIndex();
+		auto variant = comboBox->itemData(i);
+		model->setData(index, variant, Qt::EditRole);
+	}
+}
+
 template class XMVD_API classProcessorFactory<1, QWidget* (QWidget*, const QStyleOptionViewItem&, sptr<XDataAttribute>, XAttrItemDelegate*)>;
 template class XMVD_API classProcessorFactory<1, void(QWidget*, sptr<XDataAttribute>)>;
 template class XMVD_API classProcessorFactory<1, void(void* model, QWidget*, sptr<XDataAttribute>, const QModelIndex& index)>;
 
 void XMVD_API InitXAttrItemDelegate()
 {
+
 	XAttrItemDelegateCreateEditorFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Color>(), CreateEditor_XAttr_Color);
 	XAttrItemDelegateSetEditorDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Color>(), SetEditorData_XAttr_Color);
 	XAttrItemDelegatesetModelDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Color>(), SetModelData_XAttr_Color);
+
+	XAttrItemDelegateCreateEditorFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), CreateEditor_XAttr_Enum<PolygonMode>);
+	XAttrItemDelegateSetEditorDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), SetEditorData_XAttr_Enum<PolygonMode>);
+	XAttrItemDelegatesetModelDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), SetModelData_XAttr_Enum);
+
+	XAttrItemDelegateCreateEditorFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), CreateEditor_XAttr_Enum<PrimitveType>);
+	XAttrItemDelegateSetEditorDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), SetEditorData_XAttr_Enum<PrimitveType>);
+	XAttrItemDelegatesetModelDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), SetModelData_XAttr_Enum);
+
+	XAttrItemDelegateCreateEditorFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), CreateEditor_XAttr_Enum<ColorMode>);
+	XAttrItemDelegateSetEditorDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), SetEditorData_XAttr_Enum<ColorMode>);
+	XAttrItemDelegatesetModelDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), SetModelData_XAttr_Enum);
 }

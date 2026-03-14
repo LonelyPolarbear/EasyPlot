@@ -57,6 +57,9 @@ using XattrSerializer = classProcessorFactory<1, void(HighFive::Group& group, sp
 extern template class DATABASE_API classProcessorFactory<2, void(HighFive::Group& group, sptr<XDataAttribute>)>;
 using XattrDeserializer = classProcessorFactory<2, void(HighFive::Group& group, sptr<XDataAttribute>)>;
 
+extern template class DATABASE_API classProcessorFactory<1, std::string(sptr<XDataAttribute>)>;
+using XattrToQstringFactory = classProcessorFactory<1, std::string(sptr<XDataAttribute>)>;
+
 template<typename T>
 class XDataAttributeT : public XDataAttribute {
 	REGISTER_CLASS_META_DATA(XDataAttributeT<T>, XDataAttribute);
@@ -152,6 +155,13 @@ public:
 
 template<typename T>
 using XAttr_Enum = XDataAttributeEnum<T>;
+
+template<typename T>
+std::string XattrEnumToString(sptr<XDataAttribute> attr_) {
+	auto attr = attr_->asDerived<XDataAttributeEnum<T>>();
+	const auto& value = attr->getValue();
+	return XQ_META::enum_to_string(value);
+}
 
 extern template class DATABASE_API XDataAttributeT<int>;
 extern template class DATABASE_API XDataAttributeT<bool>;

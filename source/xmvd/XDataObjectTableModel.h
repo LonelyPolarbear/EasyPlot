@@ -4,8 +4,7 @@
 #include <QAbstractTableModel>
 #include <memory>
 
-extern template class XMVD_API classProcessorFactory<1, QString(sptr<XDataAttribute>)>;
-using XattrToQstringFactory = classProcessorFactory<1, QString(sptr<XDataAttribute>)>;
+
 
 class XDataObject;
 class XDataAttribute;

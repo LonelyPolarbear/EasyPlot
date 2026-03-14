@@ -18,7 +18,6 @@ enum  class LIB05_SHAPE_API graphicsItemType {
 	text
 };
 
-
 enum class LIB05_SHAPE_API  ColorMode {
 	SingleColor = 1,
 	VertexColor = 2,
@@ -36,6 +35,11 @@ enum class LIB05_SHAPE_API  PolygonMode {
 	line_and_face = line | face,
 	all = point | line | face
 };
+
+
+extern template class LIB05_SHAPE_API XDataAttributeEnum<PolygonMode>;
+extern template class LIB05_SHAPE_API XDataAttributeEnum<PrimitveType>;
+extern template class LIB05_SHAPE_API XDataAttributeEnum<ColorMode>;
 
 class LIB05_SHAPE_API XRenderNodeAttribute :public XDataObject {
 	REGISTER_CLASS_META_DATA(XRenderNodeAttribute,XDataObject);

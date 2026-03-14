@@ -8,6 +8,7 @@ static std::atomic< uint64_t>  object_id_counter(0);
 
 template class classProcessorFactory<1, void(HighFive::Group& group, sptr<XDataAttribute>)>;
 template class classProcessorFactory<2, void(HighFive::Group& group, sptr<XDataAttribute>)>;
+template class classProcessorFactory<1, std::string(sptr<XDataAttribute>)>;
 
 XDataAttribute::XDataAttribute():mUid(object_id_counter++),mName(std::to_string(mUid))
 {

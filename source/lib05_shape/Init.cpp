@@ -4,8 +4,23 @@
 #include "XGeometryNode.h"
 #include "XRenderNodeAttribute.h"
 
+static void InitBaseObjectMeta();
+
+static void InitAttrSerialize();
+
+static void InitDataSerialize();
+
+static void InitAttrToString();
+
 LIB05_SHAPE_API void InitRenderNode()
 {
+	InitBaseObjectMeta();
+	InitAttrToString();
+
+}
+
+static void InitBaseObjectMeta() {
+
 	XBaseObjectMeta::registerObject<XRenderNode>();
 	XBaseObjectMeta::registerObject<XDrawableRenderNode>();
 	XBaseObjectMeta::registerObject<XGroupRenderNode>();
@@ -17,9 +32,15 @@ LIB05_SHAPE_API void InitRenderNode()
 
 	XBaseObjectMeta::registerObject<XRenderNodeAttribute>();
 
-
 	//
 	XBaseObjectMeta::registerObject<XAttr_Enum<PolygonMode>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<ColorMode>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<PrimitveType>>();
+}
+
+
+static void InitAttrToString() {
+	XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), XattrEnumToString<PolygonMode>);
+	XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), XattrEnumToString<ColorMode>);
+	XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), XattrEnumToString<PrimitveType>);
 }

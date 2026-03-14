@@ -33,6 +33,7 @@ SET(LIB_NAMES
 	${libName}${DLL_DEBUG_POSTFIX}
 	XUtilty${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}
+	xshape${DLL_DEBUG_POSTFIX}
 	 MyLib::HeaderOnly
 	 MyLib::HDF5
 	 Qt5::Widgets

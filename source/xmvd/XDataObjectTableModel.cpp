@@ -4,8 +4,6 @@
 #include <QVector>
 #include <QColor>
 
-template class XMVD_API classProcessorFactory<1, QString(sptr<XDataAttribute>)>;
-
 class XDataObjectTableModel::Internal {
 public:
 	wptr<XDataObject> data;
@@ -49,6 +47,36 @@ public:
 
 	bool isColorAttr(sptr<XDataAttribute> attr) {
 		return attr->getClassName() == XQ_META::ClassName<XAttr_Color>();
+	}
+
+	bool isEnumAttr(sptr<XDataAttribute> attr) {
+		return XBaseObjectMeta::IsA(attr->getClassName(), XQ_META::ClassName<XDataAttributeEnumBase>());
+	}
+
+	bool isStrAttr(sptr<XDataAttribute> attr) {
+		return attr->getClassName() == XQ_META::ClassName<XAttr_String>();
+	}
+
+	bool isDigitAttr(sptr<XDataAttribute> attr,int & type) {
+		auto className = attr->getClassName();
+		
+		if (className == XQ_META::ClassName<XAttr_Int>()) {
+			type = 1;
+			return true;
+		}
+		else if (className == XQ_META::ClassName<XAttr_UInt>()) {
+			type = 2;
+			return true;
+		}
+		else if (className == XQ_META::ClassName<XAttr_Float>()) {
+			type = 3;
+			return true;
+		}
+		else if (className == XQ_META::ClassName<XAttr_Double>()) {
+			type = 4;
+			return true;
+		}
+		return false;
 	}
 
 	sptr<XDataAttribute>  getAttr(const QModelIndex& index) {
@@ -106,9 +134,9 @@ QVariant XDataObjectTableModel::data(const QModelIndex& index, int role) const
 			}
 			else {
 				if (XattrToQstringFactory::instance().hasProcessor(className)) {
-					return XattrToQstringFactory::instance().process(className, attr);
+					return QString::fromStdString(XattrToQstringFactory::instance().process(className, attr));
 				}
-				return "unknown";
+				return QString::fromStdString(className);
 			}
 			
 		}
@@ -178,12 +206,46 @@ bool XDataObjectTableModel::setData(const QModelIndex& index, const QVariant& va
 			emit dataChanged(index, index);
 			return true;
 		}
-		else if (role ==Qt::EditRole && mData->isColorAttr(attr)) {
-			auto colorAttr = attr->asDerived<XAttr_Color>();
-			QColor c =value.value<QColor>();
-			colorAttr->setValue(XQ::XColor(c.red(), c.green(), c.blue(), c.alpha()));
-			emit dataChanged(index, index);
-			return true;
+		else if (role ==Qt::EditRole) {
+			if (mData->isColorAttr(attr)) {
+				auto colorAttr = attr->asDerived<XAttr_Color>();
+				QColor c = value.value<QColor>();
+				colorAttr->setValue(XQ::XColor(c.red(), c.green(), c.blue(), c.alpha()));
+				emit dataChanged(index, index);
+				return true;
+			}
+			if (mData->isEnumAttr(attr)) {
+				auto enumAttr = attr->asDerived<XDataAttributeEnumBase>();
+				enumAttr->setIntValue(value.toInt());
+				emit dataChanged(index, index);
+				return true;
+			}
+			if (mData->isStrAttr(attr)) {
+				auto strAttr = attr->asDerived<XAttr_String>();
+				strAttr->setValue(value.toString().toStdString());
+				emit dataChanged(index, index);
+				return true;
+			}
+			int type = 0;
+			if (mData->isDigitAttr(attr,type)) {
+				value.toInt();
+				value.toFloat();
+				value.toDouble();
+				if (type == 1) {
+					attr->asDerived<XAttr_Int>()->setValue(value.toInt());
+				}
+				else if (type == 2) {
+					attr->asDerived<XAttr_UInt>()->setValue(value.toInt());
+				}
+				else if (type == 3) {
+					attr->asDerived<XAttr_Float>()->setValue(value.toFloat());
+				}
+				else if (type == 4) {
+					attr->asDerived<XAttr_Double>()->setValue(value.toDouble());
+				}
+				return true;
+			}
+			return false;
 		}
 		else {
 			return false;
