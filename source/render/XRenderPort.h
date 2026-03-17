@@ -6,6 +6,7 @@
 #include <lib00_utilty/XUtilty.h>
 
 class RENDER_API XRenderPort :public XDataObject {
+	REGISTER_CLASS_META_DATA(XRenderPort, XDataObject);
 protected:
 	XRenderPort();
 	~XRenderPort();

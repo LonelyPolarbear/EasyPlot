@@ -24,7 +24,7 @@ public:
 	int getChildCount() const;
 	sptr<XRenderNode> getChild(int index) const;
 	sptr<XRenderNode> getRenderNodeParent() const;
-	void setRenderNodeParent(sptr<XRenderNode> parent);
+	//void setRenderNodeParent(sptr<XRenderNode> parent);
 
 	void setShaderManger(std::shared_ptr<xShaderManger> shaderManger);
 

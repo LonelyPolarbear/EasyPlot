@@ -51,15 +51,18 @@ public:
 	wptr<XOpenGLRenderWindow> m_renderWindow;
 	sptr<XRenderMultiModeInteractionHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
-
-	//std::vector<sptr<XRenderNode>> m_actor3DList;
-
-	sptr<XGroupRenderNode3d> m_group3D;
+	//sptr<XGroupRenderNode3d> m_group3D;
 
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
 	XQ::Vec2f m_mousePos;																								//鼠标在窗口中的位置，未做变换
 	//std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;									//无限网格平面
+
+	xsig::xconnector connector;
+
+	~Internal() {
+		connector.disconnect();
+	}
 };
 
 XRender::XRender():mData(new Internal(this))
@@ -75,8 +78,9 @@ void XRender::Init()
 {
 	XRenderPort::Init();
 	XQ_ATTR_ADD_INIT(AttrActive, false);
+	XQ_XDATA_ADD(m_group3D);
 	auto handler =getOrCreateMultiModeEventHandler();
-	mData->m_group3D = makeShareDbObject<XGroupRenderNode3d>();
+	//mData->m_group3D = makeShareDbObject<XGroupRenderNode3d>();
 }
 
 void XRender::setRenderWindow(sptr<XOpenGLRenderWindow> renderWindow)
@@ -124,7 +128,7 @@ void XRender::render(bool isNormal)
 	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::depth_buffer_bit);
 
 	//for (auto actor : mData->m_actor3DList) {
-		mData->m_group3D->draw(Eigen::Matrix4f::Identity(), isNormal);
+		m_group3D->draw(Eigen::Matrix4f::Identity(), isNormal);
 	//}
 	enable->restore();
 
@@ -218,32 +222,32 @@ bool XRender::connectToRenderWindowSignals()
 		return false;
 	}
 
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonPress, handler, &XInteractionEventHandler::SigLeftButtonPress);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonRelease, handler,&XInteractionEventHandler::SigLeftButtonRelease);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonPress, handler,&XInteractionEventHandler::SigMiddleButtonPress);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonRelease, handler,&XInteractionEventHandler::SigMiddleButtonRelease);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonPress, handler,&XInteractionEventHandler::SigRightButtonPress);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonRelease, handler,&XInteractionEventHandler::SigRightButtonRelease);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigEnter, handler,&XInteractionEventHandler::SigEnter);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeave, handler,&XInteractionEventHandler::SigLeave);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsIn, handler,&XInteractionEventHandler::SigFoucsIn);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsOut, handler,&XInteractionEventHandler::SigFoucsOut);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigResize, handler,&XInteractionEventHandler::SigResize);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigKeyPress, handler,&XInteractionEventHandler::SigKeyPress);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigKeyRelease, handler,&XInteractionEventHandler::SigKeyRelease);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseMove, handler,&XInteractionEventHandler::SigMouseMove);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelForward, handler,&XInteractionEventHandler::SigMouseWheelForward);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelBackward, handler, &XInteractionEventHandler::SigMouseWheelBackward);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigTimeOut, handler, &XInteractionEventHandler::SigTimeOut);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonPress, handler, &XInteractionEventHandler::SigLeftButtonPress);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonRelease, handler, &XInteractionEventHandler::SigLeftButtonRelease);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonPress, handler, &XInteractionEventHandler::SigMiddleButtonPress);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonRelease, handler, &XInteractionEventHandler::SigMiddleButtonRelease);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonPress, handler, &XInteractionEventHandler::SigRightButtonPress);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonRelease, handler, &XInteractionEventHandler::SigRightButtonRelease);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigEnter, handler, &XInteractionEventHandler::SigEnter);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeave, handler, &XInteractionEventHandler::SigLeave);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsIn, handler, &XInteractionEventHandler::SigFoucsIn);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsOut, handler, &XInteractionEventHandler::SigFoucsOut);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigResize, handler, &XInteractionEventHandler::SigResize);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigKeyPress, handler, &XInteractionEventHandler::SigKeyPress);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigKeyRelease, handler, &XInteractionEventHandler::SigKeyRelease);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseMove, handler, &XInteractionEventHandler::SigMouseMove);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelForward, handler, &XInteractionEventHandler::SigMouseWheelForward);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseWheelBackward, handler, &XInteractionEventHandler::SigMouseWheelBackward);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigTimeOut, handler, &XInteractionEventHandler::SigTimeOut);
 
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigUserEvent, this, &XRender::SigUserEvent);
-	xsig::connect(eventDispatcher, &XRenderWindowEventDispatch::SigPredefineEvent, this, &XRender::SigPredefineEvent);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigUserEvent, this, &XRender::SigUserEvent);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigPredefineEvent, this, &XRender::SigPredefineEvent);
 }
 
 void XRender::addRenderNode3D(sptr<XRenderNode>s)
 {
 	s->setShaderManger(getRenderWindow()->getShaderManger());
-	mData->m_group3D->addChild(s);
+	m_group3D->addChild(s);
 }
 
 void XRender::addRenderNode2D(sptr<XGraphicsItem>)
@@ -319,7 +323,7 @@ XQ::InteractMode XRender::getInteractMode() const
 
 sptr<XRenderNode> XRender::getRenderNode3D(int id)
 {
-	return mData->m_group3D->findNodeById(id);
+	return m_group3D->findNodeById(id);
 }
 
 void XRender::updateViewPort(bool isNormal)
@@ -374,7 +378,7 @@ XQ::BoundBox  XRender::computeBoundBox() {
 	constexpr double limitMax = std::numeric_limits<double>::max();
 	constexpr double limitMin = std::numeric_limits<double>::lowest();;
 	XQ::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
-	auto shapeBoundBox = mData->m_group3D->getBoundBox(Eigen::Matrix4f::Identity());
+	auto shapeBoundBox = m_group3D->getBoundBox(Eigen::Matrix4f::Identity());
 
 	boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);
 	boundBox.xmax = std::max(boundBox.xmax, shapeBoundBox.xmax);

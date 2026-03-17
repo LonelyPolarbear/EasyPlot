@@ -22,6 +22,7 @@ LIB05_SHAPE_API void InitRenderNode()
 static void InitBaseObjectMeta() {
 
 	XBaseObjectMeta::registerObject<XRenderNode>();
+	XBaseObjectMeta::registerObject<XDataListT<XRenderNode>>();
 	XBaseObjectMeta::registerObject<XDrawableRenderNode>();
 	XBaseObjectMeta::registerObject<XGroupRenderNode>();
 	XBaseObjectMeta::registerObject<XTransformRenderNode>();

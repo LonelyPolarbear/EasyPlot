@@ -1,9 +1,11 @@
 #include "XDataObjectTreeModel.h"
 #include "XDataObjectTreeItem.h"
+#include <xsignal/XSignal.h>
 
 class XDataObjectTreeModel::Internal {
 	public:
 		std::vector<QString> headers{"Node","ClassName"};
+		xsig::xconnector connector;
 };
 XDataObjectTreeModel::XDataObjectTreeModel(QObject* parent):mData(new Internal)
 {
@@ -27,15 +29,85 @@ XDataObjectTreeItem* XDataObjectTreeModel::getItem(const QModelIndex& index) con
 
 void XDataObjectTreeModel::setRootItem(XDataObjectTreeItem* rootItem)
 {
+	if (m_rootItem == rootItem) {
+		return;
+	}
+	mData->connector.disconnect();
 	m_rootItem = rootItem;
-	beginResetModel();
-	endResetModel();
+	updateModel();
+	if (rootItem) {
+		mData->connector.connect(rootItem, &XDataObjectTreeItem::sigDataAdd, this, &XDataObjectTreeModel::slotAddItem);
+		mData->connector.connect(rootItem, &XDataObjectTreeItem::sigDataRemove,this, &XDataObjectTreeModel::slotRemoveItem);
+	}
 }
 
 void XDataObjectTreeModel::updateModel()
 {
 	beginResetModel();
 	endResetModel();
+}
+
+QModelIndex XDataObjectTreeModel::indexFromItem(XDataObjectTreeItem* item) const
+{
+	if (!item || item == m_rootItem)
+		return QModelIndex();
+	// 获取父节点
+	XDataObjectTreeItem* parent = item->parent();
+	int row = item->index(); 
+	int column = 0; 
+
+	if (parent == m_rootItem)
+		return createIndex(row, column, item);
+
+	QModelIndex parentIndex = indexFromItem(parent);
+	return createIndex(row, column, item);
+}
+
+bool XDataObjectTreeModel::removeItem(XDataObjectTreeItem* item)
+{
+	if (!item || item == m_rootItem)
+		return false;
+	
+	XDataObjectTreeItem* parent = item->parent();
+	QModelIndex parentIndex = indexFromItem(parent);
+
+	int row = item->index();
+	beginRemoveRows(parentIndex, row, row);
+
+	parent->removeChild(item);
+
+	endRemoveRows();
+
+	return true;
+}
+
+bool XDataObjectTreeModel::insertItem(XDataObjectTreeItem* parentItem, XDataObjectTreeItem* item, int row)
+{
+	if (!parentItem || !item)
+		return false;
+
+	QModelIndex parentIndex = indexFromItem(parentItem);
+
+	beginInsertRows(parentIndex, row, row);
+
+	parentItem->addChild(item);
+
+	endInsertRows();
+
+	return true;
+}
+
+void XDataObjectTreeModel::slotRemoveItem(XDataObjectTreeItem* item)
+{
+	removeItem(item);
+}
+
+void XDataObjectTreeModel::slotAddItem(XDataObjectTreeItem* parentItem, XDataObjectTreeItem* item)
+{
+	if (!parentItem || !item)
+		return;
+	auto num = parentItem->childNum();
+	insertItem(parentItem,item,num);
 }
 
 QVariant XDataObjectTreeModel::data(const QModelIndex& index, int role) const

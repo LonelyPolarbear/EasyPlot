@@ -17,7 +17,7 @@ bool XRenderNode::addChild(sptr<XRenderNode> child)
 	auto iter =std::find(renderNodes->begin(), renderNodes->end(), child );
 	if (iter == renderNodes->end()) {
 		renderNodes->append(child);
-		child->setRenderNodeParent(asDerived<XRenderNode>());
+		//child->setRenderNodeParent(asDerived<XRenderNode>()->renderNodes);
 		return true;
 	}
 	return false;
@@ -58,10 +58,10 @@ sptr<XRenderNode> XRenderNode::getRenderNodeParent() const
 	return nullptr;
 }
 
-void XRenderNode::setRenderNodeParent(sptr<XRenderNode> parent)
-{
-	setParent(parent);
-}
+//void XRenderNode::setRenderNodeParent(sptr<XRenderNode> parent)
+//{
+//	setParent(parent);
+//}
 
 void XRenderNode::setShaderManger(std::shared_ptr<xShaderManger> shaderManger)
 {

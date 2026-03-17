@@ -23,6 +23,16 @@ public:
 	XDataObjectTreeItem* getItem(const QModelIndex& index) const;
 	void setRootItem(XDataObjectTreeItem* rootItem);
 	void updateModel();
+
+	QModelIndex XDataObjectTreeModel::indexFromItem(XDataObjectTreeItem* item) const;
+
+	bool removeItem(XDataObjectTreeItem* item);
+
+	bool insertItem(XDataObjectTreeItem* parentItem,  XDataObjectTreeItem* item,int row);
+
+	void slotRemoveItem(XDataObjectTreeItem* item);
+
+	void slotAddItem(XDataObjectTreeItem* parentItem, XDataObjectTreeItem* item);
 protected:
 	XDataObjectTreeItem* m_rootItem=nullptr;
 	class Internal;

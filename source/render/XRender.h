@@ -12,7 +12,9 @@ class XInteractionEventHandler;
 class XGeometryNode;
 class XGraphicsItem;
 class XRenderNode;
+class XGroupRenderNode3d;
 class RENDER_API XRender :public XRenderPort {
+	REGISTER_CLASS_META_DATA(XRender, XRenderPort);
 protected:
 	XRender();
 	~XRender();
@@ -80,6 +82,7 @@ public:
 protected:
 	// Ù–‘
 	csptr<XAttr_Bool> AttrActive;
+	sptr<XGroupRenderNode3d> m_group3D;
 protected:
 
 	void updateViewPort(bool isNormal);

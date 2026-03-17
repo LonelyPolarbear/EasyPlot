@@ -183,14 +183,15 @@ namespace xsig {
 	struct xconnection {
 		xconnection()=default;
 
-		explicit xconnection(boost::signals2::connection con) {
+		explicit xconnection(boost::signals2::connection con,std::string str ="") {
 			handle = con;
+			name = str;
 		}
 		
 		void disconnect() {
 			handle.disconnect();
 		}
-		boost::signals2::connection handle;
+		
 
 		bool connected() const {
 			return handle.connected();
@@ -203,6 +204,9 @@ namespace xsig {
 		 operator boost::signals2::connection() const {
 			return handle;
 		}
+	public:
+			boost::signals2::connection handle;
+			std::string name;
 	};
 
 	using XConnectionContainer = std::set<xconnection>;
@@ -388,7 +392,7 @@ namespace xsig {
 		is_xsignal<signaltype>::value
 		>
 	>
-	xconnection connect(sendertype sender, signaltype senderClass::* signalObj, recivertype recv, slottype f)
+	xconnection connect(sendertype sender, signaltype senderClass::* signalObj, recivertype recv, slottype f, const std::string& name = "")
 	{
 		auto origin_ptr = extract_origin_pointer(sender);
 		if (origin_ptr) {
@@ -396,10 +400,15 @@ namespace xsig {
 				auto con = bSigConnect(&(origin_ptr->*signalObj), recv, f);
 				xconnection ret;
 				ret.handle = con;
+				ret.name = name;
 				return ret;
 			}
 			else {
-				return (origin_ptr->*signalObj).connect(recv, f);
+				auto con = (origin_ptr->*signalObj).connect(recv, f);
+				xconnection ret;
+				ret.handle = con;
+				ret.name = name;
+				return ret;
 			}
 		}	
 		return {};
@@ -413,21 +422,78 @@ namespace xsig {
 			is_xsignal<signaltype>::value
 		>
 	>
-	xconnection connect(sendertype sender, signaltype senderClass::* signalObj, slottype f)
+	xconnection connect(sendertype sender, signaltype senderClass::* signalObj, slottype f,const std::string& name="")
 	{
 		auto origin_ptr = extract_origin_pointer(sender);
 		if (origin_ptr) {
-			if constexpr (!is_xsignal<signaltype>::isBoostSig)
-				return (origin_ptr->*signalObj).connect(f);
+			if constexpr (!is_xsignal<signaltype>::isBoostSig){
+				auto con = (origin_ptr->*signalObj).connect(f);
+				xconnection ret;
+				ret.handle = con;
+				ret.name = name;
+				return ret;
+			}
 			else {
 				auto con =  bSigConnect(&(origin_ptr->*signalObj),f);
 				xconnection ret;
 				ret.handle = con;
+				ret.name =name;
 				return ret;
 			}
 		}		
 		return {};
 	}
+
+	struct xconnector {
+		std::vector<xconnection> cons;
+
+		//³ÉÔ±Ä£°å
+		template <typename sendertype, typename signaltype, typename recivertype,
+			typename senderClass = traits_class_t<     xsig::remove_cvref_t< std::remove_pointer_t<sendertype>   >   >,
+			typename reciverClass = traits_class_t<     xsig::remove_cvref_t< std::remove_pointer_t<recivertype>   >   >,
+			typename slottype /*= typename  trait_member_fun_type<  reciverClass, typename is_xsignal<signaltype>::function_type  >::type*/,
+			typename T = std::enable_if_t<
+			std::is_class_v<senderClass>&&
+			std::is_class_v<reciverClass> &&
+			(std::is_member_function_pointer_v<slottype> || std::is_member_object_pointer_v<slottype>) &&
+			is_xsignal<signaltype>::value
+			>
+		>
+		void connect(sendertype sender, signaltype senderClass::* signalObj, recivertype recv, slottype f,const std::string&name="") {
+			cons.push_back(xsig::connect(sender,signalObj,recv,f,name) );
+		}
+
+		template <typename sendertype, typename signaltype,
+			typename senderClass = traits_class_t<     xsig::remove_cvref_t< std::remove_pointer_t<sendertype>   >   >,
+			typename slottype = std::function< typename is_xsignal<signaltype>::function_type>,
+			typename T = std::enable_if_t<
+			std::is_class_v<senderClass>&&
+			is_xsignal<signaltype>::value
+			>
+		>
+		void connect(sendertype sender, signaltype senderClass::* signalObj, slottype f, const std::string& name="") {
+			cons.push_back(xsig::connect(sender, signalObj, f,name));
+		}
+
+		void disconnect() {
+			for (auto c : cons) {
+				c.disconnect();
+			}
+		}
+
+		void disconnect(const std::string& name) {
+			auto iter = cons.begin();
+			while (iter != cons.end()) {
+				if (iter->name == name) {
+					iter->disconnect();
+					iter = cons.erase(iter);
+				}
+				else {
+					++iter;
+				}
+			}
+		}
+	};
 }
 
 #define XSIGNAL(...) xsig::xsignal<__VA_ARGS__>

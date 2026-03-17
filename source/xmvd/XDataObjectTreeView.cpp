@@ -2,6 +2,8 @@
 #include "XDataObjectTreeModel.h"
 #include "XDataObjectTreeItem.h"
 #include <qheaderview.h>
+#include <QContextMenuEvent>
+#include <QMenu>
 
 class XDataObjectTreeView::Internal {
 public:
@@ -46,6 +48,31 @@ void XDataObjectTreeView::setDataObject(const std::shared_ptr<XDataObject>& data
 	for (int i = 0; i < mData->model->columnCount(); ++i) {
 		resizeColumnToContents(i);
 	}
+}
+
+void XDataObjectTreeView::contextMenuEvent(QContextMenuEvent* event)
+{
+	auto index = indexAt(event->pos());
+	if (!index.isValid())return;
+
+	if (auto item = getItem(currentIndex()))
+	{
+		if (item)
+		{
+			QMenu* pop_menu = new QMenu(this);
+			item->buildContextMen(pop_menu);
+			pop_menu->exec(QCursor::pos());
+			event->accept();
+		}
+	}
+}
+
+XDataObjectTreeItem* XDataObjectTreeView::getItem(const QModelIndex& index)
+{
+	if (auto item = mData->model->getItem(index)) {
+		return item;
+	}
+	return nullptr;
 }
 
 void XDataObjectTreeView::slotCurrentRowChanged(const QModelIndex& current, const QModelIndex& previous)

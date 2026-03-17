@@ -1,17 +1,19 @@
 #include "XDataObjectTreeItem.h"
 #include <dataBase/XDataObject.h>
+#include <dataBase/XDataList.h>
+#include <dataBase/XObjectFactory.h>
+#include <xsignal/XSignal.h>
+#include <QMenu>
 
-void createTreeItemFromObject(XDataObjectTreeItem* parent, std::shared_ptr<XDataObject> object) {
-	auto num = object->childCount();
-	for (int i = 0; i < num; i++) {
-		auto obj = object->childAt(i);
-		auto curItem = new XDataObjectTreeItem(obj, parent);
-		parent->addChild(curItem);
-		createTreeItemFromObject(curItem, obj);
+class XDataObjectTreeItem::Internal {
+public:
+	xsig::xconnector connector;
+	~Internal() {
+		connector.disconnect();
 	}
-}
+};
 
-XDataObjectTreeItem::XDataObjectTreeItem(std::shared_ptr<XDataObject> data, XDataObjectTreeItem* parent):m_parentItem(parent)
+XDataObjectTreeItem::XDataObjectTreeItem(std::shared_ptr<XDataObject> data, XDataObjectTreeItem* parent):m_parentItem(parent),mData(new Internal)
 {
     setData(data);
 }
@@ -60,8 +62,21 @@ void XDataObjectTreeItem::setData(std::shared_ptr<XDataObject> data)
 {
     m_data = data;
 	//°ó¶¨ÐÅºÅ
-	//data->sigDataAdd
-	//sigDataRemove
+    mData->connector.connect(data,&XDataObject::sigDataAdd,[this](sptr<XDataObject> subData){
+        auto item =InitFromDataObject( subData,this);
+        auto root = getRoot();
+        root->sigDataAdd(this,item);
+    });
+
+	mData->connector.connect(data, &XDataObject::sigDataRemove, [this](sptr<XDataObject> subData) {
+        auto root = getRoot();
+        for (int i = 0; i < childNum(); i++) {
+            auto item = child(i);
+            if (item->getData() == subData) {
+                root->sigDataRemove(item);
+            }
+        }
+		});
 }
 
 void XDataObjectTreeItem::addChild(XDataObjectTreeItem* childItem)
@@ -72,9 +87,28 @@ void XDataObjectTreeItem::addChild(XDataObjectTreeItem* childItem)
     childItem->setParent(this);
 }
 
+void XDataObjectTreeItem::removeChild(XDataObjectTreeItem* item)
+{
+    for (auto it = m_childItems.begin(); it != m_childItems.end(); ++it) {
+        if (*it == item) {
+            m_childItems.erase(it);
+            return;
+        }
+    }
+}
+
 void XDataObjectTreeItem::clear()
 {
     m_childItems.clear();
+}
+
+XDataObjectTreeItem* XDataObjectTreeItem::getRoot() const
+{
+    auto p = this;
+    while (p->parent()) {
+        p = p->parent();
+    }
+    return const_cast<XDataObjectTreeItem*>(p);
 }
 
 size_t XDataObjectTreeItem::childNum() const
@@ -110,30 +144,36 @@ std::shared_ptr<XDataObject> XDataObjectTreeItem::getData() const
     return m_data;
 }
 
-
-/*
-void createTreeItemFromObject(XDataObjectTreeItem* inputItem, std::shared_ptr<XDataObject> object) {
-	XDataObjectTreeItem* curItem = new XDataObjectTreeItem(object, inputItem);
-	inputItem->addChild(curItem);
+void createTreeItemFromObject(XDataObjectTreeItem* parent, std::shared_ptr<XDataObject> object) {
 	auto num = object->childCount();
 	for (int i = 0; i < num; i++) {
 		auto obj = object->childAt(i);
-		//auto curChildItem = new XDataObjectTreeItem(obj, curItem);
-		//parent->addChild(curChildItem);
+		auto curItem = new XDataObjectTreeItem(obj, parent);
+		parent->addChild(curItem);
 		createTreeItemFromObject(curItem, obj);
 	}
 }
-XDataObjectTreeItem* XDataObjectTreeItem::InitFromDataObject(std::shared_ptr<XDataObject> object)
-{
-	XDataObjectTreeItem* parent = new XDataObjectTreeItem(nullptr, nullptr);
-	createTreeItemFromObject(parent, object);
-	return parent;
-}
-*/
 
-XDataObjectTreeItem* XDataObjectTreeItem::InitFromDataObject(std::shared_ptr<XDataObject> object)
+XDataObjectTreeItem* XDataObjectTreeItem::InitFromDataObject(std::shared_ptr<XDataObject> object, XDataObjectTreeItem *item )
 {
-    XDataObjectTreeItem* parent = new XDataObjectTreeItem(object, nullptr);
+    XDataObjectTreeItem* parent = new XDataObjectTreeItem(object, item);
     createTreeItemFromObject(parent, object);
     return parent;
+}
+
+void XDataObjectTreeItem::buildContextMen(QMenu* menu)
+{
+	auto dataobject = getData();
+	auto parent = dataobject->getParent();
+	if (parent) {
+		if (XBaseObjectMeta::IsA(parent->getClassName(), XQ_META::ClassName<XDataList>())) {
+			auto action = menu->addAction("delete");
+			QObject::connect(action, &QAction::triggered, [p = parent,d = dataobject]() {
+				p->asDerived<XDataList>()->remove(d);
+				});
+		}
+	}
+	else {
+		//do nth
+	}
 }

@@ -19,6 +19,11 @@ public:
 	XEasyPlotWidget *plotWidget = nullptr;
 
 	XObjectInspectorView *objectInspector = nullptr;
+	xsig::xconnector connector;
+
+	~Internal() {
+		connector.disconnect();
+	}
 };
 
 XMainWindow::XMainWindow(QWidget *parent)
@@ -89,14 +94,15 @@ void XMainWindow::InitBotTab()
 
 void XMainWindow::InitView()
 {
-	xsig::connect(mData->plotWidget,&XEasyPlotWidget::sigRenderAdd,[this](sptr<XRender> render){
-		xsig::connect(render,&XRender::SigRenderNodeSelected,[this](sptr<XRenderNode> node){
+	 mData->connector.connect(mData->plotWidget,&XEasyPlotWidget::sigRenderAdd,[this](sptr<XRender> render){
+		 mData->objectInspector->setRootObject(render);
+		 /*mData->connector.connect(render,&XRender::SigRenderNodeSelected,[this](sptr<XRenderNode> node){
 			auto parent = node;
 			while (auto p = parent->getRenderNodeParent()) {
 				parent = p;
 			}
 			mData->objectInspector->setRootObject(parent);
-		});
+		});*/
 	});
 
 	mData->plotWidget->test2();
