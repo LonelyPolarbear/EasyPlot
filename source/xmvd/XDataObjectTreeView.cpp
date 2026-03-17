@@ -7,6 +7,7 @@ class XDataObjectTreeView::Internal {
 public:
 	XDataObjectTreeModel *model =nullptr;
 	XDataObjectTreeItem*	rootItem =nullptr;
+	sptr<XDataObject> dataObject;
 };
 XDataObjectTreeView::XDataObjectTreeView(QWidget* parent):mData(new Internal)
 {
@@ -32,7 +33,9 @@ void XDataObjectTreeView::setDataObject(const std::shared_ptr<XDataObject>& data
 		return;
 	}
 
-	
+	if(mData->dataObject == dataObject)
+		return;
+	mData->dataObject = dataObject;
 	auto item = XDataObjectTreeItem::InitFromDataObject(dataObject);
 
 	mData->rootItem->clear();

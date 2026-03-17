@@ -37,7 +37,7 @@
 XEasyPlotWidget::XEasyPlotWidget(QWidget* parent) :XGLWidget(parent)
 {
 	//test1();
-	test2();
+	//test2();
 	//test3();
 	//test4();
 	//test5();
@@ -214,23 +214,10 @@ void XEasyPlotWidget::test1()
 void XEasyPlotWidget::test2()
 {
 	auto render = makeShareDbObject<XRender>();
+	sigRenderAdd(render);
 	mRenderWindow->addRender(render);
-	#if 0
-	sptr<XGeometryNode> frustumNode = makeShareDbObject<XGeometryNode>();
-	sptr<xfrustumSource> frustum = makeShareDbObject<xfrustumSource>();
-	
-	frustum->setNearPlanePoints({ {-1, 1, 1}, {-1, -1, 1}, {1, -1, 1}, {1, 1, 1} });		//上底面
-	frustum->setFarPlanePoints({ { -1, 1, -1 }, { -1, -1, -1 }, { 1, -1, -1 }, { 1, 1, -1 } });				//下底面
 
-	frustumNode->setInput(frustum);
-	frustumNode->setSingleColor(XQ::Vec4f(1, 1, 1, 1));
-	frustumNode->setPolygonMode(PolygonMode::line_and_face);
-	frustumNode->setColorMode(ColorMode::FaceColor);
 
-	render->addRenderNode3D(frustumNode);
-	#endif
-
-	#if 1
 	sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
 	sptr<XRegularPrimSource> coneSource = makeShareDbObject<XRegularPrimSource>();
 	coneSource->Modified();
@@ -246,10 +233,8 @@ void XEasyPlotWidget::test2()
 
 	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
 
-	HighFive::File file("88888test.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
-	coneNode->serialize(file.createGroup(coneNode->getName()));
-
-	#endif
+	//HighFive::File file("88888test.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
+	//coneNode->serialize(file.createGroup(coneNode->getName()));
 }
 
 void XEasyPlotWidget::test3()

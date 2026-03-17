@@ -256,6 +256,8 @@ bool XDataObjectTableModel::setData(const QModelIndex& index, const QVariant& va
 
 void XDataObjectTableModel::setDataObject(std::shared_ptr<XDataObject> obj)
 {
+	if(mData->data.lock() == obj)
+		return;
 	mData->data = obj;
 	beginResetModel();
 	endResetModel();

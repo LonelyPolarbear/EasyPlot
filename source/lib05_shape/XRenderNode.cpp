@@ -104,7 +104,30 @@ int64_t XRenderNode::getID() const
 	return m_id;
 }
 
-//--------------------------------------------------------------
+void XRenderNode::findNodeById(uint64_t id, sptr<XRenderNode>& findNode)
+{
+	if (isSelf(id)) {
+		findNode = asDerived<XRenderNode>();
+		return;
+	}
+		
+	for (auto iter = renderNodes->begin(); iter != renderNodes->end(); iter++) {
+		(*iter)->asDerived<XRenderNode>()->findNodeById(id,findNode);
+		if (findNode)
+		{
+			return;
+		}
+	}
+}
+
+sptr<XRenderNode> XRenderNode::findNodeById(uint64_t id)
+{
+	sptr<XRenderNode>find;
+	findNodeById(id,find);
+	return find;
+}
+
+//XDrawableRenderNode
 XDrawableRenderNode::XDrawableRenderNode()
 {
 }
@@ -113,7 +136,7 @@ XDrawableRenderNode::~XDrawableRenderNode()
 {
 }
 
-//--------------------------------------------------------------
+//XRenderNode3D
 XRenderNode3D::XRenderNode3D()
 {
 }
@@ -122,7 +145,7 @@ XRenderNode3D::~XRenderNode3D()
 {
 }
 
-//--------------------------------------------------------------
+//XRenderNode2D
 XRenderNode2D::XRenderNode2D()
 {
 }
@@ -131,6 +154,7 @@ XRenderNode2D::~XRenderNode2D()
 {
 }
 
+//XGroupRenderNode
 XGroupRenderNode::XGroupRenderNode()
 {
 }
@@ -139,6 +163,7 @@ XGroupRenderNode::~XGroupRenderNode()
 {
 }
 
+//XTransformRenderNode
 XTransformRenderNode::XTransformRenderNode()
 {
 }

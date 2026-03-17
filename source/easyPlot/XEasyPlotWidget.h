@@ -8,7 +8,8 @@
 #include <XOpenGLWidget/XGLWidget.h>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XDataArray.h>
-
+#include <xsignal/XSignal.h>
+class XRender;
 class lib06_easyplot_API XEasyPlotWidget : public XGLWidget
 {
 	Q_OBJECT
@@ -25,4 +26,6 @@ public:
 	void test5();
 public slots:
 	void slotFitView3D();
+public:
+	XSIGNAL(void(sptr<XRender>)) sigRenderAdd;
 };

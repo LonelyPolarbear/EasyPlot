@@ -1,6 +1,7 @@
 #include <iostream>
 #include <xmvd/XDataObjectTableView.h>
 #include <xmvd/XDataObjectTreeView.h>
+#include <xmvd/XObjectInspectorView.h>
 #include <qapplication.h>
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataAttribute.h>
@@ -56,7 +57,8 @@ int main(int argc, char** argv) {
 
 	QApplication app(argc, argv);
 
-	XDataObjectTreeView view;
+
+	/*XDataObjectTreeView view;
 	view.resize(300, 200);
 	view.show();
 
@@ -72,8 +74,16 @@ int main(int argc, char** argv) {
 
 	xsig::connect(&view, &XDataObjectTreeView::sigCurrentObjectChanged, [&](std::shared_ptr<XDataObject> obj) {
 		tableView.setDataObject(obj);
-		});
+		});*/
+		
 
+	XObjectInspectorView InspectorView;	
+
+	InspectorView.resize(300, 200);
+	InspectorView.show();
+	auto object = makeShareDbObject<MyObject>();
+	object->setName("test");
+	InspectorView.setRootObject(object);
 
 	return app.exec();
 }

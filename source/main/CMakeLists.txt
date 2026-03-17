@@ -20,7 +20,7 @@ file(GLOB_RECURSE SOURCES_FILES *.cpp)
 #Qt支持
 #-------------------------------------------------------
 #查找所有的需要moc预处理的文件
-set(MOC_FILES MainWindow.h)
+set(MOC_FILES MainWindow.h XMainWindow.h)
 
 #GLOB_RECURSE 
 FILE(GLOB UI_FILES "ui/*.ui")
@@ -82,6 +82,9 @@ SET(LIB_NAMES PRIVATE
 				xeasyplot${DLL_DEBUG_POSTFIX}
 				xpanel${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
+				xmvd${DLL_DEBUG_POSTFIX}
+				xrender${DLL_DEBUG_POSTFIX}
+				xshape${DLL_DEBUG_POSTFIX}
 				
 	)
 

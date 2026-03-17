@@ -38,9 +38,12 @@ protected:
 	~XRenderNode();
 public:
 	int64_t getID() const;
-	bool isSelf(uint64_t id) {
+	bool isSelf(uint64_t id) const{
 		return getID() == id;
 	}
+
+	void findNodeById(uint64_t id, sptr<XRenderNode>& findNode);
+	sptr<XRenderNode> findNodeById(uint64_t id);
 public:
 	csptr<XDataListT<XRenderNode>> renderNodes;
 protected:

@@ -15,6 +15,7 @@
 #include <lib05_shape/XGraphicsItem.h>
 #include <lib02_camera/xcamera.h>
 #include <lib05_shape/renderNode3d/XInfinitePlaneRenderNode.h>
+#include <lib05_shape/renderNode3d/XGroupRenderNode3d.h>
 
 
 struct XRender::Internal {
@@ -51,7 +52,10 @@ public:
 	sptr<XRenderMultiModeInteractionHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
 
-	std::vector<sptr<XRenderNode>> m_actor3DList;
+	//std::vector<sptr<XRenderNode>> m_actor3DList;
+
+	sptr<XGroupRenderNode3d> m_group3D;
+
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
 	XQ::Vec2f m_mousePos;																								//鼠标在窗口中的位置，未做变换
@@ -72,6 +76,7 @@ void XRender::Init()
 	XRenderPort::Init();
 	XQ_ATTR_ADD_INIT(AttrActive, false);
 	auto handler =getOrCreateMultiModeEventHandler();
+	mData->m_group3D = makeShareDbObject<XGroupRenderNode3d>();
 }
 
 void XRender::setRenderWindow(sptr<XOpenGLRenderWindow> renderWindow)
@@ -118,9 +123,9 @@ void XRender::render(bool isNormal)
 	XOpenGLFuntion::xglClearDepth(1);
 	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::depth_buffer_bit);
 
-	for (auto actor : mData->m_actor3DList) {
-		actor->draw(Eigen::Matrix4f::Identity(), isNormal);
-	}
+	//for (auto actor : mData->m_actor3DList) {
+		mData->m_group3D->draw(Eigen::Matrix4f::Identity(), isNormal);
+	//}
 	enable->restore();
 
 	doneCurrent();
@@ -238,7 +243,7 @@ bool XRender::connectToRenderWindowSignals()
 void XRender::addRenderNode3D(sptr<XRenderNode>s)
 {
 	s->setShaderManger(getRenderWindow()->getShaderManger());
-	mData->m_actor3DList.push_back(s);
+	mData->m_group3D->addChild(s);
 }
 
 void XRender::addRenderNode2D(sptr<XGraphicsItem>)
@@ -312,6 +317,11 @@ XQ::InteractMode XRender::getInteractMode() const
 	return XQ::InteractMode::none;
 }
 
+sptr<XRenderNode> XRender::getRenderNode3D(int id)
+{
+	return mData->m_group3D->findNodeById(id);
+}
+
 void XRender::updateViewPort(bool isNormal)
 {
 	XQ::Recti rect = getConvertViewPort();
@@ -364,7 +374,16 @@ XQ::BoundBox  XRender::computeBoundBox() {
 	constexpr double limitMax = std::numeric_limits<double>::max();
 	constexpr double limitMin = std::numeric_limits<double>::lowest();;
 	XQ::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
-	for (auto& shape : mData->m_actor3DList) {
+	auto shapeBoundBox = mData->m_group3D->getBoundBox(Eigen::Matrix4f::Identity());
+
+	boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);
+	boundBox.xmax = std::max(boundBox.xmax, shapeBoundBox.xmax);
+	boundBox.ymin = std::min(boundBox.ymin, shapeBoundBox.ymin);
+	boundBox.ymax = std::max(boundBox.ymax, shapeBoundBox.ymax);
+	boundBox.zmin = std::min(boundBox.zmin, shapeBoundBox.zmin);
+	boundBox.zmax = std::max(boundBox.zmax, shapeBoundBox.zmax);
+
+	/*for (auto& shape : mData->m_actor3DList) {
 		if (shape->asDerived<XInfinitePlaneRenderNode>()) {
 			continue;
 		}
@@ -384,6 +403,6 @@ XQ::BoundBox  XRender::computeBoundBox() {
 		boundBox.ymax = 1;
 		boundBox.zmin = -1;
 		boundBox.zmax = 1;
-	}
+	}*/
 	return boundBox;
 }

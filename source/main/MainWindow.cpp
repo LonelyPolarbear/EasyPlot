@@ -10,7 +10,7 @@
 #include "lib05_shape/actor2d/XRectItem.h"
 #include <lib09_panel/ColorPickButton.h>
 #include <lib09_panel/CustomToolButton.h>
-
+//¾ÉµÄ£¬ÒÑ¶ªÆú
 easyPlotWidget * easyPlot = nullptr;
 
 void setDarwType(graphicsItemType type, int method, easyPlotWidget* p, bool flag) {

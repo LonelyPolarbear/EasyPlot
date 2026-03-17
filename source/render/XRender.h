@@ -71,9 +71,12 @@ public:
 	void setInteractMode(XQ::InteractMode mode);
 
 	XQ::InteractMode getInteractMode() const;
+
+	sptr<XRenderNode> getRenderNode3D(int id);
 public:
 	XSIGNAL(void(int id, void*/*data*/)) SigUserEvent;																		//用户自定义事件
 	XSIGNAL(void(XQ::PreDefineEvent, void*/*data*/)) SigPredefineEvent;										//预定义业务逻辑事件
+	XSIGNAL(void(sptr<XRenderNode>)) SigRenderNodeSelected;
 protected:
 	//属性
 	csptr<XAttr_Bool> AttrActive;

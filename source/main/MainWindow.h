@@ -2,6 +2,8 @@
 
 #include <QMainWindow>
 #include <QContextMenuEvent>
+
+//¾ÉµÄ£¬ÒÑ¶ªÆú
 namespace Ui {
 	class MainWindow;
 }

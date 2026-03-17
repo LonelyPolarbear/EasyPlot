@@ -23,6 +23,6 @@ void XGroupRenderNode3d::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal
 	for (int i = 0; i < count; i++)
 	{
 		auto node =getChild(i);
-		node->draw(parentMatrix,isNormal);
+		node->draw(parentMatrix * m_transform.matrix(),isNormal);
 	}
 }

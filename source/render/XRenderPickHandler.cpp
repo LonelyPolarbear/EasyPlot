@@ -33,8 +33,12 @@ void XRenderPickHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardM
 	auto select=mData->pick3d->getPointSelection(windowpos);
 
 	//获取拾取到的结果
-	if(select.objectId!= 0)
-		std::cout<<"objectId:"<<select.objectId <<" primitiveId:" << select.primitiveId << std::endl;
+	if (select.objectId != 0) {
+		auto node =getRender()->getRenderNode3D(select.objectId);
+		getRender()->SigRenderNodeSelected(node);
+		std::cout << "objectId:" << select.objectId << " primitiveId:" << select.primitiveId << std::endl;
+	}
+		
 }
 
 void XRenderPickHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
