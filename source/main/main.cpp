@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
 	w.show();
 #else
 	XMainWindow w(nullptr);
-	w.resize(400, 300);
+	w.resize(600, 400);
 	w.show();
 #endif
 	return a.exec();

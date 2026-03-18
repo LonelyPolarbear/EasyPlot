@@ -25,10 +25,9 @@ public:
 };
 
 extern void XMVD_API InitXAttrItemDelegate();
-extern template class XMVD_API classProcessorFactory<1, QWidget* (QWidget*, const QStyleOptionViewItem&, sptr<XDataAttribute>, XAttrItemDelegate*)>;
-extern template class XMVD_API classProcessorFactory<1, void (QWidget*, sptr<XDataAttribute>)>;
-extern template class XMVD_API classProcessorFactory<1, void (void* model, QWidget*, sptr<XDataAttribute>, const QModelIndex& index)>;
 
-using XAttrItemDelegateCreateEditorFactory = classProcessorFactory<1, QWidget* (QWidget*, const QStyleOptionViewItem&, sptr<XDataAttribute>, XAttrItemDelegate*)>;
-using XAttrItemDelegateSetEditorDataFactory = classProcessorFactory<1, void(QWidget*, sptr<XDataAttribute>)>; 
-using XAttrItemDelegatesetModelDataFactory = classProcessorFactory<1, void(void* model, QWidget*, sptr<XDataAttribute>, const QModelIndex& index)>;
+extern  XMVD_API classMultiProcessorFactory<
+	QWidget* (QWidget*, const QStyleOptionViewItem&, sptr<XDataAttribute>, XAttrItemDelegate*),
+	void(QWidget*, sptr<XDataAttribute>),
+	void(void* model, QWidget*, sptr<XDataAttribute>, const QModelIndex& index)
+> XAttrItemDelegateFactory;

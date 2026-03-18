@@ -26,6 +26,4 @@ public:
 	void test5();
 public slots:
 	void slotFitView3D();
-public:
-	XSIGNAL(void(sptr<XRender>)) sigRenderAdd;
 };

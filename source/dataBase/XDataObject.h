@@ -10,10 +10,9 @@ namespace HighFive {
 	class DataSet;
 }
 
-extern template class DATABASE_API classProcessorFactory<1, void(HighFive::Group& group, const std::string& name, void* data)>;
-extern template class DATABASE_API classProcessorFactory<2, void(HighFive::DataSet& dataSet, void* data)>;
-using XDataSerializer = classProcessorFactory<1, void(HighFive::Group& group, const std::string	&name, void* data)>;
-using XDataDeserializer = classProcessorFactory<2, void(HighFive::DataSet& dataSet, void* data)>;
+extern  DATABASE_API classProcessorFactory<void(HighFive::Group& group, const std::string& name, void* data)> XDataSerializer;
+extern  DATABASE_API classProcessorFactory<void(HighFive::DataSet& dataSet, void* data)> XDataDeserializer;
+
 
 class DATABASE_API XDataObject : public XDataBaseObject {
 	REGISTER_CLASS_META_DATA(XDataObject, XDataBaseObject);

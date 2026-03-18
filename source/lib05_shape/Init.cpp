@@ -41,7 +41,7 @@ static void InitBaseObjectMeta() {
 
 
 static void InitAttrToString() {
-	XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), XattrEnumToString<PolygonMode>);
-	XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), XattrEnumToString<ColorMode>);
-	XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), XattrEnumToString<PrimitveType>);
+	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), XattrEnumToString<PolygonMode>);
+	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), XattrEnumToString<ColorMode>);
+	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), XattrEnumToString<PrimitveType>);
 }

@@ -123,6 +123,8 @@ void XOpenGLRenderWindow::SetWindowId(uint64_t winId)
 
 void XOpenGLRenderWindow::Init()
 {
+	XDataObject::Init();
+	XQ_XDATA_ADD(m_renderList);
     m_context =makeShareDbObject<XOpenGLContext>();
 	m_eventDispatch = makeShareDbObject<XRenderWindowEventDispatch>();
 	m_eventDispatch->setRenderWindow(asDerived<XOpenGLRenderWindow>());
@@ -136,7 +138,9 @@ void XOpenGLRenderWindow::bindSigalSlot()
 	xsig::connect(m_eventDispatch, &XRenderWindowEventDispatch::SigResize, this, &XOpenGLRenderWindow::slotUpdateSize);
 	xsig::connect(m_eventDispatch, &XRenderWindowEventDispatch::SigMouseMove, [this](XQ::Vec2i windowPos, XQ::KeyboardModifier){
 		//根据windowPos判断当前应该激活哪个窗口，这个绑定工作是在最前面的
-		for (auto ren : m_renders) {
+
+		for (auto r : *m_renderList) {
+			auto ren = r->asDerived<XRender>();
 			ren->setActive(ren->isBelongToRender(windowPos));
 		}
 	});
@@ -151,8 +155,9 @@ void XOpenGLRenderWindow::render()
 
 	makeCurrent();
 	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer,0);
-	for (auto r : m_renders) {
-		r->render();
+	for (auto r : *m_renderList) {
+		auto ren = r->asDerived<XRender>();
+		ren->render();
 	}
 
 	makeCurrent();
@@ -204,7 +209,7 @@ void XOpenGLRenderWindow::addRender(sptr<XRender> ren)
 {
 	if(!ren)
 		return;
-	m_renders.push_back(ren);
+	m_renderList->append(ren);
 	ren->setRenderWindow(asDerived<XOpenGLRenderWindow>());
 
 	//同时 将事件分发器分发的事件路由到render的事件处理器上
@@ -213,7 +218,11 @@ void XOpenGLRenderWindow::addRender(sptr<XRender> ren)
 
 std::vector<sptr<XRender>> XOpenGLRenderWindow::getRenders() const
 {
-	return m_renders;
+	std::vector<sptr<XRender>> result;
+	for (auto r : *m_renderList) {
+		result.push_back(r->asDerived<XRender>());
+	}
+	return result;
 }
 
 sptr<xShaderManger> XOpenGLRenderWindow::getShaderManger() const

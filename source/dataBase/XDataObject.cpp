@@ -9,8 +9,8 @@ static std::atomic< uint64_t>  object_id_counter(0);
 static bool s_isDeserializing = false;
 static std::vector<std::function<void()>> s_deserializeFinishedFn;
 
-template class DATABASE_API classProcessorFactory<1, void(HighFive::Group& group, const std::string& name, void* data)>;
-template class DATABASE_API classProcessorFactory<2, void(HighFive::DataSet& dataSet, void* data)>;
+classProcessorFactory<void(HighFive::Group& group, const std::string& name, void* data)> XDataSerializer;
+classProcessorFactory<void(HighFive::DataSet& dataSet, void* data)> XDataDeserializer;
 
 XDataObject::XDataObject(sptr<XDataObject> parent):mUid(object_id_counter++), mParent(parent)
 {
@@ -469,7 +469,7 @@ void XDataObject::ChildItemDataChanged(XQ::XDataPath& path, sptr<XDataAttribute>
 	if (path.size() != 0) {
 		auto completePath = path;
 		completePath.insert(AttrName->getValue());
-		XQ::print("ChildAttributeChanged","path:",completePath.path(),"type:", XQ_META::enum_to_string(type));
+		//XQ::print("ChildAttributeChanged","path:",completePath.path(),"type:", XQ_META::enum_to_string(type));
 		sigChildItemDataChanged(path, attr, type);
 	}
 	//通知父类
@@ -487,7 +487,7 @@ void XDataObject::ChildDataChanged(XQ::XDataPath& path, sptr<XDataObject> obj, X
 	if (path.size() != 0) {
 		auto completePath = path;
 		completePath.insert(AttrName->getValue());
-		XQ::print("ChildDataChanged", "path:", completePath.path(), "type:", XQ_META::enum_to_string(type));
+		//XQ::print("ChildDataChanged", "path:", completePath.path(), "type:", XQ_META::enum_to_string(type));
 		sigChildDataChanged(path, obj, type);
 	}
 	//通知父类

@@ -133,8 +133,8 @@ QVariant XDataObjectTableModel::data(const QModelIndex& index, int role) const
 				return QVariant();
 			}
 			else {
-				if (XattrToQstringFactory::instance().hasProcessor(className)) {
-					return QString::fromStdString(XattrToQstringFactory::instance().process(className, attr));
+				if (XattrToQstringFactory.hasProcessor<1>(className)) {
+					return QString::fromStdString(XattrToQstringFactory.process<1>(className, attr,0));
 				}
 				return QString::fromStdString(className);
 			}

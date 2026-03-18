@@ -214,7 +214,6 @@ void XEasyPlotWidget::test1()
 void XEasyPlotWidget::test2()
 {
 	auto render = makeShareDbObject<XRender>();
-	sigRenderAdd(render);
 	mRenderWindow->addRender(render);
 
 

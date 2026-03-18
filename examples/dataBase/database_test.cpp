@@ -290,7 +290,7 @@ void testDataArraySerialization() {
 
 	HighFive::File file("array.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
 	auto gg =file.createGroup("root");
-	XDataSerializer::instance().process(intArray->getClassName(),gg,"1d",intArray.get());
+	XDataSerializer.process(intArray->getClassName(),gg,"1d",intArray.get());
 	}
 
 	{
@@ -307,7 +307,7 @@ void testDataArraySerialization() {
 
 		HighFive::File file("array2d.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
 		auto gg = file.createGroup("root");
-		XDataSerializer::instance().process(intArray->getClassName(), gg, "2d", intArray.get());
+		XDataSerializer.process(intArray->getClassName(), gg, "2d", intArray.get());
 	}
 
 	{
@@ -351,7 +351,7 @@ void testDataArraySerialization() {
 
 		HighFive::File file("array3d.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
 		auto gg = file.createGroup("root");
-		XDataSerializer::instance().process(intArray3d->getClassName(), gg, "3d", intArray3d.get());
+		XDataSerializer.process(intArray3d->getClassName(), gg, "3d", intArray3d.get());
 	}
 }
 
@@ -361,11 +361,11 @@ void testDataArrayDeserialization() {
 	 auto dataset = group.getDataSet("1d");
 	auto intArray = makeShareDbObject<XUCharArray>();
 
-	XDataDeserializer::instance().process(intArray->getClassName(), dataset, intArray.get());
+	XDataDeserializer.process(intArray->getClassName(), dataset, intArray.get());
 	{
 		HighFive::File file("arrayCopy.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
 		auto gg = file.createGroup("root");
-		XDataSerializer::instance().process(intArray->getClassName(), gg, "1d", intArray.get());
+		XDataSerializer.process(intArray->getClassName(), gg, "1d", intArray.get());
 	}
 
 	{
@@ -375,11 +375,11 @@ void testDataArrayDeserialization() {
 		auto dataset = group.getDataSet("2d");
 		auto intArray = makeShareDbObject<XIntArray2D>();
 
-		XDataDeserializer::instance().process(intArray->getClassName(), dataset, intArray.get());
+		XDataDeserializer.process(intArray->getClassName(), dataset, intArray.get());
 		{
 			HighFive::File file("arrayCopy2d.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
 			auto gg = file.createGroup("root");
-			XDataSerializer::instance().process(intArray->getClassName(), gg, "2d", intArray.get());
+			XDataSerializer.process(intArray->getClassName(), gg, "2d", intArray.get());
 		}
 	}
 
@@ -390,11 +390,11 @@ void testDataArrayDeserialization() {
 		auto dataset = group.getDataSet("3d");
 		auto intArray = makeShareDbObject<XIntArray3D>();
 
-		XDataDeserializer::instance().process(intArray->getClassName(), dataset, intArray.get());
+		XDataDeserializer.process(intArray->getClassName(), dataset, intArray.get());
 		{
 			HighFive::File file("arrayCopy3d.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
 			auto gg = file.createGroup("root");
-			XDataSerializer::instance().process(intArray->getClassName(), gg, "3d", intArray.get());
+			XDataSerializer.process(intArray->getClassName(), gg, "3d", intArray.get());
 		}
 	}
 }

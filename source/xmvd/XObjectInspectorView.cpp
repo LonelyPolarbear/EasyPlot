@@ -19,7 +19,11 @@ XObjectInspectorView::XObjectInspectorView(QWidget* parent):QWidget(parent),mDat
 void XObjectInspectorView::setRootObject(std::shared_ptr<XDataObject> root)
 {
 	m_treeView->setDataObject(root);
+	bindSignal();
+}
 
+void XObjectInspectorView::bindSignal()
+{
 	mData->con.disconnect();
 	mData->con = xsig::connect(m_treeView, &XDataObjectTreeView::sigCurrentObjectChanged, [&](std::shared_ptr<XDataObject> obj) {
 		m_propertyView->setDataObject(obj);

@@ -134,9 +134,9 @@ QVariant XDataObjectTreeItem::data( int column,int  role) const
 int XDataObjectTreeItem::columnCount() const
 {
     if (m_data) {
-        return 2;
+        return 1;
     }
-    return 2;
+    return 1;
 }
 
 std::shared_ptr<XDataObject> XDataObjectTreeItem::getData() const

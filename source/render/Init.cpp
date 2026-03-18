@@ -1,5 +1,9 @@
 #include "Init.h"
 #include <dataBase/XObjectFactory.h>
+#include <dataBase/XDataList.h>
+#include "XRenderPort.h"
+#include "XRender.h"
+#include "XOpenGLRenderWindow.h"
 
 //模块初始化工作
 //1. XBaseObjectMeta尽心数据注册，主要是XBaseObject子类注册，用于注册继承关系以及工厂创建
@@ -23,7 +27,13 @@ RENDER_API void InitRender()
 	InitAttrSerialize();
 }
 
-static void InitBaseObjectMeta(){}
+static void InitBaseObjectMeta(){
+	XBaseObjectMeta::registerObject<XRenderPort>();
+	XBaseObjectMeta::registerObject<XRender>();
+	XBaseObjectMeta::registerObject<XOpenGLRenderWindow>();
+	XBaseObjectMeta::registerObject<XDataListT<XRender>>();
+
+}
 
 static void InitAttrSerialize(){}
 

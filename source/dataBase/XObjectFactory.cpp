@@ -211,51 +211,51 @@ namespace XBaseObjectMeta {
 	}
 
 	void InitAttrWrite() {
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::XColor>(), writeAttr<XQ::XColor>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<int>(), writeAttr<int>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<bool>(), writeAttr<bool>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<unsigned int>(), writeAttr<unsigned int>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<float>(), writeAttr<float>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<double>(), writeAttr<double>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<std::string>(), writeAttr<std::string>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), writeAttr<XQ::Vec2f>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), writeAttr<XQ::Vec2d>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), writeAttr<XQ::Vec2i>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), writeAttr<XQ::Vec2u>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), writeAttr<XQ::Vec2u8>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), writeAttr<XQ::Vec2i8>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), writeAttr<XQ::Vec3f>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), writeAttr<XQ::Vec3d>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), writeAttr<XQ::Vec3i>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), writeAttr<XQ::Vec3u>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), writeAttr<XQ::Vec3u8>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), writeAttr<XQ::Vec3i8>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), writeAttr<XQ::Vec4f>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), writeAttr<XQ::Vec4d>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), writeAttr<XQ::Vec4i>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), writeAttr<XQ::Vec4u>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), writeAttr<XQ::Vec4u8>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), writeAttr<XQ::Vec4i8>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::XColor>(), writeAttr<XQ::XColor>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<int>(), writeAttr<int>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<bool>(), writeAttr<bool>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<unsigned int>(), writeAttr<unsigned int>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<float>(), writeAttr<float>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<double>(), writeAttr<double>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<std::string>(), writeAttr<std::string>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), writeAttr<XQ::Vec2f>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), writeAttr<XQ::Vec2d>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), writeAttr<XQ::Vec2i>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), writeAttr<XQ::Vec2u>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), writeAttr<XQ::Vec2u8>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), writeAttr<XQ::Vec2i8>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), writeAttr<XQ::Vec3f>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), writeAttr<XQ::Vec3d>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), writeAttr<XQ::Vec3i>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), writeAttr<XQ::Vec3u>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), writeAttr<XQ::Vec3u8>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), writeAttr<XQ::Vec3i8>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), writeAttr<XQ::Vec4f>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), writeAttr<XQ::Vec4d>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), writeAttr<XQ::Vec4i>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), writeAttr<XQ::Vec4u>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), writeAttr<XQ::Vec4u8>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), writeAttr<XQ::Vec4i8>);
 
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point2f>(), writeAttr<XQ::Point2f>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point2d>(), writeAttr<XQ::Point2d>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point2i>(), writeAttr<XQ::Point2i>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point2u>(), writeAttr<XQ::Point2u>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point2f>(), writeAttr<XQ::Point2f>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point2d>(), writeAttr<XQ::Point2d>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point2i>(), writeAttr<XQ::Point2i>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point2u>(), writeAttr<XQ::Point2u>);
 
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point3f>(), writeAttr<XQ::Point3f>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point3d>(), writeAttr<XQ::Point3d>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point3i>(), writeAttr<XQ::Point3i>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point3u>(), writeAttr<XQ::Point3u>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point3f>(), writeAttr<XQ::Point3f>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point3d>(), writeAttr<XQ::Point3d>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point3i>(), writeAttr<XQ::Point3i>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point3u>(), writeAttr<XQ::Point3u>);
 
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point4f>(), writeAttr<XQ::Point4f>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point4d>(), writeAttr<XQ::Point4d>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point4i>(), writeAttr<XQ::Point4i>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point4u>(), writeAttr<XQ::Point4u>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point4f>(), writeAttr<XQ::Point4f>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point4d>(), writeAttr<XQ::Point4d>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point4i>(), writeAttr<XQ::Point4i>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Point4u>(), writeAttr<XQ::Point4u>);
 
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Rectf>(), writeAttr<XQ::Rectf>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Rectd>(), writeAttr<XQ::Rectd>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Recti>(), writeAttr<XQ::Recti>);
-		XattrSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Rectu>(), writeAttr<XQ::Rectu>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Rectf>(), writeAttr<XQ::Rectf>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Rectd>(), writeAttr<XQ::Rectd>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Recti>(), writeAttr<XQ::Recti>);
+		XattrSerializer.registerProcessor(XQ_META::ClassName<XQ::Rectu>(), writeAttr<XQ::Rectu>);
 	}
 }
 
@@ -326,51 +326,51 @@ namespace XBaseObjectMeta {
 
 	void InitAttrRead(){
 
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::XColor>(), readAttr<XQ::XColor>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<int>(), readAttr<int>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<bool>(), readAttr<bool>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<unsigned int>(), readAttr<unsigned int>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<float>(), readAttr<float>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<double>(), readAttr<double>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<std::string>(), readAttr<std::string>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), readAttr<XQ::Vec2f>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), readAttr<XQ::Vec2d>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), readAttr<XQ::Vec2i>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), readAttr<XQ::Vec2u>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), readAttr<XQ::Vec2u8>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), readAttr<XQ::Vec2i8>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), readAttr<XQ::Vec3f>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), readAttr<XQ::Vec3d>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), readAttr<XQ::Vec3i>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), readAttr<XQ::Vec3u>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), readAttr<XQ::Vec3u8>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), readAttr<XQ::Vec3i8>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), readAttr<XQ::Vec4f>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), readAttr<XQ::Vec4d>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), readAttr<XQ::Vec4i>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), readAttr<XQ::Vec4u>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), readAttr<XQ::Vec4u8>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), readAttr<XQ::Vec4i8>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::XColor>(), readAttr<XQ::XColor>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<int>(), readAttr<int>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<bool>(), readAttr<bool>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<unsigned int>(), readAttr<unsigned int>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<float>(), readAttr<float>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<double>(), readAttr<double>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<std::string>(), readAttr<std::string>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), readAttr<XQ::Vec2f>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), readAttr<XQ::Vec2d>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), readAttr<XQ::Vec2i>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), readAttr<XQ::Vec2u>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), readAttr<XQ::Vec2u8>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), readAttr<XQ::Vec2i8>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), readAttr<XQ::Vec3f>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), readAttr<XQ::Vec3d>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), readAttr<XQ::Vec3i>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), readAttr<XQ::Vec3u>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), readAttr<XQ::Vec3u8>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), readAttr<XQ::Vec3i8>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), readAttr<XQ::Vec4f>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), readAttr<XQ::Vec4d>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), readAttr<XQ::Vec4i>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), readAttr<XQ::Vec4u>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), readAttr<XQ::Vec4u8>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), readAttr<XQ::Vec4i8>);
 
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point2f>(), readAttr<XQ::Point2f>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point2d>(), readAttr<XQ::Point2d>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point2i>(), readAttr<XQ::Point2i>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point2u>(), readAttr<XQ::Point2u>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point2f>(), readAttr<XQ::Point2f>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point2d>(), readAttr<XQ::Point2d>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point2i>(), readAttr<XQ::Point2i>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point2u>(), readAttr<XQ::Point2u>);
 
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point3f>(), readAttr<XQ::Point3f>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point3d>(), readAttr<XQ::Point3d>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point3i>(), readAttr<XQ::Point3i>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point3u>(), readAttr<XQ::Point3u>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point3f>(), readAttr<XQ::Point3f>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point3d>(), readAttr<XQ::Point3d>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point3i>(), readAttr<XQ::Point3i>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point3u>(), readAttr<XQ::Point3u>);
 
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point4f>(), readAttr<XQ::Point4f>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point4d>(), readAttr<XQ::Point4d>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point4i>(), readAttr<XQ::Point4i>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Point4u>(), readAttr<XQ::Point4u>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point4f>(), readAttr<XQ::Point4f>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point4d>(), readAttr<XQ::Point4d>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point4i>(), readAttr<XQ::Point4i>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Point4u>(), readAttr<XQ::Point4u>);
 
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Rectf>(), readAttr<XQ::Rectf>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Rectd>(), readAttr<XQ::Rectd>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Recti>(), readAttr<XQ::Recti>);
-		XattrDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Rectu>(), readAttr<XQ::Rectu>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Rectf>(), readAttr<XQ::Rectf>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Rectd>(), readAttr<XQ::Rectd>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Recti>(), readAttr<XQ::Recti>);
+		XattrDeserializer.registerProcessor(XQ_META::ClassName<XQ::Rectu>(), readAttr<XQ::Rectu>);
 	}
 }
 
@@ -469,55 +469,55 @@ namespace XBaseObjectMeta {
 	}
 	
 	void InitDataWrite() {
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<int>(), writeData<int>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<double>(), writeData<double>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<float>(), writeData<float>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<unsigned int>(), writeData<unsigned int>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<int>(), writeData<int>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<double>(), writeData<double>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<float>(), writeData<float>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<unsigned int>(), writeData<unsigned int>);
 
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::XColor>(), writeData<XQ::XColor>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::XColor>(), writeData<XQ::XColor>);
 
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XIntArray>(), writeDataArrayID<XIntArray>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray>(), writeDataArrayID<XUIntArray>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray>(), writeDataArrayID<XFloatArray>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray>(), writeDataArrayID<XDoubleArray>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray>(), writeDataArrayID<XUCharArray>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XCharArray>(), writeDataArrayID<XCharArray>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XIntArray>(), writeDataArrayID<XIntArray>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XUIntArray>(), writeDataArrayID<XUIntArray>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XFloatArray>(), writeDataArrayID<XFloatArray>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XDoubleArray>(), writeDataArrayID<XDoubleArray>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XUCharArray>(), writeDataArrayID<XUCharArray>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XCharArray>(), writeDataArrayID<XCharArray>);
 
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XIntArray2D>(), writeDataArray2D<XIntArray2D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray2D>(), writeDataArray2D<XUIntArray2D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray2D>(), writeDataArray2D<XFloatArray2D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray2D>(), writeDataArray2D<XDoubleArray2D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray2D>(), writeDataArray2D<XUCharArray2D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XCharArray2D>(), writeDataArray2D<XCharArray2D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XIntArray2D>(), writeDataArray2D<XIntArray2D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XUIntArray2D>(), writeDataArray2D<XUIntArray2D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XFloatArray2D>(), writeDataArray2D<XFloatArray2D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XDoubleArray2D>(), writeDataArray2D<XDoubleArray2D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XUCharArray2D>(), writeDataArray2D<XUCharArray2D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XCharArray2D>(), writeDataArray2D<XCharArray2D>);
 
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XIntArray3D>(), writeDataArray3D<XIntArray3D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray3D>(), writeDataArray3D<XUIntArray3D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray3D>(), writeDataArray3D<XFloatArray3D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray3D>(), writeDataArray3D<XDoubleArray3D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray3D>(), writeDataArray3D<XUCharArray3D>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XCharArray3D>(), writeDataArray3D<XCharArray3D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XIntArray3D>(), writeDataArray3D<XIntArray3D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XUIntArray3D>(), writeDataArray3D<XUIntArray3D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XFloatArray3D>(), writeDataArray3D<XFloatArray3D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XDoubleArray3D>(), writeDataArray3D<XDoubleArray3D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XUCharArray3D>(), writeDataArray3D<XUCharArray3D>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XCharArray3D>(), writeDataArray3D<XCharArray3D>);
 
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), writeData<XQ::Vec2f>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), writeData<XQ::Vec2d>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), writeData<XQ::Vec2i>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), writeData<XQ::Vec2u>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), writeData<XQ::Vec2u8>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), writeData<XQ::Vec2i8>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), writeData<XQ::Vec2f>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), writeData<XQ::Vec2d>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), writeData<XQ::Vec2i>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), writeData<XQ::Vec2u>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), writeData<XQ::Vec2u8>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), writeData<XQ::Vec2i8>);
 
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), writeData<XQ::Vec3f>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), writeData<XQ::Vec3d>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), writeData<XQ::Vec3i>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), writeData<XQ::Vec3u>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), writeData<XQ::Vec3u8>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), writeData<XQ::Vec3i8>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), writeData<XQ::Vec3f>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), writeData<XQ::Vec3d>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), writeData<XQ::Vec3i>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), writeData<XQ::Vec3u>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), writeData<XQ::Vec3u8>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), writeData<XQ::Vec3i8>);
 
 
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), writeData<XQ::Vec4f>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), writeData<XQ::Vec4d>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), writeData<XQ::Vec4i>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), writeData<XQ::Vec4u>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), writeData<XQ::Vec4u8>);
-		XDataSerializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), writeData<XQ::Vec4i8>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), writeData<XQ::Vec4f>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), writeData<XQ::Vec4d>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), writeData<XQ::Vec4i>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), writeData<XQ::Vec4u>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), writeData<XQ::Vec4u8>);
+		XDataSerializer.registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), writeData<XQ::Vec4i8>);
 
 	}
 }
@@ -624,66 +624,73 @@ namespace XBaseObjectMeta {
 	}
 
 	void InitDataRead() {
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<int>(), readData<int>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<double>(), readData<double>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<float>(), readData<float>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<unsigned int>(), readData<unsigned int>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<int>(), readData<int>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<double>(), readData<double>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<float>(), readData<float>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<unsigned int>(), readData<unsigned int>);
 
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::XColor>(), readData<XQ::XColor>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::XColor>(), readData<XQ::XColor>);
 
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XIntArray>(), readDataArrayID<XIntArray>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray>(), readDataArrayID<XUIntArray>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray>(), readDataArrayID<XFloatArray>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray>(), readDataArrayID<XDoubleArray>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray>(), readDataArrayID<XUCharArray>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XCharArray>(), readDataArrayID<XCharArray>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XIntArray>(), readDataArrayID<XIntArray>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XUIntArray>(), readDataArrayID<XUIntArray>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XFloatArray>(), readDataArrayID<XFloatArray>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XDoubleArray>(), readDataArrayID<XDoubleArray>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XUCharArray>(), readDataArrayID<XUCharArray>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XCharArray>(), readDataArrayID<XCharArray>);
 
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XIntArray2D>(), readDataArray2D<XIntArray2D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray2D>(), readDataArray2D<XUIntArray2D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray2D>(), readDataArray2D<XFloatArray2D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray2D>(), readDataArray2D<XDoubleArray2D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray2D>(), readDataArray2D<XUCharArray2D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XCharArray2D>(), readDataArray2D<XCharArray2D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XIntArray2D>(), readDataArray2D<XIntArray2D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XUIntArray2D>(), readDataArray2D<XUIntArray2D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XFloatArray2D>(), readDataArray2D<XFloatArray2D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XDoubleArray2D>(), readDataArray2D<XDoubleArray2D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XUCharArray2D>(), readDataArray2D<XUCharArray2D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XCharArray2D>(), readDataArray2D<XCharArray2D>);
 
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XIntArray3D>(), readDataArray3D<XIntArray3D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUIntArray3D>(), readDataArray3D<XUIntArray3D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XFloatArray3D>(), readDataArray3D<XFloatArray3D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XDoubleArray3D>(), readDataArray3D<XDoubleArray3D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XUCharArray3D>(), readDataArray3D<XUCharArray3D>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XCharArray3D>(), readDataArray3D<XCharArray3D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XIntArray3D>(), readDataArray3D<XIntArray3D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XUIntArray3D>(), readDataArray3D<XUIntArray3D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XFloatArray3D>(), readDataArray3D<XFloatArray3D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XDoubleArray3D>(), readDataArray3D<XDoubleArray3D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XUCharArray3D>(), readDataArray3D<XUCharArray3D>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XCharArray3D>(), readDataArray3D<XCharArray3D>);
 
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), readData<XQ::Vec2f>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), readData<XQ::Vec2d>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), readData<XQ::Vec2i>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), readData<XQ::Vec2u>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), readData<XQ::Vec2u8>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), readData<XQ::Vec2i8>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2f>(), readData<XQ::Vec2f>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2d>(), readData<XQ::Vec2d>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2i>(), readData<XQ::Vec2i>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2u>(), readData<XQ::Vec2u>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2u8>(), readData<XQ::Vec2u8>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec2i8>(), readData<XQ::Vec2i8>);
 
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), readData<XQ::Vec3f>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), readData<XQ::Vec3d>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), readData<XQ::Vec3i>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), readData<XQ::Vec3u>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), readData<XQ::Vec3u8>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), readData<XQ::Vec3i8>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3f>(), readData<XQ::Vec3f>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3d>(), readData<XQ::Vec3d>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3i>(), readData<XQ::Vec3i>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3u>(), readData<XQ::Vec3u>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3u8>(), readData<XQ::Vec3u8>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec3i8>(), readData<XQ::Vec3i8>);
 
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), readData<XQ::Vec4f>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), readData<XQ::Vec4d>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), readData<XQ::Vec4i>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), readData<XQ::Vec4u>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), readData<XQ::Vec4u8>);
-		XDataDeserializer::instance().registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), readData<XQ::Vec4i8>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4f>(), readData<XQ::Vec4f>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4d>(), readData<XQ::Vec4d>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4i>(), readData<XQ::Vec4i>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4u>(), readData<XQ::Vec4u>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4u8>(), readData<XQ::Vec4u8>);
+		XDataDeserializer.registerProcessor(XQ_META::ClassName<XQ::Vec4i8>(), readData<XQ::Vec4i8>);
 	}
 }
 
 namespace XBaseObjectMeta {
 	template<typename T>
-	std::string valueToString(const T& value) {
+	std::string valueToString(const T& value,int index) {
 		if constexpr (std::is_arithmetic_v<T>) {
 			return std::to_string(value);
 		}
 
 		if constexpr (XTraits::is_xq_vector_v<T>) {
-			return "xvector";
+			if (index == 0) {
+				std::stringstream stm;
+				stm<<value;
+				return stm.str();
+			}
+			else {
+				return std::to_string(value.data[index-1]);
+			}
 		}
 
 		if constexpr (std::is_same_v<T, XQ::XColor>) {
@@ -698,46 +705,78 @@ namespace XBaseObjectMeta {
 	}
 
 	template<typename T>
-	std::string XattrToString(sptr<XDataAttribute> attr_) {
+	std::string XattrToString(sptr<XDataAttribute> attr_,int index) {
 		auto attr = attr_->asDerived<XDataAttributeT<T>>();
 		const auto& value = attr->getValue();
-		return valueToString(value);
+		return valueToString(value,index);
 	}
 
 
-	std::string  XattrEnumBaseToQstring(sptr<XDataAttribute> attr_) {
+	std::string  XattrEnumBaseToQstring(sptr<XDataAttribute> attr_,int index) {
 		auto attr = attr_->asDerived<XDataAttributeEnumBase>();
 		const auto& value = attr->getIntValue();
-		return valueToString(value);
+		return valueToString(value,index);
+	}
+
+	template<unsigned int N>
+	int XattrGetNum(sptr<XDataAttribute> attr) {
+		return N;
 	}
 
 	void InitAttrToString() {
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Color>(), XattrToString<XQ::XColor>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Int>(), XattrToString<int>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Bool>(), XattrToString<bool>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_UInt>(), XattrToString<unsigned int>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Float>(), XattrToString<float>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Double>(), XattrToString<double>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_String>(), XattrToString<std::string>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2f>(), XattrToString<XQ::Vec2f>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2d>(), XattrToString<XQ::Vec2d>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2i>(), XattrToString<XQ::Vec2i>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2u>(), XattrToString<XQ::Vec2u>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2u8>(), XattrToString<XQ::Vec2u8>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec2i8>(), XattrToString<XQ::Vec2i8>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3f>(), XattrToString<XQ::Vec3f>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3d>(), XattrToString<XQ::Vec3d>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3i>(), XattrToString<XQ::Vec3i>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3u>(), XattrToString<XQ::Vec3u>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3u8>(), XattrToString<XQ::Vec3u8>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec3i8>(), XattrToString<XQ::Vec3i8>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4f>(), XattrToString<XQ::Vec4f>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4d>(), XattrToString<XQ::Vec4d>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4i>(), XattrToString<XQ::Vec4i>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4u>(), XattrToString<XQ::Vec4u>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4u8>(), XattrToString<XQ::Vec4u8>);
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Vec4i8>(), XattrToString<XQ::Vec4i8>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Color>(), XattrToString<XQ::XColor>); 
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Int>(), XattrToString<int>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Bool>(), XattrToString<bool>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_UInt>(), XattrToString<unsigned int>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Float>(), XattrToString<float>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Double>(), XattrToString<double>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_String>(), XattrToString<std::string>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec2f>(), XattrToString<XQ::Vec2f>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec2d>(), XattrToString<XQ::Vec2d>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec2i>(), XattrToString<XQ::Vec2i>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec2u>(), XattrToString<XQ::Vec2u>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec2u8>(), XattrToString<XQ::Vec2u8>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec2i8>(), XattrToString<XQ::Vec2i8>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec3f>(), XattrToString<XQ::Vec3f>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec3d>(), XattrToString<XQ::Vec3d>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec3i>(), XattrToString<XQ::Vec3i>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec3u>(), XattrToString<XQ::Vec3u>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec3u8>(), XattrToString<XQ::Vec3u8>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec3i8>(), XattrToString<XQ::Vec3i8>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec4f>(), XattrToString<XQ::Vec4f>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec4d>(), XattrToString<XQ::Vec4d>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec4i>(), XattrToString<XQ::Vec4i>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec4u>(), XattrToString<XQ::Vec4u>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec4u8>(), XattrToString<XQ::Vec4u8>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec4i8>(), XattrToString<XQ::Vec4i8>);
+		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XDataAttributeEnumBase>(), XattrEnumBaseToQstring);
 
-		XattrToQstringFactory::instance().registerProcessor(XQ_META::ClassName<XDataAttributeEnumBase>(), XattrEnumBaseToQstring);
-	}
+
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Color>(), XattrGetNum<1>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Int>(), XattrGetNum<1>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Bool>(), XattrGetNum<1>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_UInt>(), XattrGetNum<1>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Float>(), XattrGetNum<1>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Double>(), XattrGetNum<1>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_String>(), XattrGetNum<1>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2f>(), XattrGetNum<3>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2d>(), XattrGetNum<3>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2i>(), XattrGetNum<3>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2u>(), XattrGetNum<3>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2u8>(), XattrGetNum<3>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2i8>(), XattrGetNum<3>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3f>(), XattrGetNum<4>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3d>(), XattrGetNum<4>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3i>(), XattrGetNum<4>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3u>(), XattrGetNum<4>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3u8>(), XattrGetNum<4>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3i8>(), XattrGetNum<4>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4f>(), XattrGetNum<5>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4d>(), XattrGetNum<5>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4i>(), XattrGetNum<5>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4u>(), XattrGetNum<5>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4u8>(), XattrGetNum<5>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4i8>(), XattrGetNum<5>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XDataAttributeEnumBase>(), XattrGetNum<1>);
+	}																		 
 }

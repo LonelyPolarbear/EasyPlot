@@ -10,6 +10,7 @@
 
 #include <render/XRender.h>
 #include <lib05_shape/XRenderNode.h>
+#include <render/XOpenGLRenderWindow.h>
 
 class XMainWindow::Internal {
 public:
@@ -45,6 +46,7 @@ void XMainWindow::BuildUI()
 	// 中央区域：主显示内容
 	mData->plotWidget = new XEasyPlotWidget(this);
 	this->centralWidget()->setLayout(new QHBoxLayout);
+	this->centralWidget()->layout()->setContentsMargins(1,1,1,1);
 	this->centralWidget()->layout()->addWidget(mData->plotWidget);
 
 	// 左侧 Dock
@@ -94,16 +96,6 @@ void XMainWindow::InitBotTab()
 
 void XMainWindow::InitView()
 {
-	 mData->connector.connect(mData->plotWidget,&XEasyPlotWidget::sigRenderAdd,[this](sptr<XRender> render){
-		 mData->objectInspector->setRootObject(render);
-		 /*mData->connector.connect(render,&XRender::SigRenderNodeSelected,[this](sptr<XRenderNode> node){
-			auto parent = node;
-			while (auto p = parent->getRenderNodeParent()) {
-				parent = p;
-			}
-			mData->objectInspector->setRootObject(parent);
-		});*/
-	});
-
+	mData->objectInspector->setRootObject(mData->plotWidget->getRenderWindow());
 	mData->plotWidget->test2();
 }

@@ -1,3 +1,4 @@
+#pragma once
 #include "XDataObject.h"
 #include "dataBaseApi.h"
 #include <type_traits>

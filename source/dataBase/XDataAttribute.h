@@ -8,6 +8,9 @@
 #include <highfive/H5File.hpp>
 #include <lib00_utilty/gp/classProcessorFactory.hpp>
 
+#define ATTR_SERIALIZER 0
+#define ATTR_DESERIALIZER 1
+
 class XDataObject;
 class DATABASE_API XDataAttribute : public XDataBaseObject {
 	REGISTER_CLASS_META_DATA(XDataAttribute, XDataBaseObject);
@@ -51,14 +54,17 @@ protected:
 	std::string mName;
 };
 
-extern template class DATABASE_API classProcessorFactory<1, void(HighFive::Group& group,sptr<XDataAttribute>)>;
-using XattrSerializer = classProcessorFactory<1, void(HighFive::Group& group, sptr<XDataAttribute>)>;
 
-extern template class DATABASE_API classProcessorFactory<2, void(HighFive::Group& group, sptr<XDataAttribute>)>;
-using XattrDeserializer = classProcessorFactory<2, void(HighFive::Group& group, sptr<XDataAttribute>)>;
+extern DATABASE_API classProcessorFactory<void(HighFive::Group& group, sptr<XDataAttribute>)> XattrSerializer;
+extern DATABASE_API classProcessorFactory<void(HighFive::Group& group, sptr<XDataAttribute>)> XattrDeserializer;
 
-extern template class DATABASE_API classProcessorFactory<1, std::string(sptr<XDataAttribute>)>;
-using XattrToQstringFactory = classProcessorFactory<1, std::string(sptr<XDataAttribute>)>;
+
+//extern  DATABASE_API classProcessorFactory<std::string(sptr<XDataAttribute>, int index)> XattrToQstringFactory;
+extern  DATABASE_API classMultiProcessorFactory<
+	int(sptr<XDataAttribute>),/*获取大小*/
+	std::string(sptr<XDataAttribute>, int index) /*获取每一个index的字符串*/
+> XattrToQstringFactory;
+
 
 template<typename T>
 class XDataAttributeT : public XDataAttribute {
@@ -89,15 +95,15 @@ public:
 
 	void serialize(HighFive::Group& group) override {
 		auto name = XQ_META::ClassName<T>();
-		if (XattrSerializer::instance().hasProcessor(name)) {
-			XattrSerializer::instance().process(name , group,asDerived<XDataAttribute>());
+		if (XattrSerializer.hasProcessor(name)) {
+			XattrSerializer.process(name , group,asDerived<XDataAttribute>());
 		}
 	}
 
 	void deserialize(HighFive::Group& group) override {
 		auto name = XQ_META::ClassName<T>();
-		if (XattrDeserializer::instance().hasProcessor(name)) {
-			XattrDeserializer::instance().process(name, group, asDerived<XDataAttribute>());
+		if (XattrDeserializer.hasProcessor(name)) {
+			XattrDeserializer.process(name, group, asDerived<XDataAttribute>());
 		}
 	}
 protected:
@@ -157,7 +163,7 @@ template<typename T>
 using XAttr_Enum = XDataAttributeEnum<T>;
 
 template<typename T>
-std::string XattrEnumToString(sptr<XDataAttribute> attr_) {
+std::string XattrEnumToString(sptr<XDataAttribute> attr_,int index) {
 	auto attr = attr_->asDerived<XDataAttributeEnum<T>>();
 	const auto& value = attr->getValue();
 	return XQ_META::enum_to_string(value);

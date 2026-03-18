@@ -16,12 +16,13 @@ XAttrItemDelegate::XAttrItemDelegate(QObject* parent):QItemDelegate(parent)
 QWidget* XAttrItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 	XDataObjectTableModel* customModel = getXDataObjectTableModel(index);
+	int curAttrOffset = 0;
 	auto attr = customModel->getAttr(index);
 	
 	if (attr && index.column() ==1) {
 		auto className = attr->getClassName();
-		if (XAttrItemDelegateCreateEditorFactory::instance().hasProcessor(className)) {
-			return XAttrItemDelegateCreateEditorFactory::instance().process(className, parent, option, attr, const_cast<XAttrItemDelegate*>(this));
+		if (XAttrItemDelegateFactory.hasProcessor<0>(className)) {
+			return XAttrItemDelegateFactory.process<0>(className, parent, option, attr, const_cast<XAttrItemDelegate*>(this));
 		}
 		else {
 			return QItemDelegate::createEditor(parent, option, index);
@@ -35,13 +36,14 @@ QWidget* XAttrItemDelegate::createEditor(QWidget* parent, const QStyleOptionView
 void XAttrItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
 {
 	XDataObjectTableModel* customModel = getXDataObjectTableModel(index);
+	int curAttrOffset = 0;
 	auto attr = customModel->getAttr(index);
 
 	//如果是颜色控件
 	if (attr && index.column() == 1) {
 		auto className = attr->getClassName();
-		if (XAttrItemDelegateSetEditorDataFactory::instance().hasProcessor(className)) {
-			XAttrItemDelegateSetEditorDataFactory::instance().process(className,editor,attr);
+		if (XAttrItemDelegateFactory.hasProcessor<1>(className)) {
+			XAttrItemDelegateFactory.process<1>(className,editor,attr);
 		}
 		else {
 			return QItemDelegate::setEditorData(editor, index);
@@ -56,13 +58,14 @@ void XAttrItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index)
 void XAttrItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
 {
 	XDataObjectTableModel* customModel = getXDataObjectTableModel(index);
+	int curAttrOffset = 0;
 	auto attr = customModel->getAttr(index);
 
 	//如果是颜色控件
 	if (attr && index.column() == 1) {
 		auto className = attr->getClassName();
-		if (XAttrItemDelegatesetModelDataFactory::instance().hasProcessor(className)) {
-			XAttrItemDelegatesetModelDataFactory::instance().process(className, model, editor, attr, index);
+		if (XAttrItemDelegateFactory.hasProcessor<2>(className)) {
+			XAttrItemDelegateFactory.process<2>(className, model, editor, attr, index);
 		}
 		else {
 			return QItemDelegate::setModelData(editor, model, index);
@@ -198,26 +201,32 @@ void SetModelData_XAttr_Enum(void* model_, QWidget* editor, sptr<XDataAttribute>
 	}
 }
 
-template class XMVD_API classProcessorFactory<1, QWidget* (QWidget*, const QStyleOptionViewItem&, sptr<XDataAttribute>, XAttrItemDelegate*)>;
-template class XMVD_API classProcessorFactory<1, void(QWidget*, sptr<XDataAttribute>)>;
-template class XMVD_API classProcessorFactory<1, void(void* model, QWidget*, sptr<XDataAttribute>, const QModelIndex& index)>;
+using CreateEditorFn = QWidget*(QWidget*, const QStyleOptionViewItem&, sptr<XDataAttribute>, XAttrItemDelegate*);
+using SetEditorDataFn = void(QWidget*, sptr<XDataAttribute>);
+using SetModelDataFn = void(void* model_, QWidget*, sptr<XDataAttribute>, const QModelIndex& index);
+
+
+classMultiProcessorFactory<CreateEditorFn,SetEditorDataFn,SetModelDataFn> XAttrItemDelegateFactory;
+
+template XMVD_API void classMultiProcessorFactory<CreateEditorFn, SetEditorDataFn, SetModelDataFn>::registerProcessor<0>(const std::string&, const std::function<CreateEditorFn>&);
+template XMVD_API void classMultiProcessorFactory<CreateEditorFn, SetEditorDataFn, SetModelDataFn>::registerProcessor<1>(const std::string&, const std::function<SetEditorDataFn>&);
+template XMVD_API void classMultiProcessorFactory<CreateEditorFn, SetEditorDataFn, SetModelDataFn>::registerProcessor<2>(const std::string&, const std::function<SetModelDataFn>&);
 
 void XMVD_API InitXAttrItemDelegate()
 {
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Color>(), CreateEditor_XAttr_Color);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Color>(), SetEditorData_XAttr_Color);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Color>(), SetModelData_XAttr_Color);
 
-	XAttrItemDelegateCreateEditorFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Color>(), CreateEditor_XAttr_Color);
-	XAttrItemDelegateSetEditorDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Color>(), SetEditorData_XAttr_Color);
-	XAttrItemDelegatesetModelDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Color>(), SetModelData_XAttr_Color);
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), CreateEditor_XAttr_Enum<PolygonMode>);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), SetEditorData_XAttr_Enum<PolygonMode>);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), SetModelData_XAttr_Enum);
 
-	XAttrItemDelegateCreateEditorFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), CreateEditor_XAttr_Enum<PolygonMode>);
-	XAttrItemDelegateSetEditorDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), SetEditorData_XAttr_Enum<PolygonMode>);
-	XAttrItemDelegatesetModelDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), SetModelData_XAttr_Enum);
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), CreateEditor_XAttr_Enum<PrimitveType>);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), SetEditorData_XAttr_Enum<PrimitveType>);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), SetModelData_XAttr_Enum);
 
-	XAttrItemDelegateCreateEditorFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), CreateEditor_XAttr_Enum<PrimitveType>);
-	XAttrItemDelegateSetEditorDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), SetEditorData_XAttr_Enum<PrimitveType>);
-	XAttrItemDelegatesetModelDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), SetModelData_XAttr_Enum);
-
-	XAttrItemDelegateCreateEditorFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), CreateEditor_XAttr_Enum<ColorMode>);
-	XAttrItemDelegateSetEditorDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), SetEditorData_XAttr_Enum<ColorMode>);
-	XAttrItemDelegatesetModelDataFactory::instance().registerProcessor(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), SetModelData_XAttr_Enum);
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), CreateEditor_XAttr_Enum<ColorMode>);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), SetEditorData_XAttr_Enum<ColorMode>);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), SetModelData_XAttr_Enum);
 }

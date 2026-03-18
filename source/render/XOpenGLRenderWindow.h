@@ -1,14 +1,17 @@
 #pragma once
 #include "renderApi.h"
 #include <dataBase/XDataBaseObject.h>
+#include <dataBase/XDataObject.h>
+#include <dataBase/XDataList.h>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
 #include <lib01_shader/xshaderManger.h>
+#include "XRender.h"
 
 class XOpenGLContext;
 class XOpenGLBuffer;
 class XRenderWindowEventDispatch;
-class XRender;
+//class XRender;
 
 class RENDER_API RenderWindowUbo :public XDataBaseObject {
 protected:
@@ -37,7 +40,8 @@ protected:
 };
 
 
-class RENDER_API XOpenGLRenderWindow :public XDataBaseObject {
+class RENDER_API XOpenGLRenderWindow :public XDataObject {
+	REGISTER_CLASS_META_DATA(XOpenGLRenderWindow, XDataObject);
 protected:
 	XOpenGLRenderWindow();
 	virtual ~XOpenGLRenderWindow();
@@ -77,6 +81,8 @@ private:
 	sptr<XOpenGLContext> m_context;										//窗口上下文
 	XQ::Vec2i m_windowSize;														//窗口尺寸
 	sptr<XRenderWindowEventDispatch> m_eventDispatch;	//渲染窗口交互器
-	std::vector<sptr<XRender>> m_renders;
+	//std::vector<sptr<XRender>> m_renders;
 	sptr< RenderWindowUbo> m_renderWindowUbo;
+
+	csptr<XDataListT<XRender> > m_renderList;
 };
