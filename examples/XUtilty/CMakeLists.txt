@@ -26,6 +26,7 @@ SET(LIB_INCLUDE_DIRECTORY
 SET(LIB_NAMES 	
 	${libName}${DLL_DEBUG_POSTFIX}
 	MyLib::HeaderOnly
+	xtest${DLL_DEBUG_POSTFIX}
 )
 
 #Èý·½¿â

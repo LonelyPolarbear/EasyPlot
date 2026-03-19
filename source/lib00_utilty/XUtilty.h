@@ -341,6 +341,42 @@ namespace XQ {
 
 	extern lib00_utilty_API std::string to_string_with_precision(double value, int precision);
 
+	template<typename T>
+	T fromString(const std::string&value) {
+		if constexpr (std::is_same_v<T, int>) {
+			return std::stoi(value);
+		}
+		if constexpr (std::is_same_v<T, float>) {
+			return std::stof(value);
+		}
+		if constexpr (std::is_same_v<T, double>) {
+			return std::stod(value);
+		}
+		if constexpr (std::is_same_v<T, unsigned int>) {
+			return std::stoul(value);
+		}
+		if constexpr (std::is_same_v<T, char>){
+			return std::stoi(value);
+		}
+		if constexpr (std::is_same_v<T, unsigned char>) {
+			return std::stoi(value);
+		}
+		if constexpr (std::is_same_v<T, bool>) {
+			if (value == "true") {
+				return true;
+			}
+			else if (value == "false") {
+				return false;
+			}
+			else {
+				throw std::invalid_argument("invalid bool value");
+			}
+		}
+		else {
+			static_assert("true", "fromString(const std::string&) ¿‡–Õ¥ÌŒÛ");
+		}
+	}
+
 	template< bool isReverse,size_t... Is, typename Tuple>
 	auto printTupleImpl(std::ostream& os, std::index_sequence<Is...>, Tuple&& args) {
 		constexpr int N = std::tuple_size_v<std::remove_reference_t<Tuple>>-1;

@@ -5,6 +5,7 @@ copy .\3rdParty\glew\bin\*.dll .\output\bin\
 copy .\3rdParty\glew\lib\*.lib .\output\bin\
 
 copy .\3rdParty\assimp\lib\*.lib .\output\bin\
+copy .\3rdParty\linenoise\lib\*.lib .\output\bin\
 
 rem copy .\3rdParty\hdf5\1.14.5\lib\*.lib .\output\bin\
 copy .\3rdParty\hdf5\bin\*.dll .\output\bin\

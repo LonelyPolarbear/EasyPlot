@@ -7,6 +7,7 @@
 #include <boost/core/demangle.hpp>
 
 #include <string_view>
+#include <xtest/XTest.h>
 
 
 #define REGISTER_CLASS_META_DATA(className, ...)  \
@@ -103,8 +104,7 @@ namespace XQ {
 	class B:public A{};
 }
 
-int main() {
-
+void test01() {
 	XQ::print("XUtilty test");
 
 	std::cout << boost::typeindex::type_id<XQ::foo>().pretty_name() << std::endl;
@@ -125,9 +125,12 @@ int main() {
 	for (auto n : name) {
 		std::cout << n << std::endl;
 	}
+}
 
-	//auto sss = get_parent_className<XQ::B>;
-	//auto sss2 = ClassName<XQ::B>();
+int main() {
+	XTestApp app("XUtiltyTest");
+	
+	app.addCmd("test01","test01",test01);
 
-	return 0;
+	return app.run();
 }

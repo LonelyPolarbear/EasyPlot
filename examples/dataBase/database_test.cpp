@@ -10,6 +10,8 @@
 #include <numeric>
 #include <highfive/H5File.hpp>
 
+#include <xtest/XTest.h>
+
 void testXVector() {
 	XQ::print("一维数组");
 
@@ -400,13 +402,10 @@ void testDataArrayDeserialization() {
 }
 
 int main() {
-	//testXDataObject01();
-	//testXDataObject02();
-	//testSerialization();
-	//testDeserialization();
-	//testXDataPath();
+	XTestApp app("XDataBaseTest");
+	
+	app.addCmd("testDataArraySerialization","数据序列化",testDataArraySerialization);
+	app.addCmd("testDataArrayDeserialization", "数据反序列化", testDataArrayDeserialization);
 
-	//testDataArraySerialization();
-	testDataArrayDeserialization();
-	return 1;
+	return app.run();
 }

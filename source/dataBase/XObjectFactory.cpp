@@ -6,6 +6,8 @@
 #include "XClolor.h"
 #include "XRefAttribute.h"
 #include "XDataArray.h"
+#include <lib00_utilty/XUtilty.h>
+#include <regex>
 namespace XBaseObjectMeta {
 	void InitAttrWrite();
 	void InitAttrRead();
@@ -676,21 +678,18 @@ namespace XBaseObjectMeta {
 }
 
 namespace XBaseObjectMeta {
+	//to string
+
 	template<typename T>
-	std::string valueToString(const T& value,int index) {
+	std::string valueToString(const T& value) {
 		if constexpr (std::is_arithmetic_v<T>) {
 			return std::to_string(value);
 		}
 
 		if constexpr (XTraits::is_xq_vector_v<T>) {
-			if (index == 0) {
-				std::stringstream stm;
-				stm<<value;
-				return stm.str();
-			}
-			else {
-				return std::to_string(value.data[index-1]);
-			}
+			std::stringstream stm;
+			stm << value;
+			return stm.str();
 		}
 
 		if constexpr (std::is_same_v<T, XQ::XColor>) {
@@ -705,22 +704,78 @@ namespace XBaseObjectMeta {
 	}
 
 	template<typename T>
-	std::string XattrToString(sptr<XDataAttribute> attr_,int index) {
+	std::string XattrToString(sptr<XDataAttribute> attr_) {
 		auto attr = attr_->asDerived<XDataAttributeT<T>>();
 		const auto& value = attr->getValue();
-		return valueToString(value,index);
+		return valueToString(value);
 	}
 
 
-	std::string  XattrEnumBaseToQstring(sptr<XDataAttribute> attr_,int index) {
+	std::string  XattrEnumBaseToQstring(sptr<XDataAttribute> attr_) {
 		auto attr = attr_->asDerived<XDataAttributeEnumBase>();
 		const auto& value = attr->getIntValue();
-		return valueToString(value,index);
+		return valueToString(value);
 	}
 
-	template<unsigned int N>
-	int XattrGetNum(sptr<XDataAttribute> attr) {
-		return N;
+	//from string
+	template< typename T>
+	struct VecDataFromStr;
+
+	template<unsigned N, typename T>
+	struct VecDataFromStr<XQ::Vector<N, T>> {
+		static XQ::Vector<N, T> resume(const std::string& name) {
+			XQ::Vector<N, T> data;
+			//利用正则表达式，按照“,”分割字符串”
+			std::regex digit_regex(R"(\d+)");
+			std::vector<std::string> numbers;
+			std::sregex_iterator iter(name.begin(), name.end(), digit_regex);
+			std::sregex_iterator end;
+
+			// 遍历所有匹配项
+			for (; iter != end; ++iter) {
+				numbers.push_back(iter->str());
+			}
+
+			if (numbers.size() != N) {
+
+				throw std::runtime_error("invalid vector data");
+			}
+
+			for (int i = 0; i < N; i++) {
+				data.data[i] = XQ::fromString<T>(numbers[i]);
+			}
+
+			return data;
+		}
+	};
+
+	template<typename T>
+	void XattrFromString(sptr<XDataAttribute> attr_, const std::string& str) {
+		auto attr = attr_->asDerived<XDataAttributeT<T>>();
+		if constexpr (std::is_arithmetic_v<T>) {
+			auto value = XQ::fromString<T>(str);
+			attr->setValue(value);
+		}
+
+		if constexpr (XTraits::is_xq_vector_v<T>) {
+			auto data = VecDataFromStr<T>::resume(str);
+			attr->setValue(data);
+			return;
+		}
+
+		if constexpr (std::is_same_v<T, XQ::XColor>) {
+			return ;
+		}
+
+		if constexpr (std::is_same_v<T, std::string>) {
+			attr->setValue(str);
+			return ;
+		}
+	}
+
+	void  XattrEnumBaseFromQstring(sptr<XDataAttribute> attr_,const std::string& str) {
+		auto attr = attr_->asDerived<XDataAttributeEnumBase>();
+		attr->setIntValue(std::stoi(str));
 	}
 
 	void InitAttrToString() {
@@ -751,32 +806,32 @@ namespace XBaseObjectMeta {
 		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Vec4i8>(), XattrToString<XQ::Vec4i8>);
 		XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XDataAttributeEnumBase>(), XattrEnumBaseToQstring);
 
-
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Color>(), XattrGetNum<1>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Int>(), XattrGetNum<1>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Bool>(), XattrGetNum<1>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_UInt>(), XattrGetNum<1>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Float>(), XattrGetNum<1>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Double>(), XattrGetNum<1>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_String>(), XattrGetNum<1>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2f>(), XattrGetNum<3>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2d>(), XattrGetNum<3>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2i>(), XattrGetNum<3>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2u>(), XattrGetNum<3>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2u8>(), XattrGetNum<3>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2i8>(), XattrGetNum<3>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3f>(), XattrGetNum<4>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3d>(), XattrGetNum<4>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3i>(), XattrGetNum<4>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3u>(), XattrGetNum<4>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3u8>(), XattrGetNum<4>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3i8>(), XattrGetNum<4>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4f>(), XattrGetNum<5>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4d>(), XattrGetNum<5>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4i>(), XattrGetNum<5>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4u>(), XattrGetNum<5>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4u8>(), XattrGetNum<5>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4i8>(), XattrGetNum<5>);
-		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XDataAttributeEnumBase>(), XattrGetNum<1>);
+		
+		//XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Color>(), XattrFromString<>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Int>(), XattrFromString<int>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Bool>(), XattrFromString<bool>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_UInt>(), XattrFromString<unsigned int>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Float>(), XattrFromString<float>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Double>(), XattrFromString<double>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_String>(), XattrFromString<std::string>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2f>(), XattrFromString<XQ::Vec2f>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2d>(), XattrFromString<XQ::Vec2d>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2i>(), XattrFromString<XQ::Vec2i>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2u>(), XattrFromString<XQ::Vec2u>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2u8>(), XattrFromString<XQ::Vec2u8>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec2i8>(), XattrFromString<XQ::Vec2i8>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3f>(), XattrFromString<XQ::Vec3f>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3d>(), XattrFromString<XQ::Vec3d>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3i>(), XattrFromString<XQ::Vec3i>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3u>(), XattrFromString<XQ::Vec3u>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3u8>(), XattrFromString<XQ::Vec3u8>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec3i8>(), XattrFromString<XQ::Vec3i8>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4f>(), XattrFromString<XQ::Vec4f>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4d>(), XattrFromString<XQ::Vec4d>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4i>(), XattrFromString<XQ::Vec4i>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4u>(), XattrFromString<XQ::Vec4u>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4u8>(), XattrFromString<XQ::Vec4u8>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Vec4i8>(), XattrFromString<XQ::Vec4i8>);
+		XattrToQstringFactory.registerProcessor<0>(XQ_META::ClassName<XDataAttributeEnumBase>(), XattrEnumBaseFromQstring);
 	}																		 
 }

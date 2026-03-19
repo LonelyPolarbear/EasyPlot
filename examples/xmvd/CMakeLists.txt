@@ -38,6 +38,7 @@ SET(LIB_NAMES
 	 MyLib::HDF5
 	 Qt5::Widgets
 	 Qt5::Core
+	 xtest${DLL_DEBUG_POSTFIX}
 )
 
 SET(LIB_INCLUDE_DIRECTORY 	

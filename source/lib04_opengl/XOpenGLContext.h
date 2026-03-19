@@ -2,6 +2,18 @@
 #include "XOpenglApi.h"
 #include <dataBase/XDataBaseObject.h>
 
+class LIB04_OPENGL_API XOffsetWindow :public XDataBaseObject {
+protected:
+	XOffsetWindow();
+	virtual ~XOffsetWindow();
+public:
+	virtual void Init();
+	uint64_t winId();
+protected:
+	class Internal;
+	std::shared_ptr<Internal> mData;;
+};
+
 class LIB04_OPENGL_API XOpenGLShareContext :public XDataBaseObject {
 protected:
 	XOpenGLShareContext();
@@ -44,6 +56,8 @@ public:
 	bool create(uint64_t window);
 
 	std::shared_ptr<XOpenGLShareContext> createOrgetShareContext();
+
+	void reset();
 
 protected:
 	bool createTempContext();

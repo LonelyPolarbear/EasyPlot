@@ -5,6 +5,7 @@ set(EXAMPLES_TOP_FOLDER "Examples")
 # 遍历目录添加所有示例项目
 file(GLOB child_entries LIST_DIRECTORIES true RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/*)
 
+
 foreach(entry ${child_entries})
     if(IS_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/${entry})
         message(STATUS "Found directory: ${entry}")

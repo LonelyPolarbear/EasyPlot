@@ -39,6 +39,7 @@ bool XOpenGLFramebufferObject::create()
 {
 	// ´´½¨FBO
 	glGenFramebuffers(1, &d->FBO);
+	XOpenGLFuntion::checkGLError();
 	return d->FBO >0;
 }
 

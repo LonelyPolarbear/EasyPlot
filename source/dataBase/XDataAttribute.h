@@ -58,11 +58,9 @@ protected:
 extern DATABASE_API classProcessorFactory<void(HighFive::Group& group, sptr<XDataAttribute>)> XattrSerializer;
 extern DATABASE_API classProcessorFactory<void(HighFive::Group& group, sptr<XDataAttribute>)> XattrDeserializer;
 
-
-//extern  DATABASE_API classProcessorFactory<std::string(sptr<XDataAttribute>, int index)> XattrToQstringFactory;
 extern  DATABASE_API classMultiProcessorFactory<
-	int(sptr<XDataAttribute>),/*获取大小*/
-	std::string(sptr<XDataAttribute>, int index) /*获取每一个index的字符串*/
+	void(sptr<XDataAttribute>,const std::string&),
+	std::string(sptr<XDataAttribute>) 
 > XattrToQstringFactory;
 
 
@@ -163,7 +161,7 @@ template<typename T>
 using XAttr_Enum = XDataAttributeEnum<T>;
 
 template<typename T>
-std::string XattrEnumToString(sptr<XDataAttribute> attr_,int index) {
+std::string XattrEnumToString(sptr<XDataAttribute> attr_) {
 	auto attr = attr_->asDerived<XDataAttributeEnum<T>>();
 	const auto& value = attr->getValue();
 	return XQ_META::enum_to_string(value);

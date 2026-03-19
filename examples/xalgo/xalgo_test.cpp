@@ -6,6 +6,8 @@
 #include <lib00_utilty/XUtilty.h>
 #include <numeric>
 
+#include <xtest/XTest.h>
+
 
 void test_lerp_rgb() {
 	XQ::print("lerp_rgb...");
@@ -54,7 +56,11 @@ void test_linespace() {
 }
 
 int main() {
-	//test_combineArray();
-	test_linespace();
-	return 1;
+	XTestApp app("XAlgoTest");
+
+	app.addCmd("test_lerp_rgb", "颜色线性插值",test_lerp_rgb);
+	app.addCmd("test_combineArray", "合并数组", test_combineArray);
+	app.addCmd("test_linespace", "线性空间", test_linespace);
+
+	return app.run();
 }

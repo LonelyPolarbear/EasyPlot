@@ -57,6 +57,7 @@ public:
 		return attr->getClassName() == XQ_META::ClassName<XAttr_String>();
 	}
 
+	#if 0
 	bool isDigitAttr(sptr<XDataAttribute> attr,int & type) {
 		auto className = attr->getClassName();
 		
@@ -78,6 +79,7 @@ public:
 		}
 		return false;
 	}
+	#endif
 
 	sptr<XDataAttribute>  getAttr(const QModelIndex& index) {
 		auto obj = data.lock();
@@ -134,7 +136,7 @@ QVariant XDataObjectTableModel::data(const QModelIndex& index, int role) const
 			}
 			else {
 				if (XattrToQstringFactory.hasProcessor<1>(className)) {
-					return QString::fromStdString(XattrToQstringFactory.process<1>(className, attr,0));
+					return QString::fromStdString(XattrToQstringFactory.process<1>(className, attr));
 				}
 				return QString::fromStdString(className);
 			}
@@ -214,38 +216,21 @@ bool XDataObjectTableModel::setData(const QModelIndex& index, const QVariant& va
 				emit dataChanged(index, index);
 				return true;
 			}
-			if (mData->isEnumAttr(attr)) {
+			else if (mData->isEnumAttr(attr)) {
 				auto enumAttr = attr->asDerived<XDataAttributeEnumBase>();
 				enumAttr->setIntValue(value.toInt());
 				emit dataChanged(index, index);
 				return true;
 			}
-			if (mData->isStrAttr(attr)) {
-				auto strAttr = attr->asDerived<XAttr_String>();
-				strAttr->setValue(value.toString().toStdString());
-				emit dataChanged(index, index);
-				return true;
+			else {
+				auto str =value.toString().toStdString();
+				if (XattrToQstringFactory.hasProcessor<0>(attr->getClassName())) {
+					XattrToQstringFactory.process<0>(attr->getClassName(),attr,str);
+					emit dataChanged(index, index);
+					return true;
+				}
+				return false;
 			}
-			int type = 0;
-			if (mData->isDigitAttr(attr,type)) {
-				value.toInt();
-				value.toFloat();
-				value.toDouble();
-				if (type == 1) {
-					attr->asDerived<XAttr_Int>()->setValue(value.toInt());
-				}
-				else if (type == 2) {
-					attr->asDerived<XAttr_UInt>()->setValue(value.toInt());
-				}
-				else if (type == 3) {
-					attr->asDerived<XAttr_Float>()->setValue(value.toFloat());
-				}
-				else if (type == 4) {
-					attr->asDerived<XAttr_Double>()->setValue(value.toDouble());
-				}
-				return true;
-			}
-			return false;
 		}
 		else {
 			return false;

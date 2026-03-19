@@ -8,6 +8,10 @@
 #include <dataBase/XObjectFactory.h>
 
 #include <lib05_shape/XRenderNodeAttribute.h>
+#include <xtest/XTest.h>
+
+int g_argc;
+char** g_argv;
 
 enum class MyEnum {
 	point,
@@ -35,6 +39,9 @@ public:
 };
 
 void testTableView() {
+
+	QApplication app(g_argc, g_argv);
+
 	XDataObjectTableView view;
 	view.resize(300, 200);
 	view.show();
@@ -42,9 +49,12 @@ void testTableView() {
 	auto object = makeShareDbObject<MyObject>();
 	object->setName("test");
 	view.setDataObject(object);
+
+	app.exec();
 }
 
 void testTreeView() {
+	QApplication app(g_argc, g_argv);
 	XDataObjectTreeView view;
 	view.resize(300, 200);
 	view.show();
@@ -52,49 +62,35 @@ void testTreeView() {
 	auto object = makeShareDbObject<MyObject>();
 	object->setName("test");
 	view.setDataObject(object);
+	app.exec();
 }
 
-int main(int argc, char** argv) {
-	XBaseObjectMeta::registerObject<XAttr_Enum<MyEnum>>();
-	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<MyEnum>>(), XattrEnumToString<MyEnum>);
+void testXObjectInspectorView() {
+	QApplication app(g_argc, g_argv);
 
-	QApplication app(argc, argv);
-
-
-	/*XDataObjectTreeView view;
-	view.resize(300, 200);
-	view.show();
-
-	auto object = makeShareDbObject<MyObject>();
-	object->setName("test");
-	view.setDataObject(object);
-
-
-	XDataObjectTableView tableView;
-	tableView.resize(300, 200);
-	tableView.show();
-	tableView.setDataObject(object);
-
-	xsig::connect(&view, &XDataObjectTreeView::sigCurrentObjectChanged, [&](std::shared_ptr<XDataObject> obj) {
-		tableView.setDataObject(obj);
-		});*/
-		
-
-	/*XObjectInspectorView InspectorView;	
-
+	XObjectInspectorView InspectorView;
 	InspectorView.resize(300, 200);
 	InspectorView.show();
 	auto object = makeShareDbObject<MyObject>();
 	object->setName("test");
-	InspectorView.setRootObject(object);*/
+	InspectorView.setRootObject(object);
 
-	XDataObjectTableView view;
-	view.resize(300, 200);
-	view.show();
+	app.exec();
+}
 
-	auto object = makeShareDbObject<MyObject>();
-	object->setName("test");
-	view.setDataObject(object);
 
-	return app.exec();
+int main(int argc, char** argv) {
+	g_argc = argc;
+	g_argv = argv;
+
+	XBaseObjectMeta::registerObject<XAttr_Enum<MyEnum>>();
+	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<MyEnum>>(), XattrEnumToString<MyEnum>);
+
+	XTestApp app("XMVD Test");
+
+	app.addCmd("testTableView","表格控件",testTableView);
+	app.addCmd("testTreeView","树控件",testTreeView);
+	app.addCmd("testXObjectInspectorView","对象属性编辑器",testXObjectInspectorView);
+
+	return app.run();
 }

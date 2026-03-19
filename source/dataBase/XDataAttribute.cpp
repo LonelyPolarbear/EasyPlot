@@ -9,15 +9,15 @@ static std::atomic< uint64_t>  object_id_counter(0);
 classProcessorFactory<void(HighFive::Group& group, sptr<XDataAttribute>)> XattrSerializer;
 classProcessorFactory<void(HighFive::Group& group, sptr<XDataAttribute>)> XattrDeserializer;
 
-classMultiProcessorFactory<
-	int(sptr<XDataAttribute>),/*获取大小*/
-	std::string(sptr<XDataAttribute>, int index) /*获取每一个index的字符串*/
-> XattrToQstringFactory;
 
-using _GetNumFn_ = int(sptr<XDataAttribute>);
-using _ToStringFn_ = std::string(sptr<XDataAttribute>, int index);
-template DATABASE_API void classMultiProcessorFactory<_GetNumFn_, _ToStringFn_>::registerProcessor<0>(const std::string&, const std::function<_GetNumFn_>&);
-template DATABASE_API void classMultiProcessorFactory<_GetNumFn_, _ToStringFn_>::registerProcessor<1>(const std::string&, const std::function<_ToStringFn_>&);
+
+using _FromStringFn_ = void(sptr<XDataAttribute>, const std::string&);
+using _ToStringFn_ = std::string(sptr<XDataAttribute>);
+
+classMultiProcessorFactory<_FromStringFn_,_ToStringFn_> XattrToQstringFactory;
+
+template DATABASE_API void classMultiProcessorFactory<_FromStringFn_, _ToStringFn_>::registerProcessor<0>(const std::string&, const std::function<_FromStringFn_>&);
+template DATABASE_API void classMultiProcessorFactory<_FromStringFn_, _ToStringFn_>::registerProcessor<1>(const std::string&, const std::function<_ToStringFn_>&);
 
 XDataAttribute::XDataAttribute():mUid(object_id_counter++),mName(std::to_string(mUid))
 {

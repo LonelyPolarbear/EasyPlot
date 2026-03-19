@@ -101,7 +101,7 @@ XOpenGLContext::XOpenGLContext()
 
 XOpenGLContext::~XOpenGLContext()
 {
-	wglMakeCurrent(nullptr, nullptr);
+	reset();
 }
 
 bool XOpenGLContext::makeCurrent()
@@ -329,6 +329,20 @@ std::shared_ptr<XOpenGLShareContext> XOpenGLContext::createOrgetShareContext()
 	}
 }
 
+void XOpenGLContext::reset()
+{
+	if (nativeDisplay) {
+		HWND window = WindowFromDC((HDC)nativeDisplay);
+		ReleaseDC(window, (HDC)nativeDisplay);
+	}
+	
+	if(nativeContext)
+		wglMakeCurrent(nullptr, nullptr);
+
+	nativeDisplay = nullptr;
+	nativeContext = nullptr;
+}
+
 XOpenGLShareContext::XOpenGLShareContext()
 {
 
@@ -370,4 +384,46 @@ void* XOpenGLShareContext::getNativeContext() const
 bool XOpenGLShareContext::isValid()
 {
 	return nativeContext;
+}
+//--------------------------------------------------------------------------------------
+class XOffsetWindow::Internal {
+public:
+	HWND hwnd = nullptr;
+	WNDCLASS wc = { 0 };
+};
+
+XOffsetWindow::XOffsetWindow() :mData(new Internal)
+{
+
+}
+
+XOffsetWindow::~XOffsetWindow()
+{	
+	if (mData->hwnd) {
+		DestroyWindow(mData->hwnd);
+		UnregisterClass("OffscreenOpenGL", mData->wc.hInstance);
+	}
+}
+
+void XOffsetWindow::Init()
+{
+	WNDCLASS wc = { 0 };
+	wc.lpfnWndProc = DefWindowProc;
+	wc.hInstance = GetModuleHandle(NULL);
+	wc.lpszClassName = "OffscreenOpenGL";
+
+	if (!RegisterClass(&wc)) return;
+
+	mData->wc = wc;
+
+	auto hwnd = CreateWindowEx(0, "OffscreenOpenGL", "Temp Window", 0,
+		0, 0, 1, 1, NULL, NULL, GetModuleHandle(NULL), NULL);
+	if (!hwnd) return;
+	ShowWindow(hwnd, SW_HIDE);  // вўВи
+	mData->hwnd = hwnd;
+}
+
+uint64_t XOffsetWindow::winId()
+{
+	return (uint64_t)mData->hwnd;
 }

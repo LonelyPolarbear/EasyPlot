@@ -37,7 +37,7 @@ LIST(APPEND LIB_DIRECTORIES
 														
 #生成动态库
 add_library(${proName}  SHARED)
-target_sources(${proName} PRIVATE  ${SOURCES_FILES} ${HERDERS_FILES})						#设置源文件和头文件
+target_sources(${proName} PRIVATE  ${SOURCES_FILES} ${HEADERS_FILES})						#设置源文件和头文件
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE XALGO_DLL)														#预定义宏
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${proName})									#设置库的输出名称

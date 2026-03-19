@@ -40,6 +40,22 @@ target_include_directories(MyHDF5Deps INTERFACE
 add_library(MyLib::HDF5 ALIAS MyHDF5Deps)
 
 #--------------------------------------------------------------------------------------------------------------
+# 所有的测试示例都要依赖
+#--------------------------------------------------------------------------------------------------------------
+add_library(MyExampleDeps INTERFACE)
+target_link_libraries(MyExampleDeps INTERFACE
+   linenoise_lib${DLL_DEBUG_POSTFIX}
+)
+
+# 添加 HighFive 头文件路径（如果 HighFive 是 header-only 且未使用 CMake 目标）
+target_include_directories(MyExampleDeps INTERFACE
+                                            ${CMAKE_SOURCE_DIR}/3rdParty/CLI/include
+											${CMAKE_SOURCE_DIR}/3rdParty/linenoise/include
+)
+
+add_library(MyLib::example ALIAS MyExampleDeps)
+
+#--------------------------------------------------------------------------------------------------------------
 # 使用全局属性收集所有lib以便示例项目正确依赖
 #--------------------------------------------------------------------------------------------------------------
 set_property(GLOBAL PROPERTY MY_PROJECT_LIB_TARGETS "")
@@ -67,6 +83,7 @@ add_subdirectory(source/easyPlot)
 add_subdirectory(source/xsignal)
 add_subdirectory(source/xstorage)
 add_subdirectory(source/xmvd)
+add_subdirectory(source/xtest)
 
 #--------------------------------------------------------------------------------------------------------------
 # 依赖关系
