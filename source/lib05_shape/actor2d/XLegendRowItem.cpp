@@ -75,7 +75,8 @@ void XLegendRowItem::setChecked(bool checked)
 {
 	m_internal->checked = checked;
 	if (checked) {
-		m_internal->textItem->setText(L"¡Ì");
+		//m_internal->textItem->setText(L"¡Ì");
+		m_internal->textItem->setText(L"\u221a");
 	}
 	else {
 		m_internal->textItem->setText(L" ");

@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.8)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)           # 生成编译命令数据库,需要在project之前设置,MSVC下不生效
 project(QtOpenGL)		                                                        #放在根目录下可以理解为解决方案的名称
 
-
+add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
+if(MSVC)
+    add_compile_options(/utf-8)
+    add_compile_options(/Zc:__cplusplus)
+endif()
 #--------------------------------------------------------------------------------------------------------------
 # 创建一个 INTERFACE 库（只传递属性）可选：加个命名空间别名，更规范
 #--------------------------------------------------------------------------------------------------------------
@@ -10,6 +14,7 @@ set(MYLIB_INCLUDE_DIR
                 ${CMAKE_SOURCE_DIR}/3rdParty/boost/include
                 ${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
                 ${CMAKE_SOURCE_DIR}/3rdParty/MagicEnum/include
+                ${CMAKE_SOURCE_DIR}/3rdParty/spdlog/include
 )
 add_library(mylib_header_only INTERFACE)
 target_include_directories(mylib_header_only INTERFACE ${MYLIB_INCLUDE_DIR})
@@ -84,27 +89,28 @@ add_subdirectory(source/xsignal)
 add_subdirectory(source/xstorage)
 add_subdirectory(source/xmvd)
 add_subdirectory(source/xtest)
+add_subdirectory(source/xlog)
 
 #--------------------------------------------------------------------------------------------------------------
 # 依赖关系
 #--------------------------------------------------------------------------------------------------------------
-add_dependencies(dataBase  xstorage)
-add_dependencies(xalgo  dataBase)
-add_dependencies(lib01_shader  dataBase)
-add_dependencies(lib00_utilty  dataBase)
-add_dependencies(lib02_camera  lib00_utilty)
-add_dependencies(lib04_opengl  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase)
-add_dependencies(render  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase lib04_opengl lib05_shape)
-add_dependencies(lib05_shape  lib04_opengl xalgo)
-add_dependencies(lib06_select  lib04_opengl lib02_camera lib01_shader lib00_utilty lib05_shape)
-add_dependencies(lib07_scene  lib04_opengl lib02_camera lib01_shader lib00_utilty lib06_select lib05_shape)
-add_dependencies(lib08_freetype   lib00_utilty dataBase)
-add_dependencies(XOpenGLWidget  lib00_utilty lib01_shader lib02_camera lib04_opengl render)
+add_dependencies(dataBase  xstorage xlog)
+add_dependencies(xalgo  dataBase xlog)
+add_dependencies(lib01_shader  dataBase xlog)
+add_dependencies(lib00_utilty  dataBase xlog)
+add_dependencies(lib02_camera  lib00_utilty xlog)
+add_dependencies(lib04_opengl  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase xlog)
+add_dependencies(render  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase lib04_opengl lib05_shape xlog)
+add_dependencies(lib05_shape  lib04_opengl xalgo xlog)
+add_dependencies(lib06_select  lib04_opengl lib02_camera lib01_shader lib00_utilty lib05_shape xlog)
+add_dependencies(lib07_scene  lib04_opengl lib02_camera lib01_shader lib00_utilty lib06_select lib05_shape xlog)
+add_dependencies(lib08_freetype   lib00_utilty dataBase xlog)
+add_dependencies(XOpenGLWidget  lib00_utilty lib01_shader lib02_camera lib04_opengl render xlog)
 
-add_dependencies(easyPlot  XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel render)
-add_dependencies(lib09_panel  lib00_utilty)
-add_dependencies(xmvd  dataBase lib00_utilty)
-add_dependencies(main easyPlot lib09_panel)
+add_dependencies(easyPlot  XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel render xlog)
+add_dependencies(lib09_panel  lib00_utilty xlog)
+add_dependencies(xmvd  dataBase lib00_utilty xlog)
+add_dependencies(main easyPlot lib09_panel xlog)
 
 
 #--------------------------------------------------------------------------------------------------------------

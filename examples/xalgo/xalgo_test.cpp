@@ -1,4 +1,4 @@
-#include <iostream>
+ï»¿#include <iostream>
 #include <dataBase/XVector.h>
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataArray.h>
@@ -50,7 +50,7 @@ void test_combineArray() {
 
 void test_linespace() {
 	auto out =XQ::XAlgo::linspace<double>(1,10,6);
-	//´òÓ¡
+	//æ‰“å°
 	std::copy(out.begin(), out.end(), std::ostream_iterator<double>(std::cout, " "));
 	std::cout << std::endl;
 }
@@ -58,9 +58,9 @@ void test_linespace() {
 int main() {
 	XTestApp app("XAlgoTest");
 
-	app.addCmd("test_lerp_rgb", "ÑÕÉ«ÏßĞÔ²åÖµ",test_lerp_rgb);
-	app.addCmd("test_combineArray", "ºÏ²¢Êı×é", test_combineArray);
-	app.addCmd("test_linespace", "ÏßĞÔ¿Õ¼ä", test_linespace);
+	app.addCmd("test_lerp_rgb", u8"é¢œè‰²çº¿æ€§æ’å€¼",test_lerp_rgb);
+	app.addCmd("test_combineArray", u8"åˆå¹¶æ•°ç»„", test_combineArray);
+	app.addCmd("test_linespace", u8"çº¿æ€§ç©ºé—´", test_linespace);
 
 	return app.run();
 }

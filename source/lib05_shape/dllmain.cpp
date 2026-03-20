@@ -2,17 +2,17 @@
 #include <windows.h>
 #include <iostream>
 #include "Init.h"
+#include <xlog/XLogger.h>
 
 BOOL APIENTRY DllMain(HMODULE hmod, DWORD reason, LPVOID reserved) {
     switch (reason) {
     case DLL_PROCESS_ATTACH:
-		std::cout << "----------------------------------------------------" << std::endl;
-		std::cout << "lib05_shape loaded" << std::endl;
-		std::cout << "----------------------------------------------------" << std::endl;
+		XLOG_TRACE("lib05_shape loaded");
         InitRenderNode();
         break;
     case DLL_PROCESS_DETACH:
         // cleanup if needed
+        XLOG_TRACE("lib05_shape unload");
         break;
     }
     return TRUE;

@@ -4,6 +4,7 @@
 
 #include "XOpenGLContext.h"
 #include <iostream>
+#include <xlog/XLogger.h>
 
 HGLRC CreateWindowlessContext(HGLRC shareContext, HWND& tempWindow) {
 	// 使用wglCreateContextAttribsARB创建现代OpenGL上下文
@@ -115,8 +116,6 @@ void XOpenGLContext::doneCurrent()
 {
 	if (isValid())
 		wglMakeCurrent(nullptr, nullptr);
-	//wglDeleteContext((HGLRC)nativeContext);
-	//ReleaseDC((HWND)winId(), (HDC)nativeDisplay);
 }
 
 void XOpenGLContext::swapBuffers()
@@ -274,9 +273,12 @@ bool XOpenGLContext::create(uint64_t winId)
 	// 初始化GLEW
 	glewExperimental = GL_TRUE;
 	if (glewInit() != GLEW_OK) {
-		std::cout << "GLEW Error:" << glewGetErrorString(glewInit())<<std::endl;
+		//std::cout << "GLEW Error:" << glewGetErrorString(glewInit())<<std::endl;
+		//std::string ss((const char*)glewGetErrorString(glewInit()));
+		XLOG_ERROR("GLEW Error:",  std::string(reinterpret_cast<const char*>(glewGetErrorString(glewInit()))));
 	}
-	std::cout << glGetString(GL_VERSION) << std::endl;
+	
+	XLOG_INFO("OpenGL version:", std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION))));
 
 	// 检查实际上下文类型
 	int context_flags;
@@ -285,25 +287,28 @@ bool XOpenGLContext::create(uint64_t winId)
 	int profile_mask;
 	glGetIntegerv(GL_CONTEXT_PROFILE_MASK, &profile_mask);
 
-	std::cout << "Context flags: 0x" << std::hex << context_flags << "\n";
-	std::cout << "Profile mask: 0x" << profile_mask << "\n";
+	XLOG_INFO("Context flags:", context_flags);
+	XLOG_INFO("Profile mask: ", profile_mask);
+
+	//std::cout << "Context flags: 0x" << std::hex << context_flags << "\n";
+	//std::cout << "Profile mask: 0x" << profile_mask << "\n";
 
 	// 检查是否核心模式
 	if (profile_mask & GL_CONTEXT_CORE_PROFILE_BIT) {
-		std::cout << "Core Profile Context\n";
+		XLOG_INFO("Core Profile Context");
 	}
 	else if (profile_mask & GL_CONTEXT_COMPATIBILITY_PROFILE_BIT) {
-		std::cout << "Compatibility Profile Context\n";
+		XLOG_INFO("Compatibility Profile Context");
 	}
 
 	// 检查向前兼容标志
 	if (context_flags & GL_CONTEXT_FLAG_FORWARD_COMPATIBLE_BIT) {
-		std::cout << "Forward Compatible\n";
+		XLOG_INFO("Forward Compatible");
 	}
 
 	// 检查调试标志
 	if (context_flags & GL_CONTEXT_FLAG_DEBUG_BIT) {
-		std::cout << "Debug Context\n";
+		XLOG_INFO("Debug Context");
 	}
 
 	return true;

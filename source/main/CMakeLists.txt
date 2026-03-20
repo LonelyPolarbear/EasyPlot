@@ -85,6 +85,7 @@ SET(LIB_NAMES PRIVATE
 				xmvd${DLL_DEBUG_POSTFIX}
 				xrender${DLL_DEBUG_POSTFIX}
 				xshape${DLL_DEBUG_POSTFIX}
+				xlog${DLL_DEBUG_POSTFIX}
 				
 	)
 

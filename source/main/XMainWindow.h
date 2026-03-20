@@ -21,6 +21,8 @@ public:
     void InitBotTab();
 
     void InitView();
+
+    Q_INVOKABLE void SlotAddLog(const std::string& log,int level);
 private:
     Ui::XMainWindow *ui;
 protected:

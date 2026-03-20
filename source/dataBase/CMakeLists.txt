@@ -30,6 +30,7 @@ list(APPEND LIB_INCLUDE_DIRECTORY
 #-------------------------------------------------------
 list(APPEND LIB_NAMES 
 	xstorage${DLL_DEBUG_POSTFIX}
+	xlog${DLL_DEBUG_POSTFIX}
 	MyLib::HDF5
 )
 

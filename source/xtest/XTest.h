@@ -5,12 +5,13 @@
 
 class XTestApp {
 public:
-    XTestApp(const std::string& prompt ="");
+    XTestApp(const std::string& name="", const std::string& desc="");
     ~XTestApp();
 
     int run();
-    void addCmd(const std::string& cmd, const std::string& desc, const std::function<void()>& func);
-    void setPrompt(const std::string& prompt);
+    XTestApp* addCmd(const std::string& cmd, const std::string& desc, const std::function<void()>& func);
+	XTestApp* setName(const std::string& name);
+	XTestApp* setDesc(const std::string& desc);
 protected:
     class Internal;
     std::shared_ptr<Internal> mData;

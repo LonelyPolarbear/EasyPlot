@@ -2,17 +2,16 @@
 #include <windows.h>
 #include <iostream>
 #include "XObjectFactory.h"
+#include <xlog/XLogger.h>
 
 BOOL APIENTRY DllMain(HMODULE hmod, DWORD reason, LPVOID reserved) {
     switch (reason) {
     case DLL_PROCESS_ATTACH:
-		std::cout << "----------------------------------------------------" << std::endl;
-		std::cout << "dataBase loaded" << std::endl;
-		std::cout << "----------------------------------------------------" << std::endl;
+		XLOG_TRACE("dataBase loaded");
         XBaseObjectMeta::InitializeCoreTypes();
         break;
     case DLL_PROCESS_DETACH:
-        std::cout << "dataBase unLoaded" << std::endl;
+        XLOG_TRACE("dataBase unLoaded");
         break;
     }
     return TRUE;

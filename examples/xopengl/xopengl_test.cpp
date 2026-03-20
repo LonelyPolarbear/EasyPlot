@@ -2,9 +2,11 @@
 #include <lib04_opengl/XOpenGLFramebufferObject.h>
 
 #include <xtest/XTest.h>
+#include <xlog/XLogger.h>
 
 //离线渲染环境搭建测试
 void TestOffsetWindow() {
+	XLOG_DEBUG("TestOffsetWindow");
 	auto window = makeShareDbObject<XOffsetWindow>();
 	auto context = makeShareDbObject<XOpenGLContext>();
 
@@ -17,6 +19,7 @@ void TestOffsetWindow() {
 }
 
 void CreateFbo() {
+	XLOG_DEBUG("CreateFbo");
 	auto window = makeShareDbObject<XOffsetWindow>();
 	auto context = makeShareDbObject<XOpenGLContext>();
 

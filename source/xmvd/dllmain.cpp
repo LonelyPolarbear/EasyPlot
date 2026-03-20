@@ -2,16 +2,17 @@
 #include <windows.h>
 #include <iostream>
 #include "Init.h"
+#include <xlog/XLogger.h>
 
 BOOL APIENTRY DllMain(HMODULE hmod, DWORD reason, LPVOID reserved) {
     switch (reason) {
     case DLL_PROCESS_ATTACH:
-        std::cout << "DLL xmvd loaded" << std::endl;
+        XLOG_TRACE("DLL xmvd loaded");
         XMVD_Init();
         break;
     case DLL_PROCESS_DETACH:
         // cleanup if needed
-        std::cout << "DLL xmvd unloaded" << std::endl;
+        XLOG_TRACE("DLL xmvd unload");
         break;
     }
     return TRUE;

@@ -41,18 +41,26 @@ void completionHook(const char* buf, linenoiseCompletions* lc, void* userdata) {
 
 class XTestApp::Internal {
 public:
-	Internal() {}
-	~Internal() {}
+	Internal() {
+		app = new CLI::App;
+	}
+	~Internal() {
+		delete app;
+	}
 public:
 	char *line = nullptr;
 	std::map<std::string, CLI_cmd_data> cmdCallbacks;
-	std::string prompt;
+	CLI::App* app = nullptr;
+	std::vector<XTestApp*> subApps;
+
+protected:
+	bool isNew = true;
 };
 
-XTestApp::XTestApp(const std::string& prompt):mData(new Internal)
+XTestApp::XTestApp(const std::string& name,const std::string& desc ):mData(new Internal())
 {
-	mData->prompt = prompt;
 	linenoiseSetCompletionCallback(completionHook, &mData->cmdCallbacks);
+	mData->app->name(name)->description(desc);
 }
 
 XTestApp::~XTestApp()
@@ -61,6 +69,10 @@ XTestApp::~XTestApp()
 
 int XTestApp::run()
 {
+	//for (auto d : mData->cmdCallbacks) {
+		//app.add_subcommand(d.first, d.second.cmdDesc)->callback(d.second.fn);
+	//}
+
 	/*
 	bool flag = false;
 	app.add_flag("-f,--flag", flag, "这是一个标志选项");
@@ -71,8 +83,6 @@ int XTestApp::run()
 	std::string name = "default";
 	app.add_option("--name", name, "你的名字")->required();  // 带这个关键字说明必须有
 	*/
-	if(!mData->prompt.empty())
-		std::cout<<mData->prompt<<std::endl;
 	while (true) {
 		std::cout << "> ";
 		mData->line = linenoise("> ");
@@ -91,31 +101,37 @@ int XTestApp::run()
 		std::istringstream iss(input);
 		std::vector<std::string> args{ std::istream_iterator<std::string>(iss),std::istream_iterator<std::string>() };
 
-		CLI::App app{ "XOpenGL Commands" };
-		for (auto d : mData->cmdCallbacks) {
-			app.add_subcommand(d.first, d.second.cmdDesc)->callback(d.second.fn);
-		}
+		
 		try {
-			app.parse(args);
+			mData->app->parse(args);
 		}
 		catch (const CLI::ParseError& e) {
 			if (e.get_exit_code() != 0) {
 				std::cerr << e.what() << "\n";
 			}
 			else {
-				std::cout << app.help() << std::endl;
+				std::cout << mData->app->help() << std::endl;
 			}
 		}
 	}
 	return 1;
 }
 
-void XTestApp::addCmd(const std::string& cmd, const std::string& desc, const std::function<void()>& func)
+XTestApp* XTestApp::addCmd(const std::string& cmd, const std::string& desc, const std::function<void()>& func)
 {
 	mData->cmdCallbacks[cmd] = CLI_cmd_data{ cmd,desc,func };
+	auto sub_cli_app = mData->app->add_subcommand(cmd, desc)->callback(func);
+	return this;
 }
 
-void XTestApp::setPrompt(const std::string& prompt)
+XTestApp* XTestApp::setName(const std::string& name)
 {
-	mData->prompt = prompt;
+	mData->app->name(name);
+	return this;
+}
+
+XTestApp* XTestApp::setDesc(const std::string& desc)
+{
+	mData->app->description(desc);
+	return this;
 }
