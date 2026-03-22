@@ -1,123 +1,162 @@
-# Easyplot
+# EasyPlot
 
-## 简介
+> 高性能 2D / 3D 可视化与交互平台（基于 Qt + OpenGL）
 
-这是一个功能完善、模块化设计的 3D/2D 渲染框架，采用分层架构，从底层基础工具到高层应用逐步构建。框架集成了 OpenGL 资源管理、几何数据处理、相机控制、交互事件处理、拾取、字体渲染、图像加载等功能，并提供了 Qt 集成部件，便于快速开发科学可视化、CAD 或游戏工具。
+## 目录
 
-## 主要特性
+- 项目概述
+- 作者设计理念
+- 架构与模块
+- 关键类与实现亮点
+- 模块详细说明（xmvd / xlog / xtest）
+- 依赖
+- 构建与运行
+- 使用说明（快速上手）
+- 开发与扩展指南
+- 贡献
+- 许可证
 
-- **分层模块化**：各模块职责清晰，依赖关系明确，可独立替换或升级。
-- **数据驱动**：基于时间戳的增量更新机制，避免不必要的计算和数据上传。
-- **可观察对象**：统一的属性系统（`XDataAttribute`）和对象树（`XDataObject`），支持属性变化信号。
-- **灵活相机**：支持透视/正交投影、轨道球/直立旋转两种交互风格，并提供丰富的坐标系转换函数。
-- **OpenGL 资源 RAII**：Buffer、Texture、FBO、VAO 等均封装为 RAII 对象，自动管理生命周期，支持状态追踪。
-- **几何管线**：数据源（`XShapeSource`）- 过滤器（变换/合并）- 映射器（`XPolyDataMapper`）- 渲染节点（`XGeometryNode`）的完整管线，支持程序化几何生成。
-- **2D/3D 节点体系**：统一的场景图（父子关系），支持变换、可见性、渲染属性等。
-- **交互事件处理**：多模式事件处理器（相机漫游、拾取、操纵器），支持信号槽连接。
-- **拾取支持**：基于深度剥离的像素级精确拾取，返回对象 ID 和图元 ID。
-- **图像加载**：基于 stb_image 的简单图像加载工具，支持 2D 纹理和立方体贴图。
-- **字体处理**：基于 FreeType 的离线工具，生成普通/SDF 图集，提供字形度量信息。
-- **算法工具**：提供常用数学算法（线性插值、布局计算、几何相交、数组合并等）。
-- **Qt 集成**：`XGLWidget` 作为 Qt 部件，轻松嵌入 Qt 应用程序。
-- **示例应用**：`EasyPlot` 部件展示多视口、实时更新、视锥体可视化等核心能力。
+---
 
-## 模块列表
+## 项目概述
 
-| 模块 | 描述 |
-|------|------|
-| `lib00_utilty` | 基础工具库：数学工具、并行算法、typelist、工厂模板、类型萃取等 |
-| `xsignal` | 信号槽库，基于 Boost.Signals2，支持智能指针 |
-| `xalgo` | 算法工具：线性插值、布局计算、线段与平面交点、视锥与 XOZ 平面相交、循环索引、数组合并等 |
-| `dataBase` | 数据基础：对象模型、属性系统、多维数组、时间戳、数学向量 |
-| `lib02_camera` | 相机模块：`XBaseCamera` 抽象，`XTrackBallCamera` 实现 |
-| `lib03_stbImage` | 图像加载：基于 stb_image 加载 2D 纹理和立方体贴图，返回 OpenGL 纹理 ID |
-| `lib04_opengl` | OpenGL 资源封装：Buffer、Texture、FBO、VAO、Context |
-| `lib05_shape` | 几何数据与渲染节点：数据源、过滤器、`XGeometryNode`、`XGraphicsItem` |
-| `lib08_freetype` | 字体处理：生成图集，提供字形信息 |
-| `render` | 渲染驱动：窗口、视口、事件分发、拾取 |
-| `XOpenGLWidget` | Qt 集成部件 |
-| `easyPlot` | 示例应用部件，演示框架功能 |
+EasyPlot 是作者为科研、工程与教学场景设计的模块化可视化与交互组件集合，目标是提供高性能、可扩展且工程化的 2D/3D 可视化基础设施，覆盖渲染、场景管理、对象/属性检查、日志与测试等能力。
 
-## 构建要求
+## 作者设计理念
 
-- **编译器**：支持 C++17 的编译器（如 MSVC 2019+、GCC 9+、Clang 10+）
-- **依赖库**：
-  - Eigen3（数学库）
-  - Boost（仅 Signals2）
-  - GLEW
-  - FreeType（可选，用于字体处理）
-  - stb_image（已包含在 3rdParty 中）
-  - Qt5（Core、Widgets、Concurrent，用于集成层和示例）
-- **构建系统**：CMake 3.12+
+作者的核心思路：模块化 + 数据驱动 + 工程化。
 
-## 快速开始
+- 模块化分层：每个功能拆分为单独库（例：`lib05_shape`、`lib07_scene`），降低耦合，便于维护与重用；
+- 数据驱动：渲染层与数据层解耦，图形对象由数据驱动（`XData*`、`XGraphicsItem`、`XGeometryNode`）。
+- 工程化：使用 CMake 管理项目，配置清晰，内置日志与测试（`xlog`、`xtest`）提高可靠性；
+- 可扩展性：采用 Qt 信号槽与自定义 `xsignal`，并以工厂模式（如 `XAttrItemDelegateFactory`）支持运行时扩展；
+- 用户体验：重视交互（旋转/平移/缩放/框选/右键菜单）、字体渲染（SDF）、截屏与异步加载。
 
-### 1. 克隆项目并初始化子模块（如果有）
-```bash
-git clone <repository-url>
-cd <project-root>
+作者偏重长期可维护性与工程实践，而非短期功能堆叠，因此代码结构、模块边界与构建脚本都体现“可演进”的设计。
+
+## 架构与模块
+
+顶层目录与核心模块：
+
+- `source/`：主要源代码，按功能拆分子模块；
+- `3rdParty/`：第三方依赖（包含 Boost、Eigen、Freetype、stb_image 等）；
+- `output/`：构建产物；
+- `build/`：CMake / VS 生成文件；
+- `config_cmake/`：复用的 CMake 脚本。
+
+主要子模块（摘要）：
+
+- `lib00_utilty`：通用工具；
+- `lib01_shader`：着色器管理；
+- `lib02_camera`：相机与视图变换；
+- `lib04_opengl`：OpenGL 资源封装（纹理 / FBO / PBO）；
+- `lib05_shape`：几何体与图形项；
+- `lib06_select`：选择/拾取逻辑；
+- `lib07_scene`：场景管理；
+- `lib08_freetype`：字体与 SDF 支持；
+- `xmvd`：对象/属性视图（对象树、属性表、检查器）；
+- `xlog`：日志系统；
+- `xtest`：示例与测试用例；
+- `XOpenGLWidget`：OpenGL 控件基类。
+
+## 关键类与实现亮点
+
+- `easyPlotWidget`（`source/easyPlot/easyPlotWidget.{h,cpp}`）：主控件，负责渲染循环、事件处理、场景交互（添加/删除图元、拾取、框选等）；
+- `XScene`：场景容器，提供坐标变换、拾取、渲染排序和相机控制接口；
+- `xShaderManger`：统一着色器加载、缓存、管理与热重载；
+- `XOpenGLTexture` / `XOpenGLFramebufferObject` / `XOpenGLBuffer`：封装了纹理、FBO、PBO 的创建与读写，示例见 `slotFboTest`；
+- `XGraphicsItem` 及其子类（`XRectItem`、`XTextItem`、`XLineItem`、`XChartItem`）：2D/3D 图元，支持层级、变换与属性；
+- `xmvd` 中的 `XDataObjectTreeView` / `XDataObjectTableView` / `XObjectInspectorView`：构建对象/属性的可视化与编辑面板。
+
+实现亮点：
+
+- 深度使用 OpenGL 特性（纹理数组、深度/模板测试、PBO 映射）以优化大数据渲染与读回；
+- 将字体渲染与 SDF 生成异步化（`QtConcurrent`），提升启动/运行体验；
+- 数据与渲染完全解耦，便于单元测试与模块替换；
+- 场景层实现统一的点选/框选机制，支持 2D 与 3D 混合选择。
+
+## 模块详细说明（xmvd / xlog / xtest）
+
+### xmvd
+
+位置：`source/xmvd/`
+
+作用：对象/属性可视化与编辑面板。实现对象树（`XDataObjectTreeView`）、属性表（`XDataObjectTableView`）与检查器（`XObjectInspectorView`），支持：
+
+- 将 `XDataObject` 映射为树形结构并显示属性；
+- 使用 `XAttrItemDelegateFactory` 注册不同类型的属性编辑器（运行时扩展）；
+- 基于 `xsignal` 做视图间联动（当前选中对象变化时同步属性表）。
+
+结论：`xmvd` 不是算法模块，而是工程化的“对象与属性可视化/编辑”模块，便于调试、运行时检查与交互式修改数据。
+
+### xlog
+
+位置：`source/xlog/`
+
+作用：统一日志接口（集成 `spdlog`），提供多级别日志记录与输出策略，便于定位渲染与运行时问题。
+
+### xtest
+
+位置：`source/xtest/`
+
+作用：示例与测试用例集合，用于回归测试与功能演示，帮助新开发者理解模块用法。
+
+## 依赖
+
+- Qt5 (Core, Widgets, Concurrent, Gui)
+- OpenGL (glew, opengl32)
+- Eigen3
+- Boost
+- Freetype
+- Assimp
+- HDF5（可选）
+- spdlog, MagicEnum, stb_image
+
+（仓库内 `3rdParty/` 包含多数依赖，部分平台或配置可能需要额外安装）
+
+## 构建与运行（Windows / Visual Studio）
+
+先决条件：Visual Studio 2019/2022、CMake ≥ 3.18、Qt 开发包。
+
+快速构建示例（在仓库根目录）：
+
+```bat
+create_debug_2022.bat
 ```
-### 2.配置依赖
-确保已安装上述依赖，并设置好环境变量（如 `Qt5_DIR`、`Boost_ROOT`、`EIGEN3_INCLUDE_DIR` 等）。
 
-### 3. 使用 CMake 构建
-```bash
+或使用 CMake 手动生成：
+
+```bat
 mkdir build
 cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release
-```
-### 4. 运行示例
-
-构建后，在 `output/bin` 目录下生成动态库和可执行文件（若存在示例应用程序）。可运行 `easyPlot` 的测试程序查看效果。
-
-### 5.创建渲染窗口并添加一个立方体
-
-```c++
-#include <XOpenGLWidget/XGLWidget.h>
-#include <render/XRender.h>
-#include <lib05_shape/XGeometryNode.h>
-#include <lib05_shape/datasource/xchamferCubeSource.h>
-// 创建 Qt 部件
-XGLWidget* widget = new XGLWidget(parent);
-auto renderWindow = widget->getRenderWindow();
-// 创建渲染器（视口）
-auto render = makeShareDbObject<XRender>();
-renderWindow->addRender(render);
-// 创建立方体数据源
-auto cubeSource = makeShareDbObject<xchamferCubeSource>();
-cubeSource->Modified();
-// 创建几何节点
-auto cubeNode = makeShareDbObject<XGeometryNode>();
-cubeNode->setInput(cubeSource);
-cubeNode->setColorMode(ColorMode::FaceColor);
-cubeNode->scale(100, 100, 100);
-// 添加到渲染器
-render->addRenderNode3D(cubeNode);
-// 调整相机视角
-render->fitView();
-```
-### 5.响应鼠标事件
-```c++
-// 在自定义部件中连接信号
-connect(renderWindow->getEventDispatcher(), &XRenderWindowEventDispatch::SigMouseMove,
-        [](XQ::Vec2i pos, XQ::KeyboardModifier mod) {
-            // 处理鼠标移动
-        });
+cmake .. -G "Visual Studio 16 2019" -A x64
+cmake --build . --config Debug
 ```
 
-### 6.加载纹理
+构建产物会输出到 `output/bin`。
 
-```c++
-unsigned int texID = stbImage::loadTexture2D("path/to/image.png");
-```
+## 使用说明（快速上手）
 
-### 7.生成字体图集（离线工具）
-```c++
-xfreetype* ft = xfreetype::Instance();
-ft->generateFontSdf("output_font_dir", false, false);  // 生成 SDF 图集
-```
-## 贡献指南
+1. 在 Qt 应用中包含 `easyPlotWidget` 或 `XEasyPlotWidget`；
+2. 通过 `d->scene->addGraphicsItem(...)` 或 `d->scene->addShape(...)` 管理图元；
+3. 使用 `XObjectInspectorView`（`xmvd`）绑定 `XDataObject`，实时查看/编辑属性；
+4. 字体与 SDF：通过 `xfreetype::Instance()` 生成并加载字体纹理。
 
-欢迎提交 issue 和 pull request。请确保代码风格一致，并添加必要的单元测试。
+## 开发与扩展指南
 
+- 新功能以独立模块实现，遵循 `config_cmake` 下的模版；
+- 属性编辑器注册到 `XAttrItemDelegateFactory`；
+- Shader 由 `xShaderManger` 管理，建议集中维护并支持热重载；
+- 大数据渲染使用纹理/缓冲分批上传与 PBO 映射以减少拷贝开销。
+
+## 贡献
+
+欢迎提交 Issue 与 PR。流程：Fork -> 分支 -> Commit -> PR，PR 请包含功能描述、示例与必要说明。
+
+## 许可证
+
+本项目采用 MIT 许可证，详见 `LICENSE` 文件。
+
+---
+
+如需我将 README 分拆为多份模块级文档、生成类图或示例工程，我可以继续为你自动生成。

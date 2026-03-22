@@ -6,6 +6,7 @@ add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 if(MSVC)
     add_compile_options(/utf-8)
     add_compile_options(/Zc:__cplusplus)
+    add_compile_options(-Zc:nrvo-)
 endif()
 #--------------------------------------------------------------------------------------------------------------
 # 创建一个 INTERFACE 库（只传递属性）可选：加个命名空间别名，更规范

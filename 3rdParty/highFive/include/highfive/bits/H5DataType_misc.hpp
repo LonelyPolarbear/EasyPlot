@@ -293,7 +293,7 @@ inline void CompoundType::create(size_t size) {
 
             // Keep track of the highest atomic member size because it's needed
             // for the padding of the complete compound type.
-            max_atomic_size = std::max(max_atomic_size, first_atomic_size);
+            max_atomic_size = std::max<size_t>(max_atomic_size, first_atomic_size);
         }
 
         size = current_size + _H5_STRUCT_PADDING(current_size, max_atomic_size);

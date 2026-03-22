@@ -37,6 +37,9 @@ LIST(APPEND LIB_DIRECTORIES
 														
 #生成动态库
 add_library(${proName}  SHARED)
+
+target_compile_options(xtest PRIVATE "-Zc:nrvo-")
+
 generate_dllapi_if_needed(${proName} )
 get_dll_api_macro(${proName} DLL_API_NAME)
 

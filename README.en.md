@@ -1,132 +1,156 @@
-# QtOpenGL
+# EasyPlot
 
-This is a graphics rendering project implemented using Qt and OpenGL, supporting 2D and 3D graphics drawing, interactive operations, and various visualization effects.
+> High-performance 2D/3D visualization and interaction platform (Qt + OpenGL)
 
-## Project Overview
+## Contents
 
-QtOpenGL is a graphics rendering framework based on Qt and OpenGL, providing rich graphics drawing capabilities and visualization components. This project supports creating complex 2D/3D scenes with excellent interactivity and extensibility.
+- Overview
+- Author's Design Philosophy
+- Architecture & Modules
+- Core Classes & Implementation Highlights
+- Detailed Modules (xmvd / xlog / xtest)
+- Dependencies
+- Build & Run
+- Quick Start
+- Development & Extension Guide
+- Contributing
+- License
 
-## Features
+---
 
-- Supports 2D and 3D graphics rendering
-- Provides various geometric shapes (cube, cylinder, cone, etc.)
-- Supports chart visualization (line charts, bar charts, etc.)
-- Includes text rendering functionality
-- Supports lighting and material effects
-- Provides camera control and interactive operations
-- Supports shader programming and compute shaders
-- Includes multiple UI components (checkboxes, legends, etc.)
+## Overview
+
+EasyPlot is a modular visualization and interaction toolkit designed by the author for research, engineering, and teaching scenarios. It aims to provide a performant, extensible and engineering-friendly infrastructure for 2D/3D plotting, scene management, object/property inspection, logging and testing.
+
+## Author's Design Philosophy
+
+The author's core ideas: modularization + data-driven + engineering-grade.
+
+- Modular layers: each capability lives in its own library (e.g. `lib05_shape`, `lib07_scene`) to reduce coupling and ease reuse;
+- Data-driven: rendering and data are decoupled; graphics objects are driven by data (`XData*`, `XGraphicsItem`, `XGeometryNode`);
+- Engineering practices: CMake-based project, clear dependency declaration, built-in logging and tests (`xlog`, `xtest`);
+- Extensibility: Qt signals/slots plus custom `xsignal`, runtime factories (e.g. `XAttrItemDelegateFactory`);
+- UX focused: interactions (rotate/translate/zoom/box select/context menu), font SDF rendering, screenshot, asynchronous loading.
+
+The author emphasizes long-term maintainability and engineering quality over short-term feature accumulation.
+
+## Architecture & Modules
+
+Top-level folders and core modules:
+
+- `source/`: main source code organized into submodules;
+- `3rdParty/`: third-party libraries (Boost, Eigen, Freetype, stb_image, etc.);
+- `output/`: built artifacts;
+- `build/`: generated CMake / Visual Studio files;
+- `config_cmake/`: reusable CMake helpers.
+
+Key submodules (summary):
+
+- `lib00_utilty`: utilities;
+- `lib01_shader`: shader manager;
+- `lib02_camera`: camera and view transforms;
+- `lib04_opengl`: OpenGL resource wrappers (textures / FBO / PBO);
+- `lib05_shape`: geometry and graphic items;
+- `lib06_select`: selection / picking;
+- `lib07_scene`: scene management;
+- `lib08_freetype`: font and SDF support;
+- `xmvd`: data/object viewer and inspector (tree, table, inspector);
+- `xlog`: logging system;
+- `xtest`: examples and tests;
+- `XOpenGLWidget`: OpenGL widget base class.
+
+## Core Classes & Implementation Highlights
+
+- `easyPlotWidget` (`source/easyPlot/easyPlotWidget.{h,cpp}`): main widget that handles render loop, events and scene interactions (add/remove items, picking, box selection).
+- `XScene`: scene container providing coordinate transforms, picking, render ordering and camera control.
+- `xShaderManger`: centralized shader loading, caching and hot-reload.
+- `XOpenGLTexture` / `XOpenGLFramebufferObject` / `XOpenGLBuffer`: wrappers for GPU resources with examples in `slotFboTest`.
+- `XGraphicsItem` subclasses (`XRectItem`, `XTextItem`, `XLineItem`, `XChartItem`): 2D/3D primitives supporting transforms and attributes.
+- `xmvd` components (`XDataObjectTreeView`, `XDataObjectTableView`, `XObjectInspectorView`): runtime UI for data object inspection and editing.
+
+Highlights:
+
+- Extensive use of OpenGL features (texture arrays, depth/stencil separation, PBO mapping) to optimize large-data rendering and GPU-CPU transfers;
+- Asynchronous SDF/font generation using `QtConcurrent` for better responsiveness;
+- Full data-render decoupling enabling unit testing and modular replacement;
+- Unified picking/box-selection supporting mixed 2D/3D selections at the scene layer.
+
+## Detailed Modules (xmvd / xlog / xtest)
+
+### xmvd
+
+Location: `source/xmvd/`
+
+Purpose: object/property visualization and editing UI (object tree, property table, inspector). It maps `XDataObject` and `XDataAttribute` to editable UI widgets and supports runtime extension via delegate factories and `xsignal` for inter-component communication. xmvd is a developer-focused toolset for runtime inspection and editing, not an algorithm library.
+
+### xlog
+
+Location: `source/xlog/`
+
+Purpose: unified logging API (integrates with `spdlog`), multi-level log output for debugging and runtime tracing.
+
+### xtest
+
+Location: `source/xtest/`
+
+Purpose: example apps and tests for regression and demonstrations; helps new contributors understand module usage.
 
 ## Dependencies
 
-- Qt5/Qt6
-- OpenGL
+- Qt5 (Core, Widgets, Concurrent, Gui)
+- OpenGL (glew, opengl32)
 - Eigen3
-- GLM
-- Assimp (for model loading)
-- FreeType (for font rendering)
-- GLEW (for OpenGL extension management)
-- stb_image (for image loading)
+- Boost
+- Freetype
+- Assimp
+- HDF5 (optional)
+- spdlog, MagicEnum, stb_image
 
-## Directory Structure
+Note: many dependencies are supplied in `3rdParty/`; platform-specific configuration may be required for optional components.
 
-```
-.
-├── 3rdParty/            # Third-party libraries
-│   ├── Eigen3/            # Eigen mathematical library
-│   ├── assimp/            # Model loading library
-│   ├── freetype/          # Font rendering library
-│   ├── glm/               # GLM mathematical library
-│   └── stb_image/         # Image loading library
-├── source/                # Source code
-│   ├── dataBase/          # Data base classes
-│   ├── easyPlot/          # Main visualization components
-│   ├── lib00_utilty/      # Utility classes
-│   ├── lib01_shader/      # Shader management
-│   ├── lib02_camera/      # Camera control
-│   ├── lib03_stbImage/    # Image loading
-│   ├── lib04_opengl/      # OpenGL wrapper
-│   └── lib05_shape/       # Graphic objects and visualization components
-└── CMakeLists.txt         # Build configuration
+## Build & Run (Windows / Visual Studio)
+
+Prerequisites: Visual Studio 2019/2022, CMake >= 3.18, Qt SDK.
+
+Quick build (provided scripts):
+
+```bat
+create_debug_2022.bat
 ```
 
-## Usage
+Manual CMake steps:
 
-### Building the Project
-
-1. Install the Qt development environment
-2. Install CMake
-3. Configure the build environment
-4. Use CMake to generate build files
-5. Compile the project
-
-### Example Code
-
-```cpp
-#include "easyPlotWidget.h"
-
-int main(int argc, char *argv[]) {
-    QApplication app(argc, argv);
-    
-    easyPlotWidget plotWidget;
-    plotWidget.show();
-    
-    // Add a cube
-    plotWidget.slotCreateCube();
-    
-    // Add a line chart
-    plotWidget.slotAddLine2D(XGL::Line);
-    
-    return app.exec();
-}
+```bat
+mkdir build
+cd build
+cmake .. -G "Visual Studio 16 2019" -A x64
+cmake --build . --config Debug
 ```
 
-## Example Features
+Artifacts appear under `output/bin`.
 
-- `01triangle`: Basic triangle rendering
-- `02cube`: Cube rendering
-- `05cube/06cube`: Cube rendering with geometry shaders
-- `easyPlot`: Comprehensive visualization example including charts, text, and picking
-- `sdf`: SDF font rendering example
-- `simsun_ttc`: Chinese font rendering example
+## Quick Start
 
-## Key Features
+1. Include `easyPlotWidget` or `XEasyPlotWidget` in your Qt app.
+2. Use `d->scene->addGraphicsItem(...)` or `d->scene->addShape(...)` to manage items.
+3. Bind an `XDataObject` to `XObjectInspectorView` to inspect/edit properties at runtime.
+4. Use `xfreetype::Instance()` for font/SDF texture generation.
 
-- **Object Picking**: Supports mouse click selection of graphical objects
-- **Font Rendering**: Supports standard fonts and SDF distance-field fonts
-- **Chart Visualization**: Provides 2D line charts, bar charts, etc.
-- **Camera Control**: Supports orbit camera controls
-- **Shader System**: Flexible shader management and usage
-- **Multi-level Rendering**: Supports multi-level caching and framebuffer objects
+## Development & Extension Guide
+
+- Add features as independent modules following `config_cmake` templates;
+- Register property editors with `XAttrItemDelegateFactory`;
+- Manage shaders via `xShaderManger` and support hot-reload during development;
+- For large datasets, prefer batched texture/buffer uploads and PBO mapping to minimize copies.
+
+## Contributing
+
+Please open issues or PRs. Typical flow: Fork -> branch -> commit -> PR. Describe feature, usage example and screenshots if applicable.
 
 ## License
 
-This project uses an open-source license. Please refer to the LICENSE file in the project root directory for details.
+This project is licensed under the MIT License. See `LICENSE` for details.
 
-## Contribution Guidelines
+---
 
-Contributions of code and documentation are welcome. Please follow these steps:
-
-1. Fork the project
-2. Create a new branch
-3. Commit your changes
-4. Submit a Pull Request
-
-## Feedback
-
-If you encounter any issues, please submit an issue on the project page.
-
-## Acknowledgments
-
-Thanks to the following open-source projects for their contributions to this project:
-
-- [Qt](https://www.qt.io/)
-- [OpenGL](https://www.opengl.org/)
-- [Eigen](https://eigen.tuxfamily.org/)
-- [GLM](https://glm.g-truc.net/)
-- [Assimp](https://github.com/assimp/assimp)
-- [FreeType](https://www.freetype.org/)
-- [GLEW](http://glew.sourceforge.net/)
-- [stb_image](https://github.com/nothings/stb)
-
-For further assistance, please refer to the project documentation or contact the developers.
+If you want, I can split module-level READMEs, generate class diagrams, or create small example projects demonstrating common workflows.

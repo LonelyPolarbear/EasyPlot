@@ -1,3 +1,4 @@
+#pragma once
 #include "xtestApi.h"
 #include <memory>
 #include <string>
