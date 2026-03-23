@@ -29,7 +29,6 @@ list(APPEND LIB_INCLUDE_DIRECTORY
 #设置依赖的动态库名称
 #-------------------------------------------------------
 list(APPEND LIB_NAMES 
-	xstorage${DLL_DEBUG_POSTFIX}
 	xlog${DLL_DEBUG_POSTFIX}
 	MyLib::HDF5
 )
@@ -55,3 +54,12 @@ set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})												#库目录
 target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})							#包含目录
 target_link_libraries(${proName}  PRIVATE ${LIB_NAMES})																#库lib名
+
+#[[
+install(TARGETS ${proName}
+    EXPORT dataBaseTargets                     # 导出目标集，供后续使用
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}  # 动态库安装到 lib/ 或 lib64/
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}  # 静态库（如果有）也放这里
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}  # Windows 上 .dll 会放到 bin/
+)
+]]

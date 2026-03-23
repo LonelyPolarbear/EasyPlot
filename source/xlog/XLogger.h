@@ -34,3 +34,7 @@ public:
 };
 
 extern XLOG_API std::shared_ptr<XForwardSink> getXForwardSink();
+
+extern XLOG_API void setXlogPatternLogEnd(); 
+
+extern XLOG_API void setXlogPatternLogDefault();

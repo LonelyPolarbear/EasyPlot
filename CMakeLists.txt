@@ -2,11 +2,17 @@ cmake_minimum_required(VERSION 3.8)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)           # 生成编译命令数据库,需要在project之前设置,MSVC下不生效
 project(QtOpenGL)		                                                        #放在根目录下可以理解为解决方案的名称
 
+if(CMAKE_BUILD_TYPE  MATCHES "Debug")
+SET(DLL_DEBUG_POSTFIX "_d")  
+else() 
+SET(DLL_DEBUG_POSTFIX)
+endif()
+
 add_compile_definitions(SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 if(MSVC)
     add_compile_options(/utf-8)
     add_compile_options(/Zc:__cplusplus)
-    add_compile_options(-Zc:nrvo-)
+    #add_compile_options(-Zc:nrvo-)
 endif()
 #--------------------------------------------------------------------------------------------------------------
 # 创建一个 INTERFACE 库（只传递属性）可选：加个命名空间别名，更规范
@@ -67,6 +73,45 @@ add_library(MyLib::example ALIAS MyExampleDeps)
 set_property(GLOBAL PROPERTY MY_PROJECT_LIB_TARGETS "")
 set_property(GLOBAL PROPERTY MY_PROJECT_LIBS "")
 
+
+#--------------------------------------------------------------------------------------------------------------
+# install配置
+#--------------------------------------------------------------------------------------------------------------
+include(GNUInstallDirs)
+#[[
+调用后，cmake会自动定义以下缓冲变量
+CMAKE_INSTALL_BINDIR                        bin                                                                                         可执行文件目录（对应 RUNTIME）
+CMAKE_INSTALL_SBINDIR                       sbin                                                                                        系统管理员命令（较少用）
+CMAKE_INSTALL_LIBDIR                        lib(lib64)                                                                               库文件目录（.so, .a 等）
+CMAKE_INSTALL_INCLUDEDIR                include                                                                                  头文件目录
+CMAKE_INSTALL_DATAROOTDIR               share                                                                                   数据根目录（如图标，翻译等）
+CMAKE_INSTALL_DATADIR                       ${CMAKE_INSTALL_DATAROOTDIR}/project                    项目专属数据
+CMAKE_INSTALL_DOCDIR                        ${CMAKE_INSTALL_DATAROOTDIR}/doc/project             文档目录
+CMAKE_INSTALL_MANDIR                        ${CMAKE_INSTALL_DATAROOTDIR}/man/man1                 手册页目录
+CMAKE_INSTALL_SYSCONFDIR                etc                                                                                          配置文件（系统级）
+CMAKE_INSTALL_LOCALSTATEDIR            var                                                                                          本地状态数据（如缓存）
+]]
+
+#[[
+CMAKE_BINARY_DIR                                    顶级构建目录（整个项目的 build 根目录）                                             不随子目录变化
+CMAKE_CURRENT_BINARY_DIR                  当前正在处理的 CMakeLists.txt 所在的构建目录                                    ✅ 会变（进入 add_subdirectory() 后不同）
+CMAKE_SOURCE_DIR                                    顶级源码目录（含根 CMakeLists.txt 的目录）
+CMAKE_CURRENT_SOURCE_DIR                当前 CMakeLists.txt 所在的源码目录
+]]
+
+
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)  #安装路径
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/CLI/include/CLI DESTINATION include)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/linenoise/include/linenoise DESTINATION include)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/highFive/include/highfive DESTINATION include)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/eigen3/Eigen DESTINATION include)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/eigen3/unsupported DESTINATION include)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/magic_enum/include/magic_enum DESTINATION include)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/spdlog/include/spdlog DESTINATION include)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/boost/include/boost DESTINATION include)
+#install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/hdf5/include/hdf5 DESTINATION include)
+#linenoise是静态库，也需要导出
+
 #--------------------------------------------------------------------------------------------------------------
 # 以下是各个库的CMakeLists.txt文件，按照顺序依次添加
 #--------------------------------------------------------------------------------------------------------------
@@ -110,7 +155,7 @@ add_dependencies(XOpenGLWidget  lib00_utilty lib01_shader lib02_camera lib04_ope
 
 add_dependencies(easyPlot  XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel render xlog)
 add_dependencies(lib09_panel  lib00_utilty xlog)
-add_dependencies(xmvd  dataBase lib00_utilty xlog)
+add_dependencies(xmvd  dataBase lib00_utilty xlog lib05_shape)
 add_dependencies(main easyPlot lib09_panel xlog)
 
 
@@ -119,7 +164,15 @@ add_dependencies(main easyPlot lib09_panel xlog)
 #--------------------------------------------------------------------------------------------------------------
 set_property(GLOBAL PROPERTY MY_EXAMPLE_TARGETS "")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-option(BUILD_EXAMPLES "Build the test suite" ON)		#用于定义可以被用户配置的布尔选项
+option(BUILD_EXAMPLES "Build example" OFF)		#用于定义可以被用户配置的布尔选项
 if(BUILD_EXAMPLES)
     add_subdirectory(examples)
+endif()
+
+# 测试相关（放在最后，确保库已定义）
+option(BUILD_TESTING "Build tests" OFF)
+if(BUILD_TESTING)
+    include(CTest)          # 启用测试
+    enable_testing()        # 可选，include(CTest) 已包含
+    add_subdirectory(tests)
 endif()

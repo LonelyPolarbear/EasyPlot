@@ -105,20 +105,21 @@ public:
     }
 
 
-	void dump() {
+    std::ostream& dump(std::ostream& osm = std::cout) {
 		for (int i = 0; i < d.size(); i++) {
 			if constexpr (std::is_same_v<T, char> || std::is_same_v<T, unsigned char>) {
-				std::cout << (int)d[i] << " ";
+                osm << (int)d[i] << " ";
 			}
 			else {
-				std::cout << d[i] << " ";
+                osm << d[i] << " ";
 			}
 		}
-		std::cout << std::endl;
+        osm << std::endl;
+        return osm;
 	}
 
     /// <summary>
-    /// 数据不变，数据类型转型
+    /// 数据不变，数据类型转型,异构转型
     /// </summary>
     template<typename U>
     sptr<XDataArray1D<U>> heteroCast(int componentNum) {
@@ -345,24 +346,25 @@ private:
         Modified();
     }
 
-    void dump(bool reverse = false /*是否逆序*/) {
-        std::cout<<"width:"<<mCol <<" height:"<<mRow<<std::endl;
+    std::ostream& dump(std::ostream& osm = std::cout,bool reverse = false /*是否逆序*/) {
+        osm <<"width:"<<mCol <<" height:"<<mRow<<std::endl;
         for (int row = 0; row < mRow; row++) {
             auto curRow = reverse ? mRow - row-1 :row ;
             for (int col = 0; col < mCol; col++) {
                 auto ptr = mData->data(curRow * mCol + col);
 				if constexpr (std::is_same_v<T, char> || std::is_same_v<T, unsigned char>) {
 					for (int c = 0; c < getComponent(); c++) {
-                        std::cout << (int)ptr[c] << " ";
+                        osm << (int)ptr[c] << " ";
 					}
 				}
 				else {
 					for (int c = 0; c < getComponent(); c++) {
-						std::cout << ptr[c] << " ";
+                        osm << ptr[c] << " ";
 					}
 				}  
             }
-            std::cout<<std::endl;
+            osm <<std::endl;
+            return osm;
         }
         std::cout << std::endl;
     }
@@ -498,30 +500,31 @@ public:
 		mData->setTuple(z*mRow*mCol+  y * mCol + x, args...);
 	}
 
-	void dump(bool reverse = false /*是否逆序*/) {
-        std::cout<<"width:"<<mCol<<" height:"<<mRow<<" z:"<<mLen<<std::endl;
+    std::ostream&  dump(std::ostream& osm = std::cout,bool reverse = false /*是否逆序*/) {
+        osm <<"width:"<<mCol<<" height:"<<mRow<<" z:"<<mLen<<std::endl;
         for (int z = 0; z < mLen; z++) {
-            std::cout<<"z="<<z<<std::endl;
+            osm <<"z="<<z<<std::endl;
 			for (int row = 0; row < mRow; row++) {
 				auto curRow = reverse ? mRow - row - 1 : row;
 				for (int col = 0; col < mCol; col++) {
 					auto ptr = mData->data(z * mRow * mCol + curRow * mCol + col);
 					if constexpr (std::is_same_v<T, char> || std::is_same_v<T, unsigned char>) {
 						for (int c = 0; c < getComponent(); c++) {
-							std::cout << (int)ptr[c] << " ";
+                            osm << (int)ptr[c] << " ";
 						}
 					}
 					else {
 						for (int c = 0; c < getComponent(); c++) {
-							std::cout << ptr[c] << " ";
+                            osm << ptr[c] << " ";
 						}
 					}
 				}
-				std::cout << std::endl;
+                osm << std::endl;
 			}
-			std::cout << std::endl;
+            osm << std::endl;
         }
-        std::cout << std::endl;
+        osm << std::endl;
+        return osm;
 	}
 
     template<typename U>

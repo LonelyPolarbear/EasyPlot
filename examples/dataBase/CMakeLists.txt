@@ -32,6 +32,7 @@ SET(LIB_NAMES
 	 MyLib::HeaderOnly
 	 MyLib::HDF5
 	 xtest${DLL_DEBUG_POSTFIX}
+	 xlog${DLL_DEBUG_POSTFIX}
 )
 
 SET(LIB_INCLUDE_DIRECTORY 	

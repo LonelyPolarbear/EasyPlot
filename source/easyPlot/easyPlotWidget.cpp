@@ -1422,7 +1422,7 @@ void easyPlotWidget::slotFboTest()
 				*cpuData->data(0, 1) = 0x23456702;
 
 				std::cout << "cpuData\n";
-				cpuData->dump(true);
+				cpuData->dump(std::cout,true);
 			}
 
 			int w = 20;		//每一行5个颜色数据
@@ -1433,7 +1433,7 @@ void easyPlotWidget::slotFboTest()
 			array3D->forEach(1, [](unsigned char* data) {
 				*data+=0x123456;
 				});
-			array3D->dump(true);
+			array3D->dump(std::cout,true);
 
 			auto textureArry2d =makeShareDbObject<XOpenGLTexture>();
 			textureArry2d->setTarget(XOpenGLTexture::Target2DArray);

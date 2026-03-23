@@ -11,6 +11,7 @@
 #include <highfive/H5File.hpp>
 
 #include <xtest/XTest.h>
+#include <xlog/XLogger.h>
 
 void testXVector() {
 	XQ::print("一维数组");
@@ -51,54 +52,36 @@ void testXVector() {
 	}
 }
 
-void testXDataObject01() {
-	auto root = makeShareDbObject<XDataObject>(); root->setName("root");
-	auto child1 = makeShareDbObject<XDataObject>();child1->setName("child1");
-	auto child2 = makeShareDbObject<XDataObject>(); child2->setName("child2");
+//数组测试
+namespace ns_xDataarray_test {
+	void testDataArray1D() {
+		auto tupleNum = 12;
+		auto array1d = makeShareDbObject<XIntArray>();
+		array1d->setComponent(1);
+		array1d->setNumOfTuple(tupleNum);
 
-	root->addData(child1);
-	root->addData(child2);
+		auto pdata = array1d->data(0);
+		std::iota(pdata, pdata + tupleNum, 0);
 
-	auto child1_1 = makeShareDbObject<XDataObject>(); child1_1->setName("child1_1");
-	auto child1_2 = makeShareDbObject<XDataObject>(); child1_2->setName("child1_2");
+		std::ostringstream stm;
+		array1d->dump(stm);
+		XLOG_DEBUG( "\n 123 {} ", stm.str());
+	}
 
-	XQ::print("-------------------------");
+	void testDataArray2D() {
 
-	child1->addData(child1_1);
-	child1->addData(child1_2);
+	}
 
-	child1->beginBatch();
-	child1->AttrVisible->setValue(false);
-	child1_1->AttrVisible->setValue(false);
+	void testDataArray3D() {
 
-	child1->endBatch();
-
-	//child1->removeData(child1_1);
-
-	auto listNode =makeShareDbObject<XDataListT<XDataObject>>();
-	auto subNode1 = makeShareDbObject<XDataObject>(); subNode1->setName("subNode1");
-	auto subNode2 = makeShareDbObject<XDataObject>(); subNode2->setName("subNode2");
-	
-
-	listNode->append(subNode1);
-	listNode->append(subNode2);
-
-	root->addData(listNode);
-
-	HighFive::File file("test.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
-	root->serialize(file.createGroup(root->getName()));
+	}
 }
 
-void testXDataObject02(){
-	auto attr_bool = makeShareDbObject<XAttr_Bool>();
-	auto attr_point = makeShareDbObject<XAttr_Point4f>();
-	XQ::print(attr_bool->getClassName());
-	XQ::print(attr_point->getClassName());
-}
-
+//序列化测试
+namespace ns_serialization_test {
 //序列化和反序列化测试pants jewelry
 //鞋子
-	class Clothes :public XDataObject {
+class Clothes :public XDataObject {
 		REGISTER_CLASS_META_DATA(Clothes, XDataObject);
 	public:
 		void Init() override {
@@ -401,11 +384,17 @@ void testDataArrayDeserialization() {
 	}
 }
 
+}
+
 int main() {
 	XTestApp app("XDataBaseTest");
 	
-	app.addCmd("testDataArraySerialization","数据序列化",testDataArraySerialization);
-	app.addCmd("testDataArrayDeserialization", "数据反序列化", testDataArrayDeserialization);
+	app.addCmd("testDataArray1D", "一维数组测试", ns_xDataarray_test::testDataArray1D);
+	app.addCmd("testDataArray2D", "二维数组测试", ns_xDataarray_test::testDataArray2D);
+	app.addCmd("testDataArray3D", "三维数组测试", ns_xDataarray_test::testDataArray3D);
+
+	app.addCmd("testDataArraySerialization", "数据序列化", ns_serialization_test::testDataArraySerialization);
+	app.addCmd("testDataArrayDeserialization", "数据反序列化", ns_serialization_test::testDataArrayDeserialization);
 
 	return app.run();
 }
