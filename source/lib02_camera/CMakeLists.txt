@@ -30,7 +30,7 @@ ${CMAKE_SOURCE_DIR}/output/bin
 														
 #生成动态库
 add_library(${proName}  SHARED)
-target_sources(${proName} PUBLIC ${SOURCES_FILES} ${HERDERS_FILES})
+target_sources(${proName} PRIVATE ${SOURCES_FILES} ${HERDERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB02_CAMERA_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME  ${outPutName})

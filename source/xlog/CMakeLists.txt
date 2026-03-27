@@ -44,7 +44,7 @@ get_dll_api_macro(${proName} DLL_API_NAME)
 
 #target_compile_options(${proName} PRIVATE /utf-8)
 #target_compile_definitions(${proName} PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
-target_sources(${proName} PUBLIC ${SOURCES_FILES} ${HEADERS_FILES})
+target_sources(${proName} PRIVATE ${SOURCES_FILES} ${HEADERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE ${DLL_API_NAME})
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${outPutName})
@@ -54,4 +54,4 @@ set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})											#库目录
 target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})							#包含目录
-target_link_libraries(${proName} ${LIB_NAMES})		
+target_link_libraries(${proName} PRIVATE ${LIB_NAMES})		

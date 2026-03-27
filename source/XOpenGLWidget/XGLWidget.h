@@ -22,6 +22,7 @@ class XOpenGLRenderWindow;
 class QMouseEvent;
 class QKeyEvent;
 class QFocusEvent;
+
 /// <summary>
 /// XOpenGLWidget作为基类，用于提供OpenGL渲染功能
 /// </summary>
@@ -33,6 +34,7 @@ public:
 
 	~XGLWidget();
 public:
+
 	std::shared_ptr<XOpenGLRenderWindow> getRenderWindow();
 protected:
 	QPaintEngine* paintEngine()  const override;
@@ -40,6 +42,7 @@ protected:
 	void virtual render();
 
 	//将窗口坐标转换为左下角屏幕坐标系列
+
 	XQ::Vec2u mapToGLScreen(const QPoint& point) const;
 
 	XQ::Vec2f mapToNormGLScreen(const QPoint& point) const;

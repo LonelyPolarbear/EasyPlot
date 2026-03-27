@@ -12,3 +12,8 @@ void XDataBaseObject::Init()
 {
 
 }
+
+std::string XBaseObject::dump()
+{
+	return {};
+}

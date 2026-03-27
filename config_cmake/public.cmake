@@ -1,6 +1,7 @@
 #不设置，windows下动态库不会生成.lib文件
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-set(CMAKE_DEBUG_POSTFIX "_d") 
+#set(CMAKE_DEBUG_POSTFIX "_d") 
+set(CMAKE_DEBUG_POSTFIX "") 
 
 set(CMAKE_CXX_STANDARD 17)
 

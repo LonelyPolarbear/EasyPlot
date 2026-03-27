@@ -3,7 +3,7 @@
 #include "spdlog/sinks/basic_file_sink.h"						// 基础文件输出（单文件）
 
 static std::string console_wapPattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%n] [%^%l%$] (%s %#)  %v";		//消息放到最后面，主要用于换行的消息
-static std::string console_pattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%n] [%^%l%$] %v (%s %#)";
+static std::string console_pattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%n] [%^%l%$] %v";
 static std::string forward_pattern = "[%Y-%m-%d %H:%M:%S.%e] [%t] [%n] [%^%l%$] %v";
 
 std::shared_ptr<spdlog::logger>& getLogger() {
@@ -70,7 +70,7 @@ void XForwardSink::flush_()
 	return nullptr;
 }
 
- extern XLOG_API void setXlogPatternLogEnd()
+  void setXlogPatternLogEnd()
  {
 	 auto logger = getLogger();
 	 for (auto sink : logger->sinks()) {
@@ -85,7 +85,7 @@ void XForwardSink::flush_()
 	
  }
 
- extern XLOG_API void setXlogPatternLogDefault()
+  void setXlogPatternLogDefault()
  {
 	 auto logger = getLogger();
 	 for (auto sink : logger->sinks()) {

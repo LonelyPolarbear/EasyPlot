@@ -3,7 +3,7 @@ SET(libName xmvd)
 
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
-SET(DLL_DEBUG_POSTFIX "_d")  
+SET(DLL_DEBUG_POSTFIX "")  
 else() 
 SET(DLL_DEBUG_POSTFIX)
 endif()

@@ -7,7 +7,7 @@ set(ALL_SOURCES)																							#lib°üº¬Ä¿Â¼
 
 
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
-SET(DLL_DEBUG_POSTFIX "_d")  
+SET(DLL_DEBUG_POSTFIX)  
 else() 
 SET(DLL_DEBUG_POSTFIX)
 endif()

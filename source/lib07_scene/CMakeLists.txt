@@ -8,7 +8,7 @@ file(GLOB_RECURSE HERDERS_FILES *.h)
 file(GLOB_RECURSE SOURECS_FILES *.cpp)
 
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
-SET(DLL_DEBUG_POSTFIX "_d")  
+SET(DLL_DEBUG_POSTFIX "")  
 else() 
 SET(DLL_DEBUG_POSTFIX)
 endif()
@@ -50,7 +50,7 @@ ${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 														
 #生成动态库
 add_library(${proName}  SHARED)
-target_sources(${proName} PUBLIC ${SOURECS_FILES} ${HERDERS_FILES})
+target_sources(${proName} PRIVATE ${SOURECS_FILES} ${HERDERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB07_SCENE_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "xscene")

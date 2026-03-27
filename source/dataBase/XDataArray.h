@@ -118,6 +118,12 @@ public:
         return osm;
 	}
 
+    std::string toString() {
+        std::ostringstream stm;
+        dump(stm);
+        return stm.str();
+    }
+
     /// <summary>
     /// 数据不变，数据类型转型,异构转型
     /// </summary>
@@ -369,6 +375,12 @@ private:
         std::cout << std::endl;
     }
 
+	std::string toString(bool reverse = false) {
+		std::ostringstream stm;
+		dump(stm,reverse);
+		return stm.str();
+	}
+
 	/// <summary>
    /// 数据不变，数据类型转型
    /// </summary>
@@ -527,6 +539,11 @@ public:
         return osm;
 	}
 
+	std::string toString(bool reverse = false) {
+		std::ostringstream stm;
+		dump(stm, reverse);
+		return stm.str();
+	}
     template<typename U>
     void memCopy(int z, std::shared_ptr< XDataArray2D<U>> sliceData) {
         if(!sliceData)

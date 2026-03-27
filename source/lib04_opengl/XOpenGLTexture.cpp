@@ -3,13 +3,13 @@
 #include "XOpenGLBuffer.h"
 #include "XOpenGLFramebufferObject.h"
 #include "XOpenGLFuntion.h"
-#include <iostream>
+#include <nlohmann/json.hpp>
 class XOpenGLTexture::Internal {
 public:
 	GLuint textureId{0};
 	Target target{Target::Target2D};
-	int width{0};
-	int height{0};
+	int width{1};
+	int height{1};
 	int layer{1};
 	int samples{0};
 	XOpenGLTexture::TextureFormat internalFormat;
@@ -33,10 +33,226 @@ void XOpenGLTexture::setTarget(Target target)
 	d->target = target;
 }
 
+bool XOpenGLTexture::create()
+{
+	if (d->textureId != 0)
+		return true;
+	glGenTextures(1, &d->textureId);
+	XOpenGLFuntion::checkGLError();
+	return d->textureId != 0;
+}
+
 void XOpenGLTexture::setInternalFormat(TextureFormat format)
 {
 	d->internalFormat = format;
 }
+
+void XOpenGLTexture::setExternalFormat(PixelFormat inputDataFormat, PixelType inputDataPixelType)
+{
+	d->dataFormat = inputDataFormat;
+	d->datatype = inputDataPixelType;
+}
+
+void XOpenGLTexture::texStorage1D(int width)
+{
+	auto allocatedSize = getStorgeSize();
+	
+	if (allocatedSize == 0) {
+		//尚未分配空间
+		d->width = width;
+		glTexImage1D(d->target, 0, d->internalFormat, width, 0, d->dataFormat, d->datatype, nullptr);
+		XOpenGLFuntion::checkGLError();
+		return;
+	}
+	
+	if (computeStorgeSize(width, 1, 1, d->internalFormat) == allocatedSize && d->width == width) {
+		//尺寸相同，不需要重新分配
+		return;
+	}
+
+	//尺寸不同，需要先重新创建，再次分配空间
+	//后续可能需要发射信号
+	destroy();
+
+	create();
+	bind();
+	texStorage1D(width);
+}
+
+void XOpenGLTexture::texStorage2D(int width, int height)
+{
+	auto allocatedSize = getStorgeSize();
+
+	if (allocatedSize == 0) {
+		//尚未分配空间
+		d->width = width;
+		d->height = height;
+		glTexImage2D(d->target, 0/*mimmap层级*/, d->internalFormat, width, height, 0/*历史遗留问题*/, d->dataFormat, d->datatype, nullptr);
+		XOpenGLFuntion::checkGLError();
+		return;
+	}
+
+	if (computeStorgeSize(width, height, 1, d->internalFormat) == allocatedSize && d->width == width &&d->height == height) {
+		//尺寸相同，不需要重新分配
+		return;
+	}
+
+	destroy();
+
+	create();
+	bind();
+	texStorage2D(width,height);
+}
+
+void XOpenGLTexture::texStorage2DMultiSample(int width, int height, int sampleNum)
+{
+	auto sm = *XOpenGLFuntion::xGetTextureSampleNum(d->textureId, (XOpenGL::TextureTarget)d->target);
+	auto allocatedSize = getStorgeSize()*sm;
+
+	if (allocatedSize == 0) {
+		//尚未分配空间
+		d->width = width;
+		d->height = height;
+		d->samples = sampleNum;
+		glTexImage2DMultisample(d->target, d->samples, d->internalFormat, width, height, GL_TRUE);
+		return;
+	}
+
+	if (sampleNum*computeStorgeSize(width, height, 1, d->internalFormat) == allocatedSize && d->width == width && d->height == height) {
+		//尺寸相同，不需要重新分配
+		return;
+	}
+
+	destroy();
+
+	create();
+	bind();
+	texStorage2DMultiSample(width, height,sampleNum);
+}
+
+void XOpenGLTexture::texStorage3D(int width, int height, int depth)
+{
+	auto allocatedSize = getStorgeSize();
+
+	if (allocatedSize == 0) {
+		//尚未分配空间
+		d->width = width;
+		d->height = height;
+		d->layer = depth;
+		glTexImage3D(d->target, 0, d->internalFormat, width, height, depth, 0, d->dataFormat, d->datatype, nullptr);
+		return;
+	}
+
+	if (computeStorgeSize(width, height, d->layer, d->internalFormat) == allocatedSize && 
+																									d->width == width && 
+																									d->height == height &&
+																									d->layer == depth) {
+		//尺寸相同，不需要重新分配
+		return;
+	}
+
+	destroy();
+
+	create();
+	bind();
+	texStorage3D(width, height,depth);
+}
+
+void XOpenGLTexture::texStorage3DMultiSample(int width, int height, int depth, int sampleNum)
+{
+	auto sm = *XOpenGLFuntion::xGetTextureSampleNum(d->textureId, (XOpenGL::TextureTarget)d->target);
+	auto allocatedSize = getStorgeSize() * sm;
+
+	if (allocatedSize == 0) {
+		//尚未分配空间
+		d->width = width;
+		d->height = height;
+		d->layer = depth;
+		d->samples = sampleNum;
+		glTexImage3DMultisample(d->target, d->samples, d->internalFormat, width, height, depth, GL_TRUE);
+		return;
+	}
+
+	if (sampleNum * computeStorgeSize(width, height, height, d->internalFormat) == allocatedSize && 
+	d->width == width && 
+	d->height == height &&
+	d->layer == depth
+	) {
+		//尺寸相同，不需要重新分配
+		return;
+	}
+
+	destroy();
+
+	create();
+	bind();
+	texStorage3DMultiSample(width, height, depth, sampleNum);
+}
+
+void XOpenGLTexture::setSubData1D(int xoffset, int width, const void* data)
+{
+	glTexSubImage1D(d->target,0,xoffset,width,d->dataFormat,d->datatype,data);
+	glGenerateMipmap(d->target);
+	XOpenGLFuntion::checkGLError();
+}
+
+void XOpenGLTexture::setSubData2D(int xoffset, int yoffset, int width, int height, const void* data)
+{
+	glTexSubImage2D(d->target,0,xoffset,yoffset,width,height,d->dataFormat,d->datatype,data);
+	glGenerateMipmap(d->target);
+	XOpenGLFuntion::checkGLError();
+}
+
+void XOpenGLTexture::setSubData3D(int xoffset, int yoffset, int zoffset, int width, int height, int depth, const void* data)
+{
+	glTexSubImage3D(d->target, 0, xoffset, yoffset, zoffset, width, height, depth, d->dataFormat, d->datatype, data);
+	glGenerateMipmap(d->target);
+	XOpenGLFuntion::checkGLError();
+}
+
+sptr<XOpenGLBuffer> XOpenGLTexture::map2pbo()
+{
+	//设值对齐
+	auto alignment = 1;
+	auto pixelSize =getInternalFormatSize(d->internalFormat);
+	auto oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, alignment);
+
+	auto pbo = makeShareDbObject<XOpenGLBuffer>();
+	pbo->setBufferType(XOpenGLBuffer::PixelPackBuffer);
+	pbo->setUsagePattern(XOpenGLBuffer::UsagePattern::StreamRead);
+	pbo->create();
+	pbo->bind();
+
+	auto expactedSize = d->height * d->layer * d->width * pixelSize;
+	auto pboSize = pbo->bufferSize();
+
+	if (pboSize != expactedSize) {
+		pbo->allocate(expactedSize);
+	}
+
+	bind();
+
+	glGetTexImage(
+		d->target,							// 纹理目标
+		0,											// mipmap级别
+		d->dataFormat,					// 格式（必须匹配纹理的内部格式）
+		d->datatype,						// 类型（必须匹配纹理的数据类型）
+		0											// 偏移量（使用PBO时设为0）
+	);
+
+
+	XOpenGLFuntion::checkGLError();
+
+	release();
+	oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_alignment, oldPackAlignment);
+	return pbo;
+}
+
+sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSample2pbo()
+{
+	return sptr<XOpenGLBuffer>();
+}
+
 
 XOpenGLTexture::Target XOpenGLTexture::getTarget() const
 {
@@ -48,13 +264,19 @@ uint32_t XOpenGLTexture::getId() const
 	return d->textureId;
 }
 
-bool XOpenGLTexture::create()
+XOpenGLTexture::TextureFormat XOpenGLTexture::getInternalFormat() const
 {
-	if (d->textureId != 0)
-		return true;
-	glGenTextures(1, &d->textureId);
-	XOpenGLFuntion::checkGLError();
-	return d->textureId != 0;
+	return d->internalFormat;
+}
+
+XOpenGLTexture::PixelFormat XOpenGLTexture::getInputDataPixelFormat() const
+{
+	return d->dataFormat;
+}
+
+XOpenGLTexture::PixelType XOpenGLTexture::getInputDataPixelType() const
+{
+	return d->datatype;
 }
 
 void XOpenGLTexture::destroy()
@@ -138,6 +360,27 @@ void XOpenGLTexture::setWrapMode(XOpenGLTexture::CoordinateDirection direction, 
 	glTexParameteri(d->target, direction, mode); 
 }
 
+std::string to_hex(unsigned int value)  {
+	std::ostringstream oss;
+	oss << "0x" << std::setfill('0') << std::setw(4) << std::hex << std::uppercase << value;
+	return oss.str();
+	};
+
+std::string XOpenGLTexture::dump()
+{
+	nlohmann::json obj;
+	obj["textureId"] = d->textureId;
+	obj["target"] = to_hex(d->target);
+	obj["width"] = d->width;
+	obj["height"] = d->height;
+	obj["depth"] = d->layer;
+	obj["internalFormat"] = to_hex(d->internalFormat);
+	obj["dataFormat"] = to_hex(d->dataFormat);
+	obj["datatype"] = to_hex(d->datatype);
+	obj["samples"] = d->samples;
+	return obj.dump(2);
+}
+
 void XOpenGLTexture::setData(
 													int width, 
 													int height, 
@@ -151,6 +394,11 @@ void XOpenGLTexture::setData(
 	d->dataFormat = dataFormat;
 	d->datatype = datatype;
 	glTexImage2D(d->target, level/*mimmap层级*/, d->internalFormat, width, height, 0/*历史遗留问题*/,dataFormat , datatype, data);
+	//glTexSubImage2D(d->target)
+	//glTexStorage2D() 4.2
+	//glTexSubImage2D() 4.2
+	//glTextureStorage2D glTextureStorage3D DSA 4.5
+	//glTextureSubImage2D glTextureSubImage3D 4.5
 	XOpenGLFuntion::checkGLError();
 }
 
@@ -217,20 +465,7 @@ void XOpenGLTexture::GenerateMipmap()
 	glGenerateMipmap(d->target); //让系统自动处理多级渐远纹理
 }
 
-XOpenGLTexture::TextureFormat XOpenGLTexture::getInternalFormat() const
-{
-	return d->internalFormat;
-}
 
-XOpenGLTexture::PixelFormat XOpenGLTexture::getInputDataPixelFormat() const
-{
-	return d->dataFormat;
-}
-
-XOpenGLTexture::PixelType XOpenGLTexture::getInputDataPixelType() const
-{
-	return d->datatype;
-}
 
 sptr<XOpenGLBuffer> XOpenGLTexture::map(int alignment)
 {
@@ -335,6 +570,8 @@ sptr<XOpenGLBuffer> XOpenGLTexture::map(int pboWidth, int pboHeight, int x, int 
 	 oldPackSkipPixel = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::pack_skip_pixels, oldPackSkipPixel);
 	return pbo;
 }
+
+
 
 sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSampleColor(unsigned int fboId)
 {
@@ -716,4 +953,16 @@ XOpenGL::TextureBindingType XOpenGLTexture::getTextureBindType() const
 	case XOpenGLTexture::Target::Target2DMultisampleArray:
 		return XOpenGL::TextureBindingType::XGL_TEXTURE_BINDING_2D_MULTISAMPLE_ARRAY;
 	}
+}
+
+int XOpenGLTexture::getStorgeSize()
+{
+	auto dim = *XOpenGLFuntion::xGetTextureSize(d->textureId,(XOpenGL::TextureTarget)d->target);
+	auto pixelSize = getInternalFormatSize(d->internalFormat);
+	return dim[0]*dim[1]*dim[2]*pixelSize;
+}
+
+int XOpenGLTexture::computeStorgeSize(int width, int height, int depth, XOpenGLTexture::TextureFormat format, int sampleNum)
+{
+	return sampleNum*width*height*depth*getInternalFormatSize(format);
 }

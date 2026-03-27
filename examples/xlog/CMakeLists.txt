@@ -1,9 +1,13 @@
-SET(proName xlog_example)
+ÔªøSET(proName xlog_example)
 SET(libName xlog)
+
+#set(PORTABLE_PYTHON_ROOT "${CMAKE_SOURCE_DIR}/Python38")
+#set(Python_EXECUTABLE "${PORTABLE_PYTHON_ROOT}/python.exe") 
+#find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
-SET(DLL_DEBUG_POSTFIX "_d")  
+SET(DLL_DEBUG_POSTFIX "")  
 else() 
 SET(DLL_DEBUG_POSTFIX)
 endif()
@@ -18,7 +22,7 @@ add_executable(${proName} xlog_test.cpp)
 #target_compile_options(${proName} PRIVATE /utf-8)
 set_target_properties(${proName} PROPERTIES FOLDER ${EXAMPLES_TOP_FOLDER})
 
-# Ω´ƒø±ÍÃÌº”µΩ»´æ÷ Ù–‘
+# Â∞ÜÁõÆÊ†áÊ∑ªÂä†Âà∞ÂÖ®Â±ÄÂ±ûÊÄß
 set_property(GLOBAL APPEND PROPERTY MY_EXAMPLE_TARGETS ${proName})
 
 get_property(ALL_LIB_TARGETS GLOBAL PROPERTY MY_PROJECT_LIB_TARGETS)
@@ -33,19 +37,23 @@ SET(LIB_NAMES
 	xtest${DLL_DEBUG_POSTFIX}
 	xlog${DLL_DEBUG_POSTFIX}
 	${libName}${DLL_DEBUG_POSTFIX}
+	#python38
 )
 
 SET(LIB_INCLUDE_DIRECTORY 	
 														${CMAKE_SOURCE_DIR}/source 
 														${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
 														${CMAKE_SOURCE_DIR}/3rdParty/spdlog/include
+														#${CMAKE_SOURCE_DIR}/Python38/include
+														
 )
 
 set(LIB_DIRECTORIES 
 ${CMAKE_SOURCE_DIR}/output/bin
+#${CMAKE_SOURCE_DIR}/Python38/libs
 )
 
 #target_compile_definitions(${proName} PRIVATE SPDLOG_ACTIVE_LEVEL=SPDLOG_LEVEL_TRACE)
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})	
-target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})				#∞¸∫¨ƒø¬º
+target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})				#ÂåÖÂê´ÁõÆÂΩï
 target_link_libraries(${proName} PRIVATE  ${LIB_NAMES})

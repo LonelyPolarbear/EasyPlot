@@ -142,6 +142,62 @@ std::string XOpenGLFuntion::glVersion()
 	return "";
 }
 
+std::optional<XQ::Vec2i> XOpenGLFuntion::glVersion2()
+{
+	auto p = (char*)glGetString(GL_VERSION);
+
+	checkGLError();
+	std::string version(p);
+
+	std::regex pattern(R"(^(\d+)\.(\d+))");
+	std::smatch matches;
+
+	// 执行匹配
+	if (std::regex_search(version, matches, pattern)) {
+		// matches[0] 是整个匹配的字符串（如 "4.6"）
+		// matches[1] 是第一个捕获组（主版本号 "4"）
+		// matches[2] 是第二个捕获组（次版本号 "6"）
+		if (matches.size() >= 3) {  // 确保捕获到两个组
+			int major = std::stoi(matches[1].str());  // 转换为主版本号（整数）
+			int minor = std::stoi(matches[2].str());  // 转换为次版本号（整数
+			return XQ::Vec2i(major, minor);
+		}
+	}
+	return std::nullopt;
+}
+
+std::optional<int> XOpenGLFuntion::glVersion3()
+{
+	if (auto version = glVersion2()) {
+		return (*version)[0] * 10 + (*version)[1];
+	}
+	return std::nullopt;
+}
+
+bool XOpenGLFuntion::isSupport4_5()
+{
+	if (auto v = glVersion3()) {
+		return v >=45;
+	}
+	return false;
+}
+
+bool XOpenGLFuntion::isSupport4_2()
+{
+	if (auto v = glVersion3()) {
+		return v >= 42;
+	}
+	return false;
+}
+
+bool XOpenGLFuntion::isSupport3_3()
+{
+	if (auto v = glVersion3()) {
+		return v >= 33;
+	}
+	return false;
+}
+
 bool XOpenGLFuntion::checkGLError()
 {
 	GLenum error = glGetError();
@@ -255,6 +311,45 @@ XQ::Recti XOpenGLFuntion::xglglScissor(XQ::Recti rect)
 	return XQ::Recti(scissor[0],scissor[1],scissor[2],scissor[3]);
 }
 
+std::optional<XQ::Vec3i> XOpenGLFuntion::xGetTextureSize(int textureID, XOpenGL::TextureTarget target)
+{
+	XQ::Vec3i size;
+	if (auto version =glVersion3()) {
+		if (version >= 45) {
+			glGetTextureLevelParameteriv(textureID, 0, GL_TEXTURE_WIDTH, &size[0]);
+			glGetTextureLevelParameteriv(textureID, 0, GL_TEXTURE_HEIGHT, &size[1]);
+			glGetTextureLevelParameteriv(textureID, 0, GL_TEXTURE_DEPTH, &size[2]);
+			return size;
+		}
+		else {
+			glBindTexture((GLenum)target, textureID);
+			glGetTexLevelParameteriv((GLenum)target, 0, GL_TEXTURE_WIDTH, &size[0]);
+			glGetTexLevelParameteriv((GLenum)target, 0, GL_TEXTURE_HEIGHT, &size[1]);
+			glGetTexLevelParameteriv((GLenum)target, 0, GL_TEXTURE_DEPTH, &size[2]);
+			//glBindTexture((GLenum)target, 0); // 恢复状态
+			return size;
+		}
+	}
+	return std::nullopt;
+}
+
+std::optional<int> XOpenGLFuntion::xGetTextureSampleNum(int textureId, XOpenGL::TextureTarget target)
+{
+	int samples =0;
+	if (auto version = glVersion3()) {
+		if (version >= 45) {
+			glGetTextureLevelParameteriv(textureId, 0, GL_TEXTURE_SAMPLES, &samples);
+		}
+		else {
+			glBindTexture((GLenum)target, textureId);
+			GLint samples = 0;
+			glGetTexLevelParameteriv((GLenum)target, 0, GL_TEXTURE_SAMPLES, &samples);
+			glBindTexture((GLenum)target, 0); // 可选解绑
+		}
+	}
+	return std::nullopt;
+}
+//glGetTextureLevelParameteriv(textureID, 0, GL_TEXTURE_SAMPLES, &samples);
 /*
 最大本地工作组大小限制
 glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &maxLocalWorkGroupSize[0]); // X维度

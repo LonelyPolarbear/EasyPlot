@@ -40,7 +40,7 @@ assign_source_group(${SOURCES_FILES} ${HEADERS_FILES} ${MOC_SOURCES} ${UI_SOURCE
 
 add_library(${proName}  SHARED)
 
-target_sources(${proName} PUBLIC ${SOURCES_FILES} 
+target_sources(${proName} PRIVATE ${SOURCES_FILES} 
 								${HEADERS_FILES}
 								${MOC_SOURCES}
 								${UI_SOURCES}

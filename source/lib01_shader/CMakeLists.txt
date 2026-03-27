@@ -45,7 +45,7 @@ list(APPEND LIB_DIRECTORIES
 						
 #生成动态库
 add_library(${proName}  SHARED)
-target_sources(${proName} PUBLIC ${SOURCES_FILES} ${HEADERS_FILES})
+target_sources(${proName} PRIVATE ${SOURCES_FILES} ${HEADERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB01_SHADER_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${outPutName})

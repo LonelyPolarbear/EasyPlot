@@ -123,7 +123,6 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		int index)
 {
 	if (attachment == Attachment::Color) {
-		// 创建颜色纹理
 		auto colorTexture = makeShareDbObject<XOpenGLTexture>();
 		colorTexture->setTarget(XOpenGLTexture::Target::Target2D);
 		colorTexture->setInternalFormat(internalFormat);

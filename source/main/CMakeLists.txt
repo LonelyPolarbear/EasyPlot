@@ -50,19 +50,23 @@ add_executable(${proName}
 #设置exe名称						 
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME "out")	
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
-SET(DLL_DEBUG_POSTFIX "_d")  
+SET(DLL_DEBUG_POSTFIX "")  
 else() 
-SET(DLL_DEBUG_POSTFIX)
+SET(DLL_DEBUG_POSTFIX "")
 endif()
 
 #-------------------------------------------------------
 #设置依赖的动态库头文件目录
 #-------------------------------------------------------
+
+SET(BOOST_ALL_DYN_LINK ON)
+
 SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source 
 							${CMAKE_SOURCE_DIR}/source
 							${CMAKE_SOURCE_DIR}/3rdParty/glew/include
 							${CMAKE_SOURCE_DIR}/3rdParty/Eigen3
 							${CMAKE_SOURCE_DIR}/3rdParty/boost/include
+							${CMAKE_SOURCE_DIR}/Python38/include
 	)
 
 #-------------------------------------------------------
@@ -71,6 +75,7 @@ SET(LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 SET(LIB_NAMES PRIVATE
 			MyLib::HeaderOnly
 			MyLib::HDF5
+			MyLib::pybind
 				Qt5::Widgets
 				Qt5::Core
 				Qt5::Concurrent
@@ -86,7 +91,7 @@ SET(LIB_NAMES PRIVATE
 				xrender${DLL_DEBUG_POSTFIX}
 				xshape${DLL_DEBUG_POSTFIX}
 				xlog${DLL_DEBUG_POSTFIX}
-				
+
 	)
 
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin

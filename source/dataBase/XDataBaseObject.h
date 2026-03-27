@@ -210,6 +210,8 @@ public:
 	sptr<Derived> asDerived() {
 		return std::dynamic_pointer_cast<Derived>(this->shared_from_this());
 	}
+
+	virtual std::string dump();
 };
 
 /// <summary>

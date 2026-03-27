@@ -303,34 +303,145 @@ public:
 	XOpenGLTexture();
 	~XOpenGLTexture();
 
+	/**
+	 * @brief 设置纹理的目标
+	*/
 	void setTarget(Target target);
 
-	void setInternalFormat(TextureFormat format);
-
-	Target getTarget() const;
-
-	uint32_t getId() const;
-
+	/**
+	 * @brief 创建纹理
+	 */
 	bool create();
 
+	/**
+	 * @brief 设置纹理的内部格式,建议纹理格式在整个生命周期值设置一次
+	 */
+	void setInternalFormat(TextureFormat format);
+
+	/**
+	 * @brief 设置纹理的输入数据格式,建议输入数据格式在整个生命周期值设置一次
+	*/
+	void setExternalFormat( PixelFormat inputDataFormat, PixelType inputDataPixelType);
+
+	/**
+	 * @brief 一维纹理分配内存
+	 */
+	void texStorage1D(int width);
+
+	/**
+	 * @brief 二维纹理分配内存
+	 */
+	void texStorage2D(int width, int height);
+
+	/**
+	 * @brief 二维多重采样纹理分配内存
+	 */
+	void texStorage2DMultiSample(int width, int height,int sampleNum);
+
+	/**
+	 * @brief 三维纹理分配内存
+	 */
+	void texStorage3D(int width, int height, int depth);
+
+	/**
+	 * @brief 三维多重采样纹理分配内存
+	 */
+	void texStorage3DMultiSample(int width, int height, int depth, int sampleNum);
+
+	/**
+	* @brief 填充一维纹理数据
+	*/
+	void setSubData1D(int xoffset, int width, const void* data);
+
+	/**
+	* @brief 填充二维纹理数据
+	*/
+	void setSubData2D(int xoffset, int yoffset, int width, int height, const void* data);
+
+	/**
+	* @brief 填充三维纹理数据
+	*/
+	void setSubData3D(int xoffset, int yoffset, int zoffset, int width, int height, int depth, const void* data);
+
+	/**
+	* @brief 读取纹理数据到pbo
+	*/
+	sptr<XOpenGLBuffer> map2pbo();
+
+	/**
+	* @brief 读取多重采样纹理数据到pbo
+	*/
+	sptr<XOpenGLBuffer> mapMultiSample2pbo();
+
+	/**
+	* @brief 获取纹理目标类型
+	*/
+	Target getTarget() const;
+
+	/**
+	* @brief 获取纹理内部ID
+	*/
+	uint32_t getId() const;
+
+	/**
+	* @brief 获取纹理内部格式
+	*/
+	XOpenGLTexture::TextureFormat getInternalFormat() const;
+
+	/**
+	* @brief 获取纹理输入数据Format
+	*/
+	XOpenGLTexture::PixelFormat getInputDataPixelFormat() const;
+
+	/**
+	* @brief 获取纹理输入数据类型
+	*/
+	XOpenGLTexture::PixelType getInputDataPixelType() const;
+
+	/**
+	* @brief gl底层纹理删除
+	*/
 	void destroy();
 
+	/**
+	* @brief 绑定纹理
+	*/
 	void bind();
+
+	/**
+	* @brief 绑定纹理单元
+	*/
 	void bindUnit(unsigned int unit);
+
+	/**
+	* @brief 解绑纹理
+	*/
 	void release();
+
 	void releaseUnit(unsigned int unit);
 
 	void bindBuffer(std::shared_ptr<XOpenGLBuffer> buffer, TextureFormat format);
 
-	//设置放大时的过滤方式
+	/**
+	* @brief 设置放大时的过滤方式
+	*/
 	void setMagnificationFilter(XOpenGLTexture::Filter filter);
 
-	//设置缩小时的过滤方式
+	/**
+	* @brief 设置缩小时的过滤方式
+	*/
 	void setMinificationFilter(XOpenGLTexture::Filter filter);
 
-	//设置纹理的环绕方式
+	/**
+	* @brief 设置纹理的环绕方式
+	*/
 	void setWrapMode(XOpenGLTexture::CoordinateDirection direction, XOpenGLTexture::WrapMode mode);
 
+	/**
+	* @brief 打印纹理内容
+	*/
+	std::string dump() override;
+	//计划丢弃
 	void setData(
 						int width, 
 						int height, 
@@ -339,6 +450,7 @@ public:
 						XOpenGLTexture::PixelType type,
 						const void* data);
 	
+	//计划丢弃
 	void setMultiSample(
 		int width,
 		int height,
@@ -346,6 +458,7 @@ public:
 		XOpenGLTexture::PixelFormat dataFormat,
 		XOpenGLTexture::PixelType type);
 
+	//计划丢弃
 	void setData(
 		int width,
 		int height,
@@ -354,6 +467,7 @@ public:
 		XOpenGLTexture::PixelType type,
 		std::vector< const void*> datas);
 
+	//计划丢弃
 	void XOpenGLTexture::setData(
 		CubeMapFace cubeFace,
 		int width,
@@ -365,24 +479,34 @@ public:
 
 	void GenerateMipmap();
 
-	XOpenGLTexture::TextureFormat getInternalFormat() const;
-
-	XOpenGLTexture::PixelFormat getInputDataPixelFormat() const;
-
-	XOpenGLTexture::PixelType getInputDataPixelType() const;
-
-	//2d纹理的数据映射
+	//计划丢弃
 	sptr<XOpenGLBuffer> map(int alignment = 1);
 
+	//计划丢弃
 	sptr<XOpenGLBuffer> map(int pboWidth,int pboHeight,int x,int y);
 
+	//计划丢弃
 	sptr<XOpenGLBuffer> mapMultiSampleColor(unsigned int fboId);
 
+	//计划丢弃
 	sptr<XOpenGLBuffer> mapMultiSampleDepth(unsigned int fboId);
 
+	/**
+	* @brief 返回纹理内部单个像素占据的内存字节数量
+	*/
 	static unsigned int getInternalFormatSize(XOpenGLTexture::TextureFormat format);
 
 	XOpenGL::TextureBindingType getTextureBindType() const;
+protected:
+	/**
+	* @brief 返回当前纹理分配的储存空间大小(字节数)，注意多重采样纹理需要没有乘采样数
+	*/
+	int getStorgeSize();
+
+	/**
+	* @brief 计算给定参数的纹理理论的存储大小(字节数)
+	*/
+	int computeStorgeSize(int width, int height, int depth, XOpenGLTexture::TextureFormat format,int sampleNum =1);
 protected:
 	class Internal;
 	std::unique_ptr<Internal> d;

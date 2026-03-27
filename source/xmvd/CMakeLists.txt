@@ -51,7 +51,7 @@ generate_dllapi_if_needed(${proName} )
 generate_dllmain_if_needed(${proName})
 get_dll_api_macro(${proName} DLL_API_NAME)
 
-target_sources(${proName} PUBLIC ${SOURCES_FILES} 
+target_sources(${proName} PRIVATE ${SOURCES_FILES} 
 								${HEADERS_FILES}
 								${MOC_SOURCES}
 								${UI_SOURCES}

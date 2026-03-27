@@ -49,14 +49,39 @@ public:
 	/// </summary>
 	static int xglGetActiveTexture();
 
-	/// <summary>
-	/// 获取当前使用的opengl版本号，返回格式为"major.minor"
-	/// </summary>
+	/**
+	*@brief 获取当前使用的opengl版本号，返回格式为"major.minor
+	*/
 	static std::string glVersion();
 
-	/// <summary>
-	/// 检测opengl接口调用是否出错，true表示没有错误，false表示有错误
-	/// </summary>
+	/**
+	*@brief 获取当前使用的opengl版本号
+	*/
+	static std::optional<XQ::Vec2i> glVersion2();
+
+	/**
+	*@brief 获取当前使用的opengl版本号，返回数值major*10+minor
+	*/
+	static std::optional<int> glVersion3();
+
+	/**
+	 * @brief 检测是否支持OpenGL 4.5
+	 */
+	static bool isSupport4_5();
+
+	/**
+	 * @brief 检测是否支持OpenGL 4.2
+	 */
+	static bool isSupport4_2();
+
+	/**
+	 * @brief 检测是否支持OpenGL 3.3
+	 */
+	static bool isSupport3_3();
+
+	/**
+	 * @brief 检测opengl接口调用是否出错，true表示没有错误，false表示有错误
+	 */
 	static bool checkGLError();
 
 	/// <summary>
@@ -117,4 +142,9 @@ public:
 	static XQ::Recti xglViewport(XQ::Recti rect);
 
 	static XQ::Recti xglglScissor(XQ::Recti rect);
+
+	static std::optional<XQ::Vec3i> xGetTextureSize(int textureID, XOpenGL::TextureTarget target);
+
+	static std::optional<int> xGetTextureSampleNum(int textureId, XOpenGL::TextureTarget target);
+
 };

@@ -45,7 +45,9 @@ target_sources(${proName} PRIVATE  ${SOURCES_FILES} ${HERDERS_FILES})
 
 #设置
 target_compile_definitions(${proName} PRIVATE ${DLL_API_NAME})
-set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${outPutName})
+set_target_properties(${proName} PROPERTIES 
+OUTPUT_NAME ${outPutName}
+)
 
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS ${outPutName})

@@ -1,9 +1,9 @@
 #pragma once
 
 #ifdef  LIBPANEL01_XOPENGLWIDGET_DLL	
-#define lib01_xopenglwodget_API __declspec(dllexport)
+#define lib01_xopenglwodget1_API __declspec(dllexport)
 #else
-#define lib01_xopenglwodget_API __declspec(dllimport)
+#define lib01_xopenglwodget1_API __declspec(dllimport)
 #endif 
 
 #include <QWidget>
@@ -20,7 +20,7 @@ class XOpenGLContext;
 /// <summary>
 /// XOpenGLWidget作为基类，用于提供OpenGL渲染功能
 /// </summary>
-class lib01_xopenglwodget_API XOpenGLWidget : public QWidget
+class lib01_xopenglwodget1_API XOpenGLWidget : public QWidget
 {
 	Q_OBJECT
 public:

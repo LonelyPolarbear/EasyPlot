@@ -282,6 +282,21 @@ namespace XOpenGL {
 		LuminanceAlpha = 0x190A     // GL_LUMINANCE_ALPHA
 	};
 
+	enum class LIB04_OPENGL_API TextureTarget:unsigned int
+	{
+		Target1D = 0x0DE0,									// GL_TEXTURE_1D
+		Target1DArray = 0x8C18,							// GL_TEXTURE_1D_ARRAY
+		Target2D = 0x0DE1,									// GL_TEXTURE_2D
+		Target2DArray = 0x8C1A,							// GL_TEXTURE_2D_ARRAY
+		Target3D = 0x806F,									// GL_TEXTURE_3D
+		TargetCubeMap = 0x8513,							// GL_TEXTURE_CUBE_MAP
+		TargetCubeMapArray = 0x9009,				// GL_TEXTURE_CUBE_MAP_ARRAY
+		Target2DMultisample = 0x9100,				// GL_TEXTURE_2D_MULTISAMPLE
+		Target2DMultisampleArray = 0x9102,		// GL_TEXTURE_2D_MULTISAMPLE_ARRAY
+		TargetRectangle = 0x84F5,						// GL_TEXTURE_RECTANGLE
+		TargetBuffer = 0x8C2A								// GL_TEXTURE_BUFFER
+	};
+
 	//GLsync相关枚举
 	enum class LIB04_OPENGL_API SyncCondition:unsigned int {
 		SyncGPUCommandsComplete = 0x9117,    // GL_SYNC_GPU_COMMANDS_COMPLETE  当所有在调用 glFenceSync 之前提交到 OpenGL 命令流中的 GPU 命令全部执行完成时，同步对象被触发

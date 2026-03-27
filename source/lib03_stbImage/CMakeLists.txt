@@ -39,7 +39,7 @@ ${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 														
 #生成动态库
 add_library(${proName}  SHARED)
-target_sources(${proName} PUBLIC ${SOURCES_FILES} ${HEADERS_FILES})
+target_sources(${proName} PRIVATE ${SOURCES_FILES} ${HEADERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB03_STBIMAGE_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${outPutName})

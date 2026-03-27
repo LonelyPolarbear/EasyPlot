@@ -39,7 +39,7 @@ assign_source_group(${SOURCES_FILES} ${HERDERS_FILES} ${MOC_SOURCES} ${UI_SOURCE
 
 add_library(${proName}  SHARED)
 
-target_sources(${proName} PUBLIC ${SOURCES_FILES} 
+target_sources(${proName} PRIVATE ${SOURCES_FILES} 
 								${HERDERS_FILES}
 								${MOC_SOURCES}
 								${UI_SOURCES}
@@ -49,7 +49,7 @@ target_sources(${proName} PUBLIC ${SOURCES_FILES}
 #设置exe名称						 
 #set_target_properties(${proName} PROPERTIES OUTPUT_NAME "out")	
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
-SET(DLL_DEBUG_POSTFIX "_d")  
+SET(DLL_DEBUG_POSTFIX "")  
 else() 
 SET(DLL_DEBUG_POSTFIX)
 endif()

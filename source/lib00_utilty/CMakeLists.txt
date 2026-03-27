@@ -5,6 +5,10 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/var.cmake)										
 
+set(PORTABLE_PYTHON_ROOT "${CMAKE_SOURCE_DIR}/Python38")
+set(Python_EXECUTABLE "${PORTABLE_PYTHON_ROOT}/python.exe") 
+find_package(Python COMPONENTS Interpreter Development.Embed REQUIRED)
+
 file(GLOB_RECURSE HEADERS_FILES *.h *.hpp)
 file(GLOB_RECURSE SOURCES_FILES *.cpp)
 
@@ -29,11 +33,11 @@ list(APPEND LIB_INCLUDE_DIRECTORY
 #list(APPEND LIB_NAMES MyLib::HeaderOnly)
 
 
-#list(append LIB_DIRECTORIES #${CMAKE_SOURCE_DIR}/3rdParty/glew/lib)
+#list(APPEND LIB_DIRECTORIES ${Python_LIBRARIES})
 														
 #生成动态库
 add_library(${proName}  SHARED)
-target_sources(${proName} PUBLIC ${SOURCES_FILES} ${HEADERS_FILES})
+target_sources(${proName} PRIVATE ${SOURCES_FILES} ${HEADERS_FILES})
 #将动态库名字设为add
 target_compile_definitions(${proName} PRIVATE LIB00_UTILTY_DLL)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${outPutName})
