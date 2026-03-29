@@ -1,162 +1,246 @@
 # EasyPlot
 
-> 高性能 2D / 3D 可视化与交互平台（基于 Qt + OpenGL）
-
-## 目录
-
-- 项目概述
-- 作者设计理念
-- 架构与模块
-- 关键类与实现亮点
-- 模块详细说明（xmvd / xlog / xtest）
-- 依赖
-- 构建与运行
-- 使用说明（快速上手）
-- 开发与扩展指南
-- 贡献
-- 许可证
-
----
+> 高性能 2D/3D 可视化与交互平台（基于 Qt + OpenGL）
 
 ## 项目概述
 
-EasyPlot 是作者为科研、工程与教学场景设计的模块化可视化与交互组件集合，目标是提供高性能、可扩展且工程化的 2D/3D 可视化基础设施，覆盖渲染、场景管理、对象/属性检查、日志与测试等能力。
+EasyPlot 是一个模块化、数据驱动的可视化与交互平台，专为科研、工程与教学场景设计。它提供了高性能、可扩展且工程化的 2D/3D 可视化基础设施，覆盖渲染、场景管理、对象/属性检查、日志与测试等核心能力。
 
-## 作者设计理念
+## 目录结构
 
-作者的核心思路：模块化 + 数据驱动 + 工程化。
-
-- 模块化分层：每个功能拆分为单独库（例：`lib05_shape`、`lib07_scene`），降低耦合，便于维护与重用；
-- 数据驱动：渲染层与数据层解耦，图形对象由数据驱动（`XData*`、`XGraphicsItem`、`XGeometryNode`）。
-- 工程化：使用 CMake 管理项目，配置清晰，内置日志与测试（`xlog`、`xtest`）提高可靠性；
-- 可扩展性：采用 Qt 信号槽与自定义 `xsignal`，并以工厂模式（如 `XAttrItemDelegateFactory`）支持运行时扩展；
-- 用户体验：重视交互（旋转/平移/缩放/框选/右键菜单）、字体渲染（SDF）、截屏与异步加载。
-
-作者偏重长期可维护性与工程实践，而非短期功能堆叠，因此代码结构、模块边界与构建脚本都体现“可演进”的设计。
-
-## 架构与模块
-
-顶层目录与核心模块：
-
-- `source/`：主要源代码，按功能拆分子模块；
-- `3rdParty/`：第三方依赖（包含 Boost、Eigen、Freetype、stb_image 等）；
-- `output/`：构建产物；
-- `build/`：CMake / VS 生成文件；
-- `config_cmake/`：复用的 CMake 脚本。
-
-主要子模块（摘要）：
-
-- `lib00_utilty`：通用工具；
-- `lib01_shader`：着色器管理；
-- `lib02_camera`：相机与视图变换；
-- `lib04_opengl`：OpenGL 资源封装（纹理 / FBO / PBO）；
-- `lib05_shape`：几何体与图形项；
-- `lib06_select`：选择/拾取逻辑；
-- `lib07_scene`：场景管理；
-- `lib08_freetype`：字体与 SDF 支持；
-- `xmvd`：对象/属性视图（对象树、属性表、检查器）；
-- `xlog`：日志系统；
-- `xtest`：示例与测试用例；
-- `XOpenGLWidget`：OpenGL 控件基类。
-
-## 关键类与实现亮点
-
-- `easyPlotWidget`（`source/easyPlot/easyPlotWidget.{h,cpp}`）：主控件，负责渲染循环、事件处理、场景交互（添加/删除图元、拾取、框选等）；
-- `XScene`：场景容器，提供坐标变换、拾取、渲染排序和相机控制接口；
-- `xShaderManger`：统一着色器加载、缓存、管理与热重载；
-- `XOpenGLTexture` / `XOpenGLFramebufferObject` / `XOpenGLBuffer`：封装了纹理、FBO、PBO 的创建与读写，示例见 `slotFboTest`；
-- `XGraphicsItem` 及其子类（`XRectItem`、`XTextItem`、`XLineItem`、`XChartItem`）：2D/3D 图元，支持层级、变换与属性；
-- `xmvd` 中的 `XDataObjectTreeView` / `XDataObjectTableView` / `XObjectInspectorView`：构建对象/属性的可视化与编辑面板。
-
-实现亮点：
-
-- 深度使用 OpenGL 特性（纹理数组、深度/模板测试、PBO 映射）以优化大数据渲染与读回；
-- 将字体渲染与 SDF 生成异步化（`QtConcurrent`），提升启动/运行体验；
-- 数据与渲染完全解耦，便于单元测试与模块替换；
-- 场景层实现统一的点选/框选机制，支持 2D 与 3D 混合选择。
-
-## 模块详细说明（xmvd / xlog / xtest）
-
-### xmvd
-
-位置：`source/xmvd/`
-
-作用：对象/属性可视化与编辑面板。实现对象树（`XDataObjectTreeView`）、属性表（`XDataObjectTableView`）与检查器（`XObjectInspectorView`），支持：
-
-- 将 `XDataObject` 映射为树形结构并显示属性；
-- 使用 `XAttrItemDelegateFactory` 注册不同类型的属性编辑器（运行时扩展）；
-- 基于 `xsignal` 做视图间联动（当前选中对象变化时同步属性表）。
-
-结论：`xmvd` 不是算法模块，而是工程化的“对象与属性可视化/编辑”模块，便于调试、运行时检查与交互式修改数据。
-
-### xlog
-
-位置：`source/xlog/`
-
-作用：统一日志接口（集成 `spdlog`），提供多级别日志记录与输出策略，便于定位渲染与运行时问题。
-
-### xtest
-
-位置：`source/xtest/`
-
-作用：示例与测试用例集合，用于回归测试与功能演示，帮助新开发者理解模块用法。
-
-## 依赖
-
-- Qt5 (Core, Widgets, Concurrent, Gui)
-- OpenGL (glew, opengl32)
-- Eigen3
-- Boost
-- Freetype
-- Assimp
-- HDF5（可选）
-- spdlog, MagicEnum, stb_image
-
-（仓库内 `3rdParty/` 包含多数依赖，部分平台或配置可能需要额外安装）
-
-## 构建与运行（Windows / Visual Studio）
-
-先决条件：Visual Studio 2019/2022、CMake ≥ 3.18、Qt 开发包。
-
-快速构建示例（在仓库根目录）：
-
-```bat
-create_debug_2022.bat
+```
+EasyPlot/
+├── source/            # 主要源代码，按功能拆分为多个子模块
+├── 3rdParty/          # 第三方依赖库
+├── Python38/          # 内置 Python 解释器
+├── config_cmake/      # CMake 配置脚本
+├── doxygen1.16.1/     # 文档生成工具
+├── examples/          # 示例代码
+├── ext/               # 扩展工具
+├── output/            # 构建产物
+├── CMakeLists.txt     # 主构建脚本
+└── README_NEW.md      # 项目说明文档
 ```
 
-或使用 CMake 手动生成：
+### 核心模块
 
-```bat
+| 模块 | 功能 | 描述 |
+|------|------|------|
+| **lib00_utilty** | 通用工具库 | 提供数学计算、矩阵操作、时间测量等基础工具 |
+| **lib01_shader** | 着色器管理 | 负责着色器的加载、缓存与热重载 |
+| **lib02_camera** | 相机与视图变换 | 提供透视和正交相机，支持视角变换和坐标转换 |
+| **lib04_opengl** | OpenGL 资源封装 | 封装纹理、FBO、PBO 等 OpenGL 资源 |
+| **lib05_shape** | 几何体与图形项 | 定义 2D/3D 图元，支持渲染节点层次结构 |
+| **lib06_select** | 选择/拾取逻辑 | 实现点选和框选功能 |
+| **lib07_scene** | 场景管理 | 场景容器，提供坐标变换和渲染排序 |
+| **lib08_freetype** | 字体与 SDF 支持 | 字体渲染和 SDF 生成 |
+| **lib09_panel** | 面板 | UI 面板和控件 |
+| **XOpenGLWidget** | OpenGL 控件基类 | 基础 OpenGL 控件 |
+| **easyPlot** | 主控件 | 核心渲染控件，集成场景管理和交互 |
+| **render** | 渲染模块 | 渲染管线管理，支持 2D/3D 渲染 |
+| **dataBase** | 数据管理 | 数据对象和属性管理，支持信号通知 |
+| **xalgo** | 算法库 | 提供各种算法支持，如颜色插值、数组操作等 |
+| **xlog** | 日志系统 | 统一日志接口，基于 spdlog |
+| **xmvd** | 对象/属性视图 | 对象树、属性表和检查器 |
+| **xpython** | Python 集成 | Python 脚本支持 |
+| **xsignal** | 信号系统 | 自定义信号槽实现，基于 boost.signals2 |
+| **xtest** | 测试框架 | 命令行测试应用框架 |
+| **main** | 应用入口 | 主窗口和应用启动 |
+
+## 技术栈
+
+| 技术/库 | 用途 | 来源 |
+|---------|------|------|
+| Qt5 | UI 框架、事件处理 | 外部依赖 |
+| OpenGL | 图形渲染 | 外部依赖 |
+| Eigen3 | 线性代数 | 3rdParty/ |
+| Boost | 通用库、信号系统 | 3rdParty/ |
+| Freetype | 字体处理 | 3rdParty/ |
+| Assimp | 3D 模型导入 | 3rdParty/ |
+| GLEW | OpenGL 扩展 | 3rdParty/ |
+| GLM | 数学库 | 3rdParty/ |
+| HDF5 | 数据存储 | 3rdParty/ |
+| spdlog | 日志系统 | 3rdParty/ |
+| pybind11 | Python 绑定 | 3rdParty/ |
+| Python 3.8 | 脚本集成 | Python38/ |
+
+## 核心功能
+
+### 1. 可视化能力
+
+- **2D 绘图**：支持折线、柱状图、文本、矩形等 2D 图元
+- **3D 渲染**：支持立方体、球体、锥体等 3D 几何体
+- **网格与坐标轴**：提供 2D/3D 网格和坐标轴显示
+- **颜色管理**：支持颜色插值和自定义颜色
+
+### 2. 交互能力
+
+- **相机控制**：支持旋转、平移、缩放操作
+- **选择系统**：支持点选和框选功能
+- **视图适配**：支持自动适配视图范围
+- **鼠标事件**：完整的鼠标事件处理机制
+
+### 3. 数据管理
+
+- **数据对象**：树形结构组织数据
+- **属性系统**：支持动态添加和修改属性
+- **信号通知**：数据变化自动通知相关组件
+- **序列化**：支持数据序列化和反序列化
+
+### 4. 扩展能力
+
+- **Python 集成**：支持 Python 脚本扩展
+- **插件架构**：支持运行时扩展
+- **命令行工具**：提供交互式命令行测试框架
+- **代码生成**：基于 Clang 的代码分析和生成工具
+
+## 构建与运行
+
+### 先决条件
+
+- Visual Studio 2022
+- CMake ≥ 3.18
+- Qt 5 开发包
+
+### 快速构建
+
+在项目根目录运行以下命令：
+
+```bash
+# 创建 Debug 配置（Visual Studio 2022）
+create_debug_2022.bat
+
+# 或创建 Release 配置（Visual Studio 2022）
+create_release_2022.bat
+```
+
+### 手动构建
+
+```bash
 mkdir build
 cd build
 cmake .. -G "Visual Studio 16 2019" -A x64
 cmake --build . --config Debug
 ```
 
-构建产物会输出到 `output/bin`。
+### 运行
 
-## 使用说明（快速上手）
+构建完成后，可执行文件将输出到 `output/bin` 目录。
 
-1. 在 Qt 应用中包含 `easyPlotWidget` 或 `XEasyPlotWidget`；
-2. 通过 `d->scene->addGraphicsItem(...)` 或 `d->scene->addShape(...)` 管理图元；
-3. 使用 `XObjectInspectorView`（`xmvd`）绑定 `XDataObject`，实时查看/编辑属性；
-4. 字体与 SDF：通过 `xfreetype::Instance()` 生成并加载字体纹理。
+## 使用示例
 
-## 开发与扩展指南
+### 1. 创建基本应用
 
-- 新功能以独立模块实现，遵循 `config_cmake` 下的模版；
-- 属性编辑器注册到 `XAttrItemDelegateFactory`；
-- Shader 由 `xShaderManger` 管理，建议集中维护并支持热重载；
-- 大数据渲染使用纹理/缓冲分批上传与 PBO 映射以减少拷贝开销。
+```cpp
+#include <QApplication>
+#include <easyPlot/XEasyPlotWidget.h>
 
-## 贡献
+int main(int argc, char** argv) {
+    QApplication a(argc, argv);
+    
+    // 创建主窗口
+    QMainWindow window;
+    
+    // 创建 EasyPlot 控件
+    XEasyPlotWidget* plotWidget = new XEasyPlotWidget(&window);
+    window.setCentralWidget(plotWidget);
+    
+    // 显示窗口
+    window.resize(800, 600);
+    window.show();
+    
+    return a.exec();
+}
+```
 
-欢迎提交 Issue 与 PR。流程：Fork -> 分支 -> Commit -> PR，PR 请包含功能描述、示例与必要说明。
+### 2. 添加图形项
+
+```cpp
+// 添加 2D 折线
+plotWidget->slotAddLine2D(0); // 0 表示正弦曲线
+
+// 添加 3D 立方体
+plotWidget->slotCreateCube();
+
+// 添加文本
+plotWidget->slotAddText();
+```
+
+### 3. 使用 Python 脚本
+
+```cpp
+#include <xpython/XPython.h>
+
+// 执行 Python 代码
+auto python = XPython::Instance();
+python->execute("print('Hello from Python!')");
+```
+
+### 4. 使用命令行测试工具
+
+```cpp
+#include <xtest/XTest.h>
+
+int main() {
+    XTestApp app("MyTestApp");
+    
+    app.addCmd("test_command", "测试命令", []() {
+        std::cout << "执行测试命令" << std::endl;
+    });
+    
+    return app.run();
+}
+```
+
+## 扩展与开发
+
+### 1. 添加新的图形项
+
+1. 继承 `XGraphicsItem` 或 `XRenderNode`
+2. 实现必要的方法，如 `render()`
+3. 在场景中添加图形项：
+
+```cpp
+auto scene = plotWidget->getScene();
+auto shape = std::make_shared<MyCustomShape>();
+scene->addShape(shape);
+```
+
+### 2. 自定义属性编辑器
+
+1. 继承 `XAttrItemDelegate`
+2. 注册到 `XAttrItemDelegateFactory`
+
+### 3. 添加新的着色器
+
+1. 创建顶点着色器和片段着色器文件
+2. 使用 `xShaderManger` 加载着色器：
+
+```cpp
+auto shaderMgr = scene->getShaderManger();
+auto shader = shaderMgr->createShader("vertex.glsl", "fragment.glsl");
+```
+
+## 项目特点
+
+1. **模块化设计**：高度模块化的架构，便于维护和扩展
+2. **数据驱动**：数据与渲染分离，使系统更加灵活和可测试
+3. **高性能**：深度优化的 OpenGL 渲染，支持大数据场景
+4. **工程化**：完善的构建系统、日志和测试框架
+5. **可扩展**：支持 Python 脚本和插件架构
 
 ## 许可证
 
 本项目采用 MIT 许可证，详见 `LICENSE` 文件。
 
----
+## 贡献
 
-如需我将 README 分拆为多份模块级文档、生成类图或示例工程，我可以继续为你自动生成。
+欢迎提交 Issue 和 PR。贡献流程：
+1. Fork 本仓库
+2. 创建特性分支
+3. 提交更改
+4. 发起 PR
+
+## 联系方式
+
+如有问题或建议，请通过 GitHub Issues 与我们联系。

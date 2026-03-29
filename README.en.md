@@ -2,155 +2,245 @@
 
 > High-performance 2D/3D visualization and interaction platform (Qt + OpenGL)
 
-## Contents
+## Project Overview
 
-- Overview
-- Author's Design Philosophy
-- Architecture & Modules
-- Core Classes & Implementation Highlights
-- Detailed Modules (xmvd / xlog / xtest)
-- Dependencies
-- Build & Run
-- Quick Start
-- Development & Extension Guide
-- Contributing
-- License
+EasyPlot is a modular, data-driven visualization and interaction platform designed for scientific research, engineering, and educational scenarios. It provides high-performance, extensible, and engineering-grade 2D/3D visualization infrastructure, covering rendering, scene management, object/property inspection, logging, and testing capabilities.
 
----
+## Directory Structure
 
-## Overview
-
-EasyPlot is a modular visualization and interaction toolkit designed by the author for research, engineering, and teaching scenarios. It aims to provide a performant, extensible and engineering-friendly infrastructure for 2D/3D plotting, scene management, object/property inspection, logging and testing.
-
-## Author's Design Philosophy
-
-The author's core ideas: modularization + data-driven + engineering-grade.
-
-- Modular layers: each capability lives in its own library (e.g. `lib05_shape`, `lib07_scene`) to reduce coupling and ease reuse;
-- Data-driven: rendering and data are decoupled; graphics objects are driven by data (`XData*`, `XGraphicsItem`, `XGeometryNode`);
-- Engineering practices: CMake-based project, clear dependency declaration, built-in logging and tests (`xlog`, `xtest`);
-- Extensibility: Qt signals/slots plus custom `xsignal`, runtime factories (e.g. `XAttrItemDelegateFactory`);
-- UX focused: interactions (rotate/translate/zoom/box select/context menu), font SDF rendering, screenshot, asynchronous loading.
-
-The author emphasizes long-term maintainability and engineering quality over short-term feature accumulation.
-
-## Architecture & Modules
-
-Top-level folders and core modules:
-
-- `source/`: main source code organized into submodules;
-- `3rdParty/`: third-party libraries (Boost, Eigen, Freetype, stb_image, etc.);
-- `output/`: built artifacts;
-- `build/`: generated CMake / Visual Studio files;
-- `config_cmake/`: reusable CMake helpers.
-
-Key submodules (summary):
-
-- `lib00_utilty`: utilities;
-- `lib01_shader`: shader manager;
-- `lib02_camera`: camera and view transforms;
-- `lib04_opengl`: OpenGL resource wrappers (textures / FBO / PBO);
-- `lib05_shape`: geometry and graphic items;
-- `lib06_select`: selection / picking;
-- `lib07_scene`: scene management;
-- `lib08_freetype`: font and SDF support;
-- `xmvd`: data/object viewer and inspector (tree, table, inspector);
-- `xlog`: logging system;
-- `xtest`: examples and tests;
-- `XOpenGLWidget`: OpenGL widget base class.
-
-## Core Classes & Implementation Highlights
-
-- `easyPlotWidget` (`source/easyPlot/easyPlotWidget.{h,cpp}`): main widget that handles render loop, events and scene interactions (add/remove items, picking, box selection).
-- `XScene`: scene container providing coordinate transforms, picking, render ordering and camera control.
-- `xShaderManger`: centralized shader loading, caching and hot-reload.
-- `XOpenGLTexture` / `XOpenGLFramebufferObject` / `XOpenGLBuffer`: wrappers for GPU resources with examples in `slotFboTest`.
-- `XGraphicsItem` subclasses (`XRectItem`, `XTextItem`, `XLineItem`, `XChartItem`): 2D/3D primitives supporting transforms and attributes.
-- `xmvd` components (`XDataObjectTreeView`, `XDataObjectTableView`, `XObjectInspectorView`): runtime UI for data object inspection and editing.
-
-Highlights:
-
-- Extensive use of OpenGL features (texture arrays, depth/stencil separation, PBO mapping) to optimize large-data rendering and GPU-CPU transfers;
-- Asynchronous SDF/font generation using `QtConcurrent` for better responsiveness;
-- Full data-render decoupling enabling unit testing and modular replacement;
-- Unified picking/box-selection supporting mixed 2D/3D selections at the scene layer.
-
-## Detailed Modules (xmvd / xlog / xtest)
-
-### xmvd
-
-Location: `source/xmvd/`
-
-Purpose: object/property visualization and editing UI (object tree, property table, inspector). It maps `XDataObject` and `XDataAttribute` to editable UI widgets and supports runtime extension via delegate factories and `xsignal` for inter-component communication. xmvd is a developer-focused toolset for runtime inspection and editing, not an algorithm library.
-
-### xlog
-
-Location: `source/xlog/`
-
-Purpose: unified logging API (integrates with `spdlog`), multi-level log output for debugging and runtime tracing.
-
-### xtest
-
-Location: `source/xtest/`
-
-Purpose: example apps and tests for regression and demonstrations; helps new contributors understand module usage.
-
-## Dependencies
-
-- Qt5 (Core, Widgets, Concurrent, Gui)
-- OpenGL (glew, opengl32)
-- Eigen3
-- Boost
-- Freetype
-- Assimp
-- HDF5 (optional)
-- spdlog, MagicEnum, stb_image
-
-Note: many dependencies are supplied in `3rdParty/`; platform-specific configuration may be required for optional components.
-
-## Build & Run (Windows / Visual Studio)
-
-Prerequisites: Visual Studio 2019/2022, CMake >= 3.18, Qt SDK.
-
-Quick build (provided scripts):
-
-```bat
-create_debug_2022.bat
+```
+EasyPlot/
+├── source/            # Main source code, organized into submodules
+├── 3rdParty/          # Third-party dependency libraries
+├── Python38/          # Built-in Python interpreter
+├── config_cmake/      # CMake configuration scripts
+├── doxygen1.16.1/     # Documentation generation tool
+├── examples/          # Example code
+├── ext/               # Extension tools
+├── output/            # Build artifacts
+├── CMakeLists.txt     # Main build script
+└── README_NEW.md      # Project documentation
 ```
 
-Manual CMake steps:
+### Core Modules
 
-```bat
+| Module | Function | Description |
+|--------|----------|-------------|
+| **lib00_utilty** | Utility library | Provides basic tools for mathematical calculations, matrix operations, time measurement, etc. |
+| **lib01_shader** | Shader management | Responsible for shader loading, caching, and hot-reloading |
+| **lib02_camera** | Camera and view transforms | Provides perspective and orthographic cameras, supports view transformations and coordinate conversions |
+| **lib04_opengl** | OpenGL resource wrapping | Wraps OpenGL resources such as textures, FBO, PBO, etc. |
+| **lib05_shape** | Geometry and graphics items | Defines 2D/3D primitives, supports render node hierarchy |
+| **lib06_select** | Selection/picking logic | Implements point selection and box selection functionality |
+| **lib07_scene** | Scene management | Scene container providing coordinate transformations and render ordering |
+| **lib08_freetype** | Font and SDF support | Font rendering and SDF generation |
+| **lib09_panel** | Panels | UI panels and controls |
+| **XOpenGLWidget** | OpenGL widget base class | Basic OpenGL widget |
+| **easyPlot** | Main widget | Core rendering widget integrating scene management and interaction |
+| **render** | Rendering module | Rendering pipeline management, supports 2D/3D rendering |
+| **dataBase** | Data management | Data object and property management, supports signal notifications |
+| **xalgo** | Algorithm library | Provides various algorithmic support, such as color interpolation, array operations, etc. |
+| **xlog** | Logging system | Unified logging interface based on spdlog |
+| **xmvd** | Object/property view | Object tree, property table, and inspector |
+| **xpython** | Python integration | Python script support |
+| **xsignal** | Signal system | Custom signal-slot implementation based on boost.signals2 |
+| **xtest** | Testing framework | Command-line test application framework |
+| **main** | Application entry | Main window and application startup |
+
+## Technology Stack
+
+| Technology/Library | Purpose | Source |
+|-------------------|---------|--------|
+| Qt5 | UI framework, event handling | External dependency |
+| OpenGL | Graphics rendering | External dependency |
+| Eigen3 | Linear algebra | 3rdParty/ |
+| Boost | General-purpose library, signal system | 3rdParty/ |
+| Freetype | Font processing | 3rdParty/ |
+| Assimp | 3D model import | 3rdParty/ |
+| GLEW | OpenGL extensions | 3rdParty/ |
+| GLM | Mathematics library | 3rdParty/ |
+| HDF5 | Data storage | 3rdParty/ |
+| spdlog | Logging system | 3rdParty/ |
+| pybind11 | Python binding | 3rdParty/ |
+| Python 3.8 | Script integration | Python38/ |
+
+## Core Features
+
+### 1. Visualization Capabilities
+
+- **2D Plotting**: Supports line charts, bar charts, text, rectangles, and other 2D primitives
+- **3D Rendering**: Supports cubes, spheres, cones, and other 3D geometries
+- **Grid and Axes**: Provides 2D/3D grid and axis display
+- **Color Management**: Supports color interpolation and custom colors
+
+### 2. Interaction Capabilities
+
+- **Camera Control**: Supports rotation, translation, and zoom operations
+- **Selection System**: Supports point selection and box selection functionality
+- **View Fitting**: Supports automatic view range fitting
+- **Mouse Events**: Complete mouse event handling mechanism
+
+### 3. Data Management
+
+- **Data Objects**: Tree-structured data organization
+- **Property System**: Supports dynamic addition and modification of properties
+- **Signal Notifications**: Automatic notification of data changes to related components
+- **Serialization**: Supports data serialization and deserialization
+
+### 4. Extension Capabilities
+
+- **Python Integration**: Supports Python script extensions
+- **Plugin Architecture**: Supports runtime extensions
+- **Command-line Tools**: Provides interactive command-line testing framework
+- **Code Generation**: Clang-based code analysis and generation tools
+
+## Build and Run
+
+### Prerequisites
+
+- Visual Studio 2022
+- CMake ≥ 3.18
+- Qt 5 SDK
+
+### Quick Build
+
+Run the following command in the project root directory:
+
+```bash
+# Create Debug configuration (Visual Studio 2022)
+create_debug_2022.bat
+
+# Or create Release configuration (Visual Studio 2022)
+create_release_2022.bat
+```
+
+### Manual Build
+
+```bash
 mkdir build
 cd build
 cmake .. -G "Visual Studio 16 2019" -A x64
 cmake --build . --config Debug
 ```
 
-Artifacts appear under `output/bin`.
+### Run
 
-## Quick Start
+After building, the executable files will be output to the `output/bin` directory.
 
-1. Include `easyPlotWidget` or `XEasyPlotWidget` in your Qt app.
-2. Use `d->scene->addGraphicsItem(...)` or `d->scene->addShape(...)` to manage items.
-3. Bind an `XDataObject` to `XObjectInspectorView` to inspect/edit properties at runtime.
-4. Use `xfreetype::Instance()` for font/SDF texture generation.
+## Usage Examples
 
-## Development & Extension Guide
+### 1. Creating a Basic Application
 
-- Add features as independent modules following `config_cmake` templates;
-- Register property editors with `XAttrItemDelegateFactory`;
-- Manage shaders via `xShaderManger` and support hot-reload during development;
-- For large datasets, prefer batched texture/buffer uploads and PBO mapping to minimize copies.
+```cpp
+#include <QApplication>
+#include <easyPlot/XEasyPlotWidget.h>
 
-## Contributing
+int main(int argc, char** argv) {
+    QApplication a(argc, argv);
+    
+    // Create main window
+    QMainWindow window;
+    
+    // Create EasyPlot widget
+    XEasyPlotWidget* plotWidget = new XEasyPlotWidget(&window);
+    window.setCentralWidget(plotWidget);
+    
+    // Show window
+    window.resize(800, 600);
+    window.show();
+    
+    return a.exec();
+}
+```
 
-Please open issues or PRs. Typical flow: Fork -> branch -> commit -> PR. Describe feature, usage example and screenshots if applicable.
+### 2. Adding Graphics Items
+
+```cpp
+// Add 2D line plot
+plotWidget->slotAddLine2D(0); // 0 represents sine curve
+
+// Add 3D cube
+plotWidget->slotCreateCube();
+
+// Add text
+plotWidget->slotAddText();
+```
+
+### 3. Using Python Scripts
+
+```cpp
+#include <xpython/XPython.h>
+
+// Execute Python code
+auto python = XPython::Instance();
+python->execute("print('Hello from Python!')");
+```
+
+### 4. Using Command-line Testing Tool
+
+```cpp
+#include <xtest/XTest.h>
+
+int main() {
+    XTestApp app("MyTestApp");
+    
+    app.addCmd("test_command", "Test command", []() {
+        std::cout << "Executing test command" << std::endl;
+    });
+    
+    return app.run();
+}
+```
+
+## Extension and Development
+
+### 1. Adding New Graphics Items
+
+1. Inherit from `XGraphicsItem` or `XRenderNode`
+2. Implement necessary methods, such as `render()`
+3. Add the graphics item to the scene:
+
+```cpp
+auto scene = plotWidget->getScene();
+auto shape = std::make_shared<MyCustomShape>();
+scene->addShape(shape);
+```
+
+### 2. Custom Property Editors
+
+1. Inherit from `XAttrItemDelegate`
+2. Register with `XAttrItemDelegateFactory`
+
+### 3. Adding New Shaders
+
+1. Create vertex shader and fragment shader files
+2. Load shaders using `xShaderManger`:
+
+```cpp
+auto shaderMgr = scene->getShaderManger();
+auto shader = shaderMgr->createShader("vertex.glsl", "fragment.glsl");
+```
+
+## Project Features
+
+1. **Modular Design**: Highly modular architecture for easy maintenance and extension
+2. **Data-driven**: Separation of data and rendering for greater flexibility and testability
+3. **High Performance**: Deeply optimized OpenGL rendering for large data scenarios
+4. **Engineering-grade**: Comprehensive build system, logging, and testing framework
+5. **Extensible**: Support for Python scripts and plugin architecture
 
 ## License
 
-This project is licensed under the MIT License. See `LICENSE` for details.
+This project is licensed under the MIT License. See the `LICENSE` file for details.
 
----
+## Contributing
 
-If you want, I can split module-level READMEs, generate class diagrams, or create small example projects demonstrating common workflows.
+Contributions are welcome. Contribution process:
+1. Fork this repository
+2. Create a feature branch
+3. Commit your changes
+4. Submit a PR
+
+## Contact
+
+For questions or suggestions, please contact us through GitHub Issues.
