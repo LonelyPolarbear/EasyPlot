@@ -2,6 +2,7 @@
 #include <crtdbg.h> 
 #include <pybind11/pybind11.h>
 #include <iostream>
+#include <lib00_utilty/XUtilty.h>
 
 static int add(int a, int b) {
 	std::cout << "add(" << a << ", " << b << ")" << std::endl;
@@ -17,12 +18,4 @@ PYBIND11_MODULE(xrender, m) {
 		//.def(py::init<const std::string&>());						// 带引用参数
 } 
 
-class PyInitHelper_xrender
-{
-public:
-	PyInitHelper_xrender()
-	{
-		PyImport_AppendInittab("xrender", &PyInit_xrender); \
-	}
-};
-static PyInitHelper_xrender initHelperrswj; 
+PY_INIT_HELPER(xrender)

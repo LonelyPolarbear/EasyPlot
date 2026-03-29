@@ -17,6 +17,17 @@
 #include <iostream>
 #include <utility>
 
+#define PY_INIT_HELPER(name) \
+class PyInitHelper_##name \
+{ \
+public: \
+	PyInitHelper_##name() \
+	{ \
+		PyImport_AppendInittab(#name, &PyInit_##name); \
+	} \
+}; \
+static PyInitHelper_##name initHelper_##name;
+
 namespace XQ {
 	extern lib00_utilty_API double PI;
 	

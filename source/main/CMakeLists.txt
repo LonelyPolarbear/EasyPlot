@@ -91,6 +91,7 @@ SET(LIB_NAMES PRIVATE
 				xrender${DLL_DEBUG_POSTFIX}
 				xshape${DLL_DEBUG_POSTFIX}
 				xlog${DLL_DEBUG_POSTFIX}
+				xpython${DLL_DEBUG_POSTFIX}
 
 	)
 

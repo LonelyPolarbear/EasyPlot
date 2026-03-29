@@ -157,6 +157,7 @@ add_subdirectory(source/xsignal)
 add_subdirectory(source/xmvd)
 add_subdirectory(source/xtest)
 add_subdirectory(source/xlog)
+add_subdirectory(source/xpython)
 
 #--------------------------------------------------------------------------------------------------------------
 # 依赖关系
@@ -178,7 +179,8 @@ add_dependencies(XOpenGLWidget  lib00_utilty lib01_shader lib02_camera lib04_ope
 add_dependencies(easyPlot  XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel render xlog)
 add_dependencies(lib09_panel  lib00_utilty xlog)
 add_dependencies(xmvd  dataBase lib00_utilty xlog lib05_shape)
-add_dependencies(main easyPlot lib09_panel xlog)
+add_dependencies(main easyPlot lib09_panel xlog xpython)
+add_dependencies(xpython xlog)
 
 
 #--------------------------------------------------------------------------------------------------------------
