@@ -17,6 +17,7 @@ using namespace boost::python;
 #include <xpython/XPython.h>
 #include <xpython/XPythonConsole.h>
 #include <QTimer>
+#include "lib00_utilty/gp/XTraits2.hpp"
 
 
 int main(int argc, char** argv) {
@@ -28,9 +29,13 @@ int main(int argc, char** argv) {
 	XMainWindow w(nullptr);
 	w.resize(600, 400);
 	w.show();
+	w.hide();
 
 	auto ins = XPython::Instance();
-	ins->execute("print(22)");
+	ins->execute("import xjson");
+	ins->execute("import xdata");
+	ins->execute("xjson.hello()");
+	ins->execute("xdata.hello()");
 
 	//构造时：调用 PyEval_SaveThread() 释放 GIL，并保存当前线程状态
 	//析构时：调用 PyEval_RestoreThread() 重新获取 GIL。

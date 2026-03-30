@@ -6,9 +6,8 @@
 
 #include <pybind11/embed.h>
 void XPythonInit() {
-    auto ins = XPython::Instance();
-	ins->execute("import xjson");
-	ins->execute("xjson.hello()");
+    //auto ins = XPython::Instance();
+	//ins->execute("import xjson");
 }
 
 BOOL APIENTRY DllMain(HMODULE hmod, DWORD reason, LPVOID reserved) {

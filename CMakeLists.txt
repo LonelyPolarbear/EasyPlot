@@ -190,7 +190,7 @@ set_property(GLOBAL PROPERTY MY_EXAMPLE_TARGETS "")
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 option(BUILD_EXAMPLES "Build example" OFF)		#用于定义可以被用户配置的布尔选项
 if(BUILD_EXAMPLES)
-    #add_subdirectory(examples)
+    add_subdirectory(examples)
 endif()
 
 # 测试相关（放在最后，确保库已定义）
