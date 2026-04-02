@@ -18,10 +18,10 @@ using namespace boost::python;
 #include <xpython/XPythonConsole.h>
 #include <QTimer>
 #include "lib00_utilty/gp/XTraits2.hpp"
-
+#include <sharevar/XShareVar.h>
 
 int main(int argc, char** argv) {
-	XQ::ShareVar::instance().currentExeDir = std::filesystem::path(argv[0]).parent_path().string();
+	XShareVar::instance().currentExeDir = std::filesystem::path(argv[0]).parent_path().string();
 	QApplication a(argc, argv);
 
 	QLoggingCategory::setFilterRules("qt.qpa.window.setGeometry=false");
@@ -32,10 +32,12 @@ int main(int argc, char** argv) {
 	w.hide();
 
 	auto ins = XPython::Instance();
-	ins->execute("import xjson");
+	ins->execute("import xq");
+	/*ins->execute("import xjson");
 	ins->execute("import xdata");
+	ins->execute("import sharevar");
 	ins->execute("xjson.hello()");
-	ins->execute("xdata.hello()");
+	ins->execute("xdata.hello()");*/
 
 	//构造时：调用 PyEval_SaveThread() 释放 GIL，并保存当前线程状态
 	//析构时：调用 PyEval_RestoreThread() 重新获取 GIL。

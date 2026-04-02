@@ -158,11 +158,13 @@ add_subdirectory(source/xmvd)
 add_subdirectory(source/xtest)
 add_subdirectory(source/xlog)
 add_subdirectory(source/xpython)
+add_subdirectory(source/sharevar)
 
 #--------------------------------------------------------------------------------------------------------------
 # 依赖关系
 #--------------------------------------------------------------------------------------------------------------
 add_dependencies(dataBase  xlog)
+add_dependencies(sharevar  xlog)
 add_dependencies(xtest  dataBase)
 add_dependencies(xalgo  dataBase xlog)
 add_dependencies(lib01_shader  dataBase xlog)
@@ -170,16 +172,16 @@ add_dependencies(lib00_utilty  dataBase xlog)
 add_dependencies(lib02_camera  lib00_utilty xlog)
 add_dependencies(lib04_opengl  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase xlog)
 add_dependencies(render  lib00_utilty lib01_shader lib02_camera lib03_stbImage dataBase lib04_opengl lib05_shape xlog)
-add_dependencies(lib05_shape  lib04_opengl xalgo xlog)
+add_dependencies(lib05_shape  lib04_opengl xalgo xlog sharevar )
 add_dependencies(lib06_select  lib04_opengl lib02_camera lib01_shader lib00_utilty lib05_shape xlog)
-add_dependencies(lib07_scene  lib04_opengl lib02_camera lib01_shader lib00_utilty lib06_select lib05_shape xlog)
+add_dependencies(lib07_scene  lib04_opengl lib02_camera lib01_shader lib00_utilty lib06_select lib05_shape xlog sharevar)
 add_dependencies(lib08_freetype   lib00_utilty dataBase xlog)
 add_dependencies(XOpenGLWidget  lib00_utilty lib01_shader lib02_camera lib04_opengl render xlog)
 
-add_dependencies(easyPlot  XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel render xlog)
+add_dependencies(easyPlot  XOpenGLWidget lib04_opengl lib05_shape lib06_select lib07_scene lib08_freetype lib09_panel render xlog sharevar)
 add_dependencies(lib09_panel  lib00_utilty xlog)
 add_dependencies(xmvd  dataBase lib00_utilty xlog lib05_shape)
-add_dependencies(main easyPlot lib09_panel xlog xpython)
+add_dependencies(main sharevar easyPlot lib09_panel xlog xpython sharevar)
 add_dependencies(xpython xlog)
 
 

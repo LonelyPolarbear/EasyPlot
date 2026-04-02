@@ -12,7 +12,7 @@ static void say_hello() {
 }
 
 PYBIND11_MODULE(xdata, m) {
-	m.def("hello", &say_hello, "say_hello");
+	m.def("hello_xdata", &say_hello, "say_hello");
 
 } 
 

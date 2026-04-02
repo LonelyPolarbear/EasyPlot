@@ -9,6 +9,7 @@
 
 #include <QFile> 
 #include <QVector>
+#include <sharevar/XShareVar.h>
 
 struct PlotData {
 	double phi;
@@ -402,7 +403,7 @@ public:
 	void readCSV() {
 		//¶ÁÈ¡CSVÎÄ¼þ
 
-		QFile file(QString::fromStdString(XQ::ShareVar::instance().currentExeDir + "/test.csv"));
+		QFile file(QString::fromStdString(XShareVar::instance().currentExeDir + "/test.csv"));
 		if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
 			return;
 		}

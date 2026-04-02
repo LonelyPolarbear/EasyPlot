@@ -92,6 +92,7 @@ SET(LIB_NAMES PRIVATE
 				xshape${DLL_DEBUG_POSTFIX}
 				xlog${DLL_DEBUG_POSTFIX}
 				xpython${DLL_DEBUG_POSTFIX}
+				xshareVar${DLL_DEBUG_POSTFIX}
 
 	)
 

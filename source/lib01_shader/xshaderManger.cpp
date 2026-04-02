@@ -1,6 +1,6 @@
 #include "xshaderManger.h"
 #include "xshader.h"
-#include "lib00_utilty/XUtilty.h"
+#include <sharevar/XShareVar.h>
 
 class xShaderManger::Interal {
 	std::map<int,std::shared_ptr<xshader>> shaders3D;			//针对不同的图元类型，保存对应的着色器
@@ -199,8 +199,8 @@ void xShaderManger::initGLResource()
 	{
 		auto shader3D_triangle = makeShareDbObject<xshader>();
 		shader3D_triangle->create();
-		auto vs_id = shader3D_triangle->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "3DTriangle.vs");
-		auto fs_id = shader3D_triangle->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "3DTriangle.fs");
+		auto vs_id = shader3D_triangle->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "3DTriangle.vs");
+		auto fs_id = shader3D_triangle->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "3DTriangle.fs");
 		shader3D_triangle->link({ vs_id,fs_id });
 		addShader3D(PrimitveType::triangle, shader3D_triangle);
 		addShader3D(PrimitveType::triangle_fan, shader3D_triangle);
@@ -210,9 +210,9 @@ void xShaderManger::initGLResource()
 	{
 		auto shader2D_line_strip_adjacency = makeShareDbObject<xshader>();
 		shader2D_line_strip_adjacency->create();
-		auto vs_id = shader2D_line_strip_adjacency->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "2D_line_Strip_Adjaceny.vs");
-		auto fs_id = shader2D_line_strip_adjacency->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "2D_line_Strip_Adjaceny.fs");
-		auto gs_id = shader2D_line_strip_adjacency->compile(xshader::ShaderType::GEOMETRY, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "2D_line_Strip_Adjaceny.gs");
+		auto vs_id = shader2D_line_strip_adjacency->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "2D_line_Strip_Adjaceny.vs");
+		auto fs_id = shader2D_line_strip_adjacency->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "2D_line_Strip_Adjaceny.fs");
+		auto gs_id = shader2D_line_strip_adjacency->compile(xshader::ShaderType::GEOMETRY, XShareVar::instance().currentExeDir + "/easyPlot/" + "2D_line_Strip_Adjaceny.gs");
 		shader2D_line_strip_adjacency->link({ vs_id,fs_id,gs_id });
 		addShader2D(PrimitveType::line_strip_adjacency, shader2D_line_strip_adjacency);
 	}
@@ -220,8 +220,8 @@ void xShaderManger::initGLResource()
 	{
 		auto gridShader3D= makeShareDbObject<xshader>();
 		gridShader3D->create();
-		auto vs_id = gridShader3D->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "Infinite.vs");
-		auto fs_id = gridShader3D->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "Infinite.fs");
+		auto vs_id = gridShader3D->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "Infinite.vs");
+		auto fs_id = gridShader3D->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "Infinite.fs");
 		gridShader3D->link({ vs_id,fs_id });
 		setGridShader3D(gridShader3D);
 	}
@@ -229,8 +229,8 @@ void xShaderManger::initGLResource()
 	{
 		auto gridShader2d = makeShareDbObject<xshader>();
 		gridShader2d->create();
-		auto vs_id = gridShader2d->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "Infinite2d.vs");
-		auto fs_id = gridShader2d->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "Infinite2d.fs");
+		auto vs_id = gridShader2d->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "Infinite2d.vs");
+		auto fs_id = gridShader2d->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "Infinite2d.fs");
 		gridShader2d->link({ vs_id,fs_id });
 		setGridShader2D(gridShader2d);
 	}
@@ -238,8 +238,8 @@ void xShaderManger::initGLResource()
 	{
 		auto fillShader2d = makeShareDbObject<xshader>();
 		fillShader2d->create();
-		auto vs_id = fillShader2d->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "fill2d.vs");
-		auto fs_id = fillShader2d->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "fill2d.fs");
+		auto vs_id = fillShader2d->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "fill2d.vs");
+		auto fs_id = fillShader2d->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "fill2d.fs");
 		fillShader2d->link({ vs_id,fs_id});
 		setFillShader(fillShader2d);
 	}
@@ -247,8 +247,8 @@ void xShaderManger::initGLResource()
 	{
 		auto pickShader3D = makeShareDbObject<xshader>();
 		pickShader3D->create();
-		auto vs_id = pickShader3D->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "pick3d.vs");
-		auto fs_id = pickShader3D->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "pick3d.fs");
+		auto vs_id = pickShader3D->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "pick3d.vs");
+		auto fs_id = pickShader3D->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "pick3d.fs");
 		pickShader3D->link({ vs_id,fs_id });
 		setPickShader3D(pickShader3D);
 	}
@@ -256,9 +256,9 @@ void xShaderManger::initGLResource()
 	{
 		auto pickShader2D = makeShareDbObject<xshader>();
 		pickShader2D->create();
-		auto vs_id = pickShader2D->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "pick2d.vs");
-		auto fs_id = pickShader2D->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "pick2d.fs");
-		auto gs_id = pickShader2D->compile(xshader::ShaderType::GEOMETRY, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "pick2d.gs");
+		auto vs_id = pickShader2D->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "pick2d.vs");
+		auto fs_id = pickShader2D->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "pick2d.fs");
+		auto gs_id = pickShader2D->compile(xshader::ShaderType::GEOMETRY, XShareVar::instance().currentExeDir + "/easyPlot/" + "pick2d.gs");
 		pickShader2D->link({ vs_id,fs_id ,gs_id });
 		setPickShader2D(pickShader2D);
 	}
@@ -266,8 +266,8 @@ void xShaderManger::initGLResource()
 	{
 		auto pickfillShader2D = makeShareDbObject<xshader>();
 		pickfillShader2D->create();
-		auto vs_id = pickfillShader2D->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "pick2dFill.vs");
-		auto fs_id = pickfillShader2D->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "pick2dFill.fs");
+		auto vs_id = pickfillShader2D->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "pick2dFill.vs");
+		auto fs_id = pickfillShader2D->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "pick2dFill.fs");
 		pickfillShader2D->link({ vs_id,fs_id });
 		setPickFillShader2D(pickfillShader2D);
 	}
@@ -275,8 +275,8 @@ void xShaderManger::initGLResource()
 	{
 		auto textShader = makeShareDbObject<xshader>();
 		textShader->create();
-		auto vs_id = textShader->compile(xshader::ShaderType::VERTEX, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "text2d.vs");
-		auto fs_id = textShader->compile(xshader::ShaderType::FRAGMENT, XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "text2d.fs");
+		auto vs_id = textShader->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "text2d.vs");
+		auto fs_id = textShader->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "text2d.fs");
 		textShader->link({ vs_id,fs_id });
 		setTextShader(textShader);
 	}

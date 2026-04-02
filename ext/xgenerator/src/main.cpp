@@ -1,17 +1,21 @@
-#include "clang/Tooling/Tooling.h"
-#include "clang/AST/ASTConsumer.h"
-#include "clang/AST/RecursiveASTVisitor.h"
-#include "clang/Frontend/CompilerInstance.h"
-#include <fstream>
-#include <sstream>
-#include "clang/Rewrite/Core/Rewriter.h"
-#include <iostream>
+﻿#include "clang/Frontend/CompilerInstance.h"
 #include "clang/Tooling/CommonOptionsParser.h"
 #include "clang/Tooling/Tooling.h"
+#include "clang/Tooling/JSONCompilationDatabase.h"
 
+#include "XASTFrontendAction.h"
 #include <linenoise/linenoise.h>
 #include <CLI/CLI.hpp>
-//cmake - G "Visual Studio 17 2022" - Thost = x64 - DLLVM_ENABLE_PROJECTS = "clang;clang-tools-extra" - B build - S .
+
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+#include <nlohmann/json.hpp>
+
+//cmake -G "Visual Studio 17 2022" -Thost = x64 -DLLVM_ENABLE_PROJECTS = "clang;clang-tools-extra" -B build -S .
+static CLI::App* app = nullptr;   // 全局指针，供补全回调访问
+static std::string g_prompt = ">>> ";
 
 static std::string toLower(const std::string& s) {
 	std::string result;
@@ -21,175 +25,92 @@ static std::string toLower(const std::string& s) {
 	}
 	return result;
 }
-
+// 补全回调函数
 static void completionHook(const char* buf, linenoiseCompletions* lc, void* userdata) {
-	
+	if (!app) return;
+	std::string input(buf);
+	std::vector<std::string> matches;
+
+	// 收集所有选项名称（短名带 -，长名带 --）
+	for (auto* opt : app->get_options()) {
+		for (const auto& sn : opt->get_snames()) {
+			std::string full = "-" + sn;
+			if (full.find(input) == 0) matches.push_back(full);
+		}
+		for (const auto& ln : opt->get_lnames()) {
+			std::string full = "--" + ln;
+			if (full.find(input) == 0) matches.push_back(full);
+		}
+	}
+
+	// 如果匹配项多于 1 个，打印列表并刷新
+	if (matches.size() > 1) {
+		std::cerr << std::endl;
+		for (const auto& m : matches) {
+			std::cerr << "  " << m << std::endl;
+		}
+		std::cout << g_prompt;
+		return;
+	}
+
+	if (matches.size() == 1) {
+		linenoiseAddCompletion(lc, matches[0].c_str());
+	}
 }
-
-using namespace clang;
-
-class MyVisitor : public RecursiveASTVisitor<MyVisitor> {
-public:
-	explicit MyVisitor(Rewriter& R) : TheRewriter(R) {}
-	//DEF_TRAVERSE_DECL
-	bool VisitFunctionDecl(FunctionDecl* FD) {
-		
-		// 获取函数体起始位置（跳过 { 字符）
-		SourceLocation start = FD->getBeginLoc();
-
-		// 构造插入内容（保留源代码缩进）
-		std::string indent = "\n    ";
-		std::string code = indent + "// Auto-generated at " __TIMESTAMP__ "\n";
-		//code += indent + "printf(\"Entering %s\\n\", __func__);";
-
-		// 执行代码插入
-		TheRewriter.InsertText(start, code, true, true);
-		return true;
-
-		clang::SourceManager& SM = FD->getASTContext().getSourceManager();
-		llvm::outs() << "函数名: " << FD->getQualifiedNameAsString() << "\n";
-		llvm::outs() << "是否inline: " << FD->isInlined() << "\n";
-		llvm::outs() << "是否是否在类外定义: " << FD->isOutOfLine() << "\n";
-		llvm::outs() << "hasBody: " << FD->hasBody() << "\n";
-		llvm::outs() << "返回类型: " << FD->getReturnType().getAsString() << "\n";
-		llvm::outs() << "形参:\n";
-
-		for (unsigned i = 0; i < FD->getNumParams(); ++i) {
-			ParmVarDecl* Param = FD->getParamDecl(i);
-			QualType ParamType = Param->getType();  // 参数类型:ml-citation{ref="4" data="citationList"}
-			StringRef ParamName = Param->getName(); // 参数名（可能为空）:ml-citation{ref="4" data="citationList"}
-			llvm::outs() << "形参类型:" << ParamType.getAsString() << "\n";
-			llvm::outs() << "形参名:" << ParamName.str() << "\n";
-		}
-
-		llvm::outs() << "源码位置: " << FD->getLocation().printToString(SM) << "\n";
-
-		return true;
-	}
-
-	bool VisitCXXRecordDecl(CXXRecordDecl* RD) {
-		
-		std::cout << "类整体信息\n:";
-		llvm::outs() << "Class: " << RD->getNameAsString() << "\n";
-
-		// 输出成员变量
-		llvm::outs() << "Fields:\n";
-		for (auto* Field : RD->fields()) {
-			llvm::outs() << "  " << Field->getType().getAsString()
-				<< " " << Field->getName() << "\n";
-		}
-
-		// 输出成员函数
-		llvm::outs() << "Methods:\n";
-		for (auto* Method : RD->methods()) {
-			llvm::outs() << "  " << Method->getReturnType().getAsString()
-				<< " " << Method->getNameAsString() << "()\n";
-		}
-
-		if (RD->getNumBases() > 0) {
-			llvm::outs() << "  Inheritance:\n";
-			for (const CXXBaseSpecifier& Base : RD->bases()) {
-				const Type* TypePtr = Base.getType().getTypePtr();
-				CXXRecordDecl* BaseDecl = TypePtr->getAsCXXRecordDecl();
-
-				llvm::outs() << "    " << getAccessSpecifierName(Base.getAccessSpecifier())
-					<< " " << BaseDecl->getNameAsString();
-				if (Base.isVirtual()) llvm::outs() << " (virtual)";
-				llvm::outs() << "\n";
-			}
-		}
-		else {
-			llvm::outs() << "  No base classes\n";
-		}
-
-		return true;
-	}
-
-	const char* getAccessSpecifierName(AccessSpecifier AS) const {
-		switch (AS) {
-		case AS_public: return "public";
-		case AS_protected: return "protected";
-		case AS_private: return "private";
-		default: return "unknown";
-		}
-	}
-
-private:
-	Rewriter& TheRewriter;
-};
-
-class MyASTConsumer : public ASTConsumer {
-public:
-	explicit MyASTConsumer(Rewriter& R) : Visitor(R) {}
-
-	//接收整个翻译单元（TU）的根节点（TranslationUnitDecl）和ASTContext（包含所有的AST节点、类型信息、源位置信息等）
-	//通过该接口启动对整个AST的遍历和分析
-	void HandleTranslationUnit(ASTContext& Ctx) override {
-		Visitor.TraverseDecl(Ctx.getTranslationUnitDecl());
-	}
-
-	//当类/结构体/联合体/枚举的定义被解析时调用
-	//void HandleTagDeclDefinition(TagDecl *D) override;
-
-	//void HandleCXXImplicitFunctionInstantiation(FunctionDecl *D) override;
-	void Initialize(ASTContext& Context) {
-		llvm::outs() << "Initialize\n";
-	}
-private:
-	MyVisitor Visitor;
-};
-
-class MyFrontendAction : public ASTFrontendAction {
-public:
-	std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance& CI, StringRef File) override {
-		TheRewriter.setSourceMgr(CI.getSourceManager(), CI.getLangOpts());
-		return std::make_unique<MyASTConsumer>(TheRewriter);
-	}
-
-	void EndSourceFileAction() override {
-		// 输出修改后的代码
-		Rewriter& rewriter = TheRewriter;
-	
-		std::error_code EC;
-		llvm::raw_fd_ostream os("out.md",EC, llvm::sys::fs::OF_Text);
-
-		rewriter.getEditBuffer(rewriter.getSourceMgr().getMainFileID())
-			.write(/*llvm::outs()*/os);
-		os.close();
-	}
-
-private:
-	Rewriter TheRewriter;
-};
 
 static llvm::cl::OptionCategory MyToolCategory("My Tool Options");
 
-int main(int argc, const char** argv) {
-#if 0
-	auto ExpectedParser = clang::tooling::CommonOptionsParser::create(argc, argv, MyToolCategory);
-	if (!ExpectedParser) {
-		llvm::errs() << ExpectedParser.takeError();
-		return 1;
-	}
-	auto & OptionsParser = ExpectedParser.get();
-	clang::tooling::ClangTool Tool(OptionsParser.getCompilations(),
-		OptionsParser.getSourcePathList());
+nlohmann::json create_json_command() {
+	nlohmann::json json_command;
+	json_command["directory"] = "";
+	json_command["file"] = "";
+	json_command["arguments"] = nlohmann::json::array();
+	json_command["arguments"] += "clang++";
+	json_command["arguments"] += "-x";
+	json_command["arguments"] += "c++-header";
+	json_command["arguments"] += "-fsyntax-only";
+	return json_command;
+}
 
-	return Tool.run(clang::tooling::newFrontendActionFactory<MyFrontendAction>().get());
-#endif
-    //tooling::runToolOnCode(std::make_unique<MyFrontendAction>(), strstm.str());
+template<typename T>
+CLI::Option* addOption(CLI::App* app,const std::string& option_name, const std::string& description, nlohmann::json& json_db, const std::string& json_key="") {
+	std::string real_key=json_key;
+	if(json_key.empty()){
+		real_key = option_name;
+	}
+
+	return app->add_option_function<T>(option_name, [&,real_key =real_key](const T& re)->void{
+		json_db[real_key] = re;
+		},description);
+}
+
+int main(int argc, const char** argv) {
+	std::string currentExeDir = std::filesystem::path(argv[0]).parent_path().string();
+	nlohmann::json json_command_template = create_json_command();							// 单个command的json模板
+	nlohmann::json json_commands = nlohmann::json::array();											// 存放所有命令的json，对标compile_commands.json
+	nlohmann::json json_outputConfig = nlohmann::json::object();										// 输出配置
+	json_outputConfig["output_path"] = currentExeDir;														// 输出路径
+	json_outputConfig["prefix"] = "pywrapper_";																	// 输出前缀
+	json_outputConfig["suffix"] = "";																						// 输出后缀
+
+	json_command_template["directory"]=currentExeDir;
+
+	linenoiseSetCompletionCallback(completionHook, nullptr);
+	linenoiseHistoryLoad("history.txt");
 
 	char* line = nullptr;
-	
 	std::string filePath;
 	std::string code;
-	
+
+	app = new CLI::App();
+
+	auto opt_file = app->add_option("-f,--file", "Input file names")->expected(1, 1000);
+	//auto opt_out_path = app->add_option("-o,--output", "output file path")->expected(1);
+	addOption<std::string>(app,"-o,--output", "output file path",json_outputConfig,"output_path")->expected(1);
+	addOption<std::string>(app,"-p,--prefix", "output file prefix",json_outputConfig,"prefix")->expected(1);
+	addOption<std::string>(app,"-s,--suffix", "output file suffix",json_outputConfig,"suffix")->expected(1);
+
 	while (true) {
-		CLI::App app;
-		auto opt_file = app.add_option("-f,--file", filePath, "Input file name");
-		auto opt_code = app.add_option("-c,--code", code, "Input code");
-		opt_file->excludes(opt_code);
-		opt_code->excludes(opt_file);
 		std::cout << ">>> ";
 		line = linenoise(">>> ");
 		if (line == nullptr) break;
@@ -199,38 +120,57 @@ int main(int argc, const char** argv) {
 		if (input.empty()) continue;
 
 		linenoiseHistoryAdd(input.c_str());
-		//linenoiseHistorySave("history.txt"); // 保存历史记录
+		linenoiseHistorySave("history.txt"); // 保存历史记录
 
 		if (input == "exit")
 			break;
 		std::istringstream iss(input);
 		std::vector<std::string> args{ std::istream_iterator<std::string>(iss),std::istream_iterator<std::string>() };
-
+		std::reverse(args.begin(), args.end());
 		try {
-			
-			app.parse(args);
+			app->parse(args);
 		}
 		catch (const CLI::ParseError& e) {
 			if (e.get_exit_code() != 0) {
 				std::cerr << e.what() << "\n";
 			}
 			else {
-				std::cout <<app.help() << std::endl;
+				std::cout << app->help() << std::endl;
 			}
 			continue;
 		}
 
-		if (opt_file) {
-			std::ifstream stm;
-			std::stringstream strstm;
+		if (opt_file->count() > 0) {
+			auto inputFiles = opt_file->as<std::vector<std::string>>();
 
-			stm.open("E:/work/EasyPlot/ext/xgenerator/src/test.md");
-			strstm << stm.rdbuf();
-			auto code = strstm.str();
-			tooling::runToolOnCode(std::make_unique<MyFrontendAction>(), code);
-		}
-		else if (opt_code) {
-			tooling::runToolOnCode(std::make_unique<MyFrontendAction>(), code);
+			for (auto& file : inputFiles) {
+				nlohmann::json json_command = json_command_template;
+				json_command["file"] = currentExeDir + "\\" + file;
+				json_command["arguments"] += currentExeDir + "\\" + file;
+				json_commands.push_back(json_command);
+			}
+			std::cout<<"===============================================================>\n";
+			std::cout << json_commands.dump(4) << std::endl;
+			std::cout << "===============================================================>\n";
+
+			std::unique_ptr<clang::tooling::CompilationDatabase> CompDB;
+			std::string ErrorMsg;
+
+			auto json_str =json_commands.dump();
+			auto JSONDB = clang::tooling::JSONCompilationDatabase::loadFromBuffer(json_str, ErrorMsg, clang::tooling::JSONCommandLineSyntax::Windows);
+			if (JSONDB) {
+				CompDB = std::move(JSONDB);
+				std::vector<std::string> allFiles = CompDB->getAllFiles();
+				clang::tooling::ClangTool Tool(*CompDB, allFiles);
+				Tool.run(new XASTFrontendActionFactory(json_outputConfig));
+			}
+			else {
+				std::cout << "Error loading JSON Compilation Database: " << ErrorMsg << std::endl;
+				break;
+			}
 		}
 	}
+
+	delete app;
+	return 0;
 }

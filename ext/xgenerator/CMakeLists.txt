@@ -34,6 +34,7 @@ target_include_directories(${proName} PRIVATE
     ${CLANG_INSTALL_DIR}/include
     ${CMAKE_SOURCE_DIR}/../../3rdParty/CLI/include
     ${CMAKE_SOURCE_DIR}/../../3rdParty/linenoise/include
+    ${CMAKE_SOURCE_DIR}/../../3rdParty/nlohmann/include
 )
 
 target_link_directories(${proName} PRIVATE 

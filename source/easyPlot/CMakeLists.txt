@@ -88,6 +88,7 @@ SET(LIB_NAMES
 				xpanel${DLL_DEBUG_POSTFIX}
 				xrender${DLL_DEBUG_POSTFIX}
 				xalgo${DLL_DEBUG_POSTFIX}
+				xsharevar${DLL_DEBUG_POSTFIX}
 	)
 
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin

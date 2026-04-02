@@ -232,14 +232,14 @@ namespace XQ {
 
 	};
 
-	struct lib00_utilty_API ShareVar
+	/*struct lib00_utilty_API ShareVar
 	{
 		static ShareVar& instance() {
 			static ShareVar var;
 			return var;
 		}
 		std::string currentExeDir;
-	};
+	};*/
 	
 	struct lib00_utilty_API BoundBox {
 		double xmin{ 0 };

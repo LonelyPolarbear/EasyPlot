@@ -28,6 +28,7 @@
 
 #include <future>
 #include <limits.h>
+#include <sharevar/XShareVar.h>
 bool isScreenRender = true;
 class SceneUbo:public XDataBaseObject{
 protected:
@@ -755,7 +756,7 @@ void XScene::render2D()
 
 					auto fn = [&result, &width, &height](int i) {
 						std::string  str = std::to_string(i).append(".bmp");
-						auto info = stbImage::readPicture(XQ::ShareVar::instance().currentExeDir + "\\sdf\\" + str, false);
+						auto info = stbImage::readPicture(XShareVar::instance().currentExeDir + "\\sdf\\" + str, false);
 						width = info.width;
 						height = info.height;
 						std::get<2>(result)[i] = info.data;

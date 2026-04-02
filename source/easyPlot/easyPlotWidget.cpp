@@ -66,6 +66,7 @@
 
 #include <lib04_opengl/XOpenGLFuntion.h>
 #include <QMessageBox>
+#include <sharevar/XShareVar.h>
 
 using namespace std::chrono_literals;
 enum class CameraAction {
@@ -134,7 +135,7 @@ easyPlotWidget::easyPlotWidget(QWidget* parent) :XOpenGLWidget(parent),d(std::ma
 
 
 	QFuture<void> future = QtConcurrent::run([]()->void {
-		auto ss = XQ::ShareVar::instance().currentExeDir + "\\sdf\\data.txt";
+		auto ss = XShareVar::instance().currentExeDir + "\\sdf\\data.txt";
 		xfreetype::Instance()->LoadGlyphSdf(QString::fromStdString(ss));
 		});
 
@@ -1645,7 +1646,7 @@ void easyPlotWidget::slotComputeShaderTest()
 {
 	makeCurrent();
 	auto computeShader = makeShareDbObject<XComputeShader>();
-	computeShader->loadComputeShader(XQ::ShareVar::instance().currentExeDir + "/easyPlot/" + "compute.cs");
+	computeShader->loadComputeShader(XShareVar::instance().currentExeDir + "/easyPlot/" + "compute.cs");
 	
 	computeShader->use();
 	//准备数据，创建一个SSBO，并分配数据
