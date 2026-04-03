@@ -28,17 +28,19 @@ message(STATUS "HEADERS_FILES: ${HEADERS_FILES}")
 find_package(Clang REQUIRED COMPONENTS clangAST clangBasic  clangFrontend  clangTooling clangRewrite )
 
 add_executable(${proName}  ${SOURCES_FILES} ${HEADERS_FILES})
-
+target_compile_definitions(${proName} PRIVATE REPLXX_STATIC)
 target_include_directories(${proName} PRIVATE
     ${CMAKE_SOURCE_DIR}/include
     ${CLANG_INSTALL_DIR}/include
     ${CMAKE_SOURCE_DIR}/../../3rdParty/CLI/include
     ${CMAKE_SOURCE_DIR}/../../3rdParty/linenoise/include
+    ${CMAKE_SOURCE_DIR}/../../3rdParty/replxx/include
     ${CMAKE_SOURCE_DIR}/../../3rdParty/nlohmann/include
 )
 
 target_link_directories(${proName} PRIVATE 
          ${CMAKE_SOURCE_DIR}/../../3rdParty/linenoise/lib
+         ${CMAKE_SOURCE_DIR}/../../3rdParty/replxx/lib
 )
 
  target_link_libraries(${proName} PRIVATE 
@@ -48,6 +50,7 @@ target_link_directories(${proName} PRIVATE
                 clangTooling
                 clangRewrite
                 linenoise_lib
+                replxx-static
                 )
 
 set_target_properties(${proName} PROPERTIES

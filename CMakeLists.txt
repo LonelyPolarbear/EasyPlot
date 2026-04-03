@@ -56,12 +56,14 @@ add_library(MyLib::HDF5 ALIAS MyHDF5Deps)
 add_library(MyExampleDeps INTERFACE)
 target_link_libraries(MyExampleDeps INTERFACE
    linenoise_lib${DLL_DEBUG_POSTFIX}
+   replxx-static${DLL_DEBUG_POSTFIX}
 )
 
 # 添加 HighFive 头文件路径（如果 HighFive 是 header-only 且未使用 CMake 目标）
 target_include_directories(MyExampleDeps INTERFACE
                                             ${CMAKE_SOURCE_DIR}/3rdParty/CLI/include
 											${CMAKE_SOURCE_DIR}/3rdParty/linenoise/include
+											${CMAKE_SOURCE_DIR}/3rdParty/replxx/include
 )
 
 add_library(MyLib::example ALIAS MyExampleDeps)

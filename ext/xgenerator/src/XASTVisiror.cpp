@@ -1,77 +1,97 @@
 #include "XASTVisiror.h"
+#include <iostream>
+#include <fstream>
+#include <clang\Basic\SourceManager.h>
 using namespace clang;
-XASTVisitor::XASTVisitor(clang::Rewriter* writer):mWriter(writer)
+
+XASTVisitor::XASTVisitor(clang::Rewriter* writer, nlohmann::json* config, std::ofstream* osm):mWriter(writer),mConfig(config), mOSM(osm)
 {
 }
 
 bool XASTVisitor::VisitFunctionDecl(clang::FunctionDecl* FD)
 {
+	std::cout<<"------函数声明触发------\n";
 	// 获取函数体起始位置（跳过 { 字符）
-	SourceLocation start = FD->getBeginLoc();
+	//SourceLocation start = FD->getBeginLoc();
 
 	// 构造插入内容（保留源代码缩进）
-	std::string indent = "\n    ";
-	std::string code = indent + "// Auto-generated at " __TIMESTAMP__ "\n";
+	//std::string indent = "\n    ";
+	//std::string code = indent + "// Auto-generated at " __TIMESTAMP__ "\n";
 	//code += indent + "printf(\"Entering %s\\n\", __func__);";
 
 	// 执行代码插入
-	mWriter->InsertText(start, code, true, true);
+	//mWriter->InsertText(start, code, true, true);
 	//return true;
 
 	clang::SourceManager& SM = FD->getASTContext().getSourceManager();
-	llvm::outs() << "函数名: " << FD->getQualifiedNameAsString() << "\n";
-	llvm::outs() << "是否inline: " << FD->isInlined() << "\n";
-	llvm::outs() << "是否是否在类外定义: " << FD->isOutOfLine() << "\n";
-	llvm::outs() << "hasBody: " << FD->hasBody() << "\n";
-	llvm::outs() << "返回类型: " << FD->getReturnType().getAsString() << "\n";
-	llvm::outs() << "形参:\n";
+	std::cout << "函数名: " << FD->getQualifiedNameAsString() << "\n";
+	std::cout  << "是否inline: " << FD->isInlined() << "\n";
+	std::cout  << "是否是否在类外定义: " << FD->isOutOfLine() << "\n";
+	std::cout  << "hasBody: " << FD->hasBody() << "\n";
+	std::cout  << "返回类型: " << FD->getReturnType().getAsString() << "\n";
+	std::cout  << "形参:\n";
 
 	for (unsigned i = 0; i < FD->getNumParams(); ++i) {
 		ParmVarDecl* Param = FD->getParamDecl(i);
 		QualType ParamType = Param->getType();  // 参数类型:ml-citation{ref="4" data="citationList"}
 		StringRef ParamName = Param->getName(); // 参数名（可能为空）:ml-citation{ref="4" data="citationList"}
-		llvm::outs() << "形参类型:" << ParamType.getAsString() << "\n";
-		llvm::outs() << "形参名:" << ParamName.str() << "\n";
+		std::cout << "形参类型:" << ParamType.getAsString() << "\n";
+		std::cout << "形参名:" << ParamName.str() << "\n";
 	}
 
-	llvm::outs() << "源码位置: " << FD->getLocation().printToString(SM) << "\n";
+	std::cout << "源码位置: " << FD->getLocation().printToString(SM) << "\n";
 
+	return true;
+}
+
+bool XASTVisitor::VisitVarDecl(clang::VarDecl* VD)
+{
+	return true;
+}
+
+bool XASTVisitor::VisitStmt(clang::Stmt* S)
+{
+	return true;
+}
+
+bool XASTVisitor::VisitCompoundStmt(clang::CompoundStmt* CS)
+{
 	return true;
 }
 
 bool XASTVisitor::VisitCXXRecordDecl(clang::CXXRecordDecl* RD)
 {
-	llvm::outs() << "类整体信息\n:";
-	llvm::outs() << "Class: " << RD->getNameAsString() << "\n";
-
+	std::cout << "------类声明触发------\n";
+	std::cout << "Class: " << RD->getNameAsString() << "\n";
+	*mOSM << "Class: " << RD->getNameAsString() << "\n";
 	// 输出成员变量
-	llvm::outs() << "Fields:\n";
+	std::cout << "Fields:\n";
 	for (auto* Field : RD->fields()) {
-		llvm::outs() << "  " << Field->getType().getAsString()
-			<< " " << Field->getName() << "\n";
+		std::cout << "  " << Field->getType().getAsString()
+			<< " " << Field->getName().str() << "\n";
 	}
 
 	// 输出成员函数
-	llvm::outs() << "Methods:\n";
+	std::cout << "Methods:\n";
 	for (auto* Method : RD->methods()) {
 		llvm::outs() << "  " << Method->getReturnType().getAsString()
 			<< " " << Method->getNameAsString() << "()\n";
 	}
 
 	if (RD->getNumBases() > 0) {
-		llvm::outs() << "  Inheritance:\n";
+		std::cout << "  Inheritance:\n";
 		for (const CXXBaseSpecifier& Base : RD->bases()) {
 			const Type* TypePtr = Base.getType().getTypePtr();
 			CXXRecordDecl* BaseDecl = TypePtr->getAsCXXRecordDecl();
 
-			llvm::outs() << "    " << getAccessSpecifierName(Base.getAccessSpecifier())
+			std::cout << "    " << getAccessSpecifierName(Base.getAccessSpecifier())
 				<< " " << BaseDecl->getNameAsString();
-			if (Base.isVirtual()) llvm::outs() << " (virtual)";
-			llvm::outs() << "\n";
+			if (Base.isVirtual()) std::cout << " (virtual)";
+			std::cout << "\n";
 		}
 	}
 	else {
-		llvm::outs() << "  No base classes\n";
+		std::cout << "  No base classes\n";
 	}
 
 	return true;
