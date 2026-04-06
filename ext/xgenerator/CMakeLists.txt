@@ -40,7 +40,7 @@ target_include_directories(${proName} PRIVATE
 
 target_link_directories(${proName} PRIVATE 
          ${CMAKE_SOURCE_DIR}/../../3rdParty/linenoise/lib
-         ${CMAKE_SOURCE_DIR}/../../3rdParty/replxx/lib
+         ${CMAKE_SOURCE_DIR}/../../3rdParty/replxx/lib/MT
 )
 
  target_link_libraries(${proName} PRIVATE 
@@ -49,12 +49,13 @@ target_link_directories(${proName} PRIVATE
                 clangFrontend
                 clangTooling
                 clangRewrite
-                linenoise_lib
-                replxx-static
+                #linenoise_lib
+                replxx-static-d
                 )
 
 set_target_properties(${proName} PROPERTIES
-    MSVC_RUNTIME_LIBRARY "MultiThreadedDLL"
+    #MSVC_RUNTIME_LIBRARY "MultiThreadedDLL"
+    MSVC_RUNTIME_LIBRARY "MultiThreaded"
 )
 
 if (MSVC)
