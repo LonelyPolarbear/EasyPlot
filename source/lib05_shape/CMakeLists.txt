@@ -10,6 +10,10 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/qt.cmake)
 file(GLOB_RECURSE HEADERS_FILES *.h *.hpp)
 file(GLOB_RECURSE SOURCES_FILES *.cpp)
 
+set(file_path "XScan.h")  # 实际使用时通常是列表中的某个元素
+get_filename_component(file_dir ${file_path} DIRECTORY)
+message("目录: ${file_dir}")
+
 # 调用函数进行分组
 list(APPEND ALL_SOURCES 
 	${HEADERS_FILES} 
@@ -56,6 +60,7 @@ ${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 add_library(${proName}  SHARED)
 generate_dllmain_if_needed(${proName})
 generate_dllapi_if_needed(${proName} )
+generate_xscan_if_needed(${proName} )
 get_dll_api_macro(${proName} DLL_API_NAME)
 
 target_sources(${proName} PRIVATE ${SOURCES_FILES} ${HEADERS_FILES})

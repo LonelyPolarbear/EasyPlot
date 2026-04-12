@@ -16,7 +16,7 @@ class DATABASE_API XDataAttribute : public XDataBaseObject {
 	REGISTER_CLASS_META_DATA(XDataAttribute, XDataBaseObject);
 protected:
 	XDataAttribute();
-	~XDataAttribute();
+	~XDataAttribute() override;
 public:
 	XSIGNAL(void(sptr<XDataAttribute>, XDataChangeType))  sigAttrChanged;
 	friend class XDataObject;

@@ -130,7 +130,7 @@ function(generate_dllapi_if_needed TARGET_NAME)
     set(DLLAPI_PATH "${TARGET_SOURCE_DIR}/${TARGET_NAME}Api.h")
 
     # 检查 dllmain.cpp 是否已存在
-    if(EXISTS "${HEADER_PATH}")
+    if(EXISTS "${DLLAPI_PATH}")
         return()
     endif()
 
@@ -149,6 +149,47 @@ function(generate_dllapi_if_needed TARGET_NAME)
          "${DLLAPI_PATH}"
          @ONLY)
       target_sources(${TARGET_NAME} PRIVATE "${DLLAPI_PATH}")
+endfunction()
+
+#变量大小写转换
+function(get_dll_api_name TARGET_NAME OUTPUT_VAR)
+string(TOUPPER "${TARGET_NAME}" TARGET_UPPER)
+set(${OUTPUT_VAR} "${TARGET_UPPER}_API" PARENT_SCOPE)
+endfunction()
+
+function(get_dll_api_macro TARGET_NAME OUTPUT_VAR)
+string(TOUPPER "${TARGET_NAME}" TARGET_UPPER)
+set(${OUTPUT_VAR} "${TARGET_UPPER}_DLL" PARENT_SCOPE)
+endfunction()
+
+function(generate_xscan_if_needed TARGET_NAME)
+    # 1. 获取目标类型 EXECUTABLE STATIC_LIBRARY SHARED_LIBRARY MODULE_LIBRARY INTERFACE_LIBRAR OBJECT_LIBRARY
+    get_target_property(TARGET_TYPE ${TARGET_NAME} TYPE)
+
+
+    # 获取目标源码目录
+    #SOURCE_DIR 是 CMake 内置的目标属性（Target Property），表示：该目标被定义时所在的源码目录（即包含其 CMakeLists.txt 的目录）
+    get_target_property(TARGET_SOURCE_DIR ${TARGET_NAME} SOURCE_DIR)
+
+    set(XSCAN_PATH "${TARGET_SOURCE_DIR}/XScan.h")
+
+    # 检查 dllmain.cpp 是否已存在
+    if(EXISTS "${XSCAN_PATH}")
+        return()
+    endif()
+
+     message(STATUS "Generating XScan.h for target: ${TARGET_NAME}")
+     # === 设置你要替换的变量 ===
+     #DLL_MACRO_NAME
+     #DLL_API_NAME
+
+     # 模板文件路径（假设放在 cmake/templates/ 下）
+     set(TEMPLATE_FILE "${CMAKE_SOURCE_DIR}/config_cmake/templates/xscan.h.in")
+      configure_file(
+         "${TEMPLATE_FILE}"
+         "${XSCAN_PATH}"
+         @ONLY)
+      target_sources(${TARGET_NAME} PRIVATE "${XSCAN_PATH}")
 endfunction()
 
 endif (MSVC)

@@ -12,6 +12,7 @@
 #include <sstream>
 #include <iostream>
 #include <chrono>
+#include <regex>
 
 #include <nlohmann/json.hpp>
 #ifdef _WIN32
@@ -33,10 +34,57 @@ std::string getPrefix(const std::string& context) {
 	//从前到后 数到前面空格开始 算本次的前缀 abc def,则前缀为 def
 	int i = context.size() - 1;
 	auto ss = context[i];
-	while (i >= 0 && context[i] !=' ') --i;
+	while (i >= 0 && context[i] != ' ') --i;
 
-	auto str =context.substr(i+1);
+	auto str = context.substr(i + 1);
 	return str;
+}
+
+/**
+ * @breif 将输入的文件路径转换为绝对路径
+ */
+std::vector<std::string> getScanFilePath(const std::vector<std::string>& allfiles, const std::vector<std::string>& input) {
+	std::vector<std::string> absolute_files;
+	for (auto& s : input) {
+		for (auto& a : allfiles) {
+			if (a.find(s) != std::string::npos) {
+				absolute_files.push_back(a);
+				break;
+			}
+		}
+	}
+	return absolute_files;
+}
+
+static std::string readFile(const std::string& path) {
+	std::ifstream ShaderFile;
+	ShaderFile.open(path);
+
+	std::stringstream ShaderStream;
+	// read file's buffer contents into streams
+	ShaderStream << ShaderFile.rdbuf();
+
+	ShaderFile.close();
+	return ShaderStream.str();
+}
+
+std::vector<std::string> ScanFiles(const std::vector<std::string>& input){
+	//逐行扫描文件内容，每一行都是#include"xxx.h"或者 #include<xxx.h>的形式
+	//把每一行的xxx.h转换为绝对路径，并返回
+	std::vector<std::string> all_include_files;
+	for (auto& s : input) {
+		auto text =readFile(s);
+
+		std::regex pattern(R"(#\s*include\s*["<]([^">]+)[">])");
+		std::smatch match;
+		auto begin = std::sregex_iterator(text.begin(), text.end(), pattern);
+		auto end = std::sregex_iterator();
+
+		for (std::sregex_iterator i = begin; i != end; ++i) {
+			all_include_files.push_back((*i)[1].str());
+		}
+	}
+	return all_include_files;
 }
 
 replxx::Replxx::completions_t hook_completion(std::string const& context, int& contextLen,
@@ -140,7 +188,43 @@ const std::string& json_key="",bool isAppend =false) {
 		},description);
 }
 
+std::string replaceSourceAfterDashC(const std::string& cmd, const std::string& newFile) {
+	const std::string marker = "-c -- ";
+	size_t pos = cmd.find(marker);
+	if (pos == std::string::npos) {
+		// 没有找到 "-c -- "，返回原字符串或报错
+		return cmd; // 或抛出异常
+	}
+
+	size_t start = pos + marker.length(); // 文件名起始位置
+
+	// 跳过开头空格（虽然通常没有，但更健壮）
+	while (start < cmd.size() && cmd[start] == ' ') {
+		++start;
+	}
+
+	if (start >= cmd.size()) {
+		return cmd; // 没有文件名
+	}
+
+	// 找到文件名结束位置：遇到空格或字符串结尾
+	size_t end = cmd.find(' ', start);
+	if (end == std::string::npos) {
+		end = cmd.size();
+	}
+
+	// 替换 [start, end) 为 newFile
+	std::string result = cmd;
+	result.replace(start, end - start, newFile);
+	return result;
+}
+
 int main(int argc, const char** argv) {
+	bool runLoop = true;
+	if (argc > 1) {
+		//说明是外部启动，此时不需要启动内循环
+		runLoop = false;
+	}
 	replxx::Replxx rx;
 	std::vector<std::string> candidates;
 	rx.set_completion_callback(std::bind(&hook_completion, std::placeholders::_1, std::placeholders::_2, std::cref(candidates), true));
@@ -154,8 +238,9 @@ int main(int argc, const char** argv) {
 	json_outputConfig["prefix"] = "pywrapper_";																	// 输出前缀
 	json_outputConfig["suffix"] = "";																						// 输出后缀
 
-	json_outputConfig["is_only_one_out_file"] = true;														//是否输出到一个文件
+	json_outputConfig["is_only_one_out_file"] = true;															//是否输出到一个文件
 	json_outputConfig["only_one_out_file_name"] = "xtest";												//当json_outputConfig["is_only_one_out_file"]是true时候使用
+	json_outputConfig["filters"]= nlohmann::json::array();													//过滤选项，根据过滤选项，过滤掉不感兴趣的文件
 
 	json_command_template["directory"]=currentExeDir;
 
@@ -169,7 +254,8 @@ int main(int argc, const char** argv) {
 	auto opt_json_command_file = app->add_option("-j,--json", "Input json_commanf files")->expected(1);
 	addOption<std::string>(app,"-o,--output", "output file path",json_outputConfig,"output_path")->expected(1);
 	addOption<std::string>(app,"-p,--prefix", "output file prefix",json_outputConfig,"prefix")->expected(1);
-	addOption<std::string>(app,"-s,--suffix", "output file suffix",json_outputConfig,"suffix")->expected(1);
+	addOption<std::string>(app, "-s,--suffix", "output file suffix", json_outputConfig, "suffix")->expected(1);
+	addOption<std::vector<std::string>>(app, "--filter", "command json filters", json_outputConfig, "filters");
 
 	candidates.push_back("-o");
 	candidates.push_back("--output");
@@ -183,20 +269,29 @@ int main(int argc, const char** argv) {
 	candidates.push_back("--json");
 	
 
-	while (true) {
-		input = rx.input(">>> ");
+	do {
+		std::vector<std::string> args;
 
-		if (input.empty()) continue;
+		if (runLoop) {
+			input = rx.input(">>> ");
 
-		rx.history_add(input);
+			if (input.empty()) continue;
 
-		if (input == "exit")
-			break;
-		std::istringstream iss(input);
-		std::vector<std::string> args{ std::istream_iterator<std::string>(iss),std::istream_iterator<std::string>() };
-		std::reverse(args.begin(), args.end());
+			rx.history_add(input);
+
+			if (input == "exit")
+				break;
+			std::istringstream iss(input);
+			args = std::vector<std::string>{ std::istream_iterator<std::string>(iss),std::istream_iterator<std::string>() };
+			std::reverse(args.begin(), args.end());
+		}
 		try {
-			app->parse(args);
+			if (runLoop) {
+				app->parse(args);
+			}
+			else {
+				CLI11_PARSE(*app, argc, argv);
+			}
 		}
 		catch (const CLI::ParseError& e) {
 			if (e.get_exit_code() != 0) {
@@ -207,18 +302,54 @@ int main(int argc, const char** argv) {
 			}
 			continue;
 		}
-
+		//std::cout<<json_outputConfig.dump(4)<<std::endl;
+		#if 1
 		if (opt_json_command_file->count() > 0) {
 			std::unique_ptr<clang::tooling::CompilationDatabase> CompDB;
 			std::string ErrorMsg;
 			auto json_command_file = opt_json_command_file->as<std::string>();
+			//格式 compile_commands_lib05_shape.json lib05_shape是子项目的目录，要通过这个变量去控制扫描选项
 			//如果json文件由外部提供，则不需要手动构建
-			auto JSONDB = clang::tooling::JSONCompilationDatabase::loadFromFile(json_command_file, ErrorMsg, clang::tooling::JSONCommandLineSyntax::Windows);
+			nlohmann::json j;
+			{
+				std::ifstream file(json_command_file);
+				file >> j;
+
+				//遍历修改
+				// "file":  "E:/work/EasyPlot/source/lib05_shape/renderNode3d/XRectRenderNode.cpp", 改为
+				// "file":  "E:/work/EasyPlot/source/lib05_shape/renderNode3d/XRectRenderNode.h"
+				for (auto& command : j) {
+					{
+						std::string str = command["file"];
+						//修改后缀为.h
+						auto pos = str.find(".cpp");
+						if (pos != std::string::npos) {
+							std::string header = str;
+							header.replace(pos, 4, ".h");
+							command["file"] = header;
+						}
+					}
+
+					{
+						// 同时修改 command 字符串中的源文件路径
+						if (command.contains("command") && command["command"].is_string()) {
+							std::string cmd = command["command"];
+							auto ss =replaceSourceAfterDashC(cmd, command["file"]);
+							command["command"] = replaceSourceAfterDashC(cmd, command["file"]);
+						}
+					}
+				}
+				std::cout<<j.dump(4)<<std::endl;
+			}
+			auto json_str = j.dump();
+			auto JSONDB = clang::tooling::JSONCompilationDatabase::loadFromBuffer(json_str, ErrorMsg, clang::tooling::JSONCommandLineSyntax::Windows);
 			if (JSONDB) {
 				CompDB = std::move(JSONDB);
 				std::vector<std::string> allFiles = CompDB->getAllFiles();
 				clang::tooling::ClangTool Tool(*CompDB, allFiles);
-				Tool.run(new XASTFrontendActionFactory(json_outputConfig));
+				auto factory = new XASTFrontendActionFactory(json_outputConfig);
+				Tool.run(factory);
+				delete factory;
 			}
 			else {
 				std::cout << "Error loading JSON Compilation Database: " << ErrorMsg << std::endl;
@@ -247,15 +378,18 @@ int main(int argc, const char** argv) {
 				CompDB = std::move(JSONDB);
 				std::vector<std::string> allFiles = CompDB->getAllFiles();
 				clang::tooling::ClangTool Tool(*CompDB, allFiles);
-				Tool.run(new XASTFrontendActionFactory(json_outputConfig));
+				auto factory = new XASTFrontendActionFactory(json_outputConfig);
+				Tool.run(factory);
+				delete factory;
 			}
 			else {
 				std::cout << "Error loading JSON Compilation Database: " << ErrorMsg << std::endl;
 				break;
 			}
 		}
+		#endif
 	}
-
+	while (runLoop);
 	delete app;
 	rx.history_save(currentExeDir + "\\history.txt");
 	return 0;

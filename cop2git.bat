@@ -8,7 +8,11 @@ rem copy E:\work\EasyPlot\3rdParty\hdf5\cmake E:\work\myGit\EasyPlot\3rdParty\hd
 
 
 call copy.bat E:\work\EasyPlot\source E:\work\myGit\EasyPlot\source
-call copy.bat E:\work\EasyPlot\ext E:\work\myGit\EasyPlot\ext
+rem call copy.bat E:\work\EasyPlot\Python38 E:\work\myGit\EasyPlot\Python38
+call copy.bat E:\work\EasyPlot\ext\xgenerator\src E:\work\myGit\EasyPlot\ext\xgenerator\src
+call copy.bat E:\work\EasyPlot\ext\xgenerator\CMakeLists.txt E:\work\myGit\EasyPlot\ext\xgenerator\CMakeLists.txt
+call copy.bat E:\work\EasyPlot\ext\xgenerator\create.bat E:\work\myGit\EasyPlot\ext\xgenerator\create.bat
+call copy.bat E:\work\EasyPlot\ext\xgenerator\run.bat E:\work\myGit\EasyPlot\ext\xgenerator\run.bat
 call copy.bat E:\work\EasyPlot\examples E:\work\myGit\EasyPlot\examples
 call copy.bat E:\work\EasyPlot\output\bin\easyPlot E:\work\myGit\EasyPlot\output\bin\easyPlot
 call copy.bat E:\work\EasyPlot\output\bin\sdf E:\work\myGit\EasyPlot\output\bin\sdf
@@ -18,4 +22,5 @@ call copy.bat E:\work\EasyPlot\output\bin\01triangle E:\work\myGit\EasyPlot\outp
 call copy.bat E:\work\EasyPlot\output\bin\02cube E:\work\myGit\EasyPlot\output\bin\02cube
 call copy.bat E:\work\EasyPlot\output\bin\05cube E:\work\myGit\EasyPlot\output\bin\05cube
 call copy.bat E:\work\EasyPlot\output\bin\06cube E:\work\myGit\EasyPlot\output\bin\06cube
+call copy.bat E:\work\EasyPlot\output\bin\xq E:\work\myGit\EasyPlot\output\bin\xq
 

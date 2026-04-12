@@ -10,7 +10,6 @@
 #include <Eigen/Eigen>
 
 class xShaderManger;
-class XRenderNodeAttribute;
 class LIB05_SHAPE_API XRenderNode :public XDataObject {
 	REGISTER_CLASS_META_DATA(XRenderNode, XDataObject);
 public:

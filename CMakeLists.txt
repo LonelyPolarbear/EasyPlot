@@ -25,7 +25,7 @@ set(MYLIB_INCLUDE_DIR
                 ${CMAKE_SOURCE_DIR}/3rdParty/nlohmann/include		
 )
 add_library(mylib_header_only INTERFACE)
-target_include_directories(mylib_header_only INTERFACE ${MYLIB_INCLUDE_DIR})
+target_include_directories(mylib_header_only SYSTEM INTERFACE ${MYLIB_INCLUDE_DIR})
 add_library(MyLib::HeaderOnly ALIAS mylib_header_only)
 
 
@@ -44,7 +44,7 @@ target_link_libraries(MyHDF5Deps INTERFACE
 )
 
 # 添加 HighFive 头文件路径（如果 HighFive 是 header-only 且未使用 CMake 目标）
-target_include_directories(MyHDF5Deps INTERFACE
+target_include_directories(MyHDF5Deps SYSTEM INTERFACE
     ${CMAKE_SOURCE_DIR}/3rdParty/highFive/include
 )
 
@@ -65,6 +65,8 @@ target_include_directories(MyExampleDeps INTERFACE
 											${CMAKE_SOURCE_DIR}/3rdParty/linenoise/include
 											${CMAKE_SOURCE_DIR}/3rdParty/replxx/include
 )
+
+target_link_directories(MyExampleDeps INTERFACE ${CMAKE_SOURCE_DIR}/3rdParty/replxx/lib)				#包含目录
 
 add_library(MyLib::example ALIAS MyExampleDeps)
 

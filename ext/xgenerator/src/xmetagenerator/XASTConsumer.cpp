@@ -1,31 +1,35 @@
 #include "XASTConsumer.h"
 #include "XASTVisiror.h"
 #include <fstream>
-
-XASTConsumer::XASTConsumer(clang::Rewriter* writer, nlohmann::json*config) :mWriter(writer),mConfig(config)
+#include <fstream>
+XASTConsumer::XASTConsumer(clang::Rewriter* writer, nlohmann::json* config, clang::PPConditionalDirectiveRecord* pprec, std::ofstream* ouput)
+:mWriter(writer),mConfig(config),mPPRec(pprec)
 {
 	//需要创建文件，确保文件存在
 	auto &json_config = *mConfig;
+	if(ouput){
+		mOsm = ouput;
+	}
 	if(json_config["is_only_one_out_file"]){
 		//全部输出一个文件
 		std::string path = json_config["output_path"];														// 输出路径
 		std::string prefix = json_config["prefix"];																// 输出前缀
 		std::string suffix = json_config["suffix"];																// 输出后缀
+		std::string input_file_absolute_path = json_config["input_file_absolute_path"];
 
 		std::string filename = json_config["only_one_out_file_name"];
 		filename = prefix + filename + suffix + ".cpp";
 		std::filesystem::path fullPath = std::filesystem::path(path) / filename;
 
-		//if (std::filesystem::exists(fullPath)) {
-		//	mOsm = new std::ofstream(filename);		//// 默认 ios::out，会清空已有内容
-		//}else{
-		//	
-		//}
-		mOsm = new std::ofstream(filename, std::ios::app);
-		if(!mOsm->is_open()){
+	
+		/*mOsm = new std::ofstream(filename, std::ios::app);
+		auto fstm = dynamic_cast<std::ofstream*>(mOsm);
+		if(!fstm->is_open()){
 			delete mOsm;
 			mOsm =nullptr;
-		}
+		}else{
+			*mOsm<<"#include<"<<input_file_absolute_path<<">\n";
+		}*/
 
 	}else{
 		std::string path = json_config["output_path"];														// 输出路径
@@ -35,17 +39,21 @@ XASTConsumer::XASTConsumer(clang::Rewriter* writer, nlohmann::json*config) :mWri
 		std::string filename = json_config["input_file_name"];
 		filename = prefix + filename + suffix + ".cpp";
 		std::filesystem::path fullPath = std::filesystem::path(path) / filename;
+		//每一个文件一个输出
 	}
 
-	mVisitor = new XASTVisitor(writer, config,mOsm);
+	mVisitor = new XASTVisitor(writer, config, mPPRec,mOsm);
 }
 
 XASTConsumer::~XASTConsumer()
 {
-	if(mOsm){
-		mOsm->close();
+	/*if(mOsm){
+		auto fstm = dynamic_cast<std::ofstream*>(mOsm);
+		if(fstm){
+			fstm->close();
+		}
 		delete mOsm;
-	}
+	}*/
 }
 
 void XASTConsumer::Initialize(clang::ASTContext& Context)
@@ -55,7 +63,9 @@ void XASTConsumer::Initialize(clang::ASTContext& Context)
 
 void XASTConsumer::HandleTranslationUnit(clang::ASTContext& Ctx)
 {
+	mVisitor->setASTContext(&Ctx);
 	mVisitor->TraverseDecl(Ctx.getTranslationUnitDecl());
+	//设置ctx
 }
 
 bool XASTConsumer::HandleTopLevelDecl(clang::DeclGroupRef D)

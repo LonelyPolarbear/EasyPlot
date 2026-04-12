@@ -52,7 +52,7 @@ namespace XQ {
 		float sy = 1;
 		float sz = 1;
 
-		friend static std::ostream& operator<<(std::ostream& osm, transfomData data) {
+		friend  std::ostream& operator<<(std::ostream& osm, transfomData data) {
 			std::ostringstream stm;
 			stm << std::fixed << std::setprecision(3)
 				<< "transfomData{\n"
@@ -324,7 +324,7 @@ namespace XQ {
 				return p;
 			}
 			else {
-				static_assert("true", "XQ::randon(T) ÀàÐÍ´íÎó");
+				static_assert("true", "XQ::randon(T) invliad type");
 			}
 		}
 

@@ -3,6 +3,7 @@
 #include "xtypelist.hpp"
 #include <type_traits>
 #include<memory>
+#include <tuple>
 
 namespace XTraits {
 	template <typename Fn_t>

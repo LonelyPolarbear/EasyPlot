@@ -3,6 +3,7 @@
 #include "xtypelist.hpp"
 #include <type_traits>
 #include<memory>
+#include <tuple>
 
 // 检测特定返回类型的重载
 /*

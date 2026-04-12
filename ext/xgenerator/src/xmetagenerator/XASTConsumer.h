@@ -1,8 +1,11 @@
 #pragma once
 #include "clang/AST/ASTConsumer.h"
 #include "clang/Rewrite/Core/Rewriter.h"
+#include <clang/Lex/Preprocessor.h>
+#include <clang/Lex/PPConditionalDirectiveRecord.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
+
 class XASTVisitor;
 /**
  * @brief ASTConsumer是开发者的核心钩子，当Clang完成语义分析、生成完整的AST后
@@ -13,7 +16,7 @@ class XASTVisitor;
  */
 class XASTConsumer : public clang::ASTConsumer {
 public:
-	explicit XASTConsumer(clang::Rewriter* writer,nlohmann::json*);
+	explicit XASTConsumer(clang::Rewriter* writer,nlohmann::json* config,  clang::PPConditionalDirectiveRecord* pprec, std::ofstream* ouput = nullptr);
 
 	~XASTConsumer() override;
 
@@ -63,5 +66,9 @@ protected:
 	XASTVisitor* mVisitor=nullptr;
 	clang::Rewriter* mWriter=nullptr;
 	nlohmann::json *mConfig =nullptr;
+	clang::PPConditionalDirectiveRecord* mPPRec;
+	//clang::Preprocessor *mPreprocessor = nullptr;
+	//一般文件写入，有两种，一种是所有的内容都写入一个文件
+	//一种是每一个文件解析完写入一个文件
 	std::ofstream* mOsm = nullptr;
 };
