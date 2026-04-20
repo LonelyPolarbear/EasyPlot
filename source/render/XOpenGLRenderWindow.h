@@ -29,7 +29,7 @@ public:
 
 	void writeGS(const Eigen::Vector2f& viewport, float sceneScale);
 
-	void writeCamera(int type,double near,double far);
+	void writeCamera(int type, float near, float far);
 protected:
 	std::shared_ptr<XOpenGLBuffer> uniformBufferVs;						//用于传递变换矩阵的缓冲区 绑定点1
 	std::shared_ptr<XOpenGLBuffer> uniformBufferVs2d;					//用于传递变换矩阵的缓冲区 绑定点4

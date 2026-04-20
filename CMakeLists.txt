@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.8)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)           # 生成编译命令数据库,需要在project之前设置,MSVC下不生效
-project(QtOpenGL)		                                                        #放在根目录下可以理解为解决方案的名称
+project(EasyPlot)		                                                        #放在根目录下可以理解为解决方案的名称
 
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
 SET(DLL_DEBUG_POSTFIX)  
@@ -52,11 +52,17 @@ add_library(MyLib::HDF5 ALIAS MyHDF5Deps)
 
 #--------------------------------------------------------------------------------------------------------------
 # 所有的测试示例都要依赖
+if(CMAKE_BUILD_TYPE  MATCHES "Debug")
+SET(DLL_REPLXX "-d")  
+else() 
+SET(DLL_REPLXX)
+endif()
+
 #--------------------------------------------------------------------------------------------------------------
 add_library(MyExampleDeps INTERFACE)
 target_link_libraries(MyExampleDeps INTERFACE
    linenoise_lib${DLL_DEBUG_POSTFIX}
-   replxx-static${DLL_DEBUG_POSTFIX}
+   replxx-static${DLL_REPLXX}
 )
 
 # 添加 HighFive 头文件路径（如果 HighFive 是 header-only 且未使用 CMake 目标）

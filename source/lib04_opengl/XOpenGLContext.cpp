@@ -6,6 +6,20 @@
 #include <iostream>
 #include <xlog/XLogger.h>
 
+//回调函数
+void GLAPIENTRY debugCallback(GLenum source, GLenum type, GLuint id,
+	GLenum severity, GLsizei length,
+	const GLchar* message, const void* userParam) {
+	// 忽略非错误的通知性消息，减少控制台输出干扰
+	if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+		return;
+
+	/*fprintf(stderr, "GL Debug [Source: 0x%x, Type: 0x%x, Severity: 0x%x]: %s\n",
+		source, type, severity, message);*/
+
+	XLOG_ERROR("GL Debug [Source:{}, Type:{}, Severity:{}]: {}", source, type, severity, message);
+}
+
 HGLRC CreateWindowlessContext(HGLRC shareContext, HWND& tempWindow) {
 	// 使用wglCreateContextAttribsARB创建现代OpenGL上下文
 	HDC tempDC = nullptr;
@@ -251,11 +265,11 @@ bool XOpenGLContext::create(uint64_t winId)
 	}
 
 	const int attribs[] = {
-			WGL_CONTEXT_MAJOR_VERSION_ARB, 4, // OpenGL 4.6
-			WGL_CONTEXT_MINOR_VERSION_ARB, 6,
-			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,
-			//WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-			0
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,																						// 主版本号
+			WGL_CONTEXT_MINOR_VERSION_ARB, 6,																						// 次版本号
+			WGL_CONTEXT_PROFILE_MASK_ARB, WGL_CONTEXT_CORE_PROFILE_BIT_ARB,						// 核心模式
+			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_DEBUG_BIT_ARB,													//开启调试
+			0																																							//结束标记
 	};
 
 	HGLRC modernContext = wglCreateContextAttribsARB(hdc, 0, attribs);
@@ -276,6 +290,11 @@ bool XOpenGLContext::create(uint64_t winId)
 		//std::cout << "GLEW Error:" << glewGetErrorString(glewInit())<<std::endl;
 		//std::string ss((const char*)glewGetErrorString(glewInit()));
 		XLOG_ERROR("GLEW Error:",  std::string(reinterpret_cast<const char*>(glewGetErrorString(glewInit()))));
+	}
+	else {
+		//启用调试
+		glEnable(GL_DEBUG_OUTPUT);
+		glDebugMessageCallback(debugCallback, nullptr);
 	}
 	
 	XLOG_INFO("OpenGL version:", std::string(reinterpret_cast<const char*>(glGetString(GL_VERSION))));

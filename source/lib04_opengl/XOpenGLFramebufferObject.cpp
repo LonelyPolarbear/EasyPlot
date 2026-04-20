@@ -126,6 +126,7 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		auto colorTexture = makeShareDbObject<XOpenGLTexture>();
 		colorTexture->setTarget(XOpenGLTexture::Target::Target2D);
 		colorTexture->setInternalFormat(internalFormat);
+		colorTexture->setExternalFormat(inputdataPixelFormat, inputdataPixelType);
 		colorTexture->create();
 
 		colorTexture->bind();
@@ -133,7 +134,7 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		colorTexture->setMinificationFilter(XOpenGLTexture::Filter::Nearest);
 		colorTexture->setMagnificationFilter(XOpenGLTexture::Filter::Nearest);
 
-		colorTexture->setData(d->width, d->height, 0, /*internalFormat,*/ inputdataPixelFormat, inputdataPixelType, nullptr);
+		colorTexture->texStorage2D(d->width, d->height);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+index, colorTexture->getTarget(), colorTexture->getId(), 0);
 
@@ -144,6 +145,7 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		d->depthStencilTexture = makeShareDbObject<XOpenGLTexture>();
 		d->depthStencilTexture->setTarget(XOpenGLTexture::Target::Target2D);
 		d->depthStencilTexture->setInternalFormat(internalFormat);
+		d->depthStencilTexture->setExternalFormat(inputdataPixelFormat, inputdataPixelType);
 		d->depthStencilTexture->create();
 
 		d->depthStencilTexture->bind();
@@ -156,7 +158,7 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 		float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 		
-		d->depthStencilTexture->setData(d->width, d->height, 0/*, internalFormat*/, inputdataPixelFormat, inputdataPixelType, nullptr);
+		d->depthStencilTexture->texStorage2D(d->width, d->height);
 
 		if (attachment == Attachment::Depth) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
@@ -167,24 +169,57 @@ void XOpenGLFramebufferObject::addAttachment(Attachment attachment,
 	}
 }
 
-void XOpenGLFramebufferObject::addAttachment(Attachment attachment, sptr<XOpenGLTexture> texture, int index)
+void XOpenGLFramebufferObject::addAttachment(Attachment attachment, sptr<XOpenGLTexture> texture, int index, int level, int layer)
 {
-	if (attachment == Attachment::Color) {
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, texture->getTarget(), texture->getId(), 0);
-		d->colorTextures[index] = texture;
-	}
-	else {
+	unsigned int Attachment_enum =0;
+	switch (attachment)
+	{
+	case XOpenGLFramebufferObject::CombinedDepthStencil: 
+	{
 		d->depthStencilAttachment = attachment;
 		d->depthStencilTexture = texture;
-		if (attachment == Attachment::Depth) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
-		}
-		else if(attachment == Attachment::stencil) {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
-		}
-		else {
-			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
-		}
+		Attachment_enum = GL_DEPTH_STENCIL_ATTACHMENT;
+	}
+		break;
+	case XOpenGLFramebufferObject::Depth:
+	{
+		d->depthStencilAttachment = attachment;
+		d->depthStencilTexture = texture;
+		Attachment_enum = GL_DEPTH_ATTACHMENT;
+	}
+		break;
+	case XOpenGLFramebufferObject::Color: {
+		Attachment_enum = GL_COLOR_ATTACHMENT0 + index;
+		d->colorTextures[index] = texture;
+	}
+		break;
+	case XOpenGLFramebufferObject::stencil:
+	{
+		d->depthStencilAttachment = attachment;
+		d->depthStencilTexture = texture;
+		Attachment_enum = GL_STENCIL_ATTACHMENT;
+	}
+		break;
+	default:
+		break;
+	}
+	
+	if (texture->getTarget() == XOpenGLTexture::Target1D) {
+		glFramebufferTexture1D(GL_FRAMEBUFFER, Attachment_enum, texture->getTarget(), texture->getId(), level);
+	}
+	else if (texture->getTarget() == XOpenGLTexture::Target1DArray) {
+		glFramebufferTextureLayer(GL_FRAMEBUFFER, Attachment_enum, texture->getId(), level,layer);
+		//glFramebufferTexture2D(GL_FRAMEBUFFER, Attachment_enum, texture->getTarget(), texture->getId(), level);
+	}
+	else if (texture->getTarget() == XOpenGLTexture::Target2D) {
+		glFramebufferTexture2D(GL_FRAMEBUFFER, Attachment_enum, texture->getTarget(), texture->getId(), level);
+	}
+	else if (texture->getTarget() == XOpenGLTexture::Target2DArray) {
+		glFramebufferTextureLayer(GL_FRAMEBUFFER,Attachment_enum, texture->getId(), level, layer);
+	}
+	else if (texture->getTarget() == XOpenGLTexture::Target3D) {
+		//glFramebufferTexture()
+		glFramebufferTexture3D(GL_FRAMEBUFFER, Attachment_enum, texture->getTarget(), texture->getId(), level,layer);
 	}
 }
 
@@ -199,14 +234,13 @@ int index)
 		auto colorTexture = makeShareDbObject<XOpenGLTexture>();
 		colorTexture->setTarget(XOpenGLTexture::Target::Target2DMultisample);
 		colorTexture->setInternalFormat(internalFormat);
+		colorTexture->setExternalFormat(inputdataPixelFormat,inputdataPixelType);
 		colorTexture->create();
 
 		colorTexture->bind();
 		XOpenGLFuntion::checkGLError();
-		//colorTexture->setMinificationFilter(XOpenGLTexture::Filter::Nearest);
-		//colorTexture->setMagnificationFilter(XOpenGLTexture::Filter::Nearest);
 		XOpenGLFuntion::checkGLError();
-		colorTexture->setMultiSample(d->width, d->height, 8, /*internalFormat,*/ inputdataPixelFormat, inputdataPixelType);
+		colorTexture->texStorage2DMultiSample(d->width, d->height, 8);
 		XOpenGLFuntion::checkGLError();
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, colorTexture->getTarget(), colorTexture->getId(), 0);
 
@@ -218,6 +252,7 @@ int index)
 		d->depthStencilTexture = makeShareDbObject<XOpenGLTexture>();
 		d->depthStencilTexture->setTarget(XOpenGLTexture::Target::Target2DMultisample);
 		d->depthStencilTexture->setInternalFormat(internalFormat);
+		d->depthStencilTexture->setExternalFormat(inputdataPixelFormat, inputdataPixelType);
 		d->depthStencilTexture->create();
 
 		d->depthStencilTexture->bind();
@@ -230,7 +265,7 @@ int index)
 		float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 		//glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 
-		d->depthStencilTexture->setMultiSample(d->width, d->height, 8, /*internalFormat,*/ inputdataPixelFormat, inputdataPixelType);
+		d->depthStencilTexture->texStorage2DMultiSample(d->width, d->height, 8);
 
 		if (attachment == Attachment::Depth) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
@@ -264,22 +299,15 @@ bool XOpenGLFramebufferObject::updateBufferSize(int width, int height)
 	
 
 	for(auto& [index, colorTexture]: d->colorTextures){
-		auto dataPixelFormat = colorTexture->getInputDataPixelFormat();
-		auto dataPixelType = colorTexture->getInputDataPixelType();
-		auto internalFormat = colorTexture->getInternalFormat();
 		colorTexture->bind();
-		colorTexture->setData(d->width, d->height, 0, /*internalFormat,*/ dataPixelFormat, dataPixelType, nullptr);
-		
+		colorTexture->texStorage2D(d->width, d->height);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0+index, colorTexture->getTarget(), colorTexture->getId(), 0);
 		colorTexture->release();
 	}
 
 	if (d->depthStencilTexture) {
-		auto dataPixelFormat = d->depthStencilTexture->getInputDataPixelFormat();
-		auto dataPixelType = d->depthStencilTexture->getInputDataPixelType();
-		auto internalFormat = d->depthStencilTexture->getInternalFormat();
 		d->depthStencilTexture->bind();
-		d->depthStencilTexture->setData(d->width, d->height, 0, /*internalFormat,*/ dataPixelFormat, dataPixelType, nullptr);
+		d->depthStencilTexture->texStorage2D(d->width, d->height);
 		if (d->depthStencilAttachment == Attachment::Depth) {
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, d->depthStencilTexture->getTarget(), d->depthStencilTexture->getId(), 0);
 		}

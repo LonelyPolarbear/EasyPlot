@@ -1,9 +1,5 @@
 #pragma execution_character_set("utf-8")
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
-#include <boost/python.hpp>
 
-using namespace boost::python;
 #include <pybind11/embed.h>
 #include <filesystem>
 
@@ -29,7 +25,7 @@ int main(int argc, char** argv) {
 	XMainWindow w(nullptr);
 	w.resize(600, 400);
 	w.show();
-	w.hide();
+	//w.hide();
 
 	auto ins = XPython::Instance();
 	ins->execute("import xq");

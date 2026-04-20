@@ -56,7 +56,7 @@ void XGLWidget::render()
 XQ::Vec2u  XGLWidget::mapToGLScreen(const QPoint& point) const{
 	XQ::Vec2u p;
 	p.x() = point.x();
-	p.y() = mHeight - point.y();
+	p.y() = mHeight - point.y()+1;
 	return p;
 }
 

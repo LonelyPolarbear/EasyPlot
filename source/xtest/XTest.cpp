@@ -7,18 +7,14 @@
 #include <map>
 #include <functional>
 
-#include <linenoise/linenoise.h>
+//#include <linenoise/linenoise.h>
+#include <replxx.hxx>
 #include <CLI/CLI.hpp>
 
-// 将字符串转换为小写（注意处理 unsigned char 避免断言）
-static std::string toLower(const std::string& s) {
-	std::string result;
-	result.reserve(s.size());
-	for (unsigned char c : s) {
-		result.push_back(static_cast<char>(std::tolower(c)));
-	}
-	return result;
-}
+#include <nlohmann/json.hpp>
+#ifdef _WIN32
+#define strncasecmp _strnicmp
+#endif
 
 struct CLI_cmd_data {
 	std::string cmd;
@@ -26,17 +22,51 @@ struct CLI_cmd_data {
 	std::function<void()> fn;
 };
 
-void completionHook(const char* buf, linenoiseCompletions* lc, void* userdata) {
-	std::map<std::string, CLI_cmd_data> *cmdCallbacks = (std::map<std::string, CLI_cmd_data>*)userdata;
-	std::string input(buf);
-	std::string inputLower = toLower(input);
-	//std::string inputLower = toLower(input);
-	for (auto & cmd : *cmdCallbacks) {
-		std::string cmdLower = toLower(cmd.first);
-		if (cmdLower.find(inputLower) == 0) {
-			linenoiseAddCompletion(lc, cmd.first.c_str());
+std::string getPrefix(const std::string& context) {
+	//从前到后 数到前面空格开始 算本次的前缀 abc def,则前缀为 def
+	int i = context.size() - 1;
+	auto ss = context[i];
+	while (i >= 0 && context[i] != ' ') --i;
+
+	auto str = context.substr(i + 1);
+	return str;
+}
+
+replxx::Replxx::completions_t hook_completion(std::string const& context, int& contextLen,
+	std::vector<std::string> const& examples,
+	bool ignoreCase) {
+	replxx::Replxx::completions_t completions;
+
+	std::string prefix = getPrefix(context);
+	int prefixLen = prefix.size();
+
+	// 3. 收集匹配的补全候选（忽略大小写）
+	std::vector<std::string> matches;
+	for (const auto& e : examples) {
+		bool match = ignoreCase
+			? (strncasecmp(e.c_str(), prefix.c_str(), prefix.size()) == 0)
+			: (e.compare(0, prefix.size(), prefix) == 0);
+		if (match) {
+			matches.push_back(e);
 		}
 	}
+
+	if (matches.empty()) {
+		return completions;  // 无匹配
+	}
+
+	// 构建补全列表
+	if (matches.size() > 1) {
+		for (const auto& m : matches) {
+			replxx::Replxx::Color color = replxx::Replxx::Color::RED;
+			completions.emplace_back(m.c_str(), color);
+		}
+	}
+	else {
+		contextLen = prefixLen;		//replxx 会删除光标前的几个字符
+		completions.emplace_back(matches[0], replxx::Replxx::Color::DEFAULT);
+	}
+	return completions;
 }
 
 class XTestApp::Internal {
@@ -48,10 +78,12 @@ public:
 		delete app;
 	}
 public:
-	char *line = nullptr;
+	std::string input;
 	std::map<std::string, CLI_cmd_data> cmdCallbacks;
 	CLI::App* app = nullptr;
 	std::vector<XTestApp*> subApps;
+	replxx::Replxx rx;
+	std::vector<std::string> candidates;
 
 protected:
 	bool isNew = true;
@@ -59,7 +91,7 @@ protected:
 
 XTestApp::XTestApp(const std::string& name,const std::string& desc ):mData(new Internal())
 {
-	linenoiseSetCompletionCallback(completionHook, &mData->cmdCallbacks);
+	mData->rx.set_completion_callback(std::bind(&hook_completion, std::placeholders::_1, std::placeholders::_2, std::cref(mData->candidates), true));
 	mData->app->name(name)->description(desc);
 }
 
@@ -69,36 +101,15 @@ XTestApp::~XTestApp()
 
 int XTestApp::run()
 {
-	//for (auto d : mData->cmdCallbacks) {
-		//app.add_subcommand(d.first, d.second.cmdDesc)->callback(d.second.fn);
-	//}
-
-	/*
-	bool flag = false;
-	app.add_flag("-f,--flag", flag, "这是一个标志选项");
-
-	int number = 0;
-	app.add_option("-n,--number", number, "一个整数参数");
-
-	std::string name = "default";
-	app.add_option("--name", name, "你的名字")->required();  // 带这个关键字说明必须有
-	*/
 	while (true) {
-		std::cout << "> ";
-		mData->line = linenoise("> ");
-		if (mData->line == nullptr) break;
+		mData->input = mData->rx.input(">>> ");
+		if (mData->input.empty()) continue;
 
-		std::string input(mData->line);
+		mData->rx.history_add(mData->input);
 
-		//if (!std::getline(std::cin, line) || line == "exit") break;
-		if (input.empty()) continue;
-
-		linenoiseHistoryAdd(input.c_str());
-		linenoiseHistorySave("history.txt"); // 保存历史记录
-
-		if(input =="exit")
+		if (mData->input == "exit")
 			break;
-		std::istringstream iss(input);
+		std::istringstream iss(mData->input);
 		std::vector<std::string> args{ std::istream_iterator<std::string>(iss),std::istream_iterator<std::string>() };
 
 		
@@ -120,6 +131,7 @@ int XTestApp::run()
 XTestApp* XTestApp::addCmd(const std::string& cmd, const std::string& desc, const std::function<void()>& func)
 {
 	mData->cmdCallbacks[cmd] = CLI_cmd_data{ cmd,desc,func };
+	mData->candidates.push_back(cmd);
 	auto sub_cli_app = mData->app->add_subcommand(cmd, desc)->callback(func);
 	return this;
 }

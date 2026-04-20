@@ -80,7 +80,7 @@ XViewSelection::XSelectData XViewSelection::getPointSelection(int x, int y, int 
 	
 	//读取当前位置的对象ID
 	auto fbo = d->fboPeeling[layer];
-	auto pbo = fbo->getColorAttachment()->map();
+	auto pbo = fbo->getColorAttachment()->map2pbo();
 	if (auto ptrColorTexture = (unsigned int*)pbo->map(XOpenGLBuffer::Access::ReadOnly)) {
 		//采样纹理
 		auto color1 = ptrColorTexture + (y-1) * ViewportWidth * 4 + (x-1) * 4;
@@ -136,7 +136,7 @@ std::vector< std::vector<XViewSelection::XSelectData>> XViewSelection::getBoxSel
 		auto fbo = d->fboPeeling[i];
 		//读取当前位置的对象ID
 		std::vector< XSelectData> layerSelect;
-		auto pbo = fbo->getColorAttachment()->map();
+		auto pbo = fbo->getColorAttachment()->map2pbo();
 		if (auto ptrColorTexture = (unsigned int*)pbo->map(XOpenGLBuffer ::Access::ReadOnly)) {
 			//采样纹理
 

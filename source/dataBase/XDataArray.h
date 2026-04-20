@@ -141,23 +141,20 @@ public:
         return dest;
     }
     
-    #if 0
+    /**
+     * @brief 数据类型转换，直接复制
+     */
 	template<typename U>
-	sptr<XDataArray1D<U>> heteroCast() {
-		auto tupleNum = getNumOfTuple();
-		auto typeNum = size();
+	sptr<XDataArray1D<U>>convert() {
 		auto dest = makeShareDbObject<XDataArray1D<U>>();
 		dest->setComponent(component);
-		dest->setNumOfTuple(tupleNum);
-
-		auto pdest = dest->data(0);
-		auto src = data(0);
-		for (int i = 0; i < typeNum; i++) {
-			pdest[i] = src[i];
+		dest->setNumOfTuple(getNumOfTuple());
+		for (int i = 0; i < getNumOfTuple(); i++) {
+			dest->setTuple(i, *data(i));
 		}
-		return dest;
+        return dest;
 	}
-    #endif
+
 	template<typename ...Args>
 	void setRowData(Args&& ...args) {
 		setRowDataImpl(std::make_index_sequence<sizeof...(Args)>{}, std::forward_as_tuple(args...));
@@ -370,9 +367,9 @@ private:
 				}  
             }
             osm <<std::endl;
-            return osm;
         }
         std::cout << std::endl;
+        return osm;
     }
 
 	std::string toString(bool reverse = false) {

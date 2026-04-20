@@ -91,12 +91,12 @@ void RenderWindowUbo::writeGS(const Eigen::Vector2f& viewport, float sceneScale)
 	uniformBufferGs->release();
 }
 
-void RenderWindowUbo::writeCamera(int type, double near, double far)
+void RenderWindowUbo::writeCamera(int type, float near, float far)
 {
 	uniformBufferCamera->bind();
 	uniformBufferCamera->write(0, &type, 1);
 	uniformBufferCamera->write(1, &near, 1);
-	uniformBufferCamera->write(2, &far, 1);
+	uniformBufferCamera->write(2, &far, 1); 
 	uniformBufferGs->release();
 }
 

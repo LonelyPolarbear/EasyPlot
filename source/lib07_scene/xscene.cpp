@@ -560,10 +560,10 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
         sptr<XOpenGLBuffer> pbo;
        
 		if (multisampleEnable) {
-            pbo = texture->mapMultiSampleColor(fbo->getId());
+            //pbo = texture->mapMultiSampleColor(fbo->getId());
 		}
 		else {
-            pbo = texture->map();
+            pbo = texture->map2pbo();
 		}
 
         void *p = pbo->map(XOpenGLBuffer::Access::ReadOnly);
@@ -585,10 +585,10 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
         sptr<XOpenGLBuffer> pbo;
 		if (depthEnable) {
 			if (multisampleEnable == true) {
-                pbo = texture->mapMultiSampleDepth(fbo->getId());
+               // pbo = texture->mapMultiSampleDepth(fbo->getId());
 			}
 			else {
-                pbo = texture->map();
+                pbo = texture->map2pbo();
 			}
 		}
         void* p = pbo->map(XOpenGLBuffer::Access::ReadOnly);
@@ -740,6 +740,7 @@ void XScene::render2D()
     
             d->fontTexture = texture;
             d->fontTexture->setInternalFormat(XOpenGLTexture::TextureFormat::RGB8_UNorm);
+            d->fontTexture->setExternalFormat(XOpenGLTexture::PixelFormat::RGB, XOpenGLTexture::PixelType::UInt8);
 			d->fontTexture->bind();
 			d->fontTexture->bindUnit(6);
 			d->fontTexture->release();
@@ -775,7 +776,11 @@ void XScene::render2D()
 				if (d->result_future.valid() &&  d->result_future.wait_for(std::chrono::milliseconds(100)) == std::future_status::ready) {
 					auto datas = d->result_future.get();
 					d->fontTexture->bind();
-					d->fontTexture->setData(std::get<0>(datas), std::get<1>(datas), 0, XOpenGLTexture::PixelFormat::RGB, XOpenGLTexture::PixelType::UInt8, std::get<2>(datas));
+                    auto array_data = std::get<2>(datas);
+                    d->fontTexture->texStorage3D(std::get<0>(datas), std::get<1>(datas), std::get<2>(datas).size());
+                    for(int i=0;i<array_data.size();i++){
+					    d->fontTexture->setSubData3D(0,0, 0,std::get<0>(datas), std::get<1>(datas),i,array_data[i]);
+                    }
 					d->fontTexture->release();
 
                     //ÄÚ´æÊÍ·Å

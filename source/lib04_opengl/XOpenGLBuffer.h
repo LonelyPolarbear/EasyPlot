@@ -78,8 +78,14 @@ protected:
     XOpenGLBuffer();
     ~XOpenGLBuffer();
 public:
+	/**
+	 * @brief 设置缓冲区类型
+	 */
 	void setBufferType(XOpenGLBuffer::Type type);
 
+	/**
+	 * @brief 创建底层缓冲区(不分配内存)
+	 */
 	bool create();
 
 	template<typename T>

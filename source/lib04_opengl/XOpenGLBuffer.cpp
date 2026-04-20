@@ -60,7 +60,6 @@ uint32_t XOpenGLBuffer::bufferSize() const
 
 bool XOpenGLBuffer::write(int offset, const void* data, int count)
 {
-	//glBufferSubData(GL_ARRAY_BUFFER, offset,count, data);
 	glBufferSubData(d->type, offset, count, data);
 	return glGetError() == GL_NO_ERROR;
 }

@@ -42,6 +42,7 @@ add_library(${proName}  SHARED)
 
 generate_dllapi_if_needed(${proName} )
 get_dll_api_macro(${proName} DLL_API_NAME)
+target_compile_definitions(${proName} PRIVATE REPLXX_STATIC)
 
 target_sources(${proName} PRIVATE  ${SOURCES_FILES} ${HEADERS_FILES})						#设置源文件和头文件
 #将动态库名字设为add
@@ -52,4 +53,4 @@ set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS ${proName})												#添�
 
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})											#库目录
 target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})						#包含目录
-target_link_libraries(${proName} ${LIB_NAMES})																			#依赖的lib目标名称
+target_link_libraries(${proName} PRIVATE ${LIB_NAMES})																			#依赖的lib目标名称

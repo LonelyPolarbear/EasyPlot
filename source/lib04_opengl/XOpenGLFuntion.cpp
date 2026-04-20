@@ -267,7 +267,7 @@ std::vector<std::string> XOpenGLFuntion::xglGetExtensions()
 	// 获取扩展数量
 	GLint numExtensions = 0;
 	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
-
+	
 	// 遍历扩展列表
 	for (int i = 0; i < numExtensions; ++i) {
 		const char* extension = (const char*)glGetStringi(GL_EXTENSIONS, i);

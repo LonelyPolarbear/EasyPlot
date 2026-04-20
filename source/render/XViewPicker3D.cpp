@@ -91,27 +91,29 @@ XQ::XSelectData XViewPicker3D::getPointSelection(XQ::Vec2i pos)
 	auto render =mData->render.lock();
 	
 	auto fbo = mData->fboPeeling[0];
-	auto pbo = fbo->getColorAttachment()->map();
-
+	
 	XQ::XSelectData result;
-
+#if 1
+	auto pick_data = fbo->getColorAttachment()->getSubData2D(pos[0], pos[1], 1, 1, 0, 0);
+	unsigned int *pPickData = (unsigned int*)pick_data->data(0);
+	result.objectId = pPickData[0];
+	result.primitiveId = pPickData[1];
+#else
+	auto pbo = fbo->getColorAttachment()->map2pbo();
 	auto windowViewport = render->getConvertViewPort();
 	auto ViewportWidth = fbo->getWidth();
-	
-	//auto point = render->window2render(pos);
 	int x = pos[0];
 	int y = pos[1];
-	auto ddd = pbo->map2cpu();
 	if (auto ptrColorTexture = (unsigned int*)pbo->map(XOpenGLBuffer::Access::ReadOnly)) {
 		//²ÉÑùÎÆÀí
-		auto color1 = ptrColorTexture + (y - 1) * ViewportWidth * 4 + (x - 1) * 4;
+		auto color1 = ptrColorTexture + y* ViewportWidth * 4 + x * 4;
 		auto objectId = color1[0];
 		auto primitiveId = color1[1];
 		result.objectId = objectId;
 		result.primitiveId = primitiveId;
 	}
-
 	pbo->unmap();
+#endif
 	doneCurrent();
 
 	return result;

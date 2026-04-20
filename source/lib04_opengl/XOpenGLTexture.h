@@ -5,20 +5,30 @@
 #include "XOpenGLType.h"
 
 class XOpenGLBuffer;
-class LIB04_OPENGL_API XOpenGLTexture :XDataBaseObject{
+/**
+ * @class				XOpenGLBuffer
+ * @brief				纹理对象
+ * @details			纹理对象是OpenGL中的一种资源对象，用于存储和操作图像数据。
+ *							包含纹理创建 数据写入 数据回读 纹理销毁等操作
+ * @author			宋伟军
+ * @date				2026-04-20
+ * @version			1.0
+ * @warning		只允许在当前上下文所在的线程使用
+ */
+class LIB04_OPENGL_API XOpenGLTexture :public XDataBaseObject{
 public:
 	enum Target {
-		Target1D = 0x0DE0,									// GL_TEXTURE_1D
-		Target1DArray = 0x8C18,							// GL_TEXTURE_1D_ARRAY
-		Target2D = 0x0DE1,									// GL_TEXTURE_2D
-		Target2DArray = 0x8C1A,							// GL_TEXTURE_2D_ARRAY
-		Target3D = 0x806F,									// GL_TEXTURE_3D
-		TargetCubeMap = 0x8513,							// GL_TEXTURE_CUBE_MAP
-		TargetCubeMapArray = 0x9009,				// GL_TEXTURE_CUBE_MAP_ARRAY
-		Target2DMultisample = 0x9100,				// GL_TEXTURE_2D_MULTISAMPLE
-		Target2DMultisampleArray = 0x9102,		// GL_TEXTURE_2D_MULTISAMPLE_ARRAY
-		TargetRectangle = 0x84F5,						// GL_TEXTURE_RECTANGLE
-		TargetBuffer = 0x8C2A								// GL_TEXTURE_BUFFER
+		Target1D = 0x0DE0,									///<  GL_TEXTURE_1D
+		Target1DArray = 0x8C18,							///<  GL_TEXTURE_1D_ARRAY
+		Target2D = 0x0DE1,									///<  GL_TEXTURE_2D
+		Target2DArray = 0x8C1A,							///<  GL_TEXTURE_2D_ARRAY
+		Target3D = 0x806F,									///<  GL_TEXTURE_3D
+		TargetCubeMap = 0x8513,							///<  GL_TEXTURE_CUBE_MAP
+		TargetCubeMapArray = 0x9009,				///<  GL_TEXTURE_CUBE_MAP_ARRAY
+		Target2DMultisample = 0x9100,				///<  GL_TEXTURE_2D_MULTISAMPLE
+		Target2DMultisampleArray = 0x9102,		///<  GL_TEXTURE_2D_MULTISAMPLE_ARRAY
+		TargetRectangle = 0x84F5,						///<  GL_TEXTURE_RECTANGLE
+		TargetBuffer = 0x8C2A								///<  GL_TEXTURE_BUFFER
 	};
 
 	enum MipMapGeneration {
@@ -324,12 +334,12 @@ public:
 	void setExternalFormat( PixelFormat inputDataFormat, PixelType inputDataPixelType);
 
 	/**
-	 * @brief 一维纹理分配内存
+	 * @brief 一维纹理分配内存分配大小 width *internalDataSize,如果当前大小为0，或者不等于预分配大小，则重新分配，否则直接返回，避免多次分配
 	 */
 	void texStorage1D(int width);
 
 	/**
-	 * @brief 二维纹理分配内存
+	 * @brief 二维纹理分配内存 Target1DArray、Target2D
 	 */
 	void texStorage2D(int width, int height);
 
@@ -339,7 +349,7 @@ public:
 	void texStorage2DMultiSample(int width, int height,int sampleNum);
 
 	/**
-	 * @brief 三维纹理分配内存
+	 * @brief 三维纹理分配内存 Target2DArray、Target3D
 	 */
 	void texStorage3D(int width, int height, int depth);
 
@@ -349,19 +359,38 @@ public:
 	void texStorage3DMultiSample(int width, int height, int depth, int sampleNum);
 
 	/**
-	* @brief 填充一维纹理数据
+	* @brief 填充一维纹理数据，不进行大小检查，用户应该保证大小
 	*/
 	void setSubData1D(int xoffset, int width, const void* data);
 
 	/**
-	* @brief 填充二维纹理数据
+	* @brief 填充二维纹理数据 Target1DArray、Target2D
 	*/
 	void setSubData2D(int xoffset, int yoffset, int width, int height, const void* data);
 
 	/**
-	* @brief 填充三维纹理数据
+	* @brief 填充三维纹理数据 Target2DArray、Target3D
 	*/
 	void setSubData3D(int xoffset, int yoffset, int zoffset, int width, int height, int depth, const void* data);
+
+	/**
+	 * @brief					利用fbo 读取一维纹理数据,用于Target1D、Target1DArray
+	 * @param[in]			xoffset			偏移量，如果读取的是一维数组纹理，则表示的是当前层的偏移
+	 * @param[in]			width			读取的纹素个数
+	 * @param[in]			level				mipmap层级
+	 * @param[in]			layer			要读取的一维纹理数组的当前层
+	 */
+	sptr<XUCharArray> getSubData1D(int xoffset, int width, int level=0, int layer =0);
+
+	/**
+	 * @brief 利用fbo 读取二维纹理数据 用于Target1DArray、Target2D、Target2DArray
+	 */
+	sptr<XUCharArray2D> getSubData2D(int xoffset, int yoffset, int width, int height, int level =0, int layer=0);
+
+	/**
+	 * @brief 利用fbo 读取三维纹理数据 Target2DArray Target3D
+	 */
+	sptr<XUCharArray3D> getSubData3D(int xoffset, int yoffset, int zoffset, int width, int height, int depth);
 
 	/**
 	* @brief 读取纹理数据到pbo
@@ -371,7 +400,7 @@ public:
 	/**
 	* @brief 读取多重采样纹理数据到pbo
 	*/
-	sptr<XOpenGLBuffer> mapMultiSample2pbo();
+	sptr<XOpenGLBuffer> mapMultiSample2pbo(unsigned int attachment);
 
 	/**
 	* @brief 获取纹理目标类型
@@ -441,60 +470,16 @@ public:
 	* @brief 打印纹理内容
 	*/
 	std::string dump() override;
-	//计划丢弃
-	void setData(
-						int width, 
-						int height, 
-						int level,
-						XOpenGLTexture::PixelFormat dataFormat,
-						XOpenGLTexture::PixelType type,
-						const void* data);
-	
-	//计划丢弃
-	void setMultiSample(
-		int width,
-		int height,
-		int sampleNum,
-		XOpenGLTexture::PixelFormat dataFormat,
-		XOpenGLTexture::PixelType type);
-
-	//计划丢弃
-	void setData(
-		int width,
-		int height,
-		int level,
-		XOpenGLTexture::PixelFormat dataFormat,
-		XOpenGLTexture::PixelType type,
-		std::vector< const void*> datas);
-
-	//计划丢弃
-	void XOpenGLTexture::setData(
-		CubeMapFace cubeFace,
-		int width,
-		int height,
-		int level,
-		XOpenGLTexture::PixelFormat dataFormat,
-		XOpenGLTexture::PixelType datatype,
-		const void* data);
-
-	void GenerateMipmap();
-
-	//计划丢弃
-	sptr<XOpenGLBuffer> map(int alignment = 1);
-
-	//计划丢弃
-	sptr<XOpenGLBuffer> map(int pboWidth,int pboHeight,int x,int y);
-
-	//计划丢弃
-	sptr<XOpenGLBuffer> mapMultiSampleColor(unsigned int fboId);
-
-	//计划丢弃
-	sptr<XOpenGLBuffer> mapMultiSampleDepth(unsigned int fboId);
 
 	/**
 	* @brief 返回纹理内部单个像素占据的内存字节数量
 	*/
 	static unsigned int getInternalFormatSize(XOpenGLTexture::TextureFormat format);
+
+	/**
+	* @brief 对于指定的外部纹理格式和像素类型，返回每个像素占据的字节数
+	*/
+	static unsigned int getExternalPerpixelSize(XOpenGLTexture::PixelFormat format, XOpenGLTexture::PixelType type);
 
 	XOpenGL::TextureBindingType getTextureBindType() const;
 protected:
