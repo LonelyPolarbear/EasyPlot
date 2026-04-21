@@ -23,15 +23,38 @@ public:
 	int getChildCount() const;
 	sptr<XRenderNode> getChild(int index) const;
 	sptr<XRenderNode> getRenderNodeParent() const;
-	//void setRenderNodeParent(sptr<XRenderNode> parent);
+	
+	virtual void setVisible(bool visible);
+
+	virtual bool isVisible();
 
 	void setShaderManger(std::shared_ptr<xShaderManger> shaderManger);
 
 	std::shared_ptr<xShaderManger> getShaderManger() const;
 
 	//公共的虚口
-	XQ::BoundBox getBoundBox(const Eigen::Matrix4f& m) const;
+	virtual XQ::BoundBox getBoundBox(const Eigen::Matrix4f& m) const;
+
 	virtual XQ::BoundBox getThisBoundBox(const Eigen::Matrix4f& m) const { return {}; };
+
+	Eigen::Affine3f getTransform() const;
+
+	void setTransform(const Eigen::Affine3f& transform);
+
+	void resetTransform();
+
+	virtual void translate(float x, float y, float z);
+	virtual void setPosition(float x, float y, float z);
+	virtual void setScale(float x, float y, float z);
+	virtual void rotate(float angle, XQ::Vec3f dir);
+
+	/**
+	 * @brief 旋转变换 angle角度，不是弧度
+	 */
+	virtual void rotateX(float angle);
+	virtual void rotateY(float angle);
+	virtual void rotateZ(float angle);
+	virtual void scale(float x, float y, float z);
 protected:
 	XRenderNode();
 	~XRenderNode();

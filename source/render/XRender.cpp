@@ -51,7 +51,6 @@ public:
 	wptr<XOpenGLRenderWindow> m_renderWindow;
 	sptr<XRenderMultiModeInteractionHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
-	//sptr<XGroupRenderNode3d> m_group3D;
 
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
@@ -86,6 +85,7 @@ void XRender::Init()
 void XRender::setRenderWindow(sptr<XOpenGLRenderWindow> renderWindow)
 {
 	mData->m_renderWindow = renderWindow;
+	m_group3D->setShaderManger(getRenderWindow()->getShaderManger());
 }
 
 sptr<XOpenGLRenderWindow> XRender::getRenderWindow() const
@@ -387,26 +387,5 @@ XQ::BoundBox  XRender::computeBoundBox() {
 	boundBox.zmin = std::min(boundBox.zmin, shapeBoundBox.zmin);
 	boundBox.zmax = std::max(boundBox.zmax, shapeBoundBox.zmax);
 
-	/*for (auto& shape : mData->m_actor3DList) {
-		if (shape->asDerived<XInfinitePlaneRenderNode>()) {
-			continue;
-		}
-		auto shapeBoundBox = shape->getBoundBox(Eigen::Matrix4f::Identity());
-		boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);
-		boundBox.xmax = std::max(boundBox.xmax, shapeBoundBox.xmax);
-		boundBox.ymin = std::min(boundBox.ymin, shapeBoundBox.ymin);
-		boundBox.ymax = std::max(boundBox.ymax, shapeBoundBox.ymax);
-		boundBox.zmin = std::min(boundBox.zmin, shapeBoundBox.zmin);
-		boundBox.zmax = std::max(boundBox.zmax, shapeBoundBox.zmax);
-	}
-
-	if (mData->m_actor3DList.size() == 0) {
-		boundBox.xmin = -1;
-		boundBox.xmax = 1;
-		boundBox.ymin = -1;
-		boundBox.ymax = 1;
-		boundBox.zmin = -1;
-		boundBox.zmax = 1;
-	}*/
 	return boundBox;
 }

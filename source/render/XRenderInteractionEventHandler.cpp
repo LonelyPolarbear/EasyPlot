@@ -10,7 +10,7 @@ XRenderInteractionEventHandler::~XRenderInteractionEventHandler()
 {
 }
 
-void XRenderInteractionEventHandler::LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if(!isRenderActive())
 		return;
@@ -18,7 +18,7 @@ void XRenderInteractionEventHandler::LeftButtonPressEvent(XQ::Vec2i, XQ::Keyboar
 	//XQ::print("Render LeftButtonPressEvent");
 }
 
-void XRenderInteractionEventHandler::LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
@@ -26,7 +26,7 @@ void XRenderInteractionEventHandler::LeftButtonReleaseEvent(XQ::Vec2i, XQ::Keybo
 	//XQ::print("Render LeftButtonReleaseEvent");
 }
 
-void XRenderInteractionEventHandler::MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
@@ -34,7 +34,7 @@ void XRenderInteractionEventHandler::MiddleButtonPressEvent(XQ::Vec2i, XQ::Keybo
 	//XQ::print("Render MiddleButtonPressEvent");
 }
 
-void XRenderInteractionEventHandler::MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
@@ -42,7 +42,7 @@ void XRenderInteractionEventHandler::MiddleButtonReleaseEvent(XQ::Vec2i, XQ::Key
 	//XQ::print("Render MiddleButtonReleaseEvent");
 }
 
-void XRenderInteractionEventHandler::RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
@@ -50,7 +50,7 @@ void XRenderInteractionEventHandler::RightButtonPressEvent(XQ::Vec2i, XQ::Keyboa
 	//XQ::print("Render RightButtonPressEvent");
 }
 
-void XRenderInteractionEventHandler::RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
@@ -58,7 +58,7 @@ void XRenderInteractionEventHandler::RightButtonReleaseEvent(XQ::Vec2i, XQ::Keyb
 	//XQ::print("Render RightButtonReleaseEvent");
 }
 
-void XRenderInteractionEventHandler::EnterEvent()
+void XRenderInteractionEventHandler::EnterEvent(XEvent& event)
 {
 	if (!isRenderActive())
 		return;
@@ -66,7 +66,7 @@ void XRenderInteractionEventHandler::EnterEvent()
 	//XQ::print("Render EnterEvent");
 }
 
-void XRenderInteractionEventHandler::LeaveEvent()
+void XRenderInteractionEventHandler::LeaveEvent(XEvent& event)
 {
 	if (!isRenderActive())
 		return;
@@ -74,56 +74,56 @@ void XRenderInteractionEventHandler::LeaveEvent()
 	//XQ::print("Render LeaveEvent");
 }
 
-void XRenderInteractionEventHandler::FoucsInEvent()
+void XRenderInteractionEventHandler::FoucsInEvent(XEvent& event)
 {
 	if (!isRenderActive())
 		return;
 	//XQ::print("Render FoucsInEvent");
 }
 
-void XRenderInteractionEventHandler::FoucsOutEvent()
+void XRenderInteractionEventHandler::FoucsOutEvent(XEvent& event)
 {
 	if (!isRenderActive())
 		return;
 	//XQ::print("Render FoucsOutEvent");
 }
 
-void XRenderInteractionEventHandler::ResizeEvent(XQ::Vec2i)
+void XRenderInteractionEventHandler::ResizeEvent(XQ::Vec2i, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
 	//XQ::print("Render ResizeEvent");
 }
 
-void XRenderInteractionEventHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
 	//XQ::print("Render KeyPressEvent");
 }
 
-void XRenderInteractionEventHandler::KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
 	//XQ::print("Render KeyReleaseEvent");
 }
 
-void XRenderInteractionEventHandler::MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
 	//XQ::print("Render MouseMoveEvent");
 }
 
-void XRenderInteractionEventHandler::MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;
 	//XQ::print("Render MouseWheelForwardEvent");
 }
 
-void XRenderInteractionEventHandler::MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier)
+void XRenderInteractionEventHandler::MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
 	if (!isRenderActive())
 		return;

@@ -58,5 +58,5 @@ public:
 	csptr<XAttr_Enum<PrimitveType>>  AttrPrimitveType;
 	csptr<XAttr_Color>  AttrSingleColor;
 	csptr<XAttr_Color>  AttrPreSelectColor;
-	csptr<XAttr_Bool> AttrNodeVisible;
+	//csptr<XAttr_Bool> AttrNodeVisible;
 };

@@ -13,30 +13,43 @@ enum class MouseType {
 	middle
 };
 
+class XEvent {
+public:
+	void stopPropagate() {
+		mIsStopPropagate = true;		//不再传播
+	}
+
+	bool isStopPropagate() {			//继续传播
+		return mIsStopPropagate;
+	}
+protected:
+	bool mIsStopPropagate = false;
+};
+
 class XInteractionEventHandler : public XDataBaseObject{
 protected:
 	XInteractionEventHandler();
 	virtual ~XInteractionEventHandler();
 public:
 	void Init() override; 
-	virtual void LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void EnterEvent();
-	virtual void LeaveEvent();
-	virtual void FoucsInEvent();
-	virtual void FoucsOutEvent();
-	virtual void ResizeEvent(XQ::Vec2i);
-	virtual void KeyPressEvent(XQ::Key, XQ::KeyboardModifier);
-	virtual void KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier);
-	virtual void MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
+	virtual void LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent &event);
+	virtual void LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void EnterEvent(XEvent& event);
+	virtual void LeaveEvent(XEvent& event);
+	virtual void FoucsInEvent(XEvent& event);
+	virtual void FoucsOutEvent(XEvent& event);
+	virtual void ResizeEvent(XQ::Vec2i, XEvent& event);
+	virtual void KeyPressEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event);
+	virtual void KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 
-	virtual void TimeEvent(int id,double time);
+	virtual void TimeEvent(int id,double time, XEvent& event);
 
 	//窗口信号
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigLeftButtonPress;										//鼠标左键摁下
@@ -61,4 +74,7 @@ public:
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigMouseWheelForward;								//滚轮前进
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigMouseWheelBackward;								//滚轮后退
 	XSIGNAL(void(int/*id*/, double/*ms*/)) SigTimeOut;
+protected:
+	class Internal;
+	std::unique_ptr<Internal> mData;
 };

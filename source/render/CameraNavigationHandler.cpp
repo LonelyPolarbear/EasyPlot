@@ -19,19 +19,27 @@ CameraNavigationHandler::~CameraNavigationHandler()
 {
 }
 
-void CameraNavigationHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if(!isRenderActive())
 		return;
-	
+
 	mData->mouseLstPos = getRender()->window2render(windowpos);
 	mData->mouseType = MouseType::left;
 	std::cout << std::dec;
 	XQ::print("CameraNavigationHandler LeftButtonPressEvent ", windowpos, mData->mouseLstPos);
 }
 
-void CameraNavigationHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 
@@ -39,8 +47,12 @@ void CameraNavigationHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::Ke
 	XQ::print("CameraNavigationHandler LeftButtonReleaseEvent");
 }
 
-void CameraNavigationHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 
@@ -48,71 +60,115 @@ void CameraNavigationHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::Ke
 	mData->mouseType = MouseType::middle;
 }
 
-void CameraNavigationHandler::MiddleButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::MiddleButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::none;
 }
 
-void CameraNavigationHandler::RightButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::RightButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::right;
 }
 
-void CameraNavigationHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::none;
 }
 
-void CameraNavigationHandler::EnterEvent()
+void CameraNavigationHandler::EnterEvent(XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::LeaveEvent()
+void CameraNavigationHandler::LeaveEvent(XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::FoucsInEvent()
+void CameraNavigationHandler::FoucsInEvent(XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::FoucsOutEvent()
+void CameraNavigationHandler::FoucsOutEvent(XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::ResizeEvent(XQ::Vec2i)
+void CameraNavigationHandler::ResizeEvent(XQ::Vec2i, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier)
+void CameraNavigationHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier)
+void CameraNavigationHandler::KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	if (mData->mouseType == MouseType::left) {
@@ -137,8 +193,12 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 	}
 }
 
-void CameraNavigationHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	
@@ -147,8 +207,12 @@ void CameraNavigationHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::Ke
 	c->scale(factor);
 }
 
-void CameraNavigationHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void CameraNavigationHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 

@@ -20,8 +20,12 @@ XRenderPickHandler::~XRenderPickHandler()
 {
 }
 
-void XRenderPickHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if(!isRenderActive())
 		return;
 	
@@ -35,14 +39,22 @@ void XRenderPickHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardM
 	//获取拾取到的结果
 	if (select.objectId != 0) {
 		auto node =getRender()->getRenderNode3D(select.objectId);
-		getRender()->SigRenderNodeSelected(node);
+		SigRenderNodeSelected(node);
+		//getRender()->SigRenderNodeSelected(node);
 		std::cout << "objectId:" << select.objectId << " primitiveId:" << select.primitiveId << std::endl;
+	}
+	else {
+		SigRenderNodeSelected(nullptr);
 	}
 		
 }
 
-void XRenderPickHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 
@@ -50,8 +62,12 @@ void XRenderPickHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::Keyboar
 	XQ::print("XRenderPickHandler LeftButtonReleaseEvent");
 }
 
-void XRenderPickHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 
@@ -59,71 +75,115 @@ void XRenderPickHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::Keyboar
 	mData->mouseType = MouseType::middle;
 }
 
-void XRenderPickHandler::MiddleButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::MiddleButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::none;
 }
 
-void XRenderPickHandler::RightButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::RightButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::right;
 }
 
-void XRenderPickHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::none;
 }
 
-void XRenderPickHandler::EnterEvent()
+void XRenderPickHandler::EnterEvent(XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void XRenderPickHandler::LeaveEvent()
+void XRenderPickHandler::LeaveEvent(XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void XRenderPickHandler::FoucsInEvent()
+void XRenderPickHandler::FoucsInEvent(XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void XRenderPickHandler::FoucsOutEvent()
+void XRenderPickHandler::FoucsOutEvent(XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void XRenderPickHandler::ResizeEvent(XQ::Vec2i size)
+void XRenderPickHandler::ResizeEvent(XQ::Vec2i size, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (mData->pick3d)
 		mData->pick3d->slotRenderSizeChanged(size);
 }
 
-void XRenderPickHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier)
+void XRenderPickHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void XRenderPickHandler::KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier)
+void XRenderPickHandler::KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void XRenderPickHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 	if (mData->mouseType == MouseType::left) {
@@ -146,14 +206,22 @@ void XRenderPickHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifie
 	}
 }
 
-void XRenderPickHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }
 
-void XRenderPickHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier)
+void XRenderPickHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
 {
+	if (event.isStopPropagate()) {
+		return;
+	}
+
 	if (!isRenderActive())
 		return;
 }

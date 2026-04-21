@@ -34,25 +34,12 @@ public:
 
 	void drawInstance(const Eigen::Matrix4f& parentMatrix) override {};
 
-	void translate(float x, float y, float z);
-	void setPosition(float x, float y, float z);
-	void setScale(float x, float y, float z);
-	void rotate(float angle, XQ::Vec3f dir);
-
 	//按列矩阵形式存储
 	const float* getMatrix() const;
 
-	void setVisible(bool visible);
+	void setVisible(bool visible) override;
 
-	bool isVisible();
-
-	/// <summary>
-	/// 平移变换 angle角度，不是弧度
-	/// </summary>
-	void rotateX(float angle);
-	void rotateY(float angle);
-	void rotateZ(float angle);
-	void scale(float x, float y, float z);
+	bool isVisible() override;
 
 	//对着色器的设置
 	void setPolygonMode(PolygonMode mode);
@@ -69,7 +56,6 @@ public:
 
 	void setPreSelectColor(XQ::Vec4f color);
 	XQ::Vec4f getPreSelectColor() const;
-	
 
 	XQ::BoundBox getThisBoundBox(const Eigen::Matrix4f& m)  const override;
 

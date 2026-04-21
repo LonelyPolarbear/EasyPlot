@@ -7,6 +7,7 @@
 #include <xsignal/XSignal.h>
 
 class XRender;
+class XRenderNode;
 class CameraNavigationHandler;
 class XRenderPickHandler;
 class XManipulatorHandler;
@@ -16,22 +17,22 @@ protected:
 	XRenderMultiModeInteractionHandler();
 	virtual ~XRenderMultiModeInteractionHandler();
 
-	virtual void LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void EnterEvent();
-	virtual void LeaveEvent();
-	virtual void FoucsInEvent();
-	virtual void FoucsOutEvent();
-	virtual void ResizeEvent(XQ::Vec2i);
-	virtual void KeyPressEvent(XQ::Key, XQ::KeyboardModifier);
-	virtual void KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier);
-	virtual void MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
+	virtual void LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void EnterEvent(XEvent& event);
+	virtual void LeaveEvent(XEvent& event);
+	virtual void FoucsInEvent(XEvent& event);
+	virtual void FoucsOutEvent(XEvent& event);
+	virtual void ResizeEvent(XQ::Vec2i, XEvent& event);
+	virtual void KeyPressEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event);
+	virtual void KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 public:
 	void setRender(sptr< XRender> render) override;
 	void setCameraNavigationHandler(sptr<CameraNavigationHandler> cameraHandler);
@@ -44,11 +45,18 @@ public:
 	bool hasMode(XQ::InteractMode mode);
 	void setMode(XQ::InteractMode mode);
 	XQ::InteractMode getMode() const;
+
+	/**
+	 * @breif 信号：mPickHandler 选中渲染节点,此处将mPickHandler的SigRenderNodeSelected信号与其绑定，主要是解耦
+	 */
+	XSIGNAL(void(sptr<XRenderNode>)) SigRenderNodeSelected;
+	XSIGNAL(void(XQ::InteractMode)) SigInteractModeChange;
 protected:
 	//包含多个模式交互处理器
 	sptr<CameraNavigationHandler> mCameraHandler;					//相机
 	sptr<XRenderPickHandler> mPickHandler;									//拾取
 	sptr<XManipulatorHandler> mManipulatorHandler;					//操作柄
-
-	XQ::InteractMode mCurrentMode;
+	XQ::InteractMode mCurrentMode;												//操作模式,每种模式优先级不同 TODO 待优化
+	class Internal;
+	std::unique_ptr<Internal> mData;
 };

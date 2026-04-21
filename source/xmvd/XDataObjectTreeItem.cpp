@@ -61,6 +61,7 @@ void XDataObjectTreeItem::setParent(XDataObjectTreeItem* parent)
 void XDataObjectTreeItem::setData(std::shared_ptr<XDataObject> data)
 {
     m_data = data;
+    mData->connector.disconnect();
 	//°ó¶¨ÐÅºÅ
     mData->connector.connect(data,&XDataObject::sigDataAdd,[this](sptr<XDataObject> subData){
         auto item =InitFromDataObject( subData,this);

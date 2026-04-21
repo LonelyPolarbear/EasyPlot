@@ -13,6 +13,10 @@ class XOpenGLBuffer;
 class XRenderWindowEventDispatch;
 //class XRender;
 
+/**
+ * @class RenderWindowUbo
+ * @details 渲染窗口的ubo缓冲管理类，这些ubo被所有着色器共用
+ */
 class RENDER_API RenderWindowUbo :public XDataBaseObject {
 protected:
 	RenderWindowUbo();
@@ -39,7 +43,10 @@ protected:
 	bool init_done = false;
 };
 
-
+/**
+ * @calss XOpenGLRenderWindow
+ * @details 渲染窗口
+ */
 class RENDER_API XOpenGLRenderWindow :public XDataObject {
 	REGISTER_CLASS_META_DATA(XOpenGLRenderWindow, XDataObject);
 protected:

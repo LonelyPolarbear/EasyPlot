@@ -68,64 +68,20 @@ void XGeometryNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
 	}
 }
 
-void XGeometryNode::translate(float x, float y, float z)
-{
-	m_transform.translate(Eigen::Vector3f(x, y, z));
-}
-
-void XGeometryNode::setPosition(float x, float y, float z)
-{
-	m_transform.translation()<<x,y,z;
-}
-
-void XGeometryNode::setScale(float x, float y, float z)
-{
-	auto data = XQ::Matrix::transformDecomposition_TRS(m_transform);
-	data.sx = x;
-	data.sy = y;
-	data.sz = z;
-	m_transform.matrix() = XQ::Matrix::computeMatrix(data);
-}
-
-void XGeometryNode::rotate(float angle, XQ::Vec3f dir)
-{
-	Eigen::Vector3f axis = Eigen::Vector3f(dir.x(), dir.y(), dir.z());
-	axis.normalize();
-	m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), axis));
-}
-
 const float* XGeometryNode::getMatrix() const
 {
 	return m_transform.matrix().data();
 }
 
 void XGeometryNode::setVisible(bool visible) {
-	Attribute->AttrNodeVisible->setValue(visible);
+	XRenderNode::setVisible(visible);
 }
 
 bool XGeometryNode::isVisible() {
-	return Attribute->AttrNodeVisible->getValue();
+	return XRenderNode::isVisible();
 }
 
-void XGeometryNode::rotateX(float angle)
-{
-	m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), Eigen::Vector3f::UnitX()));
-}
 
-void XGeometryNode::rotateY(float angle)
-{
-	m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), Eigen::Vector3f::UnitY()));
-}
-
-void XGeometryNode::rotateZ(float angle)
-{
-	m_transform.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(angle), Eigen::Vector3f::UnitZ()));
-}
-
-void XGeometryNode::scale(float x, float y, float z)
-{
-	m_transform.scale(Eigen::Vector3f(x, y, z));
-}
 
 void XGeometryNode::setPolygonMode(PolygonMode mode)
 {

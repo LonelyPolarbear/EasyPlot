@@ -26,7 +26,7 @@ XGLWidget::XGLWidget(QWidget* parent) :QWidget(parent)
 	setAttribute(Qt::WA_OpaquePaintEvent, true);
 	this->setMouseTracking(true);
 	mTimerId = this->startTimer(60ms);
-
+	setFocusPolicy(Qt::StrongFocus);
 	mRenderWindow = makeShareDbObject<XOpenGLRenderWindow>();
 }
 
@@ -63,7 +63,7 @@ XQ::Vec2u  XGLWidget::mapToGLScreen(const QPoint& point) const{
 XQ::Vec2f  XGLWidget::mapToNormGLScreen(const QPoint& point) const{
 	XQ::Vec2f p;
 	p.x() = (float)point.x() / (float)mWidth;
-	p.y() = (float)(mHeight - point.y()) / (float)mHeight;
+	p.y() = (float)(mHeight - point.y()+1) / (float)mHeight;
 	return p;
 }
 

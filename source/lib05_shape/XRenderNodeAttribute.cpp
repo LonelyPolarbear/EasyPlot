@@ -21,5 +21,5 @@ void XRenderNode3DAttribute::Init()
 	XQ_ATTR_ADD_INIT(AttrPrimitveType, PrimitveType::triangle);
 	XQ_ATTR_ADD_INIT(AttrSingleColor, XQ::XColor(255, 255, 255, 255));
 	XQ_ATTR_ADD_INIT(AttrPreSelectColor, XQ::XColor(255, 255, 255, 255));
-	XQ_ATTR_ADD_INIT(AttrNodeVisible, true);
+	//XQ_ATTR_ADD_INIT(AttrNodeVisible, true);
 }

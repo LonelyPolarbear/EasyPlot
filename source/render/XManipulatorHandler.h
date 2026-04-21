@@ -8,32 +8,37 @@
 #include <xsignal/XSignal.h>
 
 class XRender;
+class XRenderNode;
 class XManipulatorHandler : public XRenderInteractionEventHandler {
 protected:
 	XManipulatorHandler();
 	virtual ~XManipulatorHandler();
 public:
-	virtual void LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void EnterEvent();
-	virtual void LeaveEvent();
-	virtual void FoucsInEvent();
-	virtual void FoucsOutEvent();
-	virtual void ResizeEvent(XQ::Vec2i);
-	virtual void KeyPressEvent(XQ::Key, XQ::KeyboardModifier);
-	virtual void KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier);
-	virtual void MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
-	virtual void MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier);
+	virtual void LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MiddleButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void EnterEvent(XEvent& event);
+	virtual void LeaveEvent(XEvent& event);
+	virtual void FoucsInEvent(XEvent& event);
+	virtual void FoucsOutEvent(XEvent& event);
+	virtual void ResizeEvent(XQ::Vec2i, XEvent& event);
+	virtual void KeyPressEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event);
+	virtual void KeyReleaseEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseMoveEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseWheelForwardEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MouseWheelBackwardEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 	bool isRenderActive() const;
 
 	void setRender(sptr< XRender> render) override;
+	XSIGNAL(void(sptr<XRenderNode>)) SigRenderNodeHasSelected;				//[in]
+	XSIGNAL(void(bool)) SigManipulatorModeChanged;										//[in] true表示进入编辑模式 false表示离开编辑模式
 protected:
 	void slotRenderActiveChanged(bool active) override;
+	void slotRenderNodeHasSelected(sptr<XRenderNode> node);
+	void slotManipulatorModeChanged(bool flag);
 protected:
 	struct Internal;
 	sptr< Internal> mData;

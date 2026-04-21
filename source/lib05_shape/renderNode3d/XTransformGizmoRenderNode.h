@@ -11,20 +11,47 @@
 /// </summary>
 class XTransformGizmoRenderNode : public XGroupRenderNode3d {
 	REGISTER_CLASS_META_DATA(XTransformGizmoRenderNode, XGroupRenderNode3d);
+
+	enum class InteractObjectType {
+		none,
+		origin,
+		translate_x,
+		translate_y,
+		translate_z,
+		rotate_x,
+		rotate_y,
+		rotate_z
+	};
 protected:
 	XTransformGizmoRenderNode();
 	virtual ~XTransformGizmoRenderNode();
 public:
 	void Init() override;
 	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
-protected:
-	//操作柄由几部分几何组成的装配体 三个箭头、三个圆环,中心点是一个球体
-	sptr<XArrowRenderNode> mArrowX;
-	sptr<XArrowRenderNode> mArrowY;
-	sptr<XArrowRenderNode> mArrowZ;
-	sptr<XSphereRenderNode> mSphere;
+	XQ::BoundBox getThisBoundBox(const Eigen::Matrix4f& m) const override;
 
-	sptr< XTorusRenderNode> mRotateXY;
-	sptr< XTorusRenderNode> mRotateYZ;
-	sptr< XTorusRenderNode> mRotateZX;
+	/**
+	 * @brief 获取不同交互类型对应的rendernode
+	 * param[in] InteractObjectType 交互类型，平移、旋转
+	 */
+	sptr<XRenderNode> getInteractObject(InteractObjectType type);
+
+	/**
+	 * @brief 判断一个renderNode是否是一个交互node
+	 */
+	InteractObjectType getInteractObjectType(sptr<XRenderNode>);
+
+	/**
+	 * @breif 绑定要操作的节点
+	 */
+	void bindRenderNode(sptr<XRenderNode> node);
+
+	sptr<XRenderNode> getBindRenderNode();
+
+	void notifySigMatrixChanged();
+public:
+	XSIGNAL(void(const Eigen::Matrix4f&)) SigMatrixChanged;
+protected:
+	class Internal;
+	std::unique_ptr<Internal> mData;
 };

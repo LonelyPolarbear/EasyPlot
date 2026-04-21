@@ -17,6 +17,7 @@
 #include "lib05_shape/datasource/xregularPrimSource.h"
 #include "lib05_shape/datasource/xTorusSource.h"
 #include "lib05_shape/datasource/xfrustumSource.h"
+#include "lib05_shape/datasource/xcubeSource.h"
 #include "lib05_shape/filter/xshapeSourceTransformFilter.h"
 #include "lib05_shape/filter/xshapeSourceCombineFilter.h"
 #include "lib05_shape/filter/xshapeSourceCombineFilter.h"
@@ -216,19 +217,43 @@ void XEasyPlotWidget::test2()
 	auto render = makeShareDbObject<XRender>();
 	mRenderWindow->addRender(render);
 
+	/*{
+		sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
+		sptr<XRegularPrimSource> coneSource = makeShareDbObject<XRegularPrimSource>();
+		coneSource->Modified();
+		coneSource->setNumVertices(8);
+		coneSource->setAngle(240);
+		coneNode->setInput(coneSource);
+		coneNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		coneNode->setPolygonMode(PolygonMode::all);
+		coneNode->setColorMode(ColorMode::FaceColor);
+		render->addRenderNode3D(coneNode);
+	}*/
 
-	sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
-	sptr<XRegularPrimSource> coneSource = makeShareDbObject<XRegularPrimSource>();
-	coneSource->Modified();
-	coneSource->setNumVertices(8);
-	coneSource->setAngle(240);
+	{
+		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
+		sptr<XCubeSource> cubesource = makeShareDbObject<XCubeSource>();
+		cubeNode->setInput(cubesource);
+		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		cubeNode->setPolygonMode(PolygonMode::all);
+		cubeNode->setColorMode(ColorMode::FaceColor);
+		cubeNode->scale(10,10,10);
+		cubesource->Modified();
+		render->addRenderNode3D(cubeNode);
+	}
 
-	coneNode->setInput(coneSource);
-	coneNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
-	coneNode->setPolygonMode(PolygonMode::all);
-	coneNode->setColorMode(ColorMode::FaceColor);
-
-	render->addRenderNode3D(coneNode);
+	{
+		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
+		sptr<XCubeSource> cubesource = makeShareDbObject<XCubeSource>();
+		cubeNode->setInput(cubesource);
+		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		cubeNode->setPolygonMode(PolygonMode::all);
+		cubeNode->setColorMode(ColorMode::FaceColor);
+		cubeNode->scale(10, 10, 10);
+		cubeNode->translate(20, 0, 0);
+		cubesource->Modified();
+		render->addRenderNode3D(cubeNode);
+	}
 
 	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
 
