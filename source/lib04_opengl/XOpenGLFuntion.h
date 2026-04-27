@@ -135,6 +135,32 @@ public:
 	/// </summary>
 	static void xglClearStencil(int s);
 
+	/**
+	 * @brief 设置深度比较函数，比较逻辑当前片段的深度值 < 深度缓冲区中对应位置的已有深度值，缓冲中的深度值始终位于右侧
+	 */
+	static void xglDepthFunc(XOpenGL::DepthOrStencilCompFunType fun);
+
+	/**
+	 * @brief 设置模板通过测试的比较函数，比较逻辑(ref & mask) < (stencil_value & mask)，缓冲中的模板值始终位于右侧
+	 */
+	static void xglStencilFunc(XOpenGL::DepthOrStencilCompFunType fun,int ref,uint32_t mask);
+
+	static void xGetStencilFunc(XOpenGL::DepthOrStencilCompFunType &fun, int &ref, uint32_t& mask);
+
+	/**
+	 * @brief 设置模板测试函数通过后缓冲中的模板值如何变化
+	 * @param sfail[in] 模板比较函数未通过时候，如何更新缓冲中的模板值
+	 * @param zfail[in] 模板比较函数通过，深度测试失败时候，如何更新缓冲中的模板值
+	 * @param sfail[in] 模板比较函数通过，深度测试通过时候，如何更新缓冲中的模板值
+	 */
+	static void xglStencilOp(XOpenGL::StencilBehavior sfail, XOpenGL::StencilBehavior zfail, XOpenGL::StencilBehavior zpass);
+
+	static void xGetStencilOp(XOpenGL::StencilBehavior& sfail, XOpenGL::StencilBehavior& zfail, XOpenGL::StencilBehavior& zpass);
+
+	static void xglBlendFunc(XOpenGL::BlendFuncFactor srcFactor, XOpenGL::BlendFuncFactor dstFactor);
+
+	static void xGetBlendFunc(XOpenGL::BlendFuncFactor& srcFactor, XOpenGL::BlendFuncFactor& dstFactor);
+
 	static std::vector<std::string> xglGetExtensions();
 
 	static bool xisExtensionSupported(const std::string& extensionName);

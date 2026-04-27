@@ -80,6 +80,7 @@ void XPolyDataMapper::updateData()
 		m_vertex_color->release();
 
 		if (vertex_color->getNumOfTuple()) {
+			m_vao->addBuffer(ATTR_VERTEX_COLOR, m_vertex_color, 3, XOpenGL::DataType::float_, sizeof(XQ::Vec3f), 0);
 			m_vao->enableAttribute(ATTR_VERTEX_COLOR);
 		}
 		else {

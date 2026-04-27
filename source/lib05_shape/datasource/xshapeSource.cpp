@@ -6,7 +6,7 @@ XShapeSource::XShapeSource()
 {
 	m_VertexCoord = makeShareDbObject<XFloatArray>(); m_VertexCoord->setComponent(3);
 	m_VertexNormal = makeShareDbObject<XFloatArray>(); m_VertexNormal->setComponent(3);
-	m_VertexColor = makeShareDbObject<XFloatArray>(); m_VertexCoord->setComponent(3);
+	m_VertexColor = makeShareDbObject<XFloatArray>(); m_VertexColor->setComponent(3);
 
 	m_FaceColor = makeShareDbObject<XFloatArray>(); m_FaceColor->setComponent(4);
 	m_FaceIndexs = makeShareDbObject<XUIntArray>(); m_FaceIndexs->setComponent(3);

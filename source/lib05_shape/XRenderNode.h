@@ -18,11 +18,16 @@ public:
 	virtual void drawInstance(const Eigen::Matrix4f& parentMatrix)=0;
 
 	bool addChild(sptr<XRenderNode> child);
-	bool removeChild(sptr<XRenderNode> child);
+	bool removeChild(sptr< XRenderNode> child);
 	void clearChildren();
 	int getChildCount() const;
 	sptr<XRenderNode> getChild(int index) const;
 	sptr<XRenderNode> getRenderNodeParent() const;
+
+	/**
+	 * @brief 获取当前节点的父节点链
+	 */
+	std::vector< sptr<const XRenderNode>> getRenderNodeChain() const;
 	
 	virtual void setVisible(bool visible);
 
@@ -38,6 +43,8 @@ public:
 	virtual XQ::BoundBox getThisBoundBox(const Eigen::Matrix4f& m) const { return {}; };
 
 	Eigen::Affine3f getTransform() const;
+
+	void getChainTransform(Eigen::Affine3f& afiine) const;
 
 	void setTransform(const Eigen::Affine3f& transform);
 

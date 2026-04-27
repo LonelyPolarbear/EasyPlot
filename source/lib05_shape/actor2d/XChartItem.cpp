@@ -172,6 +172,8 @@ void XChartItem::draw(const Eigen::Matrix4f& m)
 		endClip();
 
 		auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
+		glEnableObj->save();
+
 		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);

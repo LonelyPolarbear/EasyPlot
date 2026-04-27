@@ -89,6 +89,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 		//!
 		//! [1] Ìî³ä»æÖÆ
 		if (m_IsFilled) {
+			glEnableObj->save();
 			glEnableObj->disable(XOpenGLEnable::EnableType::BLEND);
 			glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
 			drawFill(getShaderManger()->getFillShader(), m);
@@ -97,6 +98,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 
 		//!
 		//! [2] ±ß¿ò»æÖÆ
+		glEnableObj->save();
 		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);

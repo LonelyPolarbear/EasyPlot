@@ -24,9 +24,28 @@ public:
 
 	bool isEnabled(EnableType type);
 
-	void restore();
+	void restore();		//»Ö¸´×´Ì¬
+
+	void save();				//±£´æ¾É×´Ì¬
+
+protected:
+	void saveDepthTestState();
+	void saveMultisampleState();
+	void saveScissorTestState();
+	void saveBlendState();
+	void saveCullFaceState();
+	void saveProgramPointSizeState();
+	void saveStencilTestState();
+
+	void restoreDepthTestState();
+	void restoreMultisampleState();
+	void restoreScissorTestState();
+	void restoreBlendState();
+	void restoreCullFaceState();
+	void restoreProgramPointSizeState();
+	void restoreStencilTestState();
 protected:
 	class Intertal;
 private:
-	std::unique_ptr<Intertal> d;
+	std::unique_ptr<Intertal> mData;
 };

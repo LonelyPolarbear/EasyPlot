@@ -8,47 +8,57 @@ XRenderPort::~XRenderPort()
 {
 }
 
-void XRenderPort::setBackGroundColor1(const XQ::XColor& color)
+void XRenderPort::Init()
 {
-	m_backgroundColor1 = color;
+	XDataObject::Init();
+	XQ::XColor bot_color = XQ::XColor::from_normalcolor(0.914, 0.925, 0.937, 1);
+	XQ::XColor top_color = XQ::XColor::from_normalcolor(0.973, 0.976, 0.980, 1);
+	XQ_ATTR_ADD_INIT(AttrBottomColor, bot_color);
+	XQ_ATTR_ADD_INIT(AttrTopColor, top_color);
+	XQ_ATTR_ADD_INIT(AttrViewPort, XQ::Rectf(0, 0, 1, 1));
 }
 
-void XRenderPort::setBackGroundColor1(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+void XRenderPort::setBackGroundColorTop(const XQ::XColor& color)
 {
-	m_backgroundColor1 = XQ::XColor(r,g,b,a);
+	AttrTopColor->setValue(color);
 }
 
-void XRenderPort::setBackGroundColor2(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+void XRenderPort::setBackGroundColorTop(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	m_backgroundColor2 = XQ::XColor(r, g, b, a);
+	AttrTopColor->setValue(XQ::XColor(r,g,b,a));
 }
 
-void XRenderPort::setBackGroundColor2(const XQ::XColor& color)
+void XRenderPort::setBackGroundColorBot(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-	m_backgroundColor2 = color;
+	AttrBottomColor->setValue(XQ::XColor(r, g, b, a));
 }
 
-XQ::XColor XRenderPort::getBackGroundColor1() const
+void XRenderPort::setBackGroundColorBot(const XQ::XColor& color)
 {
-	return m_backgroundColor1;
+	AttrBottomColor->setValue(color);
 }
 
-XQ::XColor XRenderPort::getBackGroundColor2() const
+XQ::XColor XRenderPort::getBackGroundColorTop() const
 {
-	return m_backgroundColor2;
+	return AttrTopColor->getValue();
 }
 
-void XRenderPort::setViewPort(const XQ::Rectd& viewPort)
+XQ::XColor XRenderPort::getBackGroundColorBot() const
 {
-	m_viewPort = viewPort;
+	return AttrBottomColor->getValue();
 }
 
-void XRenderPort::setViewPort(double x, double y, double w, double h)
+void XRenderPort::setViewPort(const XQ::Rectf& viewPort)
 {
-	m_viewPort = XQ::Rectd(x,y,w,h);
+	AttrViewPort->setValue(viewPort);
 }
 
-XQ::Rectd XRenderPort::getViewPort() const
+void XRenderPort::setViewPort(float x, float y, float w, float h)
 {
-	return m_viewPort;
+	AttrViewPort->setValue(XQ::Rectf(x,y,w,h));
+}
+
+XQ::Rectf XRenderPort::getViewPort() const
+{
+	return AttrViewPort->getValue();
 }

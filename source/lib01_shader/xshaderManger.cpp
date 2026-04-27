@@ -14,6 +14,8 @@ class xShaderManger::Interal {
 	std::shared_ptr<xshader> pickfillShader2d;							//用于2D填充拾取的着色器
 
 	std::shared_ptr<xshader> textShader;									//用于文字绘制的着色器
+
+	std::shared_ptr<xshader> ndcShader;									//ndc坐标绘制的着色器
 public:
 	std::shared_ptr<xshader> getShader3D(PrimitveType id) {
 		if (shaders3D.find((int)id) != shaders3D.end()) {
@@ -65,6 +67,10 @@ public:
 		textShader = shader;
 	}
 
+	void setNdcShader(std::shared_ptr<xshader> shader) {
+		ndcShader = shader;
+	}
+
 	std::shared_ptr<xshader> getFillShader() const {
 		return fillshader2d;
 	}
@@ -91,6 +97,10 @@ public:
 
 	std::shared_ptr<xshader> getTextshader() const {
 		return textShader;
+	}
+
+	std::shared_ptr<xshader> getNdcshader() const {
+		return ndcShader;
 	}
 
 };
@@ -157,6 +167,11 @@ void xShaderManger::setTextShader(std::shared_ptr<xshader> shader)
 	return d->setTextShader(shader);
 }
 
+void xShaderManger::setNdcShader(std::shared_ptr<xshader> shader)
+{
+	return d->setNdcShader(shader);
+}
+
 std::shared_ptr<xshader> xShaderManger::getTextShader() const
 {
 	return d->getTextshader();
@@ -190,6 +205,11 @@ std::shared_ptr<xshader> xShaderManger::getPickShader2D() const
 std::shared_ptr<xshader> xShaderManger::getPickFillShader2D() const
 {
 	return d->getPickFillShader2D();
+}
+
+std::shared_ptr<xshader> xShaderManger::getNdcShader() const
+{
+	return d->getNdcshader();
 }
 
 void xShaderManger::initGLResource()
@@ -279,5 +299,14 @@ void xShaderManger::initGLResource()
 		auto fs_id = textShader->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "text2d.fs");
 		textShader->link({ vs_id,fs_id });
 		setTextShader(textShader);
+	}
+
+	{
+		auto ndcShader = makeShareDbObject<xshader>();
+		ndcShader->create();
+		auto vs_id = ndcShader->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "ndc.vs");
+		auto fs_id = ndcShader->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "3DTriangle.fs");
+		ndcShader->link({ vs_id,fs_id });
+		setNdcShader(ndcShader);
 	}
 }

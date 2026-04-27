@@ -726,15 +726,18 @@ namespace XBaseObjectMeta {
 		static XQ::Vector<N, T> resume(const std::string& name) {
 			XQ::Vector<N, T> data;
 			//利用正则表达式，按照“,”分割字符串”
-			std::regex digit_regex(R"(\d+)");
-			std::vector<std::string> numbers;
-			std::sregex_iterator iter(name.begin(), name.end(), digit_regex);
-			std::sregex_iterator end;
+			//std::regex digit_regex(R"(\d+)");
+			std::regex comma(",");
+
+			std::sregex_token_iterator iter(name.begin(), name.end(), comma, -1);
+			std::sregex_token_iterator end;
+
+			std::vector<std::string> numbers(iter, end);
 
 			// 遍历所有匹配项
-			for (; iter != end; ++iter) {
+			/*for (; iter != end; ++iter) {
 				numbers.push_back(iter->str());
-			}
+			}*/
 
 			if (numbers.size() != N) {
 

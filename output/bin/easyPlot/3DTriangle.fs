@@ -125,6 +125,7 @@ void main()
 	}
 
 	FragColor = setColorByOrien(fragcolor_before);
+	FragColor = fragcolor_before;
 	//FragColor = vec4(1,0,0,1);
 	#endif
 

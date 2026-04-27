@@ -50,7 +50,7 @@ void XTextItem::draw(const Eigen::Matrix4f& m)
 		return;
 
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
-
+	glEnableObj->save();
 	//!
 	//! [1] Ìî³ä»æÖÆ
 	if (m_IsFilled) {

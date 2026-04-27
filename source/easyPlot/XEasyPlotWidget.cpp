@@ -109,7 +109,7 @@ void XEasyPlotWidget::test1()
 				auto viewport = lay.getCellPos(x, y);
 				auto render = makeShareDbObject<XRender>();
 				render->setActive(false);
-				render->setBackGroundColor1(colors[y * 2 + x]);
+				render->setBackGroundColorTop(colors[y * 2 + x]);
 				render->setViewPort(viewport[0], viewport[1], viewport[2], viewport[3]);
 				render->getCamera()->setProjectionType(cmaeraType[y * 2 + x]);
 				auto ss = render->getCamera()->AttrCameraStyle;

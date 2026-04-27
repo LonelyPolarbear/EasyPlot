@@ -61,3 +61,8 @@ void XRectRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
 	XGeometryNode::draw(parentMatrix,isNormal);
 }
+
+void XRectRenderNode::draw(std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
+{
+	XGeometryNode::draw(s, parentMatrix);
+}

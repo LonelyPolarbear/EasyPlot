@@ -125,6 +125,41 @@ std::vector<XQ::Vec3f> XRenderCamera::getFrustumInWorld() const
 	return mCamera->getFrustumInWorld();
 }
 
+Eigen::Vector3f XRenderCamera::ComputeDisplayToNdc(Eigen::Vector3f input) const
+{
+	return mCamera->ComputeDisplayToNdc(input);
+}
+
+Eigen::Vector3f XRenderCamera::ComputeNdcToDisplay(Eigen::Vector3f input) const
+{
+	return mCamera->ComputeNdcToDisplay(input);
+}
+
+Eigen::Vector3f XRenderCamera::ComputeWorldToDisplay(Eigen::Vector3f input) const
+{
+	return mCamera->ComputeWorldToDisplay(input);
+}
+
+Eigen::Vector3f XRenderCamera::ComputeDisplayToWorld(Eigen::Vector3f input) const
+{
+	return mCamera->ComputeDisplayToWorld(input);
+}
+
+Eigen::Vector3f XRenderCamera::ComputeDisplayToCamera(Eigen::Vector3f input) const
+{
+	return mCamera->ComputeDisplayToCamera(input);
+}
+
+Eigen::Vector3f XRenderCamera::ComputeWorldToCamera(Eigen::Vector3f input) const
+{
+	return mCamera->ComputeWorldToCamera(input);
+}
+
+Eigen::Vector3f XRenderCamera::ComputeCameraToWorld(Eigen::Vector3f input) const
+{
+	return mCamera->ComputeCameraToWorld(input);
+}
+
 void XRenderCamera::render(sptr<XRender> render)
 {
 }

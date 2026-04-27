@@ -10,24 +10,26 @@ class RENDER_API XRenderPort :public XDataObject {
 protected:
 	XRenderPort();
 	~XRenderPort();
-
+	void Init() override;
 public:
-	void setBackGroundColor1(const XQ::XColor& color);
-	void setBackGroundColor2(const XQ::XColor& color);
-	void setBackGroundColor1(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
-	void setBackGroundColor2(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+	void setBackGroundColorTop(const XQ::XColor& color);
+	void setBackGroundColorBot(const XQ::XColor& color);
+	void setBackGroundColorTop(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
+	void setBackGroundColorBot(unsigned char r, unsigned char g, unsigned char b, unsigned char a);
 
-	XQ::XColor getBackGroundColor1() const;
-	XQ::XColor getBackGroundColor2() const;
+	XQ::XColor getBackGroundColorTop() const;
+	XQ::XColor getBackGroundColorBot() const;
 
 	/// <summary>
 	/// 设置视口大小 0-1，x y w h,原点位于窗口左下角
 	/// </summary>
-	void setViewPort(const XQ::Rectd& viewPort);
-	void setViewPort(double x,double y,double w,double h);
-	XQ::Rectd getViewPort() const;
+	void setViewPort(const XQ::Rectf& viewPort);
+	void setViewPort(float x, float y, float w, float h);
+	XQ::Rectf getViewPort() const;
 protected:
-	XQ::XColor m_backgroundColor1;
-	XQ::XColor m_backgroundColor2;
-	XQ::Rectd m_viewPort = XQ::Rectd(0,0,1,1);
+	csptr<XAttr_Color> AttrBottomColor;
+	csptr<XAttr_Color> AttrTopColor;
+	csptr<XAttr_Rectf> AttrViewPort;
+
+	//XQ::Rectd m_viewPort = XQ::Rectd(0,0,1,1);
 };

@@ -61,6 +61,7 @@ void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix,  bool i
 		return;
 	}
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
+	glEnableObj->save();
 	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 

@@ -1,8 +1,11 @@
 #include "XTransformGizmoRenderNode.h"
 #include <lib04_opengl/XOpenGLEnable.h>
+#include <lib04_opengl/XOpenGLFuntion.h>
 #include <lib01_shader/xshaderManger.h>
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <xsignal/XSignal.h>
+
+#include <lib05_shape/renderNode3d/XFullScreenQuadNode.h>
 class XTransformGizmoRenderNode::Internal {
 public:
 	//操作柄由几部分几何组成的装配体 三个箭头、三个圆环,中心点是一个球体
@@ -15,10 +18,20 @@ public:
 	sptr< XTorusRenderNode> mRotateYZ;				//绕着X轴旋转
 	sptr< XTorusRenderNode> mRotateZX;				//绕着Y轴旋转
 
+	sptr<XFullScreenQuadNode> mFullScreenQuadNode;
+
 	wptr<XRenderNode> mBindRenderNode;
+	sptr<XOpenGLEnable> mGlEnable;
 	xsig::xconnector mConnector;
 	~Internal() {
 		mConnector.disconnect();
+	}
+
+	sptr<XOpenGLEnable> getGlEnable() {
+		if (!mGlEnable) {
+			mGlEnable = makeShareDbObject<XOpenGLEnable>();
+		}
+		return mGlEnable;
 	}
 };
 XTransformGizmoRenderNode::XTransformGizmoRenderNode():mData(new Internal)
@@ -90,11 +103,52 @@ void XTransformGizmoRenderNode::Init()
 	addChild(mData->mRotateXY);
 	addChild(mData->mRotateYZ);
 	addChild(mData->mRotateZX);
+
+	mData->mFullScreenQuadNode = makeShareDbObject<XFullScreenQuadNode>();
+	mData->mFullScreenQuadNode->setColorMode(ColorMode::SingleColor);
+	mData->mFullScreenQuadNode->setFarRect();
 }
 
 void XTransformGizmoRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
-	XGroupRenderNode3d::draw(parentMatrix,isNormal);
+	//为何实现节点不被阻挡，使用模板缓冲的方式 来做
+	if (isNormal) {
+		//1 启用模板测试，设置深度测试总是通过，但是不写入
+		auto glEnable = mData->getGlEnable();
+		glEnable->save();
+		glEnable->enable(XOpenGLEnable::EnableType::STENCIL_TEST);
+		XOpenGLFuntion::xglClearStencil(0);
+		XOpenGLFuntion::xglClear((int)XOpenGL::BufferBits::stencil_buffer_bit);
+		XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS,1,0xff);
+		XOpenGLFuntion::xglStencilOp(XOpenGL::StencilBehavior::XGL_KEEP,XOpenGL::StencilBehavior::XGL_KEEP,XOpenGL::StencilBehavior::XGL_REPLACE);
+		XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS);
+		XOpenGLFuntion::xglDepthMask(false);
+		XGroupRenderNode3d::draw(parentMatrix, isNormal);			//得到模板数值
+
+		// 设置模板测试相关函数 ，关闭颜色输出
+		//2 绘制全屏矩形，但是只有符合模板测试的片元才通过，只是将更新深度缓冲区为远平面
+		glEnable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
+		XOpenGLFuntion::xglDepthMask(true);
+		XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS);
+		XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_EQUAL, 1, 0xff);
+		XOpenGLFuntion::xglColorMask(false,false,false,false);
+		if (!mData->mFullScreenQuadNode->getShaderManger()) {
+			mData->mFullScreenQuadNode->setShaderManger(getShaderManger());
+		}
+		mData->mFullScreenQuadNode->draw(Eigen::Matrix4f::Identity(),true);
+
+		glEnable->restore();
+		
+		// 恢复模板测试、深度测试 颜色掩码等为默认状态
+		//3 重新绘制图元
+		XOpenGLFuntion::xglColorMask(true, true, true, true);
+		XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_LESS);
+		XGroupRenderNode3d::draw(parentMatrix, isNormal);
+	}
+	else {
+		XGroupRenderNode3d::draw(parentMatrix, isNormal);
+	}
+	
 }
 
 XQ::BoundBox XTransformGizmoRenderNode::getThisBoundBox(const Eigen::Matrix4f& m) const
@@ -166,7 +220,8 @@ void XTransformGizmoRenderNode::bindRenderNode(sptr<XRenderNode> node)
 	mData->mBindRenderNode = node;
 	//初始位置姿态相同，缩放系数可能不同
 	mData->mConnector.disconnect();
-
+	if(!node)
+		return;
 	//同步node的位姿信息给this
 	Eigen::Affine3f node_transform = node->getTransform();
 
@@ -185,12 +240,30 @@ void XTransformGizmoRenderNode::bindRenderNode(sptr<XRenderNode> node)
 
 
 	//绑定函数
-	mData->mConnector.connect(this,&XTransformGizmoRenderNode::SigMatrixChanged,[](const Eigen::Matrix4f& m){
+	mData->mConnector.connect(this,&XTransformGizmoRenderNode::SigMatrixChanged,[node](const Eigen::Matrix4f& m){
 		Eigen::Affine3f trans;
 		trans.matrix() =m;
 
 		Eigen::Vector3f origin_pos = trans*Eigen::Vector3f(0,0,0);
-	
+
+		//提取矩阵信息，更新物体
+		auto gizmo_mat_data = XQ::Matrix::transformDecomposition_TRS(trans);
+		auto node_transform = node->getTransform();
+
+		auto node_mat_data = XQ::Matrix::transformDecomposition_TRS(node_transform);
+
+		node_mat_data.tx = gizmo_mat_data.tx;
+		node_mat_data.ty = gizmo_mat_data.ty;
+		node_mat_data.tz = gizmo_mat_data.tz;
+
+		node_mat_data.rx = gizmo_mat_data.rx;
+		node_mat_data.ry = gizmo_mat_data.ry;
+		node_mat_data.rz = gizmo_mat_data.rz;
+
+		auto new_matrix =XQ::Matrix::computeMatrix(node_mat_data);
+		trans.matrix() = new_matrix;
+		node->setTransform(trans);
+
 	});
 }
 

@@ -82,6 +82,7 @@ public:
 protected:
 	// Ù–‘
 	csptr<XAttr_Bool> AttrActive;
+	
 	sptr<XGroupRenderNode3d> m_group3D;
 protected:
 

@@ -66,6 +66,17 @@ sptr<XRenderNode> XRenderNode::getRenderNodeParent() const
 	return nullptr;
 }
 
+std::vector< sptr<const XRenderNode>> XRenderNode::getRenderNodeChain() const
+{
+	std::vector< sptr<const XRenderNode>> chain;
+	auto p = asDerived<XRenderNode>();
+	while (p = getRenderNodeParent()) {
+		chain.push_back(p);
+		p = p->getRenderNodeParent();
+	}
+	return chain;
+}
+
 void XRenderNode::setVisible(bool visible)
 {
 	AttrVisible->setValue(visible);
@@ -113,6 +124,16 @@ XQ::BoundBox XRenderNode::getBoundBox(const Eigen::Matrix4f& m) const
 Eigen::Affine3f XRenderNode::getTransform() const
 {
 	return m_transform;
+}
+
+void XRenderNode::getChainTransform(Eigen::Affine3f& afiine) const
+{
+	auto thisTrans = getTransform();
+	afiine = thisTrans *afiine;
+	
+	if (auto p = getRenderNodeParent()) {
+		p->getChainTransform(afiine);
+	}
 }
 
 void XRenderNode::setTransform(const Eigen::Affine3f& transform)

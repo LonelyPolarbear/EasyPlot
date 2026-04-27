@@ -16,6 +16,7 @@
 #include <lib02_camera/xcamera.h>
 #include <lib05_shape/renderNode3d/XInfinitePlaneRenderNode.h>
 #include <lib05_shape/renderNode3d/XGroupRenderNode3d.h>
+#include <lib05_shape/renderNode3d/XFullScreenQuadNode.h>
 
 
 struct XRender::Internal {
@@ -57,6 +58,8 @@ public:
 	XQ::Vec2f m_mousePos;																								//鼠标在窗口中的位置，未做变换
 	//std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;									//无限网格平面
 
+	sptr<XFullScreenQuadNode> m_fullScreenQuadNode;											//全屏四边形，用于背景设置
+
 	xsig::xconnector connector;
 
 	~Internal() {
@@ -78,14 +81,38 @@ void XRender::Init()
 	XRenderPort::Init();
 	XQ_ATTR_ADD_INIT(AttrActive, false);
 	XQ_XDATA_ADD(m_group3D);
+	XQ::XColor bot_color = AttrBottomColor->getValue();
+	XQ::XColor top_color = AttrTopColor->getValue();
+
+
 	auto handler =getOrCreateMultiModeEventHandler();
-	//mData->m_group3D = makeShareDbObject<XGroupRenderNode3d>();
+	mData->m_fullScreenQuadNode = makeShareDbObject<XFullScreenQuadNode>();
+	mData->m_fullScreenQuadNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
+	mData->m_fullScreenQuadNode->setFarRect();
+
+	//信号的绑定
+	mData->connector.connect(AttrBottomColor,&XAttr_Color::sigAttrChanged,[this](sptr<XDataAttribute>, XDataChangeType type){
+		if (type == XDataChangeType::ItemDataModified) {
+			XQ::XColor bot_color = AttrBottomColor->getValue();
+			XQ::XColor top_color = AttrTopColor->getValue();
+			mData->m_fullScreenQuadNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
+		}
+	});
+
+	mData->connector.connect(AttrTopColor, &XAttr_Color::sigAttrChanged, [this](sptr<XDataAttribute>, XDataChangeType type) {
+		if (type == XDataChangeType::ItemDataModified) {
+			XQ::XColor bot_color = AttrBottomColor->getValue();
+			XQ::XColor top_color = AttrTopColor->getValue();
+			mData->m_fullScreenQuadNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
+		}
+		});
 }
 
 void XRender::setRenderWindow(sptr<XOpenGLRenderWindow> renderWindow)
 {
 	mData->m_renderWindow = renderWindow;
 	m_group3D->setShaderManger(getRenderWindow()->getShaderManger());
+	mData->m_fullScreenQuadNode->setShaderManger(getRenderWindow()->getShaderManger());
 }
 
 sptr<XOpenGLRenderWindow> XRender::getRenderWindow() const
@@ -119,18 +146,21 @@ void XRender::render(bool isNormal)
 	//!
 	//! 渲染
 	auto enable = makeShareDbObject<XOpenGLEnable>();
+	enable->save();
 	enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
 	enable->enable(XOpenGLEnable::EnableType::BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	enable->enable(XOpenGLEnable::EnableType::MULTISAMPLE);
+	//enable->save();
 	if(!isNormal)
 		enable->disable(XOpenGLEnable::EnableType::MULTISAMPLE);
 	XOpenGLFuntion::xglClearDepth(1);
 	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::depth_buffer_bit);
 
-	//for (auto actor : mData->m_actor3DList) {
-		m_group3D->draw(Eigen::Matrix4f::Identity(), isNormal);
-	//}
-	enable->restore();
+	m_group3D->draw(Eigen::Matrix4f::Identity(), isNormal);
+	mData->m_fullScreenQuadNode->draw(Eigen::Matrix4f::Identity(),isNormal);
+
+	//enable->restore();
 
 	doneCurrent();
 }
@@ -331,6 +361,7 @@ void XRender::updateViewPort(bool isNormal)
 	XQ::Recti rect = getConvertViewPort();
 	
 	auto enable = makeShareDbObject<XOpenGLEnable>();
+	enable->save();
 	enable->enable(XOpenGLEnable::EnableType::SCISSOR_TEST);
 	
 	auto oldViewport = XOpenGLFuntion::xglViewport(rect);
@@ -338,21 +369,26 @@ void XRender::updateViewPort(bool isNormal)
 
 	getCamera()->setAspect(rect[2]/(double)rect[3]);
 
-	auto c = getBackGroundColor1();
+	auto c = getBackGroundColorTop();
 	auto r = c.r2();
 	auto g = c.g2();
 	auto b = c.b2();
 	auto a = c.a2();
 
 	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::color_buffer_bit);
-
-	if(isNormal)
+#if 0
+	GLuint clearValue[4] = { 0, 0, 0, 0 };
+	// 清除颜色缓冲（使用无符号整数清除函数）
+	glClearBufferuiv(GL_COLOR, 0, clearValue);
+#else
+	if (isNormal)
 		XOpenGLFuntion::xglClearColor(r, g, b, a);
 	else {
-		GLuint clearValue[4] = { 0, 0, 0, 0 }; 
+		GLuint clearValue[4] = { 0, 0, 0, 0 };
 		// 清除颜色缓冲（使用无符号整数清除函数）
 		glClearBufferuiv(GL_COLOR, 0, clearValue);
 	}
+#endif
 	
 	//XOpenGLFuntion::xglViewport(oldViewport);
 	XOpenGLFuntion::xglglScissor(oldScissor);

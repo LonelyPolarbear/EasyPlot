@@ -261,6 +261,65 @@ void XOpenGLFuntion::xglClearStencil(int s)
 	checkGLError();
 }
 
+void XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType fun)
+{
+	glDepthFunc((GLenum)fun);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType fun, int ref, uint32_t mask)
+{
+	glStencilFunc((GLenum)fun,ref,mask);
+}
+
+void XOpenGLFuntion::xGetStencilFunc(XOpenGL::DepthOrStencilCompFunType& fun, int& ref, uint32_t& mask)
+{
+	GLint func_, ref_,mask_;
+	glGetIntegerv(GL_STENCIL_FUNC, &func_);
+	glGetIntegerv(GL_STENCIL_REF, &ref_);
+	glGetIntegerv(GL_STENCIL_VALUE_MASK, &mask_);
+	checkGLError();
+	fun = (XOpenGL::DepthOrStencilCompFunType)func_;
+	ref = ref_;
+	mask =mask_;
+}
+
+void XOpenGLFuntion::xglStencilOp(XOpenGL::StencilBehavior sfail, XOpenGL::StencilBehavior zfail, XOpenGL::StencilBehavior zpass)
+{
+	glStencilOp((GLenum)sfail, (GLenum)zfail, (GLenum)zpass);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xGetStencilOp(XOpenGL::StencilBehavior& sfail, XOpenGL::StencilBehavior& zfail, XOpenGL::StencilBehavior& zpass)
+{
+	GLint sfail_, zfail_, zpass_;
+	glGetIntegerv(GL_STENCIL_FAIL, &sfail_);
+	glGetIntegerv(GL_STENCIL_PASS_DEPTH_FAIL, &zfail_);
+	glGetIntegerv(GL_STENCIL_PASS_DEPTH_PASS, &zpass_);
+	checkGLError();
+	sfail = (XOpenGL::StencilBehavior)sfail_;
+	zfail = (XOpenGL::StencilBehavior)zfail_;
+	zpass = (XOpenGL::StencilBehavior)zpass_;
+}
+
+void XOpenGLFuntion::xglBlendFunc(XOpenGL::BlendFuncFactor srcFactor, XOpenGL::BlendFuncFactor dstFactor)
+{
+	glBlendFunc((GLenum)srcFactor,(GLenum)dstFactor);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xGetBlendFunc(XOpenGL::BlendFuncFactor& srcFactor, XOpenGL::BlendFuncFactor& dstFactor)
+{
+	GLint srcFactor_, dstFactor_;
+
+	glGetIntegerv(GL_BLEND_SRC_RGB, &srcFactor_);
+	glGetIntegerv(GL_BLEND_DST_RGB, &dstFactor_);
+
+	srcFactor = (XOpenGL::BlendFuncFactor)	srcFactor_;
+	dstFactor = (XOpenGL::BlendFuncFactor)	dstFactor_;
+	checkGLError();
+}
+
 std::vector<std::string> XOpenGLFuntion::xglGetExtensions()
 {
 	std::vector<std::string> names;

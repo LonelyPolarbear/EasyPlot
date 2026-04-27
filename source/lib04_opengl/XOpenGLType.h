@@ -76,6 +76,30 @@ namespace XOpenGL {
 
 	};
 
+	//opengl 深度或者模板比较函数
+	enum class LIB04_OPENGL_API DepthOrStencilCompFunType :unsigned int {
+		XGL_NEVER = 0x0200,					///< GL_NEVER						永不通过
+		XGL_LESS = 0x0201,						///< GL_LESS							小于
+		XGL_EQUAL = 0x0202,					///< GL_EQUAL						等于
+		XGL_LEQUAL = 0x0203,				///< GL_LEQUAL						小于或等于
+		XGL_GREATER = 0x0204,				///< GL_GREATER					大于
+		XGL_NOTEQUAL = 0x0205,			///< GL_NOTEQUAL				不等于
+		XGL_GEQUAL = 0x0206,				///< GL_GEQUAL					大于或等于
+		XGL_ALWAYS = 0x0207,				///< GL_ALWAYS					总是通过
+	};
+
+	//模板测试通过或者失败后如何跟新模板缓冲区
+	enum class LIB04_OPENGL_API StencilBehavior :unsigned int {
+		XGL_KEEP = 0x1E00,						///< GL_KEEP							保持当前的默认值不变
+		XGL_ZERO = 0,								///< GL_ZERO						将模板值置为0
+		XGL_REPLACE = 0x1E01,				///< GL_REPLACE					用 glStencilFunc 中的 ref 值替换当前模板值
+		XGL_INCR = 0x1E02,						///< GL_INCR							加 1（若已达最大值则保持，如 255 → 255）
+		XGL_INCR_WRAP = 0x8507,			///< GL_INCR_WRAP				加 1，溢出时回绕（255 → 0）
+		XGL_DECR = 0x1E03,						///< GL_DECR						减 1（若为 0 则保持）
+		XGL_DECR_WRAP = 0x8508,		///< GL_DECR_WRAP			减 1，下溢时回绕（0 → 255）
+		XGL_INVERT = 0x150A,					///< GL_INVERT					按位取反（bitwise invert）
+	};
+
 	enum class LIB04_OPENGL_API FilterType :unsigned int {
 		nearest = 0x2600,		//GL_NEAREST
 		linear = 0x2601,		//GL_LINEAR
@@ -381,5 +405,23 @@ namespace XOpenGL {
 		XGL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS = 0x90DA,								//片段着色器中最大的存储缓冲区数量
 		XGL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS = 0x90DB,								//计算着色器中最大的存储缓冲区数量
 		XGL_MAX_COMBINED_SHADER_STORAGE_BLOCKS = 0x90DC,								//所有着色器阶段中最大的存储缓冲区数量
+	};
+
+	enum class LIB04_OPENGL_API BlendFuncFactor : unsigned int {
+		XGL_ZERO = 0x0000,															///< GL_ZERO
+		XGL_ONE = 0x0001,															 ///< GL_ONE
+		XGL_SRC_COLOR = 0x0300,												///< GL_SRC_COLOR
+		XGL_ONE_MINUS_SRC_COLOR = 0x0301,						///< GL_ONE_MINUS_SRC_COLOR
+		XGL_DST_COLOR = 0x0306,												///< GL_DST_COLOR
+		XGL_ONE_MINUS_DST_COLOR = 0x0307,						///< GL_ONE_MINUS_DST_COLOR
+		XGL_SRC_ALPHA = 0x0302,												///< GL_SRC_ALPHA
+		XGL_ONE_MINUS_SRC_ALPHA = 0x0303,						///< GL_ONE_MINUS_SRC_ALPHA
+		XGL_DST_ALPHA = 0x0304,												///< GL_DST_ALPHA
+		XGL_ONE_MINUS_DST_ALPHA = 0x0305,						///< GL_ONE_MINUS_DST_ALPHA
+		XGL_CONSTANT_COLOR = 0x8001,									///< GL_CONSTANT_COLOR
+		XGL_ONE_MINUS_CONSTANT_COLOR = 0x8002,			///< GL_ONE_MINUS_CONSTANT_COLOR
+		XGL_CONSTANT_ALPHA = 0x8003,									///< GL_CONSTANT_ALPHA
+		XGL_ONE_MINUS_CONSTANT_ALPHA = 0x8004,			///< GL_ONE_MINUS_CONSTANT_ALPHA
+		XGL_SRC_ALPHA_SATURATE = 0x0308							///< GL_SRC_ALPHA_SATURATE (仅用于源因子)
 	};
 }
