@@ -10,16 +10,16 @@
 #include "lib06_select/xviewselection.h"
 #include "lib06_select/xviewselection2d.h"
 #include <glew/glew.h>
-#include <lib05_shape/XGeometryNode.h>
-#include <lib05_shape/XGraphicsItem.h>
-#include <lib05_shape/actor2d/XRectItem.h>
-#include <lib05_shape/actor2d/XGridItem.h>
-#include <lib05_shape/actor2d/XScreenTextItem.h>
+#include <xrendernode/XGeometryNode.h>
+#include <xrendernode/XGraphicsItem.h>
+#include <xrendernode/actor2d/XRectItem.h>
+#include <xrendernode/actor2d/XGridItem.h>
+#include <xrendernode/actor2d/XScreenTextItem.h>
 #include <lib02_camera/xcamera.h>
 #include <set>
 #include <iostream>
-#include <lib05_shape/datasource/xCustomSource.h>
-#include <lib05_shape/datasource/xchamferCubeSource.h>
+#include <xrendernode/datasource/xCustomSource.h>
+#include <xrendernode/datasource/xchamferCubeSource.h>
 
 #include <dataBase/XDataArray.h>
 

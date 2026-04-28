@@ -7,7 +7,7 @@
 
 #include <XOpenGLWidget/XOpenGLWidget.h>
 #include <lib00_utilty/XUtilty.h>
-#include <lib05_shape/XRenderNode.h>
+#include <xrendernode/XRenderNode.h>
 #include <dataBase/XDataArray.h>
 
 class QOpenGLContext;

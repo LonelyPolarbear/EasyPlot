@@ -78,7 +78,7 @@ LIST(APPEND LIB_NAMES
 				Qt5::Core
 				XUtilty${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
-				xshape${DLL_DEBUG_POSTFIX}
+				xrendernode${DLL_DEBUG_POSTFIX}
 				xlog${DLL_DEBUG_POSTFIX}
 )
 

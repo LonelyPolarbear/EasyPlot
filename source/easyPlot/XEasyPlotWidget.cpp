@@ -7,26 +7,26 @@
 #include "lib02_camera/xcamera.h"
 #include <xalgo/XAlgo.h>
 
-#include "lib05_shape/XGeometryNode.h"
-#include "lib05_shape/renderNode3d/XArrowRenderNode.h"
-#include "lib05_shape/mapper/XPolyDataMapper.h"
+#include "xrendernode/XGeometryNode.h"
+#include "xrendernode/renderNode3d/XArrowRenderNode.h"
+#include "xrendernode/mapper/XPolyDataMapper.h"
 
-#include "lib05_shape/datasource/xchamferCubeSource.h"
-#include "lib05_shape/datasource/xconeSource.h"
-#include "lib05_shape/datasource/xcylinderSource.h"
-#include "lib05_shape/datasource/xregularPrimSource.h"
-#include "lib05_shape/datasource/xTorusSource.h"
-#include "lib05_shape/datasource/xfrustumSource.h"
-#include "lib05_shape/datasource/xcubeSource.h"
-#include "lib05_shape/filter/xshapeSourceTransformFilter.h"
-#include "lib05_shape/filter/xshapeSourceCombineFilter.h"
-#include "lib05_shape/filter/xshapeSourceCombineFilter.h"
+#include "xrendernode/datasource/xchamferCubeSource.h"
+#include "xrendernode/datasource/xconeSource.h"
+#include "xrendernode/datasource/xcylinderSource.h"
+#include "xrendernode/datasource/xregularPrimSource.h"
+#include "xrendernode/datasource/xTorusSource.h"
+#include "xrendernode/datasource/xfrustumSource.h"
+#include "xrendernode/datasource/xcubeSource.h"
+#include "xrendernode/filter/xshapeSourceTransformFilter.h"
+#include "xrendernode/filter/xshapeSourceCombineFilter.h"
+#include "xrendernode/filter/xshapeSourceCombineFilter.h"
 
-#include <lib05_shape/renderNode3d/XInfinitePlaneRenderNode.h>
-#include <lib05_shape/renderNode3d/XRectRenderNode.h>
-#include <lib05_shape/renderNode3d/XSphereRenderNode.h>
-#include <lib05_shape/renderNode3d/XTransformGizmoRenderNode.h>
-#include <lib05_shape/renderNode3d/XTorusRenderNode.h>
+#include <xrendernode/renderNode3d/XInfinitePlaneRenderNode.h>
+#include <xrendernode/renderNode3d/XRectRenderNode.h>
+#include <xrendernode/renderNode3d/XSphereRenderNode.h>
+#include <xrendernode/renderNode3d/XTransformGizmoRenderNode.h>
+#include <xrendernode/renderNode3d/XTorusRenderNode.h>
 
 #include <lib04_opengl/XOpenGLBuffer.h>
 

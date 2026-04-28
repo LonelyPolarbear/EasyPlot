@@ -10,13 +10,13 @@
 #include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib04_opengl/XOpenGLEnable.h"
 #include "lib04_opengl/XOpenGLFuntion.h"
-#include <lib05_shape/XGeometryNode.h>
-#include <lib05_shape/datasource/xCustomSource.h>
-#include <lib05_shape/XGraphicsItem.h>
+#include <xrendernode/XGeometryNode.h>
+#include <xrendernode/datasource/xCustomSource.h>
+#include <xrendernode/XGraphicsItem.h>
 #include <lib02_camera/xcamera.h>
-#include <lib05_shape/renderNode3d/XInfinitePlaneRenderNode.h>
-#include <lib05_shape/renderNode3d/XGroupRenderNode3d.h>
-#include <lib05_shape/renderNode3d/XFullScreenQuadNode.h>
+#include <xrendernode/renderNode3d/XInfinitePlaneRenderNode.h>
+#include <xrendernode/renderNode3d/XGroupRenderNode3d.h>
+#include <xrendernode/renderNode3d/XFullScreenQuadNode.h>
 
 
 struct XRender::Internal {
@@ -160,7 +160,7 @@ void XRender::render(bool isNormal)
 	m_group3D->draw(Eigen::Matrix4f::Identity(), isNormal);
 	mData->m_fullScreenQuadNode->draw(Eigen::Matrix4f::Identity(),isNormal);
 
-	//enable->restore();
+	enable->restore();
 
 	doneCurrent();
 }

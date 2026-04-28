@@ -4,7 +4,7 @@
 #include "lib02_camera/xcamera.h"
 #include "XRenderCamera.h"
 #include <xsignal/XSignal.h>
-#include <lib05_shape/renderNode3d/XTransformGizmoRenderNode.h>
+#include <xrendernode/renderNode3d/XTransformGizmoRenderNode.h>
 #include <xlog/XLogger.h>
 
 #include <Eigen/Eigen>

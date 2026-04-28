@@ -79,7 +79,7 @@ SET(LIB_NAMES
 				xcamera${DLL_DEBUG_POSTFIX}
 				XOpenGLWidget${DLL_DEBUG_POSTFIX}
 				xopengl${DLL_DEBUG_POSTFIX}
-				xshape${DLL_DEBUG_POSTFIX}
+				xrendernode${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
 				xselect${DLL_DEBUG_POSTFIX}
 				xscene${DLL_DEBUG_POSTFIX}

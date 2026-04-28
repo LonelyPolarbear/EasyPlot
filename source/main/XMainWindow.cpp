@@ -10,7 +10,7 @@
 #include <QTextEdit>
 
 #include <render/XRender.h>
-#include <lib05_shape/XRenderNode.h>
+#include <xrendernode/XRenderNode.h>
 #include <render/XOpenGLRenderWindow.h>
 #include <xlog/XLogger.h>
 #include <QThread>

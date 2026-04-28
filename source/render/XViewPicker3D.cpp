@@ -4,7 +4,7 @@
 #include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib01_shader/xshader.h"
 #include <glew/glew.h>
-#include <lib05_shape/XGeometryNode.h>
+#include <xrendernode/XGeometryNode.h>
 #include <lib02_camera/xcamera.h>
 #include <Eigen/Eigen>
 

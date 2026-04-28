@@ -71,7 +71,7 @@ LIST(APPEND LIB_NAMES
 				XUtilty${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
 				xrender${DLL_DEBUG_POSTFIX}
-				xshape${DLL_DEBUG_POSTFIX}
+				xrendernode${DLL_DEBUG_POSTFIX}
 				xcamera${DLL_DEBUG_POSTFIX}
 )
 

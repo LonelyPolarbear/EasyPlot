@@ -6,7 +6,7 @@
 #include <dataBase/XVector.h>
 #include <lib00_utilty/XUtilty.h>
 #include <xsignal/XSignal.h>
-#include <lib05_shape/XRenderNode.h>
+#include <xrendernode/XRenderNode.h>
 class XRender;
 class XRenderPickHandler : public XRenderInteractionEventHandler {
 protected:

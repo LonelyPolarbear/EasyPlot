@@ -89,7 +89,7 @@ SET(LIB_NAMES PRIVATE
 				dataBase${DLL_DEBUG_POSTFIX}
 				xmvd${DLL_DEBUG_POSTFIX}
 				xrender${DLL_DEBUG_POSTFIX}
-				xshape${DLL_DEBUG_POSTFIX}
+				xrendernode${DLL_DEBUG_POSTFIX}
 				xlog${DLL_DEBUG_POSTFIX}
 				xpython${DLL_DEBUG_POSTFIX}
 				xshareVar${DLL_DEBUG_POSTFIX}

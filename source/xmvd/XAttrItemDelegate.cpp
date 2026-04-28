@@ -3,7 +3,7 @@
 #include "XColorCombobox.h"
 #include <dataBase/XDataAttribute.h>
 #include <QColor>
-#include <lib05_shape/XRenderNodeAttribute.h>
+#include <xrendernode/XRenderNodeAttribute.h>
 
 XDataObjectTableModel* getXDataObjectTableModel(const QModelIndex& index) {
 	return const_cast<XDataObjectTableModel*>(qobject_cast<const XDataObjectTableModel*>(index.model()));
