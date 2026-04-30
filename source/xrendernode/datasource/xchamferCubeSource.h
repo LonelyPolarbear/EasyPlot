@@ -2,7 +2,7 @@
 #include "../xrendernodeApi.h"
 #include "xshapeSource.h"
 
-class xrendernode_API xchamferCubeSource : public XShapeSource {
+class XRENDERNODE_API xchamferCubeSource : public XShapeSource {
 protected:
 	xchamferCubeSource();
 

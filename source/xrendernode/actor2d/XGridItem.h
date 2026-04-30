@@ -4,7 +4,7 @@
 #include <Eigen/Eigen>
 
 class XTransformItem;
-class xrendernode_API XGridItem :public XGraphicsItem {
+class XRENDERNODE_API XGridItem :public XGraphicsItem {
 public:
 enum class GridType {
 };

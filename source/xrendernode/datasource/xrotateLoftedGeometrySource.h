@@ -7,7 +7,7 @@
 /// <summary>
 /// »ΨΧͺΜε
 /// </summary>
-class xrendernode_API XRotateLoftedgeometrySource : public XShapeSource {
+class XRENDERNODE_API XRotateLoftedgeometrySource : public XShapeSource {
 protected:
 	XRotateLoftedgeometrySource();
 

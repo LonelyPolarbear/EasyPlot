@@ -9,7 +9,7 @@ class XOpenGLVertexArrayObject;
 class XOpenGLBuffer;
 class XShapeSource;
 class xshader;
-class xrendernode_API XPolyDataMapper :public XDataBaseObject {
+class XRENDERNODE_API XPolyDataMapper :public XDataBaseObject {
 protected:
 	XPolyDataMapper();
 	~XPolyDataMapper();

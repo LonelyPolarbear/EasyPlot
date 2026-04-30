@@ -33,7 +33,7 @@ list(APPEND LIB_NAMES
 					glew32
 					opengl32
 					dataBase${DLL_DEBUG_POSTFIX}
-					XUtilty${DLL_DEBUG_POSTFIX}
+					xutilty${DLL_DEBUG_POSTFIX}
 					xshareVar${DLL_DEBUG_POSTFIX}
 )
 

@@ -27,7 +27,7 @@ protected:
 	virtual ~XTransformGizmoRenderNode();
 public:
 	void Init() override;
-	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
+	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
 	XQ::BoundBox getThisBoundBox(const Eigen::Matrix4f& m) const override;
 
 	/**

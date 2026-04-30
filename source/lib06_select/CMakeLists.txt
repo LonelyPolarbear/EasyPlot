@@ -33,7 +33,7 @@ LIST(APPEND LIB_NAMES
 	Qt5::Core
 	glew32
 	opengl32
-	XUtilty${DLL_DEBUG_POSTFIX}
+	xutilty${DLL_DEBUG_POSTFIX}
 	xshader${DLL_DEBUG_POSTFIX}
 	stbImage${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}

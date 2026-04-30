@@ -10,7 +10,7 @@
 /// <summary>
 /// 圆锥，圆锥与回转体基类的区别是顶面只有一个点，为了减少不必要顶点数量，重新设计坐标和索引
 /// </summary>
-class xrendernode_API XConeSource : public XRotateLoftedgeometrySource {
+class XRENDERNODE_API XConeSource : public XRotateLoftedgeometrySource {
 protected:
 	XConeSource();
 

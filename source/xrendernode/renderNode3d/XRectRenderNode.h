@@ -16,8 +16,8 @@ protected:
 public:
 	void Init() override;
 	void setRect(std::vector<XQ::Vec3f> points);
-	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
-	void draw(std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
+	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
+	void draw(sptr<XBaseRender> render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
 protected:
 	sptr<XCustomSource> m_inputSource;
 };

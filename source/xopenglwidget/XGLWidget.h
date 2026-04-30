@@ -9,7 +9,7 @@
 #include <QWidget>
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
-#include "render/XRenderType.h"
+#include <base/xbaserender/baseRender/XRenderType.h>
 
 class QOpenGLContext;
 class QWindow;

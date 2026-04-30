@@ -2,7 +2,7 @@
 #include "../XGraphicsItem.h"
 
 
-class xrendernode_API XLineItem :public XGraphicsItem {
+class XRENDERNODE_API XLineItem :public XGraphicsItem {
 public:
 	XLineItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XLineItem();

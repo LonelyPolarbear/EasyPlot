@@ -2,7 +2,7 @@
 #include "../XGraphicsItem.h"
 
 
-class xrendernode_API XTransformItem :public XGraphicsItem {
+class XRENDERNODE_API XTransformItem :public XGraphicsItem {
 public:
 	XTransformItem(std::shared_ptr<XGraphicsItem> parent = nullptr);
 	virtual ~XTransformItem();	

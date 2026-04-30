@@ -1,7 +1,7 @@
-project(XOpenGLWidget)
-set(proName XOpenGLWidget)
+project(xopenglwidget)
+set(proName xopenglwidget)
 
-set(outPutName "XOpenGLWidget")
+set(outPutName "xopenglwidget")
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/var.cmake)	
@@ -11,7 +11,7 @@ include(${CMAKE_SOURCE_DIR}/config_cmake/qt.cmake)
 #-------------------------------------------------------
 #设置包含的头文件
 #-------------------------------------------------------
-include_directories(${PROJECT_SOURCE_DIR}/source/XOpenGLWidget)
+include_directories(${PROJECT_SOURCE_DIR}/source/xopenglwidget)
 
 file(GLOB_RECURSE HEADERS_FILES *.h *.hpp)
 file(GLOB_RECURSE SOURCES_FILES *.cpp)
@@ -68,9 +68,10 @@ LIST(APPEND LIB_NAMES
 				glew32
 				opengl32
 				xopengl${DLL_DEBUG_POSTFIX}
-				XUtilty${DLL_DEBUG_POSTFIX}
+				xutilty${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
 				xrender${DLL_DEBUG_POSTFIX}
+				xbaserender${DLL_DEBUG_POSTFIX}
 				xrendernode${DLL_DEBUG_POSTFIX}
 				xcamera${DLL_DEBUG_POSTFIX}
 )

@@ -17,12 +17,12 @@ void XGroupRenderNode3d::Init()
 	XGroupRenderNode::Init();
 }
 
-void XGroupRenderNode3d::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
+void XGroupRenderNode3d::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
-	int count = getChildCount();
+	int count = getChildRenderNodeCount();
 	for (int i = 0; i < count; i++)
 	{
-		auto node =getChild(i);
-		node->draw(parentMatrix * m_transform.matrix(),isNormal);
+		auto node =getChildRenderNode(i);
+		node->draw(render,parentMatrix * m_transform.matrix(),isNormal);
 	}
 }

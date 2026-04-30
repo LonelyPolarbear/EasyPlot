@@ -6,7 +6,7 @@
 #include <Eigen/Eigen>
 #include <lib01_shader/xshader.h>
 
-enum  class xrendernode_API graphicsItemType {
+enum  class XRENDERNODE_API graphicsItemType {
 	none,
 	rect,
 	line,
@@ -18,7 +18,7 @@ enum  class xrendernode_API graphicsItemType {
 	text
 };
 
-enum class xrendernode_API  ColorMode {
+enum class XRENDERNODE_API  ColorMode {
 	SingleColor = 1,
 	VertexColor = 2,
 	FaceColor = 3,
@@ -26,7 +26,7 @@ enum class xrendernode_API  ColorMode {
 	SelectTest = 5						//”√”⁄ ∞»°≈–∂œ
 };
 
-enum class xrendernode_API  PolygonMode {
+enum class XRENDERNODE_API  PolygonMode {
 	point = 1,
 	line = 1 << 1,
 	face = 1 << 2,
@@ -37,15 +37,15 @@ enum class xrendernode_API  PolygonMode {
 };
 
 
-extern template class xrendernode_API XDataAttributeEnum<PolygonMode>;
-extern template class xrendernode_API XDataAttributeEnum<PrimitveType>;
-extern template class xrendernode_API XDataAttributeEnum<ColorMode>;
+extern template class XRENDERNODE_API XDataAttributeEnum<PolygonMode>;
+extern template class XRENDERNODE_API XDataAttributeEnum<PrimitveType>;
+extern template class XRENDERNODE_API XDataAttributeEnum<ColorMode>;
 
-class xrendernode_API XRenderNodeAttribute :public XDataObject {
+class XRENDERNODE_API XRenderNodeAttribute :public XDataObject {
 	REGISTER_CLASS_META_DATA(XRenderNodeAttribute,XDataObject);
 };
 
-class xrendernode_API XRenderNode3DAttribute :public XRenderNodeAttribute {
+class XRENDERNODE_API XRenderNode3DAttribute :public XRenderNodeAttribute {
 	REGISTER_CLASS_META_DATA(XRenderNode3DAttribute, XRenderNodeAttribute);
 protected:
 	XRenderNode3DAttribute();

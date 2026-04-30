@@ -76,7 +76,7 @@ LIST(APPEND LIB_NAMES
 				MyLib::HDF5
 				Qt5::Widgets
 				Qt5::Core
-				XUtilty${DLL_DEBUG_POSTFIX}
+				xutilty${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
 				xrendernode${DLL_DEBUG_POSTFIX}
 				xlog${DLL_DEBUG_POSTFIX}

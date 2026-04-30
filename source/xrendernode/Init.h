@@ -1,5 +1,5 @@
 #include "xrendernodeApi.h"
 
 extern "C" {
-	xrendernode_API void InitRenderNode();
+	XRENDERNODE_API void InitRenderNode();
 }

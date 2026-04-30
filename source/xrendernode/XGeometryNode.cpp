@@ -28,7 +28,7 @@ XGeometryNode::~XGeometryNode()
 {
 }
 
-void XGeometryNode::draw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f& parentMatrix)
+void XGeometryNode::draw(sptr<XBaseRender>  render, std::shared_ptr<xshader> shader, const Eigen::Matrix4f& parentMatrix)
 {
 	if(!isVisible())
 		return;
@@ -52,19 +52,19 @@ void XGeometryNode::draw(std::shared_ptr<xshader> shader, const Eigen::Matrix4f&
 
 }
 
-void XGeometryNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
+void XGeometryNode::draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
 	if (isNormal) {
-		draw(getShaderManger()->getShader3D(getDrawType()), parentMatrix);
+		draw(render,getShaderManger()->getShader3D(getDrawType()), parentMatrix);
 	}
 	else {
-		draw(getShaderManger()->getPickShader3D(), parentMatrix);
+		draw(render,getShaderManger()->getPickShader3D(), parentMatrix);
 	}
 	
 
 	Eigen::Matrix4f matrix = parentMatrix * m_transform.matrix();
 	for (auto m : *renderNodes) {
-		m->asDerived<XRenderNode>()->draw(matrix,isNormal);
+		m->asDerived<XRenderNode>()->draw(render,matrix,isNormal);
 	}
 }
 

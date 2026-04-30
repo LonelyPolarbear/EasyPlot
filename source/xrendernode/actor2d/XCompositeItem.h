@@ -2,7 +2,7 @@
 #include "../XGraphicsItem.h"
 
 
-class xrendernode_API XCompositeItem :public XGraphicsItem {
+class XRENDERNODE_API XCompositeItem :public XGraphicsItem {
 public:
 	XCompositeItem(std::shared_ptr<XGraphicsItem> parent = nullptr);
 	virtual ~XCompositeItem();	

@@ -6,7 +6,7 @@
 #include "xrotateLoftedGeometrySource.h"
 
 
-class xrendernode_API XRegularPrimSource : public XRotateLoftedgeometrySource {
+class XRENDERNODE_API XRegularPrimSource : public XRotateLoftedgeometrySource {
 protected:
 	XRegularPrimSource();
 

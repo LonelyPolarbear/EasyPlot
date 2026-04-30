@@ -1,9 +1,9 @@
 #include "XRenderNodeAttribute.h"
 #include "xrendernodeApi.h"
 
-template class xrendernode_API XDataAttributeEnum<PolygonMode>;
-template class xrendernode_API XDataAttributeEnum<PrimitveType>;
-template class xrendernode_API XDataAttributeEnum<ColorMode>;
+template class XRENDERNODE_API XDataAttributeEnum<PolygonMode>;
+template class XRENDERNODE_API XDataAttributeEnum<PrimitveType>;
+template class XRENDERNODE_API XDataAttributeEnum<ColorMode>;
 
 XRenderNode3DAttribute::XRenderNode3DAttribute()
 {

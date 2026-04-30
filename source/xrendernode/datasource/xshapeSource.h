@@ -7,7 +7,7 @@
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
 
-class xrendernode_API XShapeSource:public XDataBaseObject {
+class XRENDERNODE_API XShapeSource:public XDataBaseObject {
 protected:
     XShapeSource();
     virtual ~XShapeSource();

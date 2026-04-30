@@ -1,6 +1,6 @@
-project(render)
-set(proName render)
-set(outPutName "xrender")
+project(xbaserender)
+set(proName xbaserender)
+set(outPutName "xbaserender")
 
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
@@ -35,13 +35,9 @@ LIST(APPEND LIB_NAMES
 	MyLib::pybind
 	glew32
 	opengl32
-	XUtilty${DLL_DEBUG_POSTFIX}
+	xutilty${DLL_DEBUG_POSTFIX}
 	xshader${DLL_DEBUG_POSTFIX}
-	stbImage${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}
-	xopengl${DLL_DEBUG_POSTFIX}
-	xcamera${DLL_DEBUG_POSTFIX}
-	xrendernode${DLL_DEBUG_POSTFIX}
 	xlog${DLL_DEBUG_POSTFIX}
 )
 
@@ -53,16 +49,15 @@ ${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 														
 #生成动态库
 add_library(${proName}  SHARED)
-#pybind11_add_module(${proName} bindings.cpp)
 generate_dllmain_if_needed(${proName})
 generate_dllapi_if_needed(${proName} )
 get_dll_api_macro(${proName} DLL_API_NAME)
+generate_Init_if_needed(${proName})
 
 target_sources(${proName} PRIVATE ${SOURCES_FILES} ${HEADERS_FILES})
-#将动态库名字设为add
+#动态库名字
 target_compile_definitions(${proName} PRIVATE ${DLL_API_NAME})
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${outPutName})
-
 
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS ${outPutName})

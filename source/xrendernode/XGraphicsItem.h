@@ -16,31 +16,31 @@ class XOpenGLBuffer;
 class xShaderManger;
 
 namespace XGL {
-	enum class xrendernode_API Orientation {
+	enum class XRENDERNODE_API Orientation {
 		left_top,
 		left_bottom,
 		right_top,
 		right_bottom
 	};
 
-	enum class xrendernode_API VAlignment {
+	enum class XRENDERNODE_API VAlignment {
 		Top,
 		Middle,
 		Bottom
 	};
 
-	enum class xrendernode_API HAlignment {
+	enum class XRENDERNODE_API HAlignment {
 		Left,
 		Middle,
 		Right
 	};
 
-	enum class xrendernode_API Layout {
+	enum class XRENDERNODE_API Layout {
 		horizontal,
 		vertical
 	};
 
-	enum class xrendernode_API PositionType {
+	enum class XRENDERNODE_API PositionType {
 		local_complete,					//所有的点都在本地坐标系中，包括中心点
 		local_center,						//只有中心点在本地坐标系中
 		sceneScreen_complete,		//场景屏幕坐标系，同时意味着固定大小
@@ -49,7 +49,7 @@ namespace XGL {
 };
 
 //假设有一个正方形 边长为2，原点位于中心，假设有个变换矩阵M，作用在该矩形，现在需要根据变换后的一个位置，反算出原始的点
-struct xrendernode_API LocalCoordCompute {
+struct XRENDERNODE_API LocalCoordCompute {
 	Eigen::Affine3f m_transform;
 	LocalCoordCompute(const Eigen::Matrix4f& transform);
 
@@ -155,7 +155,7 @@ struct xrendernode_API LocalCoordCompute {
 	double scaley =1;		//Y轴缩放比例
 };
 
-class xrendernode_API XGraphicsItem :public XDataBaseObject {
+class XRENDERNODE_API XGraphicsItem :public XDataBaseObject {
 public:
 	enum class PenStyle {
 		Solid,

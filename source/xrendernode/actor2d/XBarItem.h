@@ -2,7 +2,7 @@
 #include "../XGraphicsItem.h"
 
 
-class xrendernode_API XBarItem :public XGraphicsItem {
+class XRENDERNODE_API XBarItem :public XGraphicsItem {
 public:
 	XBarItem(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XBarItem();

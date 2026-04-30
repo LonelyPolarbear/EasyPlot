@@ -53,7 +53,7 @@ void XInfinitePlaneRenderNode::setFrame(const Eigen::Matrix4f& frame)
 	m_planeFrame = frame;
 }
 
-void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix,  bool isNormal)
+void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix,  bool isNormal)
 {
 	//sigBeginRender(this->asDerived<XRenderNode>());
 	if (isNormal == false) {
@@ -85,7 +85,7 @@ void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix,  bool i
 	mFeedBackBuffer->bind();																											 //------------------------------ ¼¤»î
 	glBeginTransformFeedback(GL_TRIANGLES);                                                                           //------------------------------ Æô¶¯
 
-	this->draw(shader,parentMatrix);
+	this->draw(render,shader,parentMatrix);
 	shader->unUse();
 
 	glEnableObj->restore();
@@ -101,9 +101,9 @@ void XInfinitePlaneRenderNode::draw(const Eigen::Matrix4f& parentMatrix,  bool i
 	//sigEndRender(this->asDerived<XRenderNode>());
 }
 
-void XInfinitePlaneRenderNode::draw(std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
+void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
 {
-	return XGeometryNode::draw(s,parentMatrix);
+	return XGeometryNode::draw(render,s,parentMatrix);
 }
 
 void XInfinitePlaneRenderNode::createFeedBack()

@@ -12,7 +12,7 @@ static void InitDataSerialize();
 
 static void InitAttrToString();
 
-xrendernode_API void InitRenderNode()
+XRENDERNODE_API void InitRenderNode()
 {
 	InitBaseObjectMeta();
 	InitAttrToString();

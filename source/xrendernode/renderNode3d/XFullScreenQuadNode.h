@@ -16,8 +16,8 @@ public:
 	void setRect(std::vector<XQ::Vec3f> points);
 	void setNearRect();
 	void setFarRect();
-	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
-	void draw(std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
+	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
+	void draw(sptr<XBaseRender> render,std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
 
 	void setVertexColor(std::vector<XQ::XColor> colors);
 protected:

@@ -96,20 +96,20 @@ void XTransformGizmoRenderNode::Init()
 	mData->mRotateZX->setMinorRadius(radius);
 	mData->mRotateZX->rotateX(90);
 
-	addChild(mData->mArrowX);
-	addChild(mData->mArrowY);
-	addChild(mData->mArrowZ);
-	addChild(mData->mSphere);
-	addChild(mData->mRotateXY);
-	addChild(mData->mRotateYZ);
-	addChild(mData->mRotateZX);
+	addChildRenderNode(mData->mArrowX);
+	addChildRenderNode(mData->mArrowY);
+	addChildRenderNode(mData->mArrowZ);
+	addChildRenderNode(mData->mSphere);
+	addChildRenderNode(mData->mRotateXY);
+	addChildRenderNode(mData->mRotateYZ);
+	addChildRenderNode(mData->mRotateZX);
 
 	mData->mFullScreenQuadNode = makeShareDbObject<XFullScreenQuadNode>();
 	mData->mFullScreenQuadNode->setColorMode(ColorMode::SingleColor);
 	mData->mFullScreenQuadNode->setFarRect();
 }
 
-void XTransformGizmoRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
+void XTransformGizmoRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
 	//为何实现节点不被阻挡，使用模板缓冲的方式 来做
 	if (isNormal) {
@@ -123,7 +123,7 @@ void XTransformGizmoRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool i
 		XOpenGLFuntion::xglStencilOp(XOpenGL::StencilBehavior::XGL_KEEP,XOpenGL::StencilBehavior::XGL_KEEP,XOpenGL::StencilBehavior::XGL_REPLACE);
 		XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS);
 		XOpenGLFuntion::xglDepthMask(false);
-		XGroupRenderNode3d::draw(parentMatrix, isNormal);			//得到模板数值
+		XGroupRenderNode3d::draw(render,parentMatrix, isNormal);			//得到模板数值
 
 		// 设置模板测试相关函数 ，关闭颜色输出
 		//2 绘制全屏矩形，但是只有符合模板测试的片元才通过，只是将更新深度缓冲区为远平面
@@ -135,7 +135,7 @@ void XTransformGizmoRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool i
 		if (!mData->mFullScreenQuadNode->getShaderManger()) {
 			mData->mFullScreenQuadNode->setShaderManger(getShaderManger());
 		}
-		mData->mFullScreenQuadNode->draw(Eigen::Matrix4f::Identity(),true);
+		mData->mFullScreenQuadNode->draw(render,Eigen::Matrix4f::Identity(),true);
 
 		glEnable->restore();
 		
@@ -143,10 +143,10 @@ void XTransformGizmoRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool i
 		//3 重新绘制图元
 		XOpenGLFuntion::xglColorMask(true, true, true, true);
 		XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_LESS);
-		XGroupRenderNode3d::draw(parentMatrix, isNormal);
+		XGroupRenderNode3d::draw(render,parentMatrix, isNormal);
 	}
 	else {
-		XGroupRenderNode3d::draw(parentMatrix, isNormal);
+		XGroupRenderNode3d::draw(render,parentMatrix, isNormal);
 	}
 	
 }

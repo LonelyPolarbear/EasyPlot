@@ -32,7 +32,7 @@ void XSphereRenderNode::Init()
 	createSource();
 }
 
-void XSphereRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
+void XSphereRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
-	XGeometryNode::draw(parentMatrix,isNormal);
+	XGeometryNode::draw(render,parentMatrix,isNormal);
 }

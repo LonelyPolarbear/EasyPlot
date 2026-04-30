@@ -7,7 +7,7 @@
 #include "XRegularPrimSource.h"
 
 
-class xrendernode_API xfrustumSource : public XRegularPrimSource {
+class XRENDERNODE_API xfrustumSource : public XRegularPrimSource {
 protected:
 	xfrustumSource();
 

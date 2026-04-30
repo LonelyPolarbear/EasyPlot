@@ -15,7 +15,7 @@
 
 class xShaderManger;
 class XShapeSource;
-class xrendernode_API XGeometryNode:public XRenderNode3D {
+class XRENDERNODE_API XGeometryNode:public XRenderNode3D {
 	REGISTER_CLASS_META_DATA(XGeometryNode, XRenderNode3D);
 public:
     XGeometryNode();
@@ -25,14 +25,14 @@ public:
     /// 由外部指定的着色器进行绘制
     /// </summary>
     /// <param name=""></param>
-    virtual void draw(std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix);
+    virtual void draw(sptr<XBaseRender>  render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix);
 
 	/// <summary>
 	/// 对外接口，绘制到屏幕
 	/// </summary>
-	void draw(const Eigen::Matrix4f& parentMatrix,bool isNormal ) override;
+	void draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix,bool isNormal ) override;
 
-	void drawInstance(const Eigen::Matrix4f& parentMatrix) override {};
+	void drawInstance(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix) override {};
 
 	//按列矩阵形式存储
 	const float* getMatrix() const;

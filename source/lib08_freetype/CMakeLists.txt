@@ -37,7 +37,7 @@ LIST(APPEND LIB_NAMES
 	glew32
 	opengl32
 	freetype
-	XUtilty${DLL_DEBUG_POSTFIX}
+	xutilty${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}
 	Qt5::Core
 	Qt5::Gui

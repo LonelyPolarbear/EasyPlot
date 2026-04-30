@@ -9,7 +9,7 @@ void XRenderNode::Init()
 	XQ_XDATA_ADD(renderNodes);
 }
 
-bool XRenderNode::addChild(sptr<XRenderNode> child)
+bool XRenderNode::addChildRenderNode(sptr<XBaseRenderNode> child)
 {
 	//节点不应该重复
 	if(!child)
@@ -23,7 +23,7 @@ bool XRenderNode::addChild(sptr<XRenderNode> child)
 	return false;
 }
 
-bool XRenderNode::removeChild(sptr<XRenderNode> child)
+bool XRenderNode::removeChildRenderNode(sptr<XBaseRenderNode> child)
 {
 	auto iter = std::find(renderNodes->begin(), renderNodes->end(), child);
 	if (iter != renderNodes->end()) {
@@ -33,28 +33,28 @@ bool XRenderNode::removeChild(sptr<XRenderNode> child)
 	return false;
 }
 
-void XRenderNode::clearChildren()
+void XRenderNode::clearChildrenRenderNode()
 {
 	renderNodes->clear();
 }
 
-int XRenderNode::getChildCount() const
+int XRenderNode::getChildRenderNodeCount() const
 {
 	return renderNodes->size();
 }
 
-sptr<XRenderNode> XRenderNode::getChild(int index) const
+sptr<XBaseRenderNode> XRenderNode::getChildRenderNode(int index) const
 {
 	if(index < 0 || index >= renderNodes->size())
 		return sptr<XRenderNode>();
 	return (*renderNodes)[index]->asDerived<XRenderNode>();
 }
 
-sptr<XRenderNode> XRenderNode::getRenderNodeParent() const
+sptr<XBaseRenderNode> XRenderNode::getRenderNodeParent() const
 {
 	auto p=getParent();
 	if (p) {
-		if (p->getClassName() ==XQ_META::ClassName<XDataListT<XRenderNode>>()) {
+		if (p->getClassName() ==XQ_META::ClassName<XDataListT<XBaseRenderNode>>()) {
 			p = p->getParent();
 		}
 		
@@ -66,16 +66,6 @@ sptr<XRenderNode> XRenderNode::getRenderNodeParent() const
 	return nullptr;
 }
 
-std::vector< sptr<const XRenderNode>> XRenderNode::getRenderNodeChain() const
-{
-	std::vector< sptr<const XRenderNode>> chain;
-	auto p = asDerived<XRenderNode>();
-	while (p = getRenderNodeParent()) {
-		chain.push_back(p);
-		p = p->getRenderNodeParent();
-	}
-	return chain;
-}
 
 void XRenderNode::setVisible(bool visible)
 {

@@ -4,7 +4,7 @@
 #include <lib00_utilty/XUtilty.h>
 
 
-class xrendernode_API XShapeSourceCombineFilter : public XShapeSource {
+class XRENDERNODE_API XShapeSourceCombineFilter : public XShapeSource {
 protected:
 	XShapeSourceCombineFilter();
 

@@ -3,7 +3,7 @@
 #include "../xrendernodeApi.h"
 #include "xshapeSource.h"
 
-class xrendernode_API XSphereSource : public XShapeSource
+class XRENDERNODE_API XSphereSource : public XShapeSource
 {
 public:
 	enum Direaction {

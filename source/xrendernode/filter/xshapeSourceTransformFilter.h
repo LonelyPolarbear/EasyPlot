@@ -5,7 +5,7 @@
 #include <Eigen/Eigen>
 
 
-class xrendernode_API XShapeSourceTransformFilter : public XShapeSource {
+class XRENDERNODE_API XShapeSourceTransformFilter : public XShapeSource {
 protected:
 	XShapeSourceTransformFilter();
 

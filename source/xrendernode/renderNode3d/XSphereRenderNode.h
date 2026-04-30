@@ -15,7 +15,7 @@ protected:
 	void createSource();
 public:
 	void Init() override;
-	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
+	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
 protected:
 	sptr<XSphereSource> m_inputSource;
 };

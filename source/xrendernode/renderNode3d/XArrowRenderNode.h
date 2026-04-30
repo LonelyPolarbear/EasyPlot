@@ -29,7 +29,7 @@ public:
 	 */
 	void setLineSize(double r, double h);
 
-	void draw(const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
+	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
 protected:
 	class Internal;
 	sptr<Internal> mData;

@@ -3,7 +3,7 @@
 
 class XLineItem;
 class XTextItem;
-class xrendernode_API XAxisItem :public XCompositeItem {
+class XRENDERNODE_API XAxisItem :public XCompositeItem {
 public:
 	XAxisItem(std::shared_ptr<XGraphicsItem> parent = nullptr);
 	virtual ~XAxisItem();

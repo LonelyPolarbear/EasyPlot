@@ -29,9 +29,9 @@ void XTorusRenderNode::Init()
 	createSource();
 }
 
-void XTorusRenderNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
+void XTorusRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
-	XGeometryNode::draw(parentMatrix,isNormal);
+	XGeometryNode::draw(render,parentMatrix,isNormal);
 }
 
 void XTorusRenderNode::setStartAngle(float angle)

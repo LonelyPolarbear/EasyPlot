@@ -3,7 +3,7 @@
 #include "xshapeSource.h"
 #include <filesystem>
 
-class xrendernode_API XCustomSource : public XShapeSource {
+class XRENDERNODE_API XCustomSource : public XShapeSource {
 protected:
 	XCustomSource();
 

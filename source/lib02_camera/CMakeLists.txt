@@ -20,7 +20,7 @@ list(APPEND LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 #设置依赖的动态库名称
 #-------------------------------------------------------
 lIST(APPEND LIB_NAMES 	
-	XUtilty${DLL_DEBUG_POSTFIX}
+	xutilty${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}
 )
 

@@ -81,9 +81,9 @@ SET(LIB_NAMES PRIVATE
 				Qt5::Concurrent
 				glew32
 				opengl32
-				XUtilty${DLL_DEBUG_POSTFIX}
+				xutilty${DLL_DEBUG_POSTFIX}
 				xshader${DLL_DEBUG_POSTFIX}
-				XOpenGLWidget${DLL_DEBUG_POSTFIX}
+				xopenglwidget${DLL_DEBUG_POSTFIX}
 				xeasyplot${DLL_DEBUG_POSTFIX}
 				xpanel${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}

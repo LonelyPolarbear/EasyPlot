@@ -1,6 +1,6 @@
 #pragma once
 #include "XRectItem.h"
-class xrendernode_API XCheckBoxItem :public XRectItem {
+class XRENDERNODE_API XCheckBoxItem :public XRectItem {
 public:
 	XCheckBoxItem(std::shared_ptr<XGraphicsItem> parent = nullptr);
 	virtual ~XCheckBoxItem();

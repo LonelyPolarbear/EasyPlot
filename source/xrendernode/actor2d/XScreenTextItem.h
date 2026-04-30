@@ -3,7 +3,7 @@
 #include "XTextItem.h"
 
 
-class xrendernode_API XScreenTextItem :public XTextItem {
+class XRENDERNODE_API XScreenTextItem :public XTextItem {
 public:
 	
 	XScreenTextItem(std::shared_ptr<XGraphicsItem> parent);

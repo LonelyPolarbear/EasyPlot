@@ -85,18 +85,18 @@ void XFullScreenQuadNode::setFarRect()
 	m_inputSource->Modified();
 }
 
-void XFullScreenQuadNode::draw(const Eigen::Matrix4f& parentMatrix, bool isNormal)
+void XFullScreenQuadNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
 	if (isNormal) {
 		auto shader = getShaderManger()->getNdcShader();
-		draw(shader, parentMatrix);
+		draw(render,shader, parentMatrix);
 	}
 	
 }
 
-void XFullScreenQuadNode::draw(std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
+void XFullScreenQuadNode::draw(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
 {
-	XGeometryNode::draw(s, parentMatrix);
+	XGeometryNode::draw(render,s, parentMatrix);
 }
 
 void XFullScreenQuadNode::setVertexColor(std::vector<XQ::XColor> colors)

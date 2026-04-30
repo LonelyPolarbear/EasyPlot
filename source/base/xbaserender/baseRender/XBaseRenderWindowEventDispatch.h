@@ -1,21 +1,20 @@
 #pragma once
-#include "renderApi.h"
-#include "XRenderType.h"
+#include "base/xbaserender/xbaserenderApi.h"
+#include "base/xbaserender/baseRender/XRenderType.h"
 #include <dataBase/XDataBaseObject.h>
 #include <dataBase/XVector.h>
 #include <lib00_utilty/XUtilty.h>
 #include <xsignal/XSignal.h>
 
 //需要定义窗口信号
-class XOpenGLRenderWindow;
-class RENDER_API XRenderWindowEventDispatch :public XDataBaseObject {
+class XBaseRenderWindow;
+class XBASERENDER_API XBaseRenderWindowEventDispatch :public XDataBaseObject {
 protected:
-	XRenderWindowEventDispatch();
-	virtual ~XRenderWindowEventDispatch();
-	wptr< XOpenGLRenderWindow> m_renderWindow;
+	XBaseRenderWindowEventDispatch();
+	virtual ~XBaseRenderWindowEventDispatch();
 public:
-	void setRenderWindow(sptr<XOpenGLRenderWindow> ren);
-	sptr<XOpenGLRenderWindow> getRenderWindow() const;
+	virtual void setRenderWindow(sptr<XBaseRenderWindow> ren) =0;
+	virtual sptr<XBaseRenderWindow> getRenderWindow() const =0;
 
 public:
 	//窗口信号

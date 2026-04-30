@@ -2,7 +2,7 @@
 #include "../XGraphicsItem.h"
 
 
-class xrendernode_API XRectItem :public XGraphicsItem {
+class XRENDERNODE_API XRectItem :public XGraphicsItem {
 public:
 	enum RectType {
 		center_rect,			// 矩形中心点和任意一个顶点

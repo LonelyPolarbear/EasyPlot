@@ -213,7 +213,7 @@ bool XViewSelection::renderLayer(std::set<std::shared_ptr<XGeometryNode>> object
 
 	for (auto shape : objects) {
 		shape->setPolygonMode(PolygonMode::face);
-		shape->draw(d->pickShader, Eigen::Matrix4f::Identity());
+		//shape->draw(d->pickShader, Eigen::Matrix4f::Identity());
 	}
 
 	glEndQuery(GL_SAMPLES_PASSED);

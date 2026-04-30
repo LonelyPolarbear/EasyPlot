@@ -1,6 +1,6 @@
 project(lib00_utilty)
 set(proName lib00_utilty)
-set(outPutName "XUtilty")
+set(outPutName "xutilty")
 include(${CMAKE_SOURCE_DIR}/config_cmake/public.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/function.cmake)
 include(${CMAKE_SOURCE_DIR}/config_cmake/var.cmake)										

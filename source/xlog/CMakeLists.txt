@@ -27,7 +27,7 @@ list(APPEND LIB_INCLUDE_DIRECTORY
 
 
 list(APPEND LIB_NAMES 
-					#XUtilty${DLL_DEBUG_POSTFIX}
+					#xutilty${DLL_DEBUG_POSTFIX}
 )
 
 

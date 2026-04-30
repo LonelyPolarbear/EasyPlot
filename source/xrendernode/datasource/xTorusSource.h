@@ -9,7 +9,7 @@
 /// <summary>
 /// Ô²»·Ãæ
 /// </summary>
-class xrendernode_API XTorusSource : public XShapeSource {
+class XRENDERNODE_API XTorusSource : public XShapeSource {
 protected:
 	XTorusSource();
 

@@ -5,7 +5,7 @@
 class XPolyline; 
 class XTextItem;
 
-class xrendernode_API XChartItem2 :public XGraphicsItem {
+class XRENDERNODE_API XChartItem2 :public XGraphicsItem {
 public:
 	
 	XChartItem2(std::shared_ptr<XGraphicsItem> parent = nullptr);

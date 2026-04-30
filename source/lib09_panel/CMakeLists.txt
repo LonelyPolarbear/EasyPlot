@@ -64,7 +64,7 @@ LIST(APPEND LIB_NAMES
 	Qt5::Widgets
 	Qt5::Core
 	glew32
-	XUtilty${DLL_DEBUG_POSTFIX}
+	xutilty${DLL_DEBUG_POSTFIX}
 	dataBase${DLL_DEBUG_POSTFIX}
 )
 

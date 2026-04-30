@@ -2,7 +2,7 @@
 #include "../XGraphicsItem.h"
 
 
-class xrendernode_API XPolyline :public XGraphicsItem {
+class XRENDERNODE_API XPolyline :public XGraphicsItem {
 public:
 	XPolyline(std::shared_ptr<XGraphicsItem> parent);
 	virtual ~XPolyline();

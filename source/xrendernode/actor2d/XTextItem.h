@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "../XGraphicsItem.h"
 
-class xrendernode_API XTextItem :public XGraphicsItem {
+class XRENDERNODE_API XTextItem :public XGraphicsItem {
 public:
 	enum class HAlign {
 		Left,
