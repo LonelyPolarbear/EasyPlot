@@ -62,7 +62,7 @@ function(group_source_files_by_directory)
 endfunction()
 
 
-# utils.cmake （或直接写在顶层 CMakeLists.txt 中）
+#--------- 生成dllmain.cpp---------
 function(generate_dllmain_if_needed TARGET_NAME)
     # 1. 获取目标类型 EXECUTABLE STATIC_LIBRARY SHARED_LIBRARY MODULE_LIBRARY INTERFACE_LIBRAR OBJECT_LIBRARY
     get_target_property(TARGET_TYPE ${TARGET_NAME} TYPE)
@@ -110,6 +110,7 @@ string(TOUPPER "${TARGET_NAME}" TARGET_UPPER)
 set(${OUTPUT_VAR} "${TARGET_UPPER}_DLL" PARENT_SCOPE)
 endfunction()
 
+#--------- 生成dllApi.h---------
 function(generate_dllapi_if_needed TARGET_NAME)
     # 1. 获取目标类型 EXECUTABLE STATIC_LIBRARY SHARED_LIBRARY MODULE_LIBRARY INTERFACE_LIBRAR OBJECT_LIBRARY
     get_target_property(TARGET_TYPE ${TARGET_NAME} TYPE)
@@ -162,6 +163,7 @@ string(TOUPPER "${TARGET_NAME}" TARGET_UPPER)
 set(${OUTPUT_VAR} "${TARGET_UPPER}_DLL" PARENT_SCOPE)
 endfunction()
 
+#--------- 生成XScan.h---------
 function(generate_xscan_if_needed TARGET_NAME)
     # 1. 获取目标类型 EXECUTABLE STATIC_LIBRARY SHARED_LIBRARY MODULE_LIBRARY INTERFACE_LIBRAR OBJECT_LIBRARY
     get_target_property(TARGET_TYPE ${TARGET_NAME} TYPE)
@@ -190,6 +192,55 @@ function(generate_xscan_if_needed TARGET_NAME)
          "${XSCAN_PATH}"
          @ONLY)
       target_sources(${TARGET_NAME} PRIVATE "${XSCAN_PATH}")
+endfunction()
+
+#--------- 生成Init.h Init.cpp---------
+function(generate_Init_if_needed TARGET_NAME)
+    # 1. 获取目标类型 EXECUTABLE STATIC_LIBRARY SHARED_LIBRARY MODULE_LIBRARY INTERFACE_LIBRAR OBJECT_LIBRARY
+    get_target_property(TARGET_TYPE ${TARGET_NAME} TYPE)
+
+    # 2. 仅对共享库处理（且仅限 Windows）
+    if(NOT WIN32)
+        return()
+    endif()
+
+    if(NOT TARGET_TYPE STREQUAL "SHARED_LIBRARY")
+        return()
+    endif()
+
+    # 获取目标源码目录
+    #SOURCE_DIR 是 CMake 内置的目标属性（Target Property），表示：该目标被定义时所在的源码目录（即包含其 CMakeLists.txt 的目录）
+    get_target_property(TARGET_SOURCE_DIR ${TARGET_NAME} SOURCE_DIR)
+
+    set(INIT_HPP_PATH "${TARGET_SOURCE_DIR}/Init.h")
+    set(INIT_CPP_PATH "${TARGET_SOURCE_DIR}/Init.cpp")
+
+    # 检查 Init.h 是否已存在
+    if(EXISTS "${INIT_HPP_PATH}")
+        return()
+    endif()
+
+    message(STATUS "Generating Init.h Init.cpp for target: ${TARGET_NAME}")
+     # === 设置你要替换的变量 ===
+
+    string(TOUPPER "${TARGET_NAME}" TARGET_UPPER)
+    set(DLL_API_NAME "${TARGET_UPPER}_API")
+    set(DLL_API_H "${TARGET_NAME}Api.h")
+    set(DLL_TARGET "${TARGET_NAME}")
+    
+    # 模板文件路径（假设放在 cmake/templates/ 下）
+    set(TEMPLATE_FILE_H "${CMAKE_SOURCE_DIR}/config_cmake/templates/Init.h.in")
+    configure_file(
+         "${TEMPLATE_FILE_H}"
+         "${INIT_HPP_PATH}"
+         @ONLY)
+
+    set(TEMPLATE_FILE_CPP "${CMAKE_SOURCE_DIR}/config_cmake/templates/Init.cpp.in")
+    configure_file(
+         "${TEMPLATE_FILE_CPP}"
+         "${INIT_CPP_PATH}"
+         @ONLY)
+    target_sources(${TARGET_NAME} PRIVATE "${INIT_HPP_PATH}" "${INIT_CPP_PATH}" )
 endfunction()
 
 endif (MSVC)

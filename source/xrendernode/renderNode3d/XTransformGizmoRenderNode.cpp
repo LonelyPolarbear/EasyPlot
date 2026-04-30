@@ -5,6 +5,9 @@
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <xsignal/XSignal.h>
 
+#include "base/xbaserender/baseRender/XBaseRender.h"
+#include "base/xbaserender/baseRender/XBaseRenderWindow.h"
+#include "base/xbaserender/baseRender/XBaseRenderCamera.h"
 #include <xrendernode/renderNode3d/XFullScreenQuadNode.h>
 class XTransformGizmoRenderNode::Internal {
 public:
@@ -43,15 +46,15 @@ XTransformGizmoRenderNode::~XTransformGizmoRenderNode()
 {
 }
 
-
-
 void XTransformGizmoRenderNode::Init()
 {
 	XGroupRenderNode3d::Init();
-	float radius =0.2;
 	float lineLen = 1;
-	XQ::Vec2f arrowSize(0.4, 0.4);
-	XQ::Vec2f lineSize(radius, lineLen);
+	float radius = 0.2;
+	XQ::Vec2f arrowSize(radius*2, radius*2);
+	XQ::Vec2f lineSize(radius, 1);
+	XQ_ATTR_ADD_INIT(AtteArrowSize, arrowSize);
+	XQ_ATTR_ADD_INIT(AtteLineSize, lineSize);
 
 	mData->mArrowZ = makeShareDbObject<XArrowRenderNode>();
 	mData->mArrowZ->setSingleColor(XQ::Vec4f(0, 0, 1, 1));
@@ -77,7 +80,7 @@ void XTransformGizmoRenderNode::Init()
 	mData->mArrowY->rotateX(270);
 
 	mData->mSphere = makeShareDbObject<XSphereRenderNode>();
-	mData->mSphere->scale(lineSize[0]*1.5, lineSize[0] * 1.5, lineSize[0] * 1.5);
+	mData->mSphere->scale(radius *1.5, radius * 1.5, radius * 1.5);
 
 	mData->mRotateXY = makeShareDbObject<XTorusRenderNode>();
 	mData->mRotateXY->setEndAngle(90);
@@ -107,10 +110,71 @@ void XTransformGizmoRenderNode::Init()
 	mData->mFullScreenQuadNode = makeShareDbObject<XFullScreenQuadNode>();
 	mData->mFullScreenQuadNode->setColorMode(ColorMode::SingleColor);
 	mData->mFullScreenQuadNode->setFarRect();
+
+
+	mData->mConnector.connect(this,&XTransformGizmoRenderNode::sigItemDataChanged,[this](sptr<XDataAttribute> attr, XDataChangeType type){
+		if (type == XDataChangeType::ItemDataModified) {
+			if (attr == AtteLineSize || attr == AtteArrowSize) {
+				auto arrowSize = AtteArrowSize->getValue();
+				auto lineSize = AtteLineSize->getValue();
+				float radius = lineSize[0];
+				float lineLen = lineSize[1];
+
+				mData->mArrowZ->setLineSize(lineSize[0], lineSize[1]);
+				mData->mArrowZ->setArrowSize(arrowSize[0], arrowSize[1]);
+
+				mData->mArrowX->setLineSize(lineSize[0], lineSize[1]);
+				mData->mArrowX->setArrowSize(arrowSize[0], arrowSize[1]);
+
+				mData->mArrowY->setLineSize(lineSize[0], lineSize[1]);
+				mData->mArrowY->setArrowSize(arrowSize[0], arrowSize[1]);
+
+				mData->mSphere->setScale(radius * 1.5, radius * 1.5, radius * 1.5);
+
+				mData->mRotateXY->setMajorRadius(lineLen * 0.5);
+				mData->mRotateXY->setMinorRadius(radius);
+
+				mData->mRotateYZ->setMajorRadius(lineLen * 0.5);
+				mData->mRotateYZ->setMinorRadius(radius);
+
+				mData->mRotateZX->setMajorRadius(lineLen * 0.5);
+				mData->mRotateZX->setMinorRadius(radius);
+			}
+		}
+	});
 }
 
 void XTransformGizmoRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
 {
+	auto viewport = render->getConvertViewPort();
+	auto w = viewport[2];
+	auto h = viewport[3];
+	//为了实现节点在屏幕中的固定大小，需要调整操作柄矩阵
+	//计算局部坐标系下的一个单位，对应屏幕上的占据多少像素
+	
+	auto parent_mat = XQ::Matrix::convert(parentMatrix);
+	auto object_mat =getTransform();
+	auto total_mat = parent_mat * object_mat;
+	auto transform_data = XQ::Matrix::transformDecomposition_TRS(parent_mat);
+	Eigen::Vector3f pos = total_mat.translation();
+	auto  z= pos.z();
+	auto scale_h =render->getCamera()->scaleFactorH(z,w);		//相机宽度：屏幕宽度
+	scale_h *= transform_data.sx;
+
+	//auto scale_v = render->getCamera()->scaleFactorV(z, h);		//相机高度：屏幕高度
+	//scale_v *= transform_data.sy;
+
+	//已知屏幕固定像素 
+	float fix_screen_size_h = 50;
+	float fix_screen_size_w = 6;
+
+	float line_real_len = fix_screen_size_h*scale_h;
+	float line_real_radius = fix_screen_size_w*scale_h;
+
+	XQ::Vec2f arrowSize(line_real_radius * 2, line_real_radius * 2);
+	AtteLineSize->setValue(XQ::Vec2f(line_real_radius, line_real_len));
+	AtteArrowSize->setValue(arrowSize);
+
 	//为何实现节点不被阻挡，使用模板缓冲的方式 来做
 	if (isNormal) {
 		//1 启用模板测试，设置深度测试总是通过，但是不写入
@@ -219,7 +283,7 @@ void XTransformGizmoRenderNode::bindRenderNode(sptr<XRenderNode> node)
 {
 	mData->mBindRenderNode = node;
 	//初始位置姿态相同，缩放系数可能不同
-	mData->mConnector.disconnect();
+	mData->mConnector.disconnect("SigMatrixChanged");
 	if(!node)
 		return;
 	//同步node的位姿信息给this
@@ -233,9 +297,13 @@ void XTransformGizmoRenderNode::bindRenderNode(sptr<XRenderNode> node)
 	auto scale_x = boundBox.xmax - boundBox.xmin;
 	auto scale_y = boundBox.ymax - boundBox.ymin;
 	auto scale_z = boundBox.zmax - boundBox.zmin;
-	data.sx = scale_x;
-	data.sy = scale_y;
-	data.sz = scale_z;
+	//data.sx = scale_x;
+	//data.sy = scale_y;
+	//data.sz = scale_z;
+
+	data.sx = 1;
+	data.sy = 1;
+	data.sz = 1;
 	m_transform.matrix() = XQ::Matrix::computeMatrix(data);
 
 
@@ -264,7 +332,7 @@ void XTransformGizmoRenderNode::bindRenderNode(sptr<XRenderNode> node)
 		trans.matrix() = new_matrix;
 		node->setTransform(trans);
 
-	});
+	},"SigMatrixChanged");
 }
 
 sptr<XRenderNode> XTransformGizmoRenderNode::getBindRenderNode()

@@ -20,6 +20,7 @@ const int COLOMODE_VERTEXCOLOR = 2;
 const int COLOMODE_FACECOLOR = 3;												//每个片元一个颜色
 const int COLOMODE_TEXTURECOLOR = 4;										//每个片元一个颜色
 const int COLOMODE_SELECT_TEST_COLOR = 5;							//每个片元一个颜色
+const int COLOMODE_VERTEXCOLOR_TEXTURE = 6;
 
 
 const int POLYGONMODE_POINT = 1;
@@ -28,19 +29,23 @@ const int POLYGONMODE_FACE = 4;
 
 uniform int polygonMode;
 
-uniform int colorMode;																		//颜色模式
-uniform vec4 singleColor;																	//单色
-uniform vec4 selectTestColor;															//选择测试颜色
-uniform vec4 preSelectColor;															//预选颜色
+uniform int colorMode;																			//颜色模式
+uniform vec4 singleColor;																		//单色
+uniform vec4 selectTestColor;																//选择测试颜色
+uniform vec4 preSelectColor;																//预选颜色
 
-uniform uint objectID;																		//当前对象ID
+uniform uint objectID;																			//当前对象ID
 
-layout(binding = 1) uniform sampler2D depthSample;					//深度纹理，暂未用到
-layout(binding = 2) uniform usampler2D objectIdSample;				//对象ID纹理(来自FBO)，用于预选
+layout(binding = 1) uniform sampler2D depthSample;						//深度纹理，暂未用到
+layout(binding = 2) uniform usampler2D objectIdSample;					//对象ID纹理(来自FBO)，用于预选
+layout(binding = 3) uniform usampler2D objectDiffuseTex;				//漫反射贴图
+layout(binding = 4) uniform usampler2D objectNormalTex;				//法线贴图
+layout(binding = 5) uniform usampler2D objectSpecularTex;				//镜面光贴图
 
 
 //顶点属性输入
 in vec4 in_color;
+in vec2 in_textureCoord;
 
 /********************************************************************************************************************/
 /*一些函数*/
@@ -97,6 +102,8 @@ void main()
 						fragcolor_before = singleColor;
 					}else if(colorMode == COLOMODE_SELECT_TEST_COLOR){
 						fragcolor_before = selectTestColor;
+					}else if(colorMode == COLOMODE_VERTEXCOLOR_TEXTURE){
+						fragcolor_before = texture(objectDiffuseTex,in_textureCoord);
 					}else{
 						fragcolor_before = vec4(1.0, 0.0, 1.0, 1.0);
 					}
@@ -110,6 +117,8 @@ void main()
 					fragcolor_before = singleColor;
 				}else if(colorMode == COLOMODE_SELECT_TEST_COLOR){
 					fragcolor_before = selectTestColor;
+				}else if(colorMode == COLOMODE_VERTEXCOLOR_TEXTURE){
+					fragcolor_before = texture(objectDiffuseTex,in_textureCoord);
 				}else{
 					fragcolor_before = vec4(1.0, 0.0, 1.0, 1.0);
 				}

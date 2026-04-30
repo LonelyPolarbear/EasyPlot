@@ -50,6 +50,16 @@ public:
 	virtual std::vector<XQ::Vec3f> getFrustumInWorld() const =0;
 
 	/**
+	 * @breif 对于指定的Z平面，相机切平面与屏幕在水平方向的缩放比例 相机：屏幕宽度，Z是相机坐标系下距离Z平面的距离
+	 */
+	virtual float scaleFactorH(float zValue, float screenw) =0;
+
+	/**
+	 * @breif 对于指定的Z平面，相机切平面与屏幕在竖直方向的缩放比例 相机：屏幕高度
+	 */
+	virtual float scaleFactorV(float zValue, float screenh) =0;
+
+	/**
 	 * @brief 屏幕坐标到NDC坐标，屏幕坐标系为左手坐标系，原点位于屏幕左下角，X轴向右，Y轴向上,Z轴朝向屏幕里，范围[-1,1]
 	 * @param input 屏幕坐标系下的一点
 	 * @return NDC坐标系下的一点

@@ -129,6 +129,12 @@ namespace XQ {
 			return ret;
 		}
 
+		static Eigen::Affine3f convert(Eigen::Matrix4f m) {
+			Eigen::Affine3f ret;
+			ret.matrix() = m;
+			return ret;
+		}
+
 		static Eigen::Vector3f dir(Eigen::Matrix4f m, int type) {
 			Eigen::Affine3f trans;
 			trans.matrix() = m;

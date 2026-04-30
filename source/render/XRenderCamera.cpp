@@ -124,6 +124,16 @@ std::vector<XQ::Vec3f> XRenderCamera::getFrustumInWorld() const
 	return mCamera->getFrustumInWorld();
 }
 
+float XRenderCamera::scaleFactorH(float zValue, float screenw)
+{
+	return mCamera->scaleFactorH(zValue,screenw);
+}
+
+float XRenderCamera::scaleFactorV(float zValue, float screenh)
+{
+	return mCamera->scaleFactorV(zValue, screenh);
+}
+
 Eigen::Vector3f XRenderCamera::ComputeDisplayToNdc(Eigen::Vector3f input) const
 {
 	return mCamera->ComputeDisplayToNdc(input);

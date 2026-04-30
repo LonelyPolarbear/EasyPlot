@@ -51,6 +51,8 @@ public:
 	void notifySigMatrixChanged();
 public:
 	XSIGNAL(void(const Eigen::Matrix4f&)) SigMatrixChanged;
+	csptr<XAttr_Vec2f> AtteArrowSize;		//¿í ¸ß
+	csptr<XAttr_Vec2f> AtteLineSize;			//°ë¾¶ ³¤¶È
 protected:
 	class Internal;
 	std::unique_ptr<Internal> mData;
