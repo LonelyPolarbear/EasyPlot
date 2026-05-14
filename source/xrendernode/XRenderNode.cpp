@@ -221,12 +221,40 @@ sptr<XRenderNode> XRenderNode::findNodeById(uint64_t id)
 }
 
 //XDrawableRenderNode
-XDrawableRenderNode::XDrawableRenderNode()
+class XDrawableRenderNode::Internal {
+	public:
+	std::vector<sptr<XBaseRenderTexture>> textures;
+};
+
+XDrawableRenderNode::XDrawableRenderNode():mData(new Internal)
 {
 }
 
 XDrawableRenderNode::~XDrawableRenderNode()
 {
+}
+
+bool XDrawableRenderNode::addRenderTexture(sptr<XBaseRenderTexture> texture)
+{
+	if(!texture)
+		return false;
+	auto find = std::find(mData->textures.begin(), mData->textures.end(), texture);
+	if(find != mData->textures.end())
+		return false;
+	mData->textures.push_back(texture);
+	return true;
+}
+
+int XDrawableRenderNode::getRenderTextureNum() const
+{
+	return mData->textures.size();
+}
+
+sptr<XBaseRenderTexture> XDrawableRenderNode::getRenderTexture(int idx) const
+{
+	if(idx+1 > mData->textures.size())
+		return nullptr;
+	return mData->textures[idx];
 }
 
 //XRenderNode3D

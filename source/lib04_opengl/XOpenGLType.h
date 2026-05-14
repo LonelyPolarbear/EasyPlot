@@ -56,6 +56,7 @@ namespace XOpenGL {
 		color_buffer_bit = 0x00004000,  //GL_COLOR_BUFFER_BIT
 		depth_buffer_bit = 0x00000100,  //GL_DEPTH_BUFFER_BIT
 		stencil_buffer_bit = 0x00000400,  //GL_STENCIL_BUFFER_BIT
+		depth_stencil_bit = depth_buffer_bit| stencil_buffer_bit
 	};
 
 	enum class LIB04_OPENGL_API BufferBits :unsigned int {

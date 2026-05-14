@@ -30,7 +30,7 @@ public:
 	/// <summary>
 	/// 对外接口，绘制到屏幕
 	/// </summary>
-	void draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix,bool isNormal ) override;
+	void draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix ) override;
 
 	void drawInstance(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix) override {};
 

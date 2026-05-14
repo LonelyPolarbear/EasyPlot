@@ -35,6 +35,8 @@ public:
 
 	void setNdcShader(std::shared_ptr<xshader> shader);
 
+	void setOutlineShader(std::shared_ptr<xshader> shader);
+
 	std::shared_ptr<xshader> getTextShader() const;
 
 	std::shared_ptr<xshader> getFillShader() const ;
@@ -50,6 +52,8 @@ public:
 	std::shared_ptr<xshader> getPickFillShader2D() const;
 
 	std::shared_ptr<xshader> getNdcShader() const;
+
+	std::shared_ptr<xshader> getOutlineShader() const;
 
 	void initGLResource();
 protected:

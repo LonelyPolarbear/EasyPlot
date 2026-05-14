@@ -53,13 +53,8 @@ void XInfinitePlaneRenderNode::setFrame(const Eigen::Matrix4f& frame)
 	m_planeFrame = frame;
 }
 
-void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix,  bool isNormal)
+void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix)
 {
-	//sigBeginRender(this->asDerived<XRenderNode>());
-	if (isNormal == false) {
-		//Ê°È¡²Ù×÷
-		return;
-	}
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
 	glEnableObj->save();
 	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
@@ -76,7 +71,6 @@ void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matri
 
 	shader->use();
 	Eigen::Affine3f t = Eigen::Affine3f::Identity();
-	//t.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(90), Eigen::Vector3f::UnitX()));
 	Eigen::Matrix4f mat = t.matrix();
 	shader->setMat4("gridPlaneMatInWorld", mat);
 	this->setPolygonMode(PolygonMode::face);

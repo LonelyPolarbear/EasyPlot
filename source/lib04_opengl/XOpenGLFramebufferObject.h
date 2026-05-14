@@ -4,9 +4,11 @@
 #include "XOpenGLType.h"
 #include "XOpenGLTexture.h"
 
-class LIB04_OPENGL_API XOpenGLFramebufferObject :XDataBaseObject {
+
+class LIB04_OPENGL_API XOpenGLFramebufferObject :public XDataBaseObject {
 public:
 	enum Attachment {
+		None,
 		CombinedDepthStencil, 
 		Depth,				//深度附件
 		Color,				//颜色附件
@@ -38,6 +40,10 @@ public:
 	std::shared_ptr<XOpenGLTexture>getColorAttachment(int index = 0) const;
 
 	std::shared_ptr<XOpenGLTexture>getDepthAttachment() const;
+
+	std::shared_ptr<XOpenGLTexture>getStencilAttachment() const;
+
+	std::shared_ptr<XOpenGLTexture>getDepthStencilAttachment() const;
 
 	/**
 	 * @brief 绑定纹理附件，外部指定纹理参数，纹理在函数内部创建
@@ -76,6 +82,7 @@ public:
 		XOpenGLTexture::TextureFormat internalFormat,
 		XOpenGLTexture::PixelFormat inputdataPixelFormat,
 		XOpenGLTexture::PixelType inputdataPixelType,
+		int sampleNum,
 		int index = 0
 	);
 
@@ -90,6 +97,11 @@ public:
 	bool updateBufferSize(int width, int height);
 
 	XOpenGL::FrameBufferBindingType getBindingType(XOpenGL::FrameBufferType type) const;
+
+	/**
+	 * @brief 读取FBO的附件数据
+	 */
+	void readPixel(Attachment attachment, int startx, int starty, int width, int height, XOpenGL::TextureExternalFormat externalFormat, XOpenGL::DataType externalPixelType, void* data, int index =0 );
 private:
 	class Internal;
 	std::unique_ptr<Internal> d;

@@ -243,21 +243,66 @@ void XOpenGLFuntion::xglClear(unsigned int bits)
 	checkGLError();
 }
 
-void XOpenGLFuntion::xglClearColor(float red, float green, float blue, float alpha)
+//void XOpenGLFuntion::xglClearColor(float red, float green, float blue, float alpha)
+//{
+//	glClearColor(red, green, blue, alpha);
+//	checkGLError();
+//}
+
+void XOpenGLFuntion::xglClearColor(float red, float green, float blue, float alpha, int index)
 {
-	glClearColor(red, green, blue, alpha);
+	GLfloat clearValue[4] = {red,green,blue,alpha };
+	glClearBufferfv(GL_COLOR, index, clearValue);
 	checkGLError();
+}
+
+void XOpenGLFuntion::xglClearColor(int red, int green, int blue, int alpha, int index)
+{
+	GLint clearValue[4] = { red,green,blue,alpha };
+	glClearBufferiv(GL_COLOR, index, clearValue);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglClearColor(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha,  int index)
+{
+	GLuint clearValue[4] = { red,green,blue,alpha };
+	glClearBufferuiv(GL_COLOR, index, clearValue);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglClearColor(XQ::Vec4f value, int index)
+{
+	xglClearColor(value[0],value[1],value[2],value[3],index);
+}
+
+void XOpenGLFuntion::xglClearColor(XQ::Vec4i value, int index)
+{
+	xglClearColor(value[0], value[1], value[2], value[3], index);
+}
+
+void XOpenGLFuntion::xglClearColor(XQ::Vec4u value, int index)
+{
+	xglClearColor((unsigned int)value[0], (unsigned int)value[1], (unsigned int)value[2], (unsigned int)value[3], index);
 }
 
 void XOpenGLFuntion::xglClearDepth(float depth)
 {
-	glClearDepth(depth);
+	glClearBufferfv(GL_DEPTH, 0, &depth);
 	checkGLError();
 }
 
 void XOpenGLFuntion::xglClearStencil(int s)
 {
-	glClearStencil(s);
+	GLint v =s;
+	glClearBufferiv(GL_STENCIL, 0, &v);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglClearDepthStencil(float depth, int s)
+{
+	GLfloat dv = depth;
+	GLint sv =s;
+	glClearBufferfi(GL_DEPTH_STENCIL,0,dv,sv);
 	checkGLError();
 }
 
@@ -370,6 +415,14 @@ XQ::Recti XOpenGLFuntion::xglglScissor(XQ::Recti rect)
 	return XQ::Recti(scissor[0],scissor[1],scissor[2],scissor[3]);
 }
 
+XQ::Recti XOpenGLFuntion::xGetglScissor()
+{
+	GLint scissor[4]{0,0,1,1};
+	glGetIntegerv(GL_SCISSOR_BOX, scissor);
+	checkGLError();
+	return XQ::Recti(scissor[0], scissor[1], scissor[2], scissor[3]);
+}
+
 std::optional<XQ::Vec3i> XOpenGLFuntion::xGetTextureSize(int textureID, XOpenGL::TextureTarget target)
 {
 	XQ::Vec3i size;
@@ -401,12 +454,12 @@ std::optional<int> XOpenGLFuntion::xGetTextureSampleNum(int textureId, XOpenGL::
 		}
 		else {
 			glBindTexture((GLenum)target, textureId);
-			GLint samples = 0;
+			//GLint samples = 0;
 			glGetTexLevelParameteriv((GLenum)target, 0, GL_TEXTURE_SAMPLES, &samples);
 			glBindTexture((GLenum)target, 0); // ¿ÉÑ¡½â°ó
 		}
 	}
-	return std::nullopt;
+	return samples;
 }
 //glGetTextureLevelParameteriv(textureID, 0, GL_TEXTURE_SAMPLES, &samples);
 /*

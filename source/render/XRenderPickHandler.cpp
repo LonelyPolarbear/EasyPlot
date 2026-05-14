@@ -3,17 +3,17 @@
 #include "lib00_utilty/XUtilty.h"
 #include "lib02_camera/xcamera.h"
 #include "XRenderCamera.h"
-#include "XViewPicker3D.h"
+#include "lib04_opengl/XOpenGLFuntion.h"
+#include "lib04_opengl/XOpenGLBuffer.h"
+#include "lib04_opengl/XOpenGLFramebufferObject.h"
 
 struct XRenderPickHandler::Internal {
 	XQ::Vec2i mouseLstPos;
 	MouseType mouseType = MouseType::none;
-	sptr<XViewPicker3D> pick3d;
 };
 
 XRenderPickHandler::XRenderPickHandler():mData(new Internal)
 {
-	mData->pick3d = makeShareDbObject<XViewPicker3D>();
 }
 
 XRenderPickHandler::~XRenderPickHandler()
@@ -34,19 +34,23 @@ void XRenderPickHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardM
 	std::cout << std::dec;
 	XQ::print("XRenderPickHandler LeftButtonPressEvent ", windowpos, mData->mouseLstPos);
 
-	auto select=mData->pick3d->getPointSelection(windowpos);
+	auto render = getRender();
+	auto data = render->getRenderObjectData();
+	auto fbo = data->asDerived<XOpenGLFramebufferObject>();
+	render->makeCurrent();
+	XQ::Vec4u object_data;
+	fbo->readPixel(XOpenGLFramebufferObject::Attachment::Color,
+		mData->mouseLstPos[0], mData->mouseLstPos[1], 1, 1,
+		XOpenGL::TextureExternalFormat::RGBA_Integer, XOpenGL::DataType::unsigned_int, object_data.data, 1);
 
-	//获取拾取到的结果
-	if (select.objectId != 0) {
-		auto node =getRender()->getRenderNode3D(select.objectId);
-		SigRenderNodeSelected(node);
-		//getRender()->SigRenderNodeSelected(node);
-		std::cout << "objectId:" << select.objectId << " primitiveId:" << select.primitiveId << std::endl;
+	render->doneCurrent();
+	//实例化ID 模型ID 图元ID //备用32位
+	if (object_data[1] != 0) {
+		auto objectId = object_data[1];
+		auto node = getRender()->getRenderNode3D(objectId);
+		SigRenderNodeSelected(node,object_data);
+		std::cout << "objectId:" << objectId << " primitiveId:" << object_data[2] << std::endl;
 	}
-	else {
-		SigRenderNodeSelected(nullptr);
-	}
-		
 }
 
 void XRenderPickHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
@@ -153,9 +157,6 @@ void XRenderPickHandler::ResizeEvent(XQ::Vec2i size, XEvent& event)
 	if (event.isStopPropagate()) {
 		return;
 	}
-
-	if (mData->pick3d)
-		mData->pick3d->slotRenderSizeChanged(size);
 }
 
 void XRenderPickHandler::KeyPressEvent(XQ::Key, XQ::KeyboardModifier, XEvent& event)
@@ -238,8 +239,6 @@ bool XRenderPickHandler::isRenderActive() const
 void XRenderPickHandler::setRender(sptr<XRender> render)
 {
 	XRenderInteractionEventHandler::setRender(render);
-	if (mData->pick3d)
-		mData->pick3d->setRender(render);
 }
 
 void XRenderPickHandler::slotRenderActiveChanged(bool active)

@@ -15,7 +15,10 @@ public:
         int width, height, channels;
         unsigned char* data = nullptr;
     };
-    static unsigned int loadTexture2D(const std::string& file);
+
+	static unsigned int loadTexture2D(const std::string& file, int channel = 0);
+
+	static unsigned int LoadSMAATexture(const std::string& file, int channel=0);
     
     //X+ X- Y+ Y- Z+ Z-     右左 上下 前后
     static unsigned int loadCubeMap(const std::vector<std::string>& textures_faces);

@@ -72,7 +72,7 @@ std::shared_ptr<XOpenGLFramebufferObject> XViewPicker3D::getFbo(int index)
 
 XQ::XSelectData XViewPicker3D::getPointSelection(XQ::Vec2i pos)
 {
-	//return {};
+	return {};
 	if (!initGL())
 		return {};
 	//需要确保初始化资源成功
@@ -150,7 +150,7 @@ bool XViewPicker3D::renderLayer(int layer)
 	pick_shader->setFloat("depthPeelingEpsilon", 0.0001);
 
 	if (auto r = mData->render.lock()) {
-		r->render(false);
+		//r->render_old(false);
 	}
 	fbo->release();
 	return true;

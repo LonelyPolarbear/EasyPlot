@@ -15,7 +15,9 @@ class xShaderManger::Interal {
 
 	std::shared_ptr<xshader> textShader;									//用于文字绘制的着色器
 
-	std::shared_ptr<xshader> ndcShader;									//ndc坐标绘制的着色器
+	std::shared_ptr<xshader> ndcShader;									//ndc坐标绘制的着色器,已经丢弃
+
+	std::shared_ptr<xshader> outlineShader;								//模型轮廓提取的着色器
 public:
 	std::shared_ptr<xshader> getShader3D(PrimitveType id) {
 		if (shaders3D.find((int)id) != shaders3D.end()) {
@@ -69,6 +71,14 @@ public:
 
 	void setNdcShader(std::shared_ptr<xshader> shader) {
 		ndcShader = shader;
+	}
+
+	void setOutlineShader(std::shared_ptr<xshader> shader) {
+		outlineShader = shader;
+	}
+
+	std::shared_ptr<xshader> getOutlineShader() const {
+		return outlineShader;
 	}
 
 	std::shared_ptr<xshader> getFillShader() const {
@@ -172,6 +182,11 @@ void xShaderManger::setNdcShader(std::shared_ptr<xshader> shader)
 	return d->setNdcShader(shader);
 }
 
+void xShaderManger::setOutlineShader(std::shared_ptr<xshader> shader)
+{
+	return d->setOutlineShader(shader);
+}
+
 std::shared_ptr<xshader> xShaderManger::getTextShader() const
 {
 	return d->getTextshader();
@@ -210,6 +225,11 @@ std::shared_ptr<xshader> xShaderManger::getPickFillShader2D() const
 std::shared_ptr<xshader> xShaderManger::getNdcShader() const
 {
 	return d->getNdcshader();
+}
+
+std::shared_ptr<xshader> xShaderManger::getOutlineShader() const
+{
+	return d->getOutlineShader();
 }
 
 void xShaderManger::initGLResource()
@@ -304,9 +324,20 @@ void xShaderManger::initGLResource()
 	{
 		auto ndcShader = makeShareDbObject<xshader>();
 		ndcShader->create();
-		auto vs_id = ndcShader->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "ndc.vs");
-		auto fs_id = ndcShader->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "3DTriangle.fs");
+		auto vs_id = ndcShader->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "smaa.vs");
+		auto fs_id = ndcShader->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "ndc.fs");
 		ndcShader->link({ vs_id,fs_id });
 		setNdcShader(ndcShader);
+	}
+
+	{
+		{
+			auto outlineShader = makeShareDbObject<xshader>();
+			outlineShader->create();
+			auto vs_id = outlineShader->compile(xshader::ShaderType::VERTEX, XShareVar::instance().currentExeDir + "/easyPlot/" + "3DTriangle.vs");
+			auto fs_id = outlineShader->compile(xshader::ShaderType::FRAGMENT, XShareVar::instance().currentExeDir + "/easyPlot/" + "outline.fs");
+			outlineShader->link({ vs_id,fs_id });
+			setOutlineShader(outlineShader);
+		}
 	}
 }

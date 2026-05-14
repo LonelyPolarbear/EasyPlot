@@ -13,6 +13,6 @@ protected:
 	virtual ~XGroupRenderNode3d();
 public:
 	void Init() override;
-	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal) override;
+	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix) override;
 	void drawInstance(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix) override{}
 };

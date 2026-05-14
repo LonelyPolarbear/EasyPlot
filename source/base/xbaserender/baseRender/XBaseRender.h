@@ -11,6 +11,7 @@ class XBaseRenderNode;
 class XBaseRenderWindow;
 class XBaseRenderCamera;
 class XBaseInteractionEventHandler;
+class XBaseDrawManger;
 class XBASERENDER_API XBaseRender : public XRenderPort {
 	REGISTER_CLASS_META_DATA(XBaseRender, XDataObject);
 protected:
@@ -37,11 +38,11 @@ public:
 	 */
 	virtual sptr<XBaseRenderCamera> getCamera() const =0;
 
-	/**
-	 * @brief 渲染
-	 * @param isNormal true表示正常渲染，false表示拾取渲染
-	 */
-	virtual void render(bool isNormal = true) =0;
+	virtual void render() = 0;
+
+	virtual void renderGBuffer() =0;
+
+	virtual void renderToScreen() =0;
 
 	/**
 	 * @brief 切换渲染上下文。
@@ -121,4 +122,6 @@ public:
 	virtual XQ::InteractMode getInteractMode() const =0;
 
 	virtual sptr<XBaseRenderNode> getRenderNode3D(int id) =0;
+
+	virtual sptr<XBaseDrawManger> getDrawManger() = 0;
 };

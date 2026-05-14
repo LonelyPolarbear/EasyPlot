@@ -2,6 +2,7 @@
 #include "XOpenglApi.h"
 #include <dataBase/XDataBaseObject.h>
 #include <glew/glew.h>
+#include "dataBase/XVector.h"
 
 class LIB04_OPENGL_API XOpenGLEnable :public XDataBaseObject {
 public:
@@ -19,6 +20,8 @@ protected:
 	virtual ~XOpenGLEnable();
 public:
 	void enable(EnableType type);
+
+	void setScissorRect(XQ::Recti rect);
 
 	void disable(EnableType type);
 

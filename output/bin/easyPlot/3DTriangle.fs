@@ -1,6 +1,7 @@
 //片段着色器
 #version 430 core
- out vec4 FragColor;
+layout (location =0) out vec4 FragColor;
+layout (location =1) out uvec4 out_objectId;
 
  layout(std430, binding = 0) buffer MySSBO_Block  {
     vec4 data[]; // 动态大小数组
@@ -20,7 +21,6 @@ const int COLOMODE_VERTEXCOLOR = 2;
 const int COLOMODE_FACECOLOR = 3;												//每个片元一个颜色
 const int COLOMODE_TEXTURECOLOR = 4;										//每个片元一个颜色
 const int COLOMODE_SELECT_TEST_COLOR = 5;							//每个片元一个颜色
-const int COLOMODE_VERTEXCOLOR_TEXTURE = 6;
 
 
 const int POLYGONMODE_POINT = 1;
@@ -33,7 +33,7 @@ uniform int colorMode;																			//颜色模式
 uniform vec4 singleColor;																		//单色
 uniform vec4 selectTestColor;																//选择测试颜色
 uniform vec4 preSelectColor;																//预选颜色
-
+uniform uint PickMode;
 uniform uint objectID;																			//当前对象ID
 
 layout(binding = 1) uniform sampler2D depthSample;						//深度纹理，暂未用到
@@ -46,7 +46,7 @@ layout(binding = 5) uniform usampler2D objectSpecularTex;				//镜面光贴图
 //顶点属性输入
 in vec4 in_color;
 in vec2 in_textureCoord;
-
+flat in int in_instanceID;
 /********************************************************************************************************************/
 /*一些函数*/
 vec3 rgb2hsv(vec3 c) {
@@ -84,7 +84,6 @@ vec4 setColorByOrien(vec4 inputColor){
 void main()
 {	
 	vec4 fragcolor_before = vec4(0,0,0,1);
-	#if 1
 	if(polygonMode == POLYGONMODE_FACE){
 			uint objectId = texelFetch( objectIdSample,ivec2(setRealTimeMousePos.x,setRealTimeMousePos.y),0).r;
 			uint primitiveId = texelFetch( objectIdSample,ivec2(setRealTimeMousePos.x,setRealTimeMousePos.y),0).g;
@@ -102,7 +101,7 @@ void main()
 						fragcolor_before = singleColor;
 					}else if(colorMode == COLOMODE_SELECT_TEST_COLOR){
 						fragcolor_before = selectTestColor;
-					}else if(colorMode == COLOMODE_VERTEXCOLOR_TEXTURE){
+					}else if(colorMode == COLOMODE_TEXTURECOLOR){
 						fragcolor_before = texture(objectDiffuseTex,in_textureCoord);
 					}else{
 						fragcolor_before = vec4(1.0, 0.0, 1.0, 1.0);
@@ -117,7 +116,7 @@ void main()
 					fragcolor_before = singleColor;
 				}else if(colorMode == COLOMODE_SELECT_TEST_COLOR){
 					fragcolor_before = selectTestColor;
-				}else if(colorMode == COLOMODE_VERTEXCOLOR_TEXTURE){
+				}else if(colorMode == COLOMODE_TEXTURECOLOR){
 					fragcolor_before = texture(objectDiffuseTex,in_textureCoord);
 				}else{
 					fragcolor_before = vec4(1.0, 0.0, 1.0, 1.0);
@@ -135,12 +134,9 @@ void main()
 
 	FragColor = setColorByOrien(fragcolor_before);
 	FragColor = fragcolor_before;
-	//FragColor = vec4(1,0,0,1);
-	#endif
 
-	#if 0
-		vec2 coord = vec2( gl_FragCoord.x / float(screenSize.x), gl_FragCoord.y / float( screenSize.y));
-		float depthValue = texture(depthSample, coord.xy).r;
-		FragColor = vec4(vec3(depthValue), 1.0);
-	#endif
+	//实例化ID 模型ID 图元ID //最高位31 30 29 PickMode 其余备用
+	uint extraData = 0u;
+	extraData  = PickMode <<29;
+	out_objectId = uvec4(in_instanceID, objectID,gl_PrimitiveID,extraData);
 }

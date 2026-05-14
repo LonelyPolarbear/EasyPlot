@@ -144,21 +144,21 @@ void XTransformGizmoRenderNode::Init()
 	});
 }
 
-void XTransformGizmoRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
+void XTransformGizmoRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix)
 {
 	auto viewport = render->getConvertViewPort();
 	auto w = viewport[2];
 	auto h = viewport[3];
 	//为了实现节点在屏幕中的固定大小，需要调整操作柄矩阵
 	//计算局部坐标系下的一个单位，对应屏幕上的占据多少像素
-	
+
 	auto parent_mat = XQ::Matrix::convert(parentMatrix);
-	auto object_mat =getTransform();
+	auto object_mat = getTransform();
 	auto total_mat = parent_mat * object_mat;
 	auto transform_data = XQ::Matrix::transformDecomposition_TRS(parent_mat);
 	Eigen::Vector3f pos = total_mat.translation();
-	auto  z= pos.z();
-	auto scale_h =render->getCamera()->scaleFactorH(z,w);		//相机宽度：屏幕宽度
+	auto  z = pos.z();
+	auto scale_h = render->getCamera()->scaleFactorH(z, w);		//相机宽度：屏幕宽度
 	scale_h *= transform_data.sx;
 
 	//auto scale_v = render->getCamera()->scaleFactorV(z, h);		//相机高度：屏幕高度
@@ -168,51 +168,45 @@ void XTransformGizmoRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matr
 	float fix_screen_size_h = 50;
 	float fix_screen_size_w = 6;
 
-	float line_real_len = fix_screen_size_h*scale_h;
-	float line_real_radius = fix_screen_size_w*scale_h;
+	float line_real_len = fix_screen_size_h * scale_h;
+	float line_real_radius = fix_screen_size_w * scale_h;
 
 	XQ::Vec2f arrowSize(line_real_radius * 2, line_real_radius * 2);
 	AtteLineSize->setValue(XQ::Vec2f(line_real_radius, line_real_len));
 	AtteArrowSize->setValue(arrowSize);
 
 	//为何实现节点不被阻挡，使用模板缓冲的方式 来做
-	if (isNormal) {
 		//1 启用模板测试，设置深度测试总是通过，但是不写入
-		auto glEnable = mData->getGlEnable();
-		glEnable->save();
-		glEnable->enable(XOpenGLEnable::EnableType::STENCIL_TEST);
-		XOpenGLFuntion::xglClearStencil(0);
-		XOpenGLFuntion::xglClear((int)XOpenGL::BufferBits::stencil_buffer_bit);
-		XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS,1,0xff);
-		XOpenGLFuntion::xglStencilOp(XOpenGL::StencilBehavior::XGL_KEEP,XOpenGL::StencilBehavior::XGL_KEEP,XOpenGL::StencilBehavior::XGL_REPLACE);
-		XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS);
-		XOpenGLFuntion::xglDepthMask(false);
-		XGroupRenderNode3d::draw(render,parentMatrix, isNormal);			//得到模板数值
+	auto glEnable = mData->getGlEnable();
+	glEnable->save();
+	glEnable->enable(XOpenGLEnable::EnableType::STENCIL_TEST);
+	XOpenGLFuntion::xglClearStencil(0);
+	XOpenGLFuntion::xglClear((int)XOpenGL::BufferBits::stencil_buffer_bit);
+	XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS, 1, 0xff);
+	XOpenGLFuntion::xglStencilOp(XOpenGL::StencilBehavior::XGL_KEEP, XOpenGL::StencilBehavior::XGL_KEEP, XOpenGL::StencilBehavior::XGL_REPLACE);
+	XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS);
+	XOpenGLFuntion::xglDepthMask(false);
+	XGroupRenderNode3d::draw(render, parentMatrix);			//得到模板数值
 
-		// 设置模板测试相关函数 ，关闭颜色输出
-		//2 绘制全屏矩形，但是只有符合模板测试的片元才通过，只是将更新深度缓冲区为远平面
-		glEnable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
-		XOpenGLFuntion::xglDepthMask(true);
-		XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS);
-		XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_EQUAL, 1, 0xff);
-		XOpenGLFuntion::xglColorMask(false,false,false,false);
-		if (!mData->mFullScreenQuadNode->getShaderManger()) {
-			mData->mFullScreenQuadNode->setShaderManger(getShaderManger());
-		}
-		mData->mFullScreenQuadNode->draw(render,Eigen::Matrix4f::Identity(),true);
+	// 设置模板测试相关函数 ，关闭颜色输出
+	//2 绘制全屏矩形，但是只有符合模板测试的片元才通过，只是将更新深度缓冲区为远平面
+	glEnable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
+	XOpenGLFuntion::xglDepthMask(true);
+	XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS);
+	XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_EQUAL, 1, 0xff);
+	XOpenGLFuntion::xglColorMask(false, false, false, false);
+	if (!mData->mFullScreenQuadNode->getShaderManger()) {
+		mData->mFullScreenQuadNode->setShaderManger(getShaderManger());
+	}
+	mData->mFullScreenQuadNode->draw(render, Eigen::Matrix4f::Identity());
 
-		glEnable->restore();
-		
-		// 恢复模板测试、深度测试 颜色掩码等为默认状态
-		//3 重新绘制图元
-		XOpenGLFuntion::xglColorMask(true, true, true, true);
-		XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_LESS);
-		XGroupRenderNode3d::draw(render,parentMatrix, isNormal);
-	}
-	else {
-		XGroupRenderNode3d::draw(render,parentMatrix, isNormal);
-	}
-	
+	glEnable->restore();
+
+	// 恢复模板测试、深度测试 颜色掩码等为默认状态
+	//3 重新绘制图元
+	XOpenGLFuntion::xglColorMask(true, true, true, true);
+	XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_LESS);
+	XGroupRenderNode3d::draw(render, parentMatrix);
 }
 
 XQ::BoundBox XTransformGizmoRenderNode::getThisBoundBox(const Eigen::Matrix4f& m) const

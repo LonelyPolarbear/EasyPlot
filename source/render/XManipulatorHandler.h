@@ -33,11 +33,11 @@ public:
 	bool isRenderActive() const;
 
 	void setRender(sptr< XRender> render) override;
-	XSIGNAL(void(sptr<XBaseRenderNode>)) SigRenderNodeHasSelected;				//[in]
+	XSIGNAL(void(sptr<XBaseRenderNode>,XQ::Vec4i)) SigRenderNodeHasSelected;				//[in]
 	XSIGNAL(void(bool)) SigManipulatorModeChanged;										//[in] true表示进入编辑模式 false表示离开编辑模式
 protected:
 	void slotRenderActiveChanged(bool active) override;
-	void slotRenderNodeHasSelected(sptr<XBaseRenderNode> node);
+	void slotRenderNodeHasSelected(sptr<XBaseRenderNode> node, XQ::Vec4i obj_data);
 	void slotManipulatorModeChanged(bool flag);
 protected:
 	struct Internal;

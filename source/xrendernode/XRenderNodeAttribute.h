@@ -36,10 +36,22 @@ enum class XRENDERNODE_API  PolygonMode {
 	all = point | line | face
 };
 
+enum class XRENDERNODE_API  PickMode {
+	none =0,
+	point = 1,
+	line = 1 << 1,
+	face = 1 << 2,
+	point_and_line = point | line,		//3
+	point_and_face = point | face,		//5
+	line_and_face = line | face,			//6
+	all = point | line | face					//7
+};
+
 
 extern template class XRENDERNODE_API XDataAttributeEnum<PolygonMode>;
 extern template class XRENDERNODE_API XDataAttributeEnum<PrimitveType>;
 extern template class XRENDERNODE_API XDataAttributeEnum<ColorMode>;
+extern template class XRENDERNODE_API XDataAttributeEnum<PickMode>;
 
 class XRENDERNODE_API XRenderNodeAttribute :public XDataObject {
 	REGISTER_CLASS_META_DATA(XRenderNodeAttribute,XDataObject);
@@ -56,7 +68,9 @@ public:
 	csptr<XAttr_Enum<PolygonMode>>  AttrPolygonMode;
 	csptr<XAttr_Enum<ColorMode>>  AttrColorMode;
 	csptr<XAttr_Enum<PrimitveType>>  AttrPrimitveType;
+	csptr<XAttr_Enum<PickMode>>  AttrPickMode;
 	csptr<XAttr_Color>  AttrSingleColor;
 	csptr<XAttr_Color>  AttrPreSelectColor;
-	//csptr<XAttr_Bool> AttrNodeVisible;
+	csptr<XAttr_Bool>  AttrIsNdc;
+	csptr<XAttr_Bool>  AttrDrawOutline;
 };

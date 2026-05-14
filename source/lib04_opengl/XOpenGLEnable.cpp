@@ -17,6 +17,7 @@ namespace ns_xopengl_enable {
     //¼ôÇÐ²âÊÔ×´Ì¬
 	struct state_scissor_test_t {
         bool isEnable = true;
+        XQ::Recti scissor_rect = XQ::Recti(0,0,1,1);
     };
 
     //ÈÚ»ìºÏ×´Ì¬
@@ -78,6 +79,11 @@ void XOpenGLEnable::enable(EnableType type)
    glEnable((GLenum)type);
 }
 
+void XOpenGLEnable::setScissorRect(XQ::Recti rect)
+{
+    XOpenGLFuntion::xglglScissor(rect);
+}
+
 void XOpenGLEnable::disable(EnableType type)
 {
     mData->oldEnableMap[(GLenum)type] = glIsEnabled((GLenum)type);
@@ -134,6 +140,8 @@ void XOpenGLEnable::saveMultisampleState()
 void XOpenGLEnable::saveScissorTestState()
 {
     mData->scissorTestState.isEnable = glIsEnabled((GLenum)EnableType::SCISSOR_TEST);
+
+    mData->scissorTestState.scissor_rect= XOpenGLFuntion::xGetglScissor();
 }
 
 void XOpenGLEnable::saveBlendState()
@@ -177,10 +185,12 @@ void XOpenGLEnable::restoreMultisampleState()
 
 void XOpenGLEnable::restoreScissorTestState()
 {
-    if(mData->scissorTestState.isEnable)
-        glEnable( (GLenum)EnableType::SCISSOR_TEST);
+    if (mData->scissorTestState.isEnable) {
+        glEnable((GLenum)EnableType::SCISSOR_TEST);
+    }
     else
         glDisable((GLenum)EnableType::SCISSOR_TEST);
+    XOpenGLFuntion::xglglScissor(mData->scissorTestState.scissor_rect);
 }
 
 void XOpenGLEnable::restoreBlendState()

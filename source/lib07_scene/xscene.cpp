@@ -515,7 +515,7 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
 			XOpenGLFramebufferObject::Attachment::Color,                        //附件类型
 			XOpenGLTexture::TextureFormat::RGBA8_UNorm,                     //内部格式
 			XOpenGLTexture::PixelFormat::RGBA,                                          //外部数据格式
-			XOpenGLTexture::PixelType::UInt8
+			XOpenGLTexture::PixelType::UInt8,8
         );
         XOpenGLFuntion::checkGLError();
     }
@@ -534,7 +534,7 @@ std::vector<sptr<XUCharArray2D>> XScene::renderFbo(int fboWidth, int fboHeight, 
 				XOpenGLFramebufferObject::Attachment::Depth,
 				XOpenGLTexture::TextureFormat::D32F,
 				XOpenGLTexture::PixelFormat::Depth,
-				XOpenGLTexture::PixelType::Float32);
+				XOpenGLTexture::PixelType::Float32,8);
 		}
 		else {
 			fbo->addAttachment(

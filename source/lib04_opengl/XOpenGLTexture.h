@@ -309,6 +309,22 @@ public:
 		CompareNever = 0x0200    // GL_NEVER
 	};
 
+	enum SwizzleComponent {
+		SwizzleRed =0x8E42,				///< The red component.Equivalent to GL_TEXTURE_SWIZZLE_R
+		SwizzleGreen =0x8E43,			///< The green component.Equivalent to GL_TEXTURE_SWIZZLE_G
+		SwizzleBlue =0x8E44,			///<The blue component.Equivalent to GL_TEXTURE_SWIZZLE_B
+		SwizzleAlpha=0x8E45			///<The alpha component.Equivalent to GL_TEXTURE_SWIZZLE_A
+	};
+	
+	enum SwizzleValue{
+		RedValue =0x1903,				///<Maps the component to the red channel.Equivalent to GL_RED
+		GreenValue =0x1904,			///<Maps the component to the green channel.Equivalent to GL_GREEN
+		BlueValue=0x1905,				///<Maps the component to the blue channel.Equivalent to GL_BLUE
+		AlphaValue=0x1906,			///<Maps the component to the alpha channel.Equivalent to GL_ALPHA
+		ZeroValue=0,						///<Maps the component to a fixed value of 0. Equivalent to GL_ZERO
+		OneValue =1,						///<Maps the component to a fixed value of 1. Equivalent to GL_ONE
+	};
+
 public:
 	XOpenGLTexture();
 	~XOpenGLTexture();
@@ -324,14 +340,32 @@ public:
 	bool create();
 
 	/**
+	 * @brief 由外部库生成的纹理创建XOpenGLTexture
+	 */
+	bool createFromExternal(unsigned int texID);
+
+	/**
 	 * @brief 设置纹理的内部格式,建议纹理格式在整个生命周期值设置一次
 	 */
 	void setInternalFormat(TextureFormat format);
 
 	/**
+	 * @ brief 创建当前纹理的纹理视图
+	 * @ param target 新纹理的目标类型
+	 * @ param InternalFormat 新纹理的内部格式
+	 */
+	 sptr<XOpenGLTexture> createTextureView(Target target, TextureFormat InternalFormat);
+
+	/**
 	 * @brief 设置纹理的输入数据格式,建议输入数据格式在整个生命周期值设置一次
 	*/
 	void setExternalFormat( PixelFormat inputDataFormat, PixelType inputDataPixelType);
+
+	/**
+	 * @brief 纹理乱序设置
+	 */
+	void setSwizzleMask(SwizzleComponent component, SwizzleValue value);
+
 
 	/**
 	 * @brief 一维纹理分配内存分配大小 width *internalDataSize,如果当前大小为0，或者不等于预分配大小，则重新分配，否则直接返回，避免多次分配

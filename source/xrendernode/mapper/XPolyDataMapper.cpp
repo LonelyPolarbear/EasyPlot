@@ -166,7 +166,7 @@ void XPolyDataMapper::updateData()
 		m_vertex_textureCoord->release();
 
 		if (texture_coord->getNumOfTuple()) {
-			m_vao->addBuffer(ATTR_VERTEX_TEXTURE_COORD, m_vertex_color, 2, XOpenGL::DataType::float_, sizeof(XQ::Vec2f), 0);
+			m_vao->addBuffer(ATTR_VERTEX_TEXTURE_COORD, m_vertex_textureCoord, 2, XOpenGL::DataType::float_, sizeof(XQ::Vec2f), 0);
 			m_vao->enableAttribute(ATTR_VERTEX_TEXTURE_COORD);
 		}
 		else {

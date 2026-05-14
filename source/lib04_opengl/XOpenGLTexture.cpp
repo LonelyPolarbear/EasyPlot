@@ -42,15 +42,68 @@ bool XOpenGLTexture::create()
 	return d->textureId != 0;
 }
 
+bool XOpenGLTexture::createFromExternal(unsigned int texID)
+{
+	if(texID ==0)
+		return false;
+	if (!glIsTexture(texID)) {
+		return false;
+	}
+
+	d->textureId = texID;
+
+	GLenum target = 0;
+	glGetTextureParameteriv(texID, GL_TEXTURE_TARGET, (GLint*)&target);		//OpenGL 4.5 »ò GL_ARB_direct_state_access
+
+	GLint internalFormat = 0;
+	glGetTextureLevelParameteriv(texID, 0, GL_TEXTURE_INTERNAL_FORMAT, &internalFormat);
+
+	GLint width, height;
+
+	glGetTextureLevelParameteriv(texID, 0, GL_TEXTURE_WIDTH, &width);
+
+	glGetTextureLevelParameteriv(texID, 0, GL_TEXTURE_HEIGHT, &height);
+	
+
+	d->width = width;
+	d->height = height;
+
+	
+	setTarget((Target)target);
+	//setInternalFormat((TextureFormat)internalFormat);
+	if (internalFormat == GL_RGBA) {
+		setInternalFormat(TextureFormat::RGBA8U);
+	}
+	else {
+		setInternalFormat((TextureFormat)internalFormat);
+	}
+	XOpenGLFuntion::checkGLError();
+	return true;
+}
+
 void XOpenGLTexture::setInternalFormat(TextureFormat format)
 {
 	d->internalFormat = format;
+}
+
+sptr<XOpenGLTexture> XOpenGLTexture::createTextureView(Target target, TextureFormat InternalFormat)
+{
+	auto texture = makeShareDbObject<XOpenGLTexture>();
+	texture->create();
+	texture->setInternalFormat(InternalFormat);
+	glTextureView(texture->getId(),target,getId(),InternalFormat,0,1,0,1);
+	return texture;
 }
 
 void XOpenGLTexture::setExternalFormat(PixelFormat inputDataFormat, PixelType inputDataPixelType)
 {
 	d->dataFormat = inputDataFormat;
 	d->datatype = inputDataPixelType;
+}
+
+void XOpenGLTexture::setSwizzleMask(SwizzleComponent component, SwizzleValue value)
+{
+	glTexParameteri(d->target, component, value);
 }
 
 void XOpenGLTexture::texStorage1D(int width)
@@ -117,7 +170,9 @@ void XOpenGLTexture::texStorage2DMultiSample(int width, int height, int sampleNu
 		d->width = width;
 		d->height = height;
 		d->samples = sampleNum;
-		glTexImage2DMultisample(d->target, d->samples, d->internalFormat, width, height, GL_TRUE);
+		glTexStorage2DMultisample(d->target, d->samples, d->internalFormat, width, height, GL_TRUE);
+		//glTexImage2DMultisample
+		
 		return;
 	}
 

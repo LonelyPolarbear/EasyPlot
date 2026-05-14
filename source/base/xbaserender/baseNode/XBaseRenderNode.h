@@ -1,3 +1,4 @@
+#pragma once
 #include "base/xbaserender/xbaserenderApi.h"
 #include <dataBase/XDataBaseObject.h>
 #include <dataBase/XDataObject.h>
@@ -10,13 +11,14 @@
  */
 class xShaderManger;
 class XBaseRender;
+class XBaseRenderTexture;
 class XBASERENDER_API XBaseRenderNode : public XDataObject {
 	REGISTER_CLASS_META_DATA(XBaseRenderNode, XDataObject);
 protected:
 	XBaseRenderNode();
 	virtual ~XBaseRenderNode();
 public:
-		virtual void draw(sptr<XBaseRender>  render,const Eigen::Matrix4f& parentMatrix, bool isNormal) = 0;
+		virtual void draw(sptr<XBaseRender>  render,const Eigen::Matrix4f& parentMatrix) = 0;
 
 		virtual void drawInstance(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix) = 0;
 
@@ -37,6 +39,12 @@ public:
 		virtual bool isVisible() =0;
 
 		virtual void setShaderManger(std::shared_ptr<xShaderManger> shaderManger)=0;
+
+		virtual bool addRenderTexture(sptr<XBaseRenderTexture> texture) = 0;
+
+		virtual int getRenderTextureNum() const = 0;
+
+		virtual sptr<XBaseRenderTexture> getRenderTexture(int idx) const = 0;
 
 		virtual std::shared_ptr<xShaderManger> getShaderManger() const=0;
 

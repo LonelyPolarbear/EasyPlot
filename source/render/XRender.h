@@ -30,7 +30,13 @@ public:
 	void setCamera(sptr<XBaseRenderCamera> camera) override;
 	sptr<XBaseRenderCamera> getCamera() const override;
 
-	virtual void render(bool isNormal = true) override;
+	sptr<XDataBaseObject> getRenderObjectData();
+
+	void render() override;
+
+	void renderGBuffer() override;
+
+	void renderToScreen() override;
 
 	bool makeCurrent() override;
 
@@ -77,17 +83,23 @@ public:
 	XQ::InteractMode getInteractMode() const override;
 
 	sptr<XBaseRenderNode> getRenderNode3D(int id) override;
+
+	sptr<XBaseDrawManger> getDrawManger() override;
 public:
 	XSIGNAL(void(int id, void*/*data*/)) SigUserEvent;																		//用户自定义事件
 	XSIGNAL(void(XQ::PreDefineEvent, void*/*data*/)) SigPredefineEvent;										//预定义业务逻辑事件
 protected:
 	//属性
 	csptr<XAttr_Bool> AttrActive;
+	csptr<XAttr_Bool> AttrSmaa;							//是否启用smaa
+	csptr<XAttr_Bool> AttrPostProcess;					//是否启用屏幕后处理，如果不启用直接写入屏幕默认帧缓冲
 	
 	sptr<XGroupRenderNode3d> m_group3D;
 protected:
-
-	void updateViewPort(bool isNormal);
+	/**
+	 * @更新视口，清楚缓冲，绘制背景
+	 */
+	void updateViewPort();
 
 	void updateUbo();
 

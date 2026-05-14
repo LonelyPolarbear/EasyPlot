@@ -123,17 +123,25 @@ public:
 	/// <summary>
 	/// 设置当前绑定的FBO的颜色缓冲清除值
 	/// </summary>
-	static void xglClearColor(float red, float green, float blue, float alpha);
+	//static void xglClearColor(float red, float green, float blue, float alpha);
 
-	/// <summary>
-	/// 设置当前绑定的FBO的深度缓冲清除值[0-1],超出范围的值会被钳制到 [0.0, 1.0]
-	/// </summary>
+	static void xglClearColor(float red, float green, float blue, float alpha, int index);
+
+	static void xglClearColor(int red, int green, int blue, int alpha, int index);
+
+	static void xglClearColor(unsigned int red, unsigned int green, unsigned int blue, unsigned int alpha, int index);
+
+	static void xglClearColor(XQ::Vec4f value, int index);
+
+	static void xglClearColor(XQ::Vec4i value, int index);
+
+	static void xglClearColor(XQ::Vec4u value, int index);
+
 	static void xglClearDepth(float depth);
 
-	/// <summary>
-	/// 设置当前绑定的FBO的模板缓冲清除值[0-255]
-	/// </summary>
 	static void xglClearStencil(int s);
+
+	static void xglClearDepthStencil(float depth,int s);
 
 	/**
 	 * @brief 设置深度比较函数，比较逻辑当前片段的深度值 < 深度缓冲区中对应位置的已有深度值，缓冲中的深度值始终位于右侧
@@ -168,6 +176,11 @@ public:
 	static XQ::Recti xglViewport(XQ::Recti rect);
 
 	static XQ::Recti xglglScissor(XQ::Recti rect);
+
+	/**
+	 * @brief 获取剪切矩形大小
+	 */
+	static  XQ::Recti xGetglScissor();
 
 	static std::optional<XQ::Vec3i> xGetTextureSize(int textureID, XOpenGL::TextureTarget target);
 

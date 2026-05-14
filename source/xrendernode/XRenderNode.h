@@ -32,6 +32,12 @@ public:
 
 	std::shared_ptr<xShaderManger> getShaderManger() const override;
 
+	virtual bool addRenderTexture(sptr<XBaseRenderTexture> texture){return false;};
+
+	virtual int getRenderTextureNum() const {return 0;};
+
+	virtual sptr<XBaseRenderTexture> getRenderTexture(int idx) const {return nullptr;};
+
 	//公共的虚口
 	virtual XQ::BoundBox getBoundBox(const Eigen::Matrix4f& m) const override;
 
@@ -82,8 +88,17 @@ protected:
 	XDrawableRenderNode();
 	~XDrawableRenderNode();
 public:
+	bool addRenderTexture(sptr<XBaseRenderTexture> texture) override;
+
+	int getRenderTextureNum() const override;
+
+	sptr<XBaseRenderTexture> getRenderTexture(int idx) const override;
+public:
 	XSIGNAL(void(sptr<XRenderNode>)) sigBeginRender;
 	XSIGNAL(void(sptr<XRenderNode>)) sigEndRender;
+protected:
+	class Internal;
+	std::unique_ptr<Internal> mData;
 };
 
 class XRENDERNODE_API XGroupRenderNode :public XRenderNode {

@@ -21,6 +21,7 @@ group_source_files_by_directory(${ALL_SOURCES})
 list(APPEND LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source 
 														${CMAKE_SOURCE_DIR}/3rdParty/glew/include
 														${CMAKE_SOURCE_DIR}/3rdParty/stb_image/
+														${CMAKE_SOURCE_DIR}/3rdParty/SOIL2/include
 														
 )
 
@@ -30,11 +31,13 @@ list(APPEND LIB_INCLUDE_DIRECTORY 	${CMAKE_SOURCE_DIR}/source
 list(APPEND LIB_NAMES 	
 	glew32
 	opengl32
+	soil2-debug
 )
 
 list(APPEND LIB_DIRECTORIES 
 ${CMAKE_SOURCE_DIR}/output/bin 
 ${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
+${CMAKE_SOURCE_DIR}/3rdParty/SOIL2/lib
 )
 														
 #生成动态库
@@ -47,7 +50,7 @@ set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS ${outPutName})
 set_target_properties(${proName} PROPERTIES VERSION 1.0 SOVERSION 1)
 
-target_compile_definitions(${proName} PRIVATE STB_IMAGE_IMPLEMENTATION)							#该宏会使得编译器编译stb_image.h文件
+#target_compile_definitions(${proName} PRIVATE STB_IMAGE_IMPLEMENTATION)							#该宏会使得编译器编译stb_image.h文件
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})									#库目录
 target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})							#包含目录
 target_link_libraries(${proName} ${LIB_NAMES})		

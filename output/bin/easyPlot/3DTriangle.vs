@@ -8,8 +8,10 @@ layout (location = 3) in vec2 aTextureCoord;
 out vec4 in_color;
 out vec2 in_textureCoord;
 
+flat out int in_instanceID;
 
 uniform mat4 ModelMat;
+uniform bool isNdc;
 
 layout (std140, binding = 1) uniform Matrices
 {
@@ -17,6 +19,13 @@ layout (std140, binding = 1) uniform Matrices
     mat4 ProjectionMat;
 };
 void main()
-{	
-	gl_Position = ProjectionMat*ViewMat*ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+{	 
+    in_color = vec4(aColor,1);
+	in_textureCoord = aTextureCoord;
+    in_instanceID = gl_InstanceID;
+    if(isNdc){
+        gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    }else{
+        gl_Position = ProjectionMat*ViewMat*ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    }
 }

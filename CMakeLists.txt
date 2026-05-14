@@ -194,7 +194,7 @@ add_dependencies(lib09_panel  lib00_utilty xlog)
 add_dependencies(xmvd  dataBase lib00_utilty xlog xrendernode)
 add_dependencies(main sharevar easyPlot lib09_panel xlog xpython sharevar)
 add_dependencies(xpython xlog)
-add_dependencies(xbaserender lib00_utilty dataBase xlog)
+add_dependencies(xbaserender lib00_utilty dataBase xlog lib04_opengl)
 
 
 #--------------------------------------------------------------------------------------------------------------

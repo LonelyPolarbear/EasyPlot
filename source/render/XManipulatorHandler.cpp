@@ -380,7 +380,7 @@ void XManipulatorHandler::slotRenderActiveChanged(bool active)
 	}
 }
 
-void XManipulatorHandler::slotRenderNodeHasSelected(sptr<XBaseRenderNode> node)
+void XManipulatorHandler::slotRenderNodeHasSelected(sptr<XBaseRenderNode> node,XQ::Vec4i obj_data)
 {
 	std::cout << "slotRenderNodeHasSelected\n";
 	if (!mData->enable) {

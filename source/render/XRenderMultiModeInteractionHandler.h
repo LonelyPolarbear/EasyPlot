@@ -49,7 +49,7 @@ public:
 	/**
 	 * @breif 信号：mPickHandler 选中渲染节点,此处将mPickHandler的SigRenderNodeSelected信号与其绑定，主要是解耦
 	 */
-	XSIGNAL(void(sptr<XBaseRenderNode>)) SigRenderNodeSelected;
+	XSIGNAL(void(sptr<XBaseRenderNode>, XQ::Vec4i)) SigRenderNodeSelected;
 	XSIGNAL(void(XQ::InteractMode)) SigInteractModeChange;
 protected:
 	//包含多个模式交互处理器

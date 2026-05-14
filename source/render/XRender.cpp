@@ -6,10 +6,12 @@
 #include "XRenderPickHandler.h"
 #include "XManipulatorHandler.h"
 #include "XRenderWindowEventDispatch.h"
+#include "XDrawManger.h"
 #include "xsignal/XSignal.h"
 #include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib04_opengl/XOpenGLEnable.h"
 #include "lib04_opengl/XOpenGLFuntion.h"
+#include "lib04_opengl/XOpenGLFramebufferObject.h"
 #include <xrendernode/XGeometryNode.h>
 #include <xrendernode/datasource/xCustomSource.h>
 #include <xrendernode/XGraphicsItem.h>
@@ -17,14 +19,20 @@
 #include <xrendernode/renderNode3d/XInfinitePlaneRenderNode.h>
 #include <xrendernode/renderNode3d/XGroupRenderNode3d.h>
 #include <xrendernode/renderNode3d/XFullScreenQuadNode.h>
+#include <xrendernode/renderNode3d/XSmaaFullScreenQuadNode.h>
 
 #include "XOpenGLRenderWindow.h"
 #include "base/xbaserender/baseRender/XBaseRenderWindow.h"
+#include "base/xbaserender/baseNode/XBaseRenderTexture.h"
+
+#include "lib03_stbImage/stbImage.h"
+#include "xlog/XLogger.h"
 
 
 struct XRender::Internal {
 	Internal(XRender *render) {
 		m_camera = makeShareDbObject<XRenderCamera>();
+		m_drawManger = makeShareDbObject<XDrawManger>();
 		host = render;
 	}
 
@@ -50,20 +58,29 @@ struct XRender::Internal {
 		getUbo()->writeCamera((int)camera->getProjectionType(),camera->getNear(),m_camera->getFar());
 	}
 
+	void SlotRenWindowResize(XQ::Vec2i size) {
+		host->makeCurrent();
+		m_drawManger->SlotRenderSizeChanged(size);
+		host->doneCurrent();
+	}
+
 public:
 	XRender* host;
 	wptr<XOpenGLRenderWindow> m_renderWindow;
 	sptr<XRenderMultiModeInteractionHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
+	sptr<XDrawManger> m_drawManger;
 
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
-	XQ::Vec2f m_mousePos;																								//鼠标在窗口中的位置，未做变换
-	//std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;									//无限网格平面
+	XQ::Vec2f m_mousePos;																										//鼠标在窗口中的位置，未做变换
+	//std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;										//无限网格平面
 
-	sptr<XFullScreenQuadNode> m_fullScreenQuadNode;											//全屏四边形，用于背景设置
+	sptr<XFullScreenQuadNode> m_fullScreenQuadNode;													//全屏四边形，用于背景设置
 
 	xsig::xconnector connector;
+
+	sptr<XSmaaFullScreenQuadNode> m_PostSmaaScreenQuadNode;									//全屏四边形，用于后处理，将G-buffer的颜色附件作为输入，输出到屏幕上
 
 	~Internal() {
 		connector.disconnect();
@@ -83,12 +100,21 @@ void XRender::Init()
 {
 	XRenderPort::Init();
 	XQ_ATTR_ADD_INIT(AttrActive, false);
+	XQ_ATTR_ADD_INIT(AttrSmaa, false);
+	XQ_ATTR_ADD_INIT(AttrPostProcess,true);
 	XQ_XDATA_ADD(m_group3D);
 	XQ::XColor bot_color = AttrBottomColor->getValue();
 	XQ::XColor top_color = AttrTopColor->getValue();
 
+	mData->m_drawManger->setRender(asDerived<XBaseRender>());
 
 	auto handler =getOrCreateMultiModeEventHandler();
+
+	mData->m_PostSmaaScreenQuadNode = makeShareDbObject<XSmaaFullScreenQuadNode>();
+	mData->m_PostSmaaScreenQuadNode->setColorMode(ColorMode::textureColor);
+	mData->m_PostSmaaScreenQuadNode->setNearRect();
+
+
 	mData->m_fullScreenQuadNode = makeShareDbObject<XFullScreenQuadNode>();
 	mData->m_fullScreenQuadNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
 	mData->m_fullScreenQuadNode->setFarRect();
@@ -133,40 +159,85 @@ sptr<XBaseRenderCamera> XRender::getCamera() const
 	return mData->m_camera;
 }
 
-void XRender::render(bool isNormal)
+sptr<XDataBaseObject> XRender::getRenderObjectData()
 {
-	//renderwindow确保opengl上下文有效，因此此处可以不对makeCurrent返回值判断
-	//所以所有actor需要初始化opengl的资源的接口都可以在此处完成
-	if(!makeCurrent())
+	makeCurrent();
+	mData->m_drawManger->bilt();
+	doneCurrent();
+	return mData->m_drawManger->getBiltFbo();
+}
+
+
+void XRender::render() {
+	if (!makeCurrent())
 		return;
-	
-	//!
-	//! 
-	updateViewPort(isNormal);
 
 	updateUbo();
 
+	renderGBuffer();
+
+	renderToScreen();
+
+	doneCurrent();
+}
+
+void XRender::renderGBuffer()
+{
 	//!
 	//! 渲染
+	mData->m_drawManger->InitRenderSource();
+
+	auto fbo = mData->m_drawManger->getScreenFbo();
+	if (fbo) {
+		auto screenFbo = fbo->asDerived<XOpenGLFramebufferObject>();
+		mData->m_PostSmaaScreenQuadNode->setInputColorTexture(screenFbo->getColorAttachment(0),screenFbo->getDepthAttachment());
+		
+		screenFbo->bind();
+		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		glDrawBuffers(2, drawBuffers);
+	}
+
+	XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 1), 0);
+	XOpenGLFuntion::xglClearColor(XQ::Vec4u(0, 0, 0, 0), 1);
+	XOpenGLFuntion::xglClearDepthStencil(1,0);
+
 	auto enable = makeShareDbObject<XOpenGLEnable>();
 	enable->save();
 	enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
 	enable->enable(XOpenGLEnable::EnableType::BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	enable->enable(XOpenGLEnable::EnableType::MULTISAMPLE);
-	//enable->save();
-	if(!isNormal)
-		enable->disable(XOpenGLEnable::EnableType::MULTISAMPLE);
-	XOpenGLFuntion::xglClearDepth(1);
-	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::depth_buffer_bit);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	
-	m_group3D->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity(), isNormal);
-	mData->m_fullScreenQuadNode->draw(asDerived<XBaseRender>(),Eigen::Matrix4f::Identity(),isNormal);
+	m_group3D->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+
+	//绘制背景
+	mData->m_fullScreenQuadNode->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
 
 	enable->restore();
+	if (fbo) {
+		fbo->asDerived<XOpenGLFramebufferObject>()->release();
+	}
 
-	doneCurrent();
+}
+
+void XRender::renderToScreen()
+{
+	updateViewPort();
+
+	if(!AttrPostProcess->getValue())
+		return;
+	//后处理渲染
+	//在绘制背景之前，先清空当前窗口缓冲区
+
+
+	auto enable = makeShareDbObject<XOpenGLEnable>();
+	mData->m_PostSmaaScreenQuadNode->AttrEnableSmaa->setValue(AttrSmaa->getValue());
+	enable->save();
+	enable->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
+	enable->disable(XOpenGLEnable::EnableType::MULTISAMPLE);
+	enable->disable(XOpenGLEnable::EnableType::BLEND);
+	mData->m_PostSmaaScreenQuadNode->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+	enable->restore();
 }
 
 bool XRender::makeCurrent()
@@ -276,6 +347,10 @@ bool XRender::connectToRenderWindowSignals()
 
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigUserEvent, this, &XRender::SigUserEvent);
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigPredefineEvent, this, &XRender::SigPredefineEvent);
+
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigResize, [this](XQ::Vec2i size){
+		mData->SlotRenWindowResize(size);
+	});
 }
 
 void XRender::addRenderNode3D(sptr<XBaseRenderNode>s)
@@ -357,43 +432,36 @@ sptr<XBaseRenderNode> XRender::getRenderNode3D(int id)
 	return m_group3D->findNodeById(id);
 }
 
-void XRender::updateViewPort(bool isNormal)
+sptr<XBaseDrawManger> XRender::getDrawManger()
 {
+	return mData->m_drawManger;
+}	
+
+void XRender::updateViewPort()
+{
+	auto fbo = mData->m_drawManger->getScreenFbo();
+	if (fbo) {
+		fbo->asDerived<XOpenGLFramebufferObject>()->bind();
+	}
 	XQ::Recti rect = getConvertViewPort();
-	
+
+	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer, 0);
+
 	auto enable = makeShareDbObject<XOpenGLEnable>();
 	enable->save();
 	enable->enable(XOpenGLEnable::EnableType::SCISSOR_TEST);
-	
-	auto oldViewport = XOpenGLFuntion::xglViewport(rect);
-	auto oldScissor = XOpenGLFuntion::xglglScissor(rect);
+	enable->setScissorRect(rect);
+	XOpenGLFuntion::xglViewport(rect);
+	getCamera()->setAspect(rect[2] / (double)rect[3]);
 
-	getCamera()->setAspect(rect[2]/(double)rect[3]);
 
-	auto c = getBackGroundColorTop();
-	auto r = c.r2();
-	auto g = c.g2();
-	auto b = c.b2();
-	auto a = c.a2();
+	XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 1), 0);
+	XOpenGLFuntion::xglClearDepthStencil(1, 0);
 
-	XOpenGLFuntion::xglClear((unsigned int)XOpenGL::BufferBits::color_buffer_bit);
-#if 0
-	GLuint clearValue[4] = { 0, 0, 0, 0 };
-	// 清除颜色缓冲（使用无符号整数清除函数）
-	glClearBufferuiv(GL_COLOR, 0, clearValue);
-#else
-	if (isNormal)
-		XOpenGLFuntion::xglClearColor(r, g, b, a);
-	else {
-		GLuint clearValue[4] = { 0, 0, 0, 0 };
-		// 清除颜色缓冲（使用无符号整数清除函数）
-		glClearBufferuiv(GL_COLOR, 0, clearValue);
-	}
-#endif
-	
-	//XOpenGLFuntion::xglViewport(oldViewport);
-	XOpenGLFuntion::xglglScissor(oldScissor);
 	enable->restore();
+	if (fbo) {
+		fbo->asDerived<XOpenGLFramebufferObject>()->release();
+	}
 }
 
 void XRender::updateUbo()

@@ -12,6 +12,8 @@ XFullScreenQuadNode::~XFullScreenQuadNode()
 void XFullScreenQuadNode::createSource()
 {
 	m_inputSource = makeShareDbObject<XCustomSource>();
+	this->setInput(m_inputSource);
+
 	auto coord = m_inputSource->getVertextCoordArray();
 	coord->setNumOfTuple(4);
 	coord->setTuple(0, -1, -1, -1);
@@ -21,7 +23,7 @@ void XFullScreenQuadNode::createSource()
 	coord->Modified();
 
 	auto index = m_inputSource->getFaceIndexArray();
-	index->setNumOfTuple(6);
+	index->setNumOfTuple(2);
 	index->setTuple(0, 0, 1, 2);
 	index->setTuple(1, 0, 2, 3);
 	index->Modified();
@@ -39,32 +41,28 @@ void XFullScreenQuadNode::createSource()
 	vertex_color_array->setTuple(3, 0, 0, 0);
 	vertex_color_array->Modified();
 
+	auto vertex_texture_array = m_inputSource->getTextureCoordArray();
+	vertex_texture_array->setNumOfTuple(4);
+	vertex_texture_array->setTuple(0, 0, 0);
+	vertex_texture_array->setTuple(1, 1,0);
+	vertex_texture_array->setTuple(2, 1,1);
+	vertex_texture_array->setTuple(3, 0,1);
+	vertex_texture_array->Modified();
+
 	m_inputSource->Modified();
 
 	this->setColorMode(ColorMode::VertexColor);
 	this->setSingleColor(XQ::Vec4f(1, 1, 1, 1));
-
-	this->setInput(m_inputSource);
 }
 
 void XFullScreenQuadNode::Init()
 {
 	XGeometryNode::Init();
+	Attribute->AttrIsNdc->setValue(true);
 
 	//!
 	//! source´´½¨
 	createSource();
-}
-
-void XFullScreenQuadNode::setRect(std::vector<XQ::Vec3f> points)
-{
-	auto coord = m_inputSource->getVertextCoordArray();
-	coord->setTuple(0, points[0].x(), points[0].y(), points[0].z());
-	coord->setTuple(1, points[1].x(), points[1].y(), points[1].z());
-	coord->setTuple(2, points[2].x(), points[2].y(), points[2].z());
-	coord->setTuple(3, points[3].x(), points[3].y(), points[3].z());
-	coord->Modified();
-	m_inputSource->Modified();
 }
 
 void XFullScreenQuadNode::setNearRect()
@@ -85,13 +83,9 @@ void XFullScreenQuadNode::setFarRect()
 	m_inputSource->Modified();
 }
 
-void XFullScreenQuadNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix, bool isNormal)
+void XFullScreenQuadNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix)
 {
-	if (isNormal) {
-		auto shader = getShaderManger()->getNdcShader();
-		draw(render,shader, parentMatrix);
-	}
-	
+	return XGeometryNode::draw(render, parentMatrix);
 }
 
 void XFullScreenQuadNode::draw(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)

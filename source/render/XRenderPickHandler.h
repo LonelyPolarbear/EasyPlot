@@ -33,7 +33,7 @@ public:
 
 	void setRender(sptr< XRender> render) override;
 
-	XSIGNAL(void(sptr<XBaseRenderNode>)) SigRenderNodeSelected;														//信号：选中渲染节点
+	XSIGNAL(void(sptr<XBaseRenderNode>,XQ::Vec4i)) SigRenderNodeSelected;														//信号：选中渲染节点
 protected:
 	void slotRenderActiveChanged(bool active) override;
 protected:
