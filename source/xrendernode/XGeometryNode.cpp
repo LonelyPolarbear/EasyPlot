@@ -6,6 +6,7 @@
 #include <lib04_opengl/XOpenGLEnable.h>
 #include <lib04_opengl/XOpenGLType.h>
 #include <lib04_opengl/XOpenGLFuntion.h>
+#include <lib04_opengl/XOpenGLBuffer.h>
 
 #include <Eigen/Eigen>
 #include <lib00_utilty/XUtilty.h>
@@ -19,14 +20,21 @@
 
 #include "base/xbaserender/baseNode/XBaseRenderTexture.h"
 #include "base/xbaserender/baseRender/XBaseDrawManger.h"
+#include "base/xbaserender/baseRender/XBaseRenderCamera.h"
 
-
-
+/**
+ * @class XGeometryNode
+ */
 class XGeometryNode::Internal {
 public:
+	Internal(XGeometryNode* host) {}
+	~Internal() {}
+
 	std::mutex m_mutex;
 };
-XGeometryNode::XGeometryNode():d(new Internal)
+
+
+XGeometryNode::XGeometryNode():mData(new Internal(this))
 {
 	Modified();
 }
@@ -43,7 +51,78 @@ void XGeometryNode::draw(sptr<XBaseRender>  render, std::shared_ptr<xshader> sha
 	if(!shader)
 		return;
 
+	//节点的位置类型 动态调整节点的矩阵
+	//可能类型 在屏幕的固定位置 屏幕的固定大小
+	if (Attribute->AttrSizePolicy->AttrPositionType->getValue() == XRenderNodeOriginPositionType::fixed) {
+		//固定位置大小
+		auto pos = Attribute->AttrSizePolicy->AttrPositionPos->getValue();
+		//预期的屏幕位置
+		auto parent_mat = XQ::Matrix::convert(parentMatrix);
+		auto object_mat = getTransform();
+		auto total_mat = parent_mat * object_mat;
+		Eigen::Vector3f origin = total_mat.translation();
+		origin = render->getCamera()->ComputeWorldToDisplay(origin);
+		auto viewport =render->getConvertViewPort();
+		auto w = viewport[2];
+		auto h = viewport[3];
+
+		auto x = (float)pos[0] / (float)w;
+		auto y = (float)pos[1] / (float)h;
+		auto expactedPos =render->getCamera()->ComputeDisplayToWorld(Eigen::Vector3f( x,y,origin[2]));
+		//
+		auto new_pos = parent_mat.inverse()* expactedPos;
+
+		auto transform_object_data = XQ::Matrix::transformDecomposition_TRS(object_mat);
+		transform_object_data.tx = new_pos[0];
+		transform_object_data.ty = new_pos[1];
+		transform_object_data.tz = new_pos[2];
+		
+
+		//缩放调整
+		if (Attribute->AttrSizePolicy->AttrIsFixedSize) {
+			auto fixedPixel = Attribute->AttrSizePolicy->AttrFixedPixel->getValue();
+			//需要获取原始物体的大小
+			auto boundBox =m_polyMapper->getInput()->getBoundBox(Eigen::Affine3f::Identity());
+			auto len_x = std::max(abs(boundBox.xmax),abs(boundBox.xmin));
+
+			auto transform_data = XQ::Matrix::transformDecomposition_TRS(parent_mat);
+			auto  z = origin.z();
+			auto scale_x = render->getCamera()->scaleFactorH(z, w);		//相机宽度：屏幕宽度
+			scale_x *= transform_data.sx;
+
+			float line_real_len = fixedPixel[0] * scale_x;
+			float object_scale_x = line_real_len /len_x;
+
+			transform_object_data.sx = object_scale_x;
+			transform_object_data.sy = object_scale_x;
+			transform_object_data.sz = object_scale_x;
+		}
+
+		auto mat = XQ::Matrix::computeMatrix(transform_object_data);
+		object_mat.matrix() = mat;
+		this->setTransform(object_mat);
+	}
+
+	//固定位置 屏幕固定位置
+
+	//固定大小，意味着是否同步缩放
+
+	//是否允许旋转
+
+	auto viewport = render->getConvertViewPort();
+	auto w = viewport[2];
+	auto h = viewport[3];
+
+
+
+	auto faceIdx = m_polyMapper->getInput()->getFaceIndexArray();
+	if (faceIdx) {
+		State->AttrFaceNum->setValue(faceIdx->getNumOfTuple());
+	}
+
 	shader->use();
+	
+	State->bindBuffer();
 
 	Eigen::Matrix4f matrix = parentMatrix * m_transform.matrix();
 	shader->setModelMatrix(matrix.data());
@@ -53,16 +132,23 @@ void XGeometryNode::draw(sptr<XBaseRender>  render, std::shared_ptr<xshader> sha
 	shader->setColorMode((int)getColorMode());
 	shader->setPolygonMode((int)getPolygonMode());
 	shader->setBool("isNdc",Attribute->AttrIsNdc->getValue());
-	shader->setUint("PickMode",(uint32_t)Attribute->AttrPickMode->getValue());
+	shader->setUint("PickMode", (uint32_t)Attribute->AttrPickMode->getValue());
+	shader->setUint("PrimitiveFaceNum", State->AttrFaceNum->getValue());
 	auto singleColor = Attribute->AttrSingleColor->getValue();
+	auto preselectColor = Attribute->AttrPreSelectColor->getValue();
+	auto selectedColor = Attribute->AttrSelectedColor->getValue();
+
 	shader->setSingleColor(singleColor.r2(), singleColor.g2(), singleColor.b2(), singleColor.a2());
+	shader->setPreSelectColor(preselectColor.r2(), preselectColor.g2(), preselectColor.b2(), preselectColor.a2());
+	shader->setSelectedColor(selectedColor.r2(), selectedColor.g2(), selectedColor.b2(), selectedColor.a2());
+
 	auto textureNum = getRenderTextureNum();
 	for (int i = 0; i < textureNum; i++) {
 		auto tex = getRenderTexture(i);
 		tex->getTexture()->bindUnit(3+i);
 	}
-	m_polyMapper->draw(shader,getPolygonMode(),getDrawType());
 
+	m_polyMapper->draw(shader,getPolygonMode(),getDrawType());
 }
 
 void XGeometryNode::draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix)
@@ -153,7 +239,7 @@ void XGeometryNode::setPolygonMode(PolygonMode mode)
 
 PolygonMode XGeometryNode::getPolygonMode() const
 {
-	std::lock_guard<std::mutex> lock(d->m_mutex);
+	std::lock_guard<std::mutex> lock(mData->m_mutex);
 	return Attribute->AttrPolygonMode->getValue();
 }
 
@@ -174,7 +260,7 @@ void XGeometryNode::setColorMode(ColorMode mode)
 
 ColorMode XGeometryNode::getColorMode() const
 {
-	std::lock_guard<std::mutex> lock(d->m_mutex);
+	std::lock_guard<std::mutex> lock(mData->m_mutex);
 	return Attribute->AttrColorMode->getValue();
 }
 
@@ -186,6 +272,17 @@ void XGeometryNode::setSingleColor(XQ::Vec4f color)
 XQ::Vec4f XGeometryNode::getSingleColor() const
 {
 	auto tmp = Attribute->AttrSingleColor->getValue();
+	return XQ::Vec4f(tmp.r2(), tmp.g2(), tmp.b2(), tmp.a());
+}
+
+void XGeometryNode::setSelectedColor(XQ::Vec4f color)
+{
+	Attribute->AttrSelectedColor->setValue(XQ::XColor::from_normalcolor(color));
+}
+
+XQ::Vec4f XGeometryNode::getSelectedColor() const
+{
+	auto tmp = Attribute->AttrSelectedColor->getValue();
 	return XQ::Vec4f(tmp.r2(), tmp.g2(), tmp.b2(), tmp.a());
 }
 
@@ -235,5 +332,5 @@ void XGeometryNode::Init()
 {
 	XRenderNode3D::Init();
 	XQ_XDATA_ADD(Attribute);
-	//Attribute = makeShareDbObject<XRenderNode3DAttribute>();
+	XQ_XDATA_ADD_EXT(State,false);
 }

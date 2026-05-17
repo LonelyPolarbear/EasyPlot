@@ -5,6 +5,7 @@
 #include "lib04_opengl/XOpenGLFuntion.h"
 #include "lib04_opengl/XOpenGLFramebufferObject.h"
 #include "lib04_opengl/XOpenGLBuffer.h"
+#include "lib04_opengl/XOpenGLEnable.h"
 #include "sharevar/XShareVar.h"
 #include "lib03_stbImage/stbImage.h"
 #include <base/xbaserender/baseRender/XBaseRender.h>
@@ -210,6 +211,7 @@ void XSmaaFullScreenQuadNode::drawSmaa(sptr<XBaseRender> render, const Eigen::Ma
 
 void XSmaaFullScreenQuadNode::drawNoSmaa(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix)
 {
+	auto viewport =render->getConvertViewPort();
 	auto width = render->getConvertViewPort()[2];
 	auto height = render->getConvertViewPort()[3];
 
@@ -221,13 +223,17 @@ void XSmaaFullScreenQuadNode::drawNoSmaa(sptr<XBaseRender> render, const Eigen::
 		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer, 0);
 		mData->smaa_final_shader->use();
 		mData->smaa_final_shader->setVec4("SMAA_RT_METRICS", 1.0 / (float)width, 1.0 / (float)height, width, height);
+		mData->smaa_final_shader->setVec2("viewPortOrigin", (float)viewport[0],(float)viewport[1]);
 		mData->smaa_final_shader->setBool("u_enableSmaa", AttrEnableSmaa->getValue());
+
 		mData->smaa_screen_color_texture->bindUnit(3);
 		mData->smaa_area_texture->bindUnit(4);
 		mData->smaa_search_texture->bindUnit(5);
 		mData->smaa_blend_texture->bindUnit(6);
 		mData->smaa_edge_texture->bindUnit(7);
 		mData->smaa_final_shader->unUse();
+
+		XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer, 0);
 		draw(render, mData->smaa_final_shader, parentMatrix);
 	}
 }

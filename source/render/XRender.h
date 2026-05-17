@@ -96,11 +96,6 @@ protected:
 	
 	sptr<XGroupRenderNode3d> m_group3D;
 protected:
-	/**
-	 * @更新视口，清楚缓冲，绘制背景
-	 */
-	void updateViewPort();
-
 	void updateUbo();
 
 	sptr< XInteractionEventHandler> getOrCreateMultiModeEventHandler();

@@ -229,4 +229,12 @@ void XMVD_API InitXAttrItemDelegate()
 	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), CreateEditor_XAttr_Enum<ColorMode>);
 	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), SetEditorData_XAttr_Enum<ColorMode>);
 	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), SetModelData_XAttr_Enum);
+
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionType>>(), CreateEditor_XAttr_Enum<XRenderNodeOriginPositionType>);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionType>>(), SetEditorData_XAttr_Enum<XRenderNodeOriginPositionType>);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionType>>(), SetModelData_XAttr_Enum);
+
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionOrien>>(), CreateEditor_XAttr_Enum<XRenderNodeOriginPositionOrien>);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionOrien>>(), SetEditorData_XAttr_Enum<XRenderNodeOriginPositionOrien>);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionOrien>>(), SetModelData_XAttr_Enum);
 }

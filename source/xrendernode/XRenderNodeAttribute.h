@@ -47,6 +47,33 @@ enum class XRENDERNODE_API  PickMode {
 	all = point | line | face					//7
 };
 
+enum class XRenderNodeOriginPositionType {
+	free,			///< 世界坐标系或者父坐标系
+	fixed,		///< 屏幕坐标系下固定位置
+};
+
+enum class XRenderNodeOriginPositionOrien {
+	left_top,
+	left_bottom,
+	right_top,
+	right_bottom
+};
+
+class XRENDERNODE_API XRenderNodeSizePolicy :public XDataObject {
+	REGISTER_CLASS_META_DATA(XRenderNodeSizePolicy, XDataObject);
+protected:
+	XRenderNodeSizePolicy();
+	~XRenderNodeSizePolicy();
+public:
+	void Init() override;
+
+	csptr<XAttr_Enum<XRenderNodeOriginPositionType>> AttrPositionType;							///< 是否原点在视口固定位置 
+	csptr<XAttr_Bool> AttrIsFixedSize;																							///< 是否大小是固定像素大小
+	csptr<XAttr_Enum<XRenderNodeOriginPositionOrien>> AttrPositionOrien;							///< 只有在XRenderNodeOriginPositionType ==fixed时候有效
+	csptr<XAttr_Vec2i> AttrPositionPos;																							///< 只有在XRenderNodeOriginPositionType ==fixed时候有效
+	csptr<XAttr_Vec3i> AttrFixedPixel;																							///< 只有在XRenderNodeOriginPositionType ==fixed时候有效,固定像素大小
+};
+
 
 extern template class XRENDERNODE_API XDataAttributeEnum<PolygonMode>;
 extern template class XRENDERNODE_API XDataAttributeEnum<PrimitveType>;
@@ -71,6 +98,8 @@ public:
 	csptr<XAttr_Enum<PickMode>>  AttrPickMode;
 	csptr<XAttr_Color>  AttrSingleColor;
 	csptr<XAttr_Color>  AttrPreSelectColor;
+	csptr<XAttr_Color>  AttrSelectedColor;
 	csptr<XAttr_Bool>  AttrIsNdc;
 	csptr<XAttr_Bool>  AttrDrawOutline;
+	csptr<XRenderNodeSizePolicy> AttrSizePolicy;
 };

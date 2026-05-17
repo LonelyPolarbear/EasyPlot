@@ -214,9 +214,6 @@ void XEasyPlotWidget::test1()
 
 void XEasyPlotWidget::test2()
 {
-	auto render = makeShareDbObject<XRender>();
-	mRenderWindow->addRender(render);
-
 	/*{
 		sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
 		sptr<XRegularPrimSource> coneSource = makeShareDbObject<XRegularPrimSource>();
@@ -231,32 +228,46 @@ void XEasyPlotWidget::test2()
 	}*/
 
 	{
+		auto render = makeShareDbObject<XRender>();
+		render->setViewPort(0,0,0.5,1);
+		render->setName("renderLeft");
+		mRenderWindow->addRender(render);
+		mRenderWindow->setName("renderWindow");
 		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
-		sptr<XCubeSource> cubesource = makeShareDbObject<XCubeSource>();
+		cubeNode->setName("cubeLeft");
+		sptr<xchamferCubeSource> cubesource = makeShareDbObject<xchamferCubeSource>();
 		cubeNode->setInput(cubesource);
 		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		cubeNode->setSelectedColor(XQ::Vec4f(1, 0, 0, 1));
 		cubeNode->setPolygonMode(PolygonMode::all);
 		cubeNode->setColorMode(ColorMode::FaceColor);
 		cubeNode->scale(10,10,10);
+		cubeNode->State->AttrHasSelect->setValue(true);
 		cubesource->Modified();
 		render->addRenderNode3D(cubeNode);
+		render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
 	}
 
 	{
+		auto render = makeShareDbObject<XRender>();
+		render->setViewPort(0.5, 0, 0.5, 1);
+		render->setName("renderRight");
+		mRenderWindow->addRender(render);
 		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
+		cubeNode->setName("cubeRight");
 		sptr<XCubeSource> cubesource = makeShareDbObject<XCubeSource>();
 		cubeNode->setInput(cubesource);
 		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		cubeNode->setSelectedColor(XQ::Vec4f(1, 0, 0, 1));
 		cubeNode->setPolygonMode(PolygonMode::all);
 		cubeNode->setColorMode(ColorMode::FaceColor);
 		cubeNode->scale(10, 10, 10);
-		cubeNode->translate(20, 0, 0);
+		cubeNode->State->AttrHasSelect->setValue(true);
 		cubesource->Modified();
 		render->addRenderNode3D(cubeNode);
+		render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
 	}
-
-	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
-
+	
 	//HighFive::File file("88888test.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
 	//coneNode->serialize(file.createGroup(coneNode->getName()));
 }

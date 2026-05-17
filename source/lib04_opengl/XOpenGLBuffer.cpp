@@ -51,6 +51,18 @@ bool XOpenGLBuffer::allocate(int count)
 	return glGetError() == GL_NO_ERROR;
 }
 
+bool XOpenGLBuffer::memsetBuffer(void* data, int size)
+{
+	//外部负责bind
+	auto byteNum =bufferSize();
+	char*p = (char*)map(WriteOnly);
+	auto tupleNum = byteNum /size;
+	for (int i = 0; i < tupleNum; i++) {
+		memcpy(p+size*i,data,size);
+	}
+	return XOpenGLFuntion::checkGLError();
+}
+
 uint32_t XOpenGLBuffer::bufferSize() const
 {
 	GLint size = 0;
@@ -105,7 +117,10 @@ bool XOpenGLBuffer::unmap()
 
 void* XOpenGLBuffer::mapRange(int offset, int count, XOpenGLBuffer::RangeAccessFlags access)
 {
-	return glMapBufferRange(d->type, offset, count, access);
+	bind();
+	void *p= glMapBufferRange(d->type, offset, count, access);
+	release();
+	return p;
 }
 
 void XOpenGLBuffer::setUsagePattern(XOpenGLBuffer::UsagePattern value)

@@ -105,6 +105,13 @@ public:
 
 	bool allocate(int count);
 
+	/**
+	 * @brief 设置缓冲初始值
+	 * @param data 数据
+	 * @parap size data的字节大小
+	 */
+	bool memsetBuffer(void *data,int size);
+
 	uint32_t bufferSize() const;
 
 	void* map(XOpenGLBuffer::Access access);

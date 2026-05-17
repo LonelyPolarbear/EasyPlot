@@ -74,6 +74,16 @@ void XDataAttribute::setName(const std::string& name)
 	mName = makeUnique(existingNames,name);
 }
 
+void XDataAttribute::setDynamic(bool flag)
+{
+	mIsDynamic = flag;
+}
+
+bool  XDataAttribute::getDynamic() const
+{
+	return mIsDynamic;
+}
+
 void XDataAttribute::emit_sigAttrChanged(XDataChangeType type)
 {
 	auto parent = getParent();

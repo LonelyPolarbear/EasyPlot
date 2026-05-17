@@ -37,6 +37,8 @@ static void InitBaseObjectMeta() {
 	XBaseObjectMeta::registerObject<XAttr_Enum<PolygonMode>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<ColorMode>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<PrimitveType>>();
+	XBaseObjectMeta::registerObject<XAttr_Enum<XRenderNodeOriginPositionType>>();
+	XBaseObjectMeta::registerObject<XAttr_Enum<XRenderNodeOriginPositionOrien>>();
 }
 
 
@@ -44,4 +46,6 @@ static void InitAttrToString() {
 	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PolygonMode>>(), XattrEnumToString<PolygonMode>);
 	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<ColorMode>>(), XattrEnumToString<ColorMode>);
 	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), XattrEnumToString<PrimitveType>);
+	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionType>>(), XattrEnumToString<XRenderNodeOriginPositionType>);
+	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionOrien>>(), XattrEnumToString<XRenderNodeOriginPositionOrien>);
 }

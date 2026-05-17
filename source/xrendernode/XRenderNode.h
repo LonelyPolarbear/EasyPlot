@@ -7,10 +7,29 @@
 #include <lib00_utilty/XUtilty.h>
 
 #include "XRenderNodeAttribute.h"
+#include "XRenderNode.h"
 #include <base/xbaserender/baseNode/XBaseRenderNode.h>
 #include <Eigen/Eigen>
 
 class xShaderManger;
+
+enum class XRENDERNODE_API PrimitiveState {
+	normal = 1,
+	preselect = 1 << 1,
+	selected = 1 << 2,
+};
+
+DEFINE_BITWISE_OPERATORS(PrimitiveState)
+
+class XRENDERNODE_API XRenderNodeState :public XBaseRenderNodeState {
+	REGISTER_CLASS_META_DATA(XRenderNodeState, XBaseRenderNodeState);
+protected:
+	XRenderNodeState();
+	~XRenderNodeState();
+public:
+	void Init() override;
+};
+
 class XRENDERNODE_API XRenderNode :public XBaseRenderNode {
 	REGISTER_CLASS_META_DATA(XRenderNode, XBaseRenderNode);
 public:
@@ -63,6 +82,9 @@ public:
 	virtual void rotateY(float angle) override;
 	virtual void rotateZ(float angle) override;
 	virtual void scale(float x, float y, float z) override;
+
+	void setNodeState(sptr<XBaseRenderNodeState>) override;
+	sptr<XBaseRenderNodeState> getNodeState() const override;
 protected:
 	XRenderNode();
 	~XRenderNode();

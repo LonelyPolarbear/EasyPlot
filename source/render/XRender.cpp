@@ -187,9 +187,16 @@ void XRender::renderGBuffer()
 	//! 渲染
 	mData->m_drawManger->InitRenderSource();
 
+	auto viewPort = this->getConvertViewPort();
+	XOpenGLFuntion::xglglScissor(XQ::Recti(0,0,viewPort[2],viewPort[3]));
+	XOpenGLFuntion::xglViewport(XQ::Recti(0, 0, viewPort[2], viewPort[3]));
+	getCamera()->setAspect(viewPort[2] / (double)viewPort[3]);
+
 	auto fbo = mData->m_drawManger->getScreenFbo();
 	if (fbo) {
 		auto screenFbo = fbo->asDerived<XOpenGLFramebufferObject>();
+		auto w = screenFbo->getWidth();
+		auto h = screenFbo->getHeight();
 		mData->m_PostSmaaScreenQuadNode->setInputColorTexture(screenFbo->getColorAttachment(0),screenFbo->getDepthAttachment());
 		
 		screenFbo->bind();
@@ -218,21 +225,34 @@ void XRender::renderGBuffer()
 		fbo->asDerived<XOpenGLFramebufferObject>()->release();
 	}
 
+	//坐标轴的渲染，始终显示在最前面，同时允许拾取
+	auto layFbo =mData->m_drawManger->getOverlayFbo(0);
+	if (layFbo) {
+
+	}
 }
 
 void XRender::renderToScreen()
 {
-	updateViewPort();
-
 	if(!AttrPostProcess->getValue())
 		return;
-	//后处理渲染
-	//在绘制背景之前，先清空当前窗口缓冲区
-
+	
+	
+	XQ::Recti rect = getConvertViewPort();
 
 	auto enable = makeShareDbObject<XOpenGLEnable>();
-	mData->m_PostSmaaScreenQuadNode->AttrEnableSmaa->setValue(AttrSmaa->getValue());
 	enable->save();
+	enable->enable(XOpenGLEnable::EnableType::SCISSOR_TEST);
+	enable->setScissorRect(rect);
+	XOpenGLFuntion::xglViewport(rect);
+	getCamera()->setAspect(rect[2] / (double)rect[3]);
+
+	
+	XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 1), 0);
+	XOpenGLFuntion::xglClearDepthStencil(1, 0);
+
+	mData->m_PostSmaaScreenQuadNode->AttrEnableSmaa->setValue(AttrSmaa->getValue());
+
 	enable->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
 	enable->disable(XOpenGLEnable::EnableType::MULTISAMPLE);
 	enable->disable(XOpenGLEnable::EnableType::BLEND);
@@ -351,6 +371,11 @@ bool XRender::connectToRenderWindowSignals()
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigResize, [this](XQ::Vec2i size){
 		mData->SlotRenWindowResize(size);
 	});
+
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigMouseMove, [this](XQ::Vec2i pos, XQ::KeyboardModifier) {
+		mData->m_mousePos[0] = pos[0];
+		mData->m_mousePos[1] = pos[1];
+		});
 }
 
 void XRender::addRenderNode3D(sptr<XBaseRenderNode>s)
@@ -436,33 +461,6 @@ sptr<XBaseDrawManger> XRender::getDrawManger()
 {
 	return mData->m_drawManger;
 }	
-
-void XRender::updateViewPort()
-{
-	auto fbo = mData->m_drawManger->getScreenFbo();
-	if (fbo) {
-		fbo->asDerived<XOpenGLFramebufferObject>()->bind();
-	}
-	XQ::Recti rect = getConvertViewPort();
-
-	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer, 0);
-
-	auto enable = makeShareDbObject<XOpenGLEnable>();
-	enable->save();
-	enable->enable(XOpenGLEnable::EnableType::SCISSOR_TEST);
-	enable->setScissorRect(rect);
-	XOpenGLFuntion::xglViewport(rect);
-	getCamera()->setAspect(rect[2] / (double)rect[3]);
-
-
-	XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 1), 0);
-	XOpenGLFuntion::xglClearDepthStencil(1, 0);
-
-	enable->restore();
-	if (fbo) {
-		fbo->asDerived<XOpenGLFramebufferObject>()->release();
-	}
-}
 
 void XRender::updateUbo()
 {

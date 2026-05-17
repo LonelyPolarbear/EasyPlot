@@ -492,6 +492,7 @@ sptr<XOpenGLBuffer> XOpenGLTexture::mapMultiSample2pbo(unsigned int attachment)
 	XOpenGLFuntion::xglBlitFramebuffer(0, 0, d->width, d->height, 0, 0, d->width, d->height,
 		XOpenGL::FlagBits::color_buffer_bit, XOpenGL::FilterType::nearest);
 
+	//XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::readBuffer, resoveFbo->getId());
 	if (attachment == XOpenGLFramebufferObject::Attachment::Color) {
 		auto texture = resoveFbo->getColorAttachment();
 		return texture->map2pbo();
@@ -547,8 +548,8 @@ void XOpenGLTexture::bindUnit(unsigned int unit)
 
 	//获取当前纹理单元绑定的纹理对象
 	auto curBindTextureId = XOpenGLFuntion::xglGetTextureUnitBindTexture(unit,bindType);
-	if(curBindTextureId == d->textureId)
-		return;
+	/*if(curBindTextureId == d->textureId)
+		return;*/
 
 	d->lastUnitBindTexture = curBindTextureId;
 

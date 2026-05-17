@@ -12,6 +12,14 @@
 class xShaderManger;
 class XBaseRender;
 class XBaseRenderTexture;
+
+class XBASERENDER_API XBaseRenderNodeState : public XDataObject {
+	REGISTER_CLASS_META_DATA(XBaseRenderNodeState, XDataObject);
+protected:
+	XBaseRenderNodeState();
+	virtual ~XBaseRenderNodeState();
+};
+
 class XBASERENDER_API XBaseRenderNode : public XDataObject {
 	REGISTER_CLASS_META_DATA(XBaseRenderNode, XDataObject);
 protected:
@@ -77,4 +85,8 @@ public:
 		virtual void scale(float x, float y, float z) = 0;
 
 		virtual int64_t getID() const =0;
+
+		virtual void setNodeState(sptr<XBaseRenderNodeState>) = 0;
+
+		virtual sptr<XBaseRenderNodeState> getNodeState() const = 0;
 };

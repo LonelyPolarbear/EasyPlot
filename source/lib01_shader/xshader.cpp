@@ -127,9 +127,9 @@ void xshader::setFillColor(float r, float g, float b, float a)
     setVec4("fillColor", Eigen::Vector4f(r, g, b, a));
 }
 
-void xshader::setSelectTestColor(float r, float g, float b, float a)
+void xshader::setSelectedColor(float r, float g, float b, float a)
 {
-	setVec4("selectTestColor", Eigen::Vector4f(r, g, b, a));
+	setVec4("selectedColor", Eigen::Vector4f(r, g, b, a));
 }
 
 void xshader::setIs3D(bool is3D)

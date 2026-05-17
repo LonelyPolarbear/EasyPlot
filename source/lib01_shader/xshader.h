@@ -41,7 +41,7 @@ public:
 
     void setFillColor(float r, float g, float b, float a);
 
-	void setSelectTestColor(float r, float g, float b, float a);
+	void setSelectedColor(float r, float g, float b, float a);
 
     void setIs3D(bool is3D);
 

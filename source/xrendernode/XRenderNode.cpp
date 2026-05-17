@@ -182,6 +182,15 @@ void XRenderNode::scale(float x, float y, float z)
 	m_transform.scale(Eigen::Vector3f(x, y, z));
 }
 
+void XRenderNode::setNodeState(sptr<XBaseRenderNodeState>)
+{
+}
+
+sptr<XBaseRenderNodeState> XRenderNode::getNodeState() const
+{
+	return nullptr;
+}
+
 
 XRenderNode::XRenderNode()
 {
@@ -291,4 +300,17 @@ XTransformRenderNode::XTransformRenderNode()
 
 XTransformRenderNode::~XTransformRenderNode()
 {
+}
+
+XRenderNodeState::XRenderNodeState()
+{
+}
+
+XRenderNodeState::~XRenderNodeState()
+{
+}
+
+void XRenderNodeState::Init()
+{
+	XBaseRenderNodeState::Init();
 }

@@ -433,6 +433,7 @@ public:
 
 	/**
 	* @brief 读取多重采样纹理数据到pbo
+	* @ warning 主要事项，如果如果开启了剪切测试，在读取时候，需要先关闭，读取完再回复！！！
 	*/
 	sptr<XOpenGLBuffer> mapMultiSample2pbo(unsigned int attachment);
 

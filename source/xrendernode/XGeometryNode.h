@@ -12,9 +12,11 @@
 #include "XRenderNode.h"
 
 #include "mapper/XPolyDataMapper.h"
+#include "XGeometryNodeState.h"
 
 class xShaderManger;
 class XShapeSource;
+
 class XRENDERNODE_API XGeometryNode:public XRenderNode3D {
 	REGISTER_CLASS_META_DATA(XGeometryNode, XRenderNode3D);
 public:
@@ -54,6 +56,9 @@ public:
 	void setSingleColor(XQ::Vec4f color);
 	XQ::Vec4f getSingleColor() const;
 
+	void setSelectedColor(XQ::Vec4f color);
+	XQ::Vec4f getSelectedColor() const;
+
 	void setPreSelectColor(XQ::Vec4f color);
 	XQ::Vec4f getPreSelectColor() const;
 
@@ -70,9 +75,10 @@ public:
 	void Init() override;
 public:
 	csptr<XRenderNode3DAttribute> Attribute;
+	csptr<XGeometryNodeState> State;
 private:
 	class Internal;
-	std::unique_ptr<Internal> d;
+	std::unique_ptr<Internal> mData;
  protected:
 	sptr<XPolyDataMapper> m_polyMapper;
 };

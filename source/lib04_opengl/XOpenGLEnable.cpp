@@ -76,6 +76,8 @@ XOpenGLEnable::~XOpenGLEnable()
 void XOpenGLEnable::enable(EnableType type)
 {
     mData->oldEnableMap[(GLenum)type] = glIsEnabled((GLenum)type);
+    if (type == EnableType::SCISSOR_TEST) {
+    }
    glEnable((GLenum)type);
 }
 
@@ -190,7 +192,7 @@ void XOpenGLEnable::restoreScissorTestState()
     }
     else
         glDisable((GLenum)EnableType::SCISSOR_TEST);
-    XOpenGLFuntion::xglglScissor(mData->scissorTestState.scissor_rect);
+    //XOpenGLFuntion::xglglScissor(mData->scissorTestState.scissor_rect);
 }
 
 void XOpenGLEnable::restoreBlendState()

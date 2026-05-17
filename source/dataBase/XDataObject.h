@@ -88,6 +88,7 @@ public:
 public:
 	friend class XDataAttribute;
 	csptr<XAttr_Bool> AttrVisible;
+	csptr<XAttr_Bool> AttrIsDynamic;		//动态数据不需要序列化
 	csptr<XAttr_String> AttrName;
 protected:
 	uint64_t mUid;																										//全局唯一标识
@@ -110,4 +111,15 @@ do { \
 		auto& __tmp__ = const_cast<std::shared_ptr<_class_>&>(_name_); \
 		__tmp__ = makeShareDbObject<_class_>(); \
 		addData(__tmp__); \
+		__tmp__->setName(#_name_); \
+} while (false);
+
+#define XQ_XDATA_ADD_EXT(_name_,_isDynamic_) \
+do { \
+		using _class_ = XTraits::traits_class<std::remove_const_t<decltype(_name_)> >::classType; \
+		auto& __tmp__ = const_cast<std::shared_ptr<_class_>&>(_name_); \
+		__tmp__ = makeShareDbObject<_class_>(); \
+		__tmp__->AttrIsDynamic->setValue(_isDynamic_);\
+		addData(__tmp__); \
+		__tmp__->setName(#_name_); \
 } while (false);

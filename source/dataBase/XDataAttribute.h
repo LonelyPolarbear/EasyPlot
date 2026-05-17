@@ -11,6 +11,72 @@
 #define ATTR_SERIALIZER 0
 #define ATTR_DESERIALIZER 1
 
+#include <type_traits>
+
+/**
+ * @brief 为枚举类型启用位运算操作符
+ * @param EnumType 需要进行位运算的枚举类型名称
+ */
+#include <type_traits>
+
+ /**
+  * @brief 为枚举类型启用位运算操作符（包含去除 flag 的减法操作）
+  * @param EnumType 需要进行位运算的枚举类型名称
+  */
+#define DEFINE_BITWISE_OPERATORS(EnumType) \
+\
+/* 基础位运算 */ \
+constexpr EnumType operator|(EnumType a, EnumType b) { \
+    using T = std::underlying_type_t<EnumType>; \
+    return static_cast<EnumType>(static_cast<T>(a) | static_cast<T>(b)); \
+} \
+\
+constexpr EnumType operator&(EnumType a, EnumType b) { \
+    using T = std::underlying_type_t<EnumType>; \
+    return static_cast<EnumType>(static_cast<T>(a) & static_cast<T>(b)); \
+} \
+\
+constexpr EnumType operator^(EnumType a, EnumType b) { \
+    using T = std::underlying_type_t<EnumType>; \
+    return static_cast<EnumType>(static_cast<T>(a) ^ static_cast<T>(b)); \
+} \
+\
+constexpr EnumType operator~(EnumType a) { \
+    using T = std::underlying_type_t<EnumType>; \
+    return static_cast<EnumType>(~static_cast<T>(a)); \
+} \
+\
+/* 复合赋值运算 */ \
+constexpr EnumType& operator|=(EnumType& a, EnumType b) { \
+    using T = std::underlying_type_t<EnumType>; \
+    a = static_cast<EnumType>(static_cast<T>(a) | static_cast<T>(b)); \
+    return a; \
+} \
+\
+constexpr EnumType& operator&=(EnumType& a, EnumType b) { \
+    using T = std::underlying_type_t<EnumType>; \
+    a = static_cast<EnumType>(static_cast<T>(a) & static_cast<T>(b)); \
+    return a; \
+} \
+\
+constexpr EnumType& operator^=(EnumType& a, EnumType b) { \
+    using T = std::underlying_type_t<EnumType>; \
+    a = static_cast<EnumType>(static_cast<T>(a) ^ static_cast<T>(b)); \
+    return a; \
+} \
+\
+/* 去除 flag 的减法操作 */ \
+constexpr EnumType operator-(EnumType a, EnumType b) { \
+    using T = std::underlying_type_t<EnumType>; \
+    return static_cast<EnumType>(static_cast<T>(a) & ~static_cast<T>(b)); \
+} \
+\
+constexpr EnumType& operator-=(EnumType& a, EnumType b) { \
+    using T = std::underlying_type_t<EnumType>; \
+    a = static_cast<EnumType>(static_cast<T>(a) & ~static_cast<T>(b)); \
+    return a; \
+}
+
 class XDataObject;
 class DATABASE_API XDataAttribute : public XDataBaseObject {
 	REGISTER_CLASS_META_DATA(XDataAttribute, XDataBaseObject);
@@ -43,6 +109,10 @@ public:
 		return mVisible;
 	}
 
+	void setDynamic(bool flag);
+
+	bool getDynamic() const;
+
 	void emit_sigAttrChanged(XDataChangeType type);
 
 	virtual void serialize(HighFive::Group& group);
@@ -51,6 +121,7 @@ protected:
 	wptr<XDataObject> mParent;
 	uint64_t mUid;
 	bool mVisible = true;
+	bool mIsDynamic = false;		//标记是否动态属性，动态属性不需要序列化
 	std::string mName;
 };
 
@@ -247,6 +318,17 @@ do { \
 		using _class_ = XTraits::traits_class<std::remove_const_t<decltype(_name_)> >::classType; \
 		auto& __tmp__ = const_cast<std::shared_ptr<_class_>&>(_name_); \
 		__tmp__ = makeShareDbObject<_class_>(); \
+		__tmp__->setName(#_name_); \
+		addAttribute(__tmp__); \
+} while (false);
+
+#define XQ_ATTR_ADD_EXT(_name_,_isDynamic_) \
+do { \
+		using _class_ = XTraits::traits_class<std::remove_const_t<decltype(_name_)> >::classType; \
+		auto& __tmp__ = const_cast<std::shared_ptr<_class_>&>(_name_); \
+		__tmp__ = makeShareDbObject<_class_>(); \
+		__tmp__->setName(#_name_); \
+		__tmp__->setDynamic(_isDynamic_);\
 		addAttribute(__tmp__); \
 } while (false);
 
@@ -257,5 +339,16 @@ do { \
 		__tmp__ = makeShareDbObject<_class_>(); \
 		__tmp__->setValue(_val_); \
 		__tmp__->setName(#_name_); \
+		addAttribute(__tmp__); \
+} while (false);
+
+#define XQ_ATTR_ADD_INIT_EXT(_name_,_val_,_isDynamic_) \
+do { \
+		using _class_ = XTraits::traits_class<std::remove_const_t<decltype(_name_)> >::classType; \
+		auto& __tmp__ = const_cast<std::shared_ptr<_class_>&>(_name_); \
+		__tmp__ = makeShareDbObject<_class_>(); \
+		__tmp__->setValue(_val_); \
+		__tmp__->setName(#_name_); \
+		__tmp__->setDynamic(_isDynamic_);\
 		addAttribute(__tmp__); \
 } while (false);

@@ -1,6 +1,7 @@
 #pragma once
 #include "base/xbaserender/xbaserenderApi.h"
 #include <type_traits>
+#include <dataBase/XDataAttribute.h>
 namespace XQ {
 	enum class XBASERENDER_API PreDefineEvent {
 		sigEdit,
@@ -546,25 +547,7 @@ namespace XQ {
 		manipulator = 1 << 2,
 	};
 
-	constexpr InteractMode operator|(InteractMode a, InteractMode b) {
-		using T = std::underlying_type_t<InteractMode>;
-		return static_cast<InteractMode>(static_cast<T>(a) | static_cast<T>(b));
-	}
-
-	constexpr InteractMode operator&(InteractMode a, InteractMode b) {
-		using T = std::underlying_type_t<InteractMode>;
-		return static_cast<InteractMode>(static_cast<T>(a) & static_cast<T>(b));
-	}
-
-	constexpr InteractMode operator^(InteractMode a, InteractMode b) {
-		using T = std::underlying_type_t<InteractMode>;
-		return static_cast<InteractMode>(static_cast<T>(a) ^ static_cast<T>(b));
-	}
-
-	constexpr InteractMode operator~(InteractMode a) {
-		using T = std::underlying_type_t<InteractMode>;
-		return static_cast<InteractMode>(~static_cast<T>(a));
-	}
+	DEFINE_BITWISE_OPERATORS(InteractMode);
 
 	struct XBASERENDER_API XSelectData {
 		uint32_t objectId{ 0 };

@@ -13,7 +13,7 @@ class XDrawManger::Internal {
 		wptr<XRender> render;
 		sptr<XOpenGLFramebufferObject> fboScreen;
 		sptr<XOpenGLFramebufferObject> biltFbo;
-		std::map<int, sptr<XOpenGLFramebufferObject>> fboOverlays;
+		std::map<int, sptr<XOpenGLFramebufferObject>> fboOverlays;		//0²ãÓÃÓÚÂÖÀªäÖÈ¾
 		int sampleNum =8;
 
 	void initFboScreen();
@@ -105,8 +105,8 @@ void XDrawManger::Internal::initFboScreen()
 
 		bool ss = fboScreen->isComplete();
 
-		auto ren_window = getRender()->getRenderWindow();
-		fboScreen->updateBufferSize(ren_window->getWindowWidth(), ren_window->getWindowHeight());
+		auto viewport = getRender()->getConvertViewPort();
+		fboScreen->updateBufferSize(viewport[2], viewport[3]);
 		fboScreen->release();
 
 		auto tex = makeShareDbObject<XBaseRenderTexture>();
@@ -127,7 +127,7 @@ void XDrawManger::Internal::initFboScreen()
 
 		bool ss2 = biltFbo->isComplete();
 
-		biltFbo->updateBufferSize(ren_window->getWindowWidth(), ren_window->getWindowHeight());
+		biltFbo->updateBufferSize(viewport[2], viewport[3]);
 		biltFbo->release();
 	}
 }
@@ -186,10 +186,12 @@ void XDrawManger::Internal::bilt()
 void XDrawManger::Internal::SlotRenderSizeChanged(XQ::Vec2i size)
 {
 	if (fboScreen) {
-		fboScreen->updateBufferSize(size[0], size[1]);
-		biltFbo->updateBufferSize(size[0], size[1]);
+		auto viewport = getRender()->getConvertViewPort();
+
+		fboScreen->updateBufferSize(viewport[2], viewport[3]);
+		biltFbo->updateBufferSize(viewport[2], viewport[3]);
 		for (auto lay : fboOverlays) {
-			lay.second->updateBufferSize(size[0], size[1]);
+			lay.second->updateBufferSize(viewport[2], viewport[3]);
 		}
 	}
 }

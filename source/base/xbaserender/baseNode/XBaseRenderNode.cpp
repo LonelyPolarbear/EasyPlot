@@ -10,3 +10,12 @@ XBaseRenderNode::~XBaseRenderNode()
 
 }
 
+XBaseRenderNodeState::XBaseRenderNodeState()
+{
+
+}
+
+XBaseRenderNodeState::~XBaseRenderNodeState()
+{
+
+}
