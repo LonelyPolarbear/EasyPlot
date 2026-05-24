@@ -196,6 +196,42 @@ namespace XQ {
 
 		return transform.matrix();
 	}
+
+	Eigen::Matrix4f Matrix::extractRotateMat(Eigen::Affine3f transform)
+	{
+		Eigen::Matrix3f rotMatrix;
+		Eigen::Matrix3f scaleMatrix;
+		transform.computeRotationScaling(&rotMatrix, &scaleMatrix);
+		Eigen::Matrix4f result = Eigen::Matrix4f::Identity();
+		result.block(0,0,3,3) = rotMatrix;
+		return result;
+	}
+
+	Eigen::Matrix4f Matrix::extractRotateMat(const Eigen::Matrix4f& transform)
+	{
+		Eigen::Affine3f t = Eigen::Affine3f::Identity();
+		t.matrix() = transform;
+		return extractRotateMat(t);
+	}
+
+	Eigen::Matrix4f Matrix::extractScaleMat(Eigen::Affine3f transform)
+	{
+		Eigen::Matrix3f rotMatrix;
+		Eigen::Matrix3f scaleMatrix;
+		transform.computeRotationScaling(&rotMatrix, &scaleMatrix);
+		Eigen::Matrix4f result = Eigen::Matrix4f::Identity();
+		result.block(0, 0, 3, 3) = scaleMatrix;
+		return result;
+	}
+
+
+	Eigen::Matrix4f Matrix::extractScaleMat(const Eigen::Matrix4f& transform)
+	{
+		Eigen::Affine3f t = Eigen::Affine3f::Identity();
+		t.matrix() =transform;
+		return extractScaleMat(t);
+	}
+
 }
 
 namespace XQ::chrono {

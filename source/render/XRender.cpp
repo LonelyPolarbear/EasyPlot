@@ -20,6 +20,8 @@
 #include <xrendernode/renderNode3d/XGroupRenderNode3d.h>
 #include <xrendernode/renderNode3d/XFullScreenQuadNode.h>
 #include <xrendernode/renderNode3d/XSmaaFullScreenQuadNode.h>
+#include <xrendernode/datasource/xchamferCubeSource.h>
+#include <xrendernode/datasource/xcubeSource.h>
 
 #include "XOpenGLRenderWindow.h"
 #include "base/xbaserender/baseRender/XBaseRenderWindow.h"
@@ -27,6 +29,7 @@
 
 #include "lib03_stbImage/stbImage.h"
 #include "xlog/XLogger.h"
+#include "xalgo/XAlgo.h"
 
 
 struct XRender::Internal {
@@ -41,11 +44,10 @@ struct XRender::Internal {
 	}
 
 	void writeUbo() {
-		getUbo()->create();
 		//!
 		//! 
 		auto camera = m_camera;
-		getUbo()->writeVS( camera->getViewMatrix(), camera->projectionMatrix());
+		getUbo()->writeVS_globalCamera( camera->getViewMatrix(), camera->projectionMatrix());
 
 		//!
 		//! 
@@ -58,10 +60,77 @@ struct XRender::Internal {
 		getUbo()->writeCamera((int)camera->getProjectionType(),camera->getNear(),m_camera->getFar());
 	}
 
+	void writeDynamicCamera(const Eigen::Matrix4f& viewMatrix, const Eigen::Matrix4f& projMatrix) {
+		getUbo()->writeVS_dynamicCamera(viewMatrix, projMatrix);
+	}
+
 	void SlotRenWindowResize(XQ::Vec2i size) {
 		host->makeCurrent();
 		m_drawManger->SlotRenderSizeChanged(size);
 		host->doneCurrent();
+	}
+
+	sptr<XBaseRenderNode> AddAxisNode() {
+		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
+		cubeNode->setName("Axis");
+		int cube_w = 18;
+		int cube_h = 18;
+		int cube_z = 18;
+		sptr<xchamferCubeSource> cubesource = makeShareDbObject<xchamferCubeSource>();
+		cubeNode->Attribute->AttrSizePolicy->AttrPositionType->setValue(XRenderNodeOriginPositionType::free);
+		cubeNode->Attribute->AttrSizePolicy->AttrPositionOrien->setValue(XRenderNodeOriginPositionOrien::left_bottom);
+		cubeNode->Attribute->AttrSizePolicy->AttrPositionPos->setValue(XQ::Vec2i(28, 28));
+		cubeNode->Attribute->AttrUseNormalCamera->setValue(false);
+
+		//cubeNode->Attribute->AttrSizePolicy->AttrIsFixedSize->setValue(false);
+		//cubeNode->Attribute->AttrSizePolicy->AttrFixedPixel->setValue(XQ::Vec3i(15, 15, 15));
+		//cubeNode->Attribute->AttrUseNormalCamera->setValue(false);
+		cubeNode->setInput(cubesource);
+		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		cubeNode->setSelectedColor(XQ::Vec4f(1, 0, 0, 1));
+		cubeNode->setPolygonMode(PolygonMode::all);
+		cubeNode->setColorMode(ColorMode::FaceColor);
+		cubeNode->scale(cube_w, cube_h, cube_z);
+		cubeNode->State->AttrHasSelect->setValue(true);
+		cubesource->Modified();
+		host->mScreenNodes->addChildRenderNode(cubeNode);
+		return cubeNode;
+	}
+
+	sptr<XBaseRenderNode>  AddCubeTestNode() {
+		//默认添加一个立方体节点
+		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
+		cubeNode->setName("cube");
+		sptr<XCubeSource> cubesource = makeShareDbObject<XCubeSource>();
+		cubeNode->setInput(cubesource);
+		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+		cubeNode->setSelectedColor(XQ::Vec4f(1, 0, 0, 1));
+		cubeNode->setPolygonMode(PolygonMode::all);
+		cubeNode->setColorMode(ColorMode::FaceColor);
+		cubeNode->scale(10, 10, 10);
+		cubeNode->translate(0, 1, 0);
+		cubeNode->State->AttrHasSelect->setValue(true);
+		cubesource->Modified();
+		host->mMainFboNodes->addChildRenderNode(cubeNode);
+		return cubeNode;
+	}
+
+	sptr<XBaseRenderNode>  AddInfinitePlaneNode() {
+		sptr<XInfinitePlaneRenderNode> InfinitePlaneNode = makeShareDbObject<XInfinitePlaneRenderNode>();
+		InfinitePlaneNode->setName("grid");
+		host->addRenderNode3D(InfinitePlaneNode);		//网格节点应该最后绘制，才能避免遮挡问题	//TODO
+
+		host->getCamera()->sigDataChanged.connect([InfinitePlaneNode](sptr<XDataObject> camera, XDataChangeType type) {
+			if (type == XDataChangeType::DataModified) {
+				auto c = camera->asDerived<XRenderCamera>();
+				if (c) {
+					auto ss = c->getFrustumInWorld();
+					auto intersections = XQ::XAlgo::getFrustumXOZIntersections(ss.data(), ss.data() + 4);
+					InfinitePlaneNode->setRect({ intersections[0],intersections[1] ,intersections[2] ,intersections[3] });
+				}
+			}
+			});
+		return InfinitePlaneNode;
 	}
 
 public:
@@ -70,17 +139,14 @@ public:
 	sptr<XRenderMultiModeInteractionHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
 	sptr<XDrawManger> m_drawManger;
+	xsig::xconnector connector;
 
 	std::vector<sptr<XGraphicsItem>> m_actor2DList;
 
-	XQ::Vec2f m_mousePos;																										//鼠标在窗口中的位置，未做变换
-	//std::vector<sptr<XGeometryNode>> m_InfinitePlaneNode;										//无限网格平面
+	XQ::Vec2f m_mousePos;																										///< 鼠标在窗口中的位置，未做变换
 
-	sptr<XFullScreenQuadNode> m_fullScreenQuadNode;													//全屏四边形，用于背景设置
-
-	xsig::xconnector connector;
-
-	sptr<XSmaaFullScreenQuadNode> m_PostSmaaScreenQuadNode;									//全屏四边形，用于后处理，将G-buffer的颜色附件作为输入，输出到屏幕上
+	sptr<XFullScreenQuadNode> m_BackGroundNode;															///< 全屏四边形，用于背景设置
+	sptr<XSmaaFullScreenQuadNode> m_PostSmaaNode;														///< 全屏四边形，用于后处理，将G-buffer的颜色附件作为输入，输出到屏幕上
 
 	~Internal() {
 		connector.disconnect();
@@ -102,7 +168,9 @@ void XRender::Init()
 	XQ_ATTR_ADD_INIT(AttrActive, false);
 	XQ_ATTR_ADD_INIT(AttrSmaa, false);
 	XQ_ATTR_ADD_INIT(AttrPostProcess,true);
-	XQ_XDATA_ADD(m_group3D);
+	XQ_XDATA_ADD(mMainFboNodes);
+	XQ_XDATA_ADD(mScreenNodes);
+
 	XQ::XColor bot_color = AttrBottomColor->getValue();
 	XQ::XColor top_color = AttrTopColor->getValue();
 
@@ -110,21 +178,28 @@ void XRender::Init()
 
 	auto handler =getOrCreateMultiModeEventHandler();
 
-	mData->m_PostSmaaScreenQuadNode = makeShareDbObject<XSmaaFullScreenQuadNode>();
-	mData->m_PostSmaaScreenQuadNode->setColorMode(ColorMode::textureColor);
-	mData->m_PostSmaaScreenQuadNode->setNearRect();
+	mData->m_PostSmaaNode = makeShareDbObject<XSmaaFullScreenQuadNode>();
+	mData->m_PostSmaaNode->setColorMode(ColorMode::textureColor);
+	mData->m_PostSmaaNode->setNearRect();
 
 
-	mData->m_fullScreenQuadNode = makeShareDbObject<XFullScreenQuadNode>();
-	mData->m_fullScreenQuadNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
-	mData->m_fullScreenQuadNode->setFarRect();
+	mData->m_BackGroundNode = makeShareDbObject<XFullScreenQuadNode>();
+	mData->m_BackGroundNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
+	mData->m_BackGroundNode->setFarRect();
+
+	//坐标轴节点
+	//mData->AddAxisNode();
+
+	//mData->AddCubeTestNode();
+
+	//mData->AddInfinitePlaneNode();
 
 	//信号的绑定
 	mData->connector.connect(AttrBottomColor,&XAttr_Color::sigAttrChanged,[this](sptr<XDataAttribute>, XDataChangeType type){
 		if (type == XDataChangeType::ItemDataModified) {
 			XQ::XColor bot_color = AttrBottomColor->getValue();
 			XQ::XColor top_color = AttrTopColor->getValue();
-			mData->m_fullScreenQuadNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
+			mData->m_BackGroundNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
 		}
 	});
 
@@ -132,7 +207,7 @@ void XRender::Init()
 		if (type == XDataChangeType::ItemDataModified) {
 			XQ::XColor bot_color = AttrBottomColor->getValue();
 			XQ::XColor top_color = AttrTopColor->getValue();
-			mData->m_fullScreenQuadNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
+			mData->m_BackGroundNode->setVertexColor({ bot_color ,bot_color ,top_color,top_color });
 		}
 		});
 }
@@ -140,8 +215,9 @@ void XRender::Init()
 void XRender::setRenderWindow(sptr<XBaseRenderWindow> renderWindow)
 {
 	mData->m_renderWindow = renderWindow->asDerived<XOpenGLRenderWindow>();
-	m_group3D->setShaderManger(getRenderWindow()->getShaderManger());
-	mData->m_fullScreenQuadNode->setShaderManger(getRenderWindow()->getShaderManger());
+	mMainFboNodes->setShaderManger(getRenderWindow()->getShaderManger());
+	mData->m_BackGroundNode->setShaderManger(getRenderWindow()->getShaderManger());
+	mScreenNodes->setShaderManger(getRenderWindow()->getShaderManger());
 }
 
 sptr<XBaseRenderWindow> XRender::getRenderWindow() const
@@ -159,14 +235,22 @@ sptr<XBaseRenderCamera> XRender::getCamera() const
 	return mData->m_camera;
 }
 
-sptr<XDataBaseObject> XRender::getRenderObjectData()
+sptr<XDataBaseObject> XRender::getMainRenderTarget()
 {
 	makeCurrent();
-	mData->m_drawManger->bilt();
+	mData->m_drawManger->biltScreen();
 	doneCurrent();
 	return mData->m_drawManger->getBiltFbo();
 }
 
+
+sptr<XDataBaseObject> XRender::getOverlayRenderTarget(int lay)
+{
+	makeCurrent();
+	mData->m_drawManger->biltOverlay(lay);
+	doneCurrent();
+	return mData->m_drawManger->getBiltFbo();
+}
 
 void XRender::render() {
 	if (!makeCurrent())
@@ -183,53 +267,107 @@ void XRender::render() {
 
 void XRender::renderGBuffer()
 {
-	//!
-	//! 渲染
-	mData->m_drawManger->InitRenderSource();
+	{
+		mData->m_drawManger->InitRenderSource();
 
-	auto viewPort = this->getConvertViewPort();
-	XOpenGLFuntion::xglglScissor(XQ::Recti(0,0,viewPort[2],viewPort[3]));
-	XOpenGLFuntion::xglViewport(XQ::Recti(0, 0, viewPort[2], viewPort[3]));
-	getCamera()->setAspect(viewPort[2] / (double)viewPort[3]);
+		auto viewPort = this->getConvertViewPort();
+		XOpenGLFuntion::xglglScissor(XQ::Recti(0, 0, viewPort[2], viewPort[3]));
+		XOpenGLFuntion::xglViewport(XQ::Recti(0, 0, viewPort[2], viewPort[3]));
+		getCamera()->setAspect(viewPort[2] / (double)viewPort[3]);
 
-	auto fbo = mData->m_drawManger->getScreenFbo();
-	if (fbo) {
-		auto screenFbo = fbo->asDerived<XOpenGLFramebufferObject>();
-		auto w = screenFbo->getWidth();
-		auto h = screenFbo->getHeight();
-		mData->m_PostSmaaScreenQuadNode->setInputColorTexture(screenFbo->getColorAttachment(0),screenFbo->getDepthAttachment());
-		
-		screenFbo->bind();
-		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-		glDrawBuffers(2, drawBuffers);
+		auto fbo = mData->m_drawManger->getScreenFbo();
+		if (fbo) {
+			auto screenFbo = fbo->asDerived<XOpenGLFramebufferObject>();
+			screenFbo->bind();
+			GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+			glDrawBuffers(2, drawBuffers);
+		}
+
+		XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 1), 0);
+		XOpenGLFuntion::xglClearColor(XQ::Vec4u(0, 0, 0, 0), 1);
+		XOpenGLFuntion::xglClearDepthStencil(1, 0);
+
+		auto enable = makeShareDbObject<XOpenGLEnable>();
+		enable->save();
+		enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
+		enable->enable(XOpenGLEnable::EnableType::BLEND);
+		enable->enable(XOpenGLEnable::EnableType::MULTISAMPLE);
+
+		//绘制背景
+		auto tmp = XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_LEQUAL);
+		mData->m_BackGroundNode->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+		XOpenGLFuntion::xglDepthFunc(tmp);
+
+		mMainFboNodes->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+
+		enable->restore();
+		if (fbo) {
+			fbo->asDerived<XOpenGLFramebufferObject>()->release();
+		}
 	}
 
-	XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 1), 0);
-	XOpenGLFuntion::xglClearColor(XQ::Vec4u(0, 0, 0, 0), 1);
-	XOpenGLFuntion::xglClearDepthStencil(1,0);
+	renderScreen3dNode2Buffer();
+}
 
-	auto enable = makeShareDbObject<XOpenGLEnable>();
-	enable->save();
-	enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
-	enable->enable(XOpenGLEnable::EnableType::BLEND);
-	enable->enable(XOpenGLEnable::EnableType::MULTISAMPLE);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+void XRender::renderScreen3dNode2Buffer()
+{
+		//坐标轴的渲染，始终显示在最前面，同时允许拾取
+		auto layFbo = mData->m_drawManger->getOverlayFbo(0);
+		if (layFbo) {
+			{
+				//先清除缓冲
+				auto fbo = layFbo->asDerived<XOpenGLFramebufferObject>();
+				fbo->bind();
+				auto enable = makeShareDbObject<XOpenGLEnable>();
+				enable->save();
+				auto viewPort = getConvertViewPort();
+				XOpenGLFuntion::xglglScissor(viewPort);
+				XOpenGLFuntion::xglViewport(viewPort);
 
-	m_group3D->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+				XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 0), 0);		//alpha设置为0，方便混合
+				XOpenGLFuntion::xglClearColor(XQ::Vec4u(0, 0, 0, 0), 1);
+				XOpenGLFuntion::xglClearDepthStencil(1, 0);
+				enable->restore();
+				fbo->release();
+			}
+			auto num = mScreenNodes->getChildRenderNodeCount();
+			for (int i = 0; i < num; i++) {
+				int screen_width = 50;		//todo 待优化，暂不处理了
+				int screen_height = 50;
+				auto projectMatrix = getCamera()->orthoMatrix(screen_width, screen_height, 0.1, 5000);
+				auto cameraMat = getCamera()->getViewMatrix().inverse();
+				//提取旋转部分
+				auto rotMat = XQ::Matrix::extractRotateMat(cameraMat);
 
-	//绘制背景
-	mData->m_fullScreenQuadNode->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+				auto newCamertMat = XQ::Matrix::convert(rotMat) * XQ::Matrix::transltae(0, 0, 200);
+				auto newViewMatrix = newCamertMat.inverse().matrix();
 
-	enable->restore();
-	if (fbo) {
-		fbo->asDerived<XOpenGLFramebufferObject>()->release();
-	}
+				mData->writeDynamicCamera(newViewMatrix, projectMatrix);
 
-	//坐标轴的渲染，始终显示在最前面，同时允许拾取
-	auto layFbo =mData->m_drawManger->getOverlayFbo(0);
-	if (layFbo) {
+				auto fbo = layFbo->asDerived<XOpenGLFramebufferObject>();
+				fbo->bind();
+				{
+					GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+					glDrawBuffers(2, drawBuffers);
+				}
+				auto enable = makeShareDbObject<XOpenGLEnable>();
+				enable->save();
+				enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
+				auto viewPort = this->getConvertViewPort();
+				XOpenGLFuntion::xglglScissor(XQ::Recti(0, 0, screen_width, screen_height));
+				XOpenGLFuntion::xglViewport(XQ::Recti(0, 0, screen_width, screen_height));
 
-	}
+				XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 0), 0);		//alpha设置为0，方便混合
+				XOpenGLFuntion::xglClearColor(XQ::Vec4u(0, 0, 0, 0), 1);
+				XOpenGLFuntion::xglClearDepthStencil(1, 0);
+				
+				auto node = mScreenNodes->getChildRenderNode(i);
+				node->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+
+				enable->restore();
+				fbo->release();
+			}
+		}
 }
 
 void XRender::renderToScreen()
@@ -243,21 +381,50 @@ void XRender::renderToScreen()
 	auto enable = makeShareDbObject<XOpenGLEnable>();
 	enable->save();
 	enable->enable(XOpenGLEnable::EnableType::SCISSOR_TEST);
-	enable->setScissorRect(rect);
+
+	XOpenGLFuntion::xglglScissor(rect);
 	XOpenGLFuntion::xglViewport(rect);
 	getCamera()->setAspect(rect[2] / (double)rect[3]);
 
-	
 	XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 1), 0);
 	XOpenGLFuntion::xglClearDepthStencil(1, 0);
 
-	mData->m_PostSmaaScreenQuadNode->AttrEnableSmaa->setValue(AttrSmaa->getValue());
+	{
+		auto fbo = mData->m_drawManger->getScreenFbo();
+		auto screenFbo = fbo->asDerived<XOpenGLFramebufferObject>();
+		mData->m_PostSmaaNode->setInputColorTexture(screenFbo->getColorAttachment(0), screenFbo->getDepthAttachment());
+	}
+	
+	mData->m_PostSmaaNode->AttrEnableSmaa->setValue(AttrSmaa->getValue());
 
 	enable->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
-	enable->disable(XOpenGLEnable::EnableType::MULTISAMPLE);
+	enable->enable(XOpenGLEnable::EnableType::MULTISAMPLE);
 	enable->disable(XOpenGLEnable::EnableType::BLEND);
-	mData->m_PostSmaaScreenQuadNode->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+	mData->m_PostSmaaNode->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+
+	renderScreen3dNodeBuffer2Screen();
+
 	enable->restore();
+}
+
+void XRender::renderScreen3dNodeBuffer2Screen()
+{
+	//渲染坐标轴
+	{
+		auto tmpEnable = makeShareDbObject<XOpenGLEnable>();
+		tmpEnable->save();
+		tmpEnable->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
+		tmpEnable->enable(XOpenGLEnable::EnableType::BLEND);
+		tmpEnable->enable(XOpenGLEnable::EnableType::MULTISAMPLE);
+		XOpenGLFuntion::xglBlendFunc(XOpenGL::BlendFuncFactor::XGL_SRC_ALPHA, XOpenGL::BlendFuncFactor::XGL_ONE_MINUS_SRC_ALPHA);
+		{
+			auto fbo = mData->m_drawManger->getOverlayFbo(0)->asDerived<XOpenGLFramebufferObject>();
+			mData->m_PostSmaaNode->setInputColorTexture(fbo->getColorAttachment(0), fbo->getDepthAttachment());
+			mData->m_PostSmaaNode->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+		}
+
+		tmpEnable->restore();
+	}
 }
 
 bool XRender::makeCurrent()
@@ -353,6 +520,11 @@ bool XRender::connectToRenderWindowSignals()
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonRelease, handler, &XInteractionEventHandler::SigMiddleButtonRelease);
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonPress, handler, &XInteractionEventHandler::SigRightButtonPress);
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonRelease, handler, &XInteractionEventHandler::SigRightButtonRelease);
+
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeftButtonDoublePress, handler, &XInteractionEventHandler::SigLeftButtonDoublePress);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigRightButtonDoublePress, handler, &XInteractionEventHandler::SigRightButtonDoublePress);
+	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigMiddleButtonDoublePress, handler, &XInteractionEventHandler::SigMiddleButtonDoublePress);
+
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigEnter, handler, &XInteractionEventHandler::SigEnter);
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigLeave, handler, &XInteractionEventHandler::SigLeave);
 	mData->connector.connect(eventDispatcher, &XRenderWindowEventDispatch::SigFoucsIn, handler, &XInteractionEventHandler::SigFoucsIn);
@@ -380,8 +552,22 @@ bool XRender::connectToRenderWindowSignals()
 
 void XRender::addRenderNode3D(sptr<XBaseRenderNode>s)
 {
-	s->setShaderManger(getRenderWindow()->getShaderManger());
-	m_group3D->addChildRenderNode(s);
+	if (auto w = getRenderWindow()) {
+		if (auto m = w->getShaderManger()) {
+			s->setShaderManger(getRenderWindow()->getShaderManger());
+		}
+	}
+	mMainFboNodes->addChildRenderNode(s);
+}
+
+void XRender::addScreenRenderNode3D(sptr<XBaseRenderNode> s)
+{
+	if (auto w = getRenderWindow()) {
+		if (auto m = w->getShaderManger()) {
+			s->setShaderManger(getRenderWindow()->getShaderManger());
+		}
+	}
+	mScreenNodes->addChildRenderNode(s);
 }
 
 void XRender::addRenderNode2D(sptr<XGraphicsItem>)
@@ -454,13 +640,35 @@ XQ::InteractMode XRender::getInteractMode() const
 
 sptr<XBaseRenderNode> XRender::getRenderNode3D(int id)
 {
-	return m_group3D->findNodeById(id);
+	return mMainFboNodes->findNodeById(id);
+}
+
+sptr<XBaseRenderNode> XRender::getRenderNode3D(int id, int lay)
+{
+	if(lay ==0)
+		return mScreenNodes->findNodeById(id);
+	return nullptr;
 }
 
 sptr<XBaseDrawManger> XRender::getDrawManger()
 {
 	return mData->m_drawManger;
 }	
+
+sptr<XBaseRenderNode> XRender::AddAxisNode()
+{
+	return mData->AddAxisNode();
+}
+
+sptr<XBaseRenderNode> XRender::AddCubeTestNode()
+{
+	return mData->AddCubeTestNode();
+}
+
+sptr<XBaseRenderNode> XRender::AddInfinitePlaneNode()
+{
+	return mData->AddInfinitePlaneNode();
+}
 
 void XRender::updateUbo()
 {
@@ -481,7 +689,7 @@ XQ::BoundBox  XRender::computeBoundBox() {
 	constexpr double limitMax = std::numeric_limits<double>::max();
 	constexpr double limitMin = std::numeric_limits<double>::lowest();;
 	XQ::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
-	auto shapeBoundBox = m_group3D->getBoundBox(Eigen::Matrix4f::Identity());
+	auto shapeBoundBox = mMainFboNodes->getBoundBox(Eigen::Matrix4f::Identity());
 
 	boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);
 	boundBox.xmax = std::max(boundBox.xmax, shapeBoundBox.xmax);

@@ -36,6 +36,9 @@ public:
 	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)=0;
 	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)=0;
 	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)=0;
+	virtual void LeftButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event) = 0;
+	virtual void RightButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event) = 0;
+	virtual void MiddleButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event) = 0;
 	virtual void EnterEvent(XEvent& event)=0;
 	virtual void LeaveEvent(XEvent& event)=0;
 	virtual void FoucsInEvent(XEvent& event)=0;
@@ -55,6 +58,9 @@ public:
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigMiddleButtonRelease;								//鼠标中键弹起
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigRightButtonPress;										//鼠标右键摁下
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigRightButtonRelease;									//鼠标右键弹起
+	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigLeftButtonDoublePress;								//鼠标左键双击摁下
+	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigRightButtonDoublePress;							//鼠标左键双击摁下
+	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigMiddleButtonDoublePress;						//鼠标左键双击摁下
 
 	XSIGNAL(void()) SigEnter;
 	XSIGNAL(void()) SigLeave;

@@ -17,6 +17,7 @@ public:
     void Init() override;
 
     void setProjectionType(ProjectionType type);
+	void setEyeDir(const XQ::Vec3f& dir) override;
 	void rotate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height);
 	void translate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height);
     void resetCamera(XQ::BoundBox box);
@@ -27,6 +28,11 @@ public:
 
     Eigen::Matrix4f projectionMatrix() const;
     Eigen::Matrix4f getViewMatrix() const;
+
+	Eigen::Matrix4f orthoMatrix(float width,float height, float znear, float zfar) const override;
+
+	Eigen::Matrix4f perspectiveMatrix(float aspect, float fovy, float znear, float zfar) const override;
+
     void setAspect(float aspect);
     std::vector<XQ::Vec3f> getFrustumInWorld() const;
 

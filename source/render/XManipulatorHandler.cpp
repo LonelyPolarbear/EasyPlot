@@ -114,6 +114,21 @@ void XManipulatorHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::Keybo
 	mData->mouseType = MouseType::none;
 }
 
+void XManipulatorHandler::LeftButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
+void XManipulatorHandler::RightButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
+void XManipulatorHandler::MiddleButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
 void XManipulatorHandler::EnterEvent(XEvent& event)
 {
 	if (event.isStopPropagate()) {

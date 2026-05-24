@@ -27,6 +27,11 @@ void XRenderCamera::setProjectionType(XBaseRenderCamera::ProjectionType type)
 	}
 }
 
+void XRenderCamera::setEyeDir(const XQ::Vec3f& dir)
+{
+	mCamera->setEyeDir(dir);
+}
+
 void XRenderCamera::rotate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height)
 {
 	if (AttrCameraStyle->getValue() == XBaseRenderCamera::CameraStyle::freely) {
@@ -112,6 +117,16 @@ Eigen::Matrix4f XRenderCamera::projectionMatrix() const
 Eigen::Matrix4f XRenderCamera::getViewMatrix() const
 {
 	return mCamera->getViewMatrix();
+}
+
+Eigen::Matrix4f XRenderCamera::orthoMatrix(float width, float height, float znear, float zfar) const
+{
+	return XQ::Matrix::ortho(-0.5 * width, 0.5 * width, -0.5 * height, 0.5 * height, znear, zfar);
+}
+
+Eigen::Matrix4f XRenderCamera::perspectiveMatrix(float aspect, float fovy, float znear, float zfar) const
+{
+	return XQ::Matrix::perspective(fovy, aspect, znear, zfar);
 }
 
 void XRenderCamera::setAspect(float aspect)

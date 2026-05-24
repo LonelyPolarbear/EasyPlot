@@ -2,6 +2,7 @@
 #include "lib04_opengl/XOpenGLContext.h"
 #include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib04_opengl/XOpenGLFuntion.h"
+#include "lib04_opengl/XOpenGLTexture.h"
 #include "XRenderWindowEventDispatch.h"
 #include "XRender.h"
 
@@ -9,7 +10,7 @@ RenderWindowUbo::RenderWindowUbo() {}
 
 RenderWindowUbo::~RenderWindowUbo() {}
 
-void RenderWindowUbo::create()
+void RenderWindowUbo::InitRenderResource()
 {
 	if (init_done)
 	{
@@ -20,7 +21,7 @@ void RenderWindowUbo::create()
 	uniformBufferVs->setUsagePattern(XOpenGLBuffer::UsagePattern::StaticDraw);
 	uniformBufferVs->create();
 	uniformBufferVs->bind();
-	uniformBufferVs->allocate(sizeof(Eigen::Matrix4f) * 2);
+	uniformBufferVs->allocate(sizeof(Eigen::Matrix4f) * 4);
 	uniformBufferVs->setBufferBindIdx(1);
 	uniformBufferVs->release();
 
@@ -60,13 +61,22 @@ void RenderWindowUbo::create()
 	uniformBufferCamera->setBufferBindIdx(5);
 	uniformBufferCamera->release();
 
+	
 	init_done = true;
 }
 
-void RenderWindowUbo::writeVS(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection) {
+void RenderWindowUbo::writeVS_globalCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection) {
 	uniformBufferVs->bind();
 	uniformBufferVs->write(0, view.data(), 16);
 	uniformBufferVs->write(16, projection.data(), 16);
+	uniformBufferVs->release();
+}
+
+void RenderWindowUbo::writeVS_dynamicCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection)
+{
+	uniformBufferVs->bind();
+	uniformBufferVs->write(32, view.data(), 16);
+	uniformBufferVs->write(48, projection.data(), 16);
 	uniformBufferVs->release();
 }
 
@@ -116,8 +126,7 @@ void XOpenGLRenderWindow::SetWindowId(uint64_t winId)
 		}
 
 		//opengl上下文已经创建
-		m_shaderManger->initGLResource();
-		m_renderWindowUbo->create();
+		SigRenderContextCreated();
 	}
 }
 
@@ -130,6 +139,7 @@ void XOpenGLRenderWindow::Init()
 	m_eventDispatch->setRenderWindow(asDerived<XOpenGLRenderWindow>());
 	m_shaderManger = makeShareDbObject<xShaderManger>();
 	m_renderWindowUbo = makeShareDbObject<RenderWindowUbo>();
+	m_renderFontMgr = makeShareDbObject<XRenderFontManger>(asDerived<XOpenGLRenderWindow>());
 	bindSigalSlot();
 }
 
@@ -144,6 +154,12 @@ void XOpenGLRenderWindow::bindSigalSlot()
 			ren->setActive(ren->isBelongToRender(windowPos));
 		}
 	});
+
+	xsig::connect(this,&XOpenGLRenderWindow::SigRenderContextCreated,[this](){
+		m_shaderManger->InitRenderResource();
+		m_renderWindowUbo->InitRenderResource();
+		m_renderFontMgr->InitRenderResource();
+	});
 }
 
 void XOpenGLRenderWindow::render()
@@ -154,7 +170,7 @@ void XOpenGLRenderWindow::render()
 	}
 
 	makeCurrent();
-	XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer,0);
+	//XOpenGLFuntion::xglBindFramebuffer(XOpenGL::FrameBufferType::framebuffer,0);
 	for (auto r : *m_renderList) {
 		auto ren = r->asDerived<XRender>();
 		ren->render();

@@ -306,10 +306,14 @@ void XOpenGLFuntion::xglClearDepthStencil(float depth, int s)
 	checkGLError();
 }
 
-void XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType fun)
+XOpenGL::DepthOrStencilCompFunType XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType fun)
 {
+	GLint depthFunc;
+	glGetIntegerv(GL_DEPTH_FUNC, &depthFunc);
+	auto lastFun = XOpenGL::DepthOrStencilCompFunType(depthFunc);
 	glDepthFunc((GLenum)fun);
 	checkGLError();
+	return lastFun;
 }
 
 void XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType fun, int ref, uint32_t mask)
@@ -421,6 +425,15 @@ XQ::Recti XOpenGLFuntion::xGetglScissor()
 	glGetIntegerv(GL_SCISSOR_BOX, scissor);
 	checkGLError();
 	return XQ::Recti(scissor[0], scissor[1], scissor[2], scissor[3]);
+}
+
+XQ::Recti XOpenGLFuntion::xGetglViewport()
+{
+	//读取之前的视口参数
+	GLint viewport[4];
+	glGetIntegerv(GL_VIEWPORT, viewport);
+	checkGLError();
+	return XQ::Recti(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
 std::optional<XQ::Vec3i> XOpenGLFuntion::xGetTextureSize(int textureID, XOpenGL::TextureTarget target)

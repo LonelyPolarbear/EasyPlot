@@ -2,6 +2,7 @@
 #include <lib04_opengl/XOpenGLEnable.h>
 #include <lib01_shader/xshaderManger.h>
 #include <lib04_opengl/XOpenGLBuffer.h>
+#include <lib04_opengl/XOpenGLFuntion.h>
 
 XInfinitePlaneRenderNode::XInfinitePlaneRenderNode()
 {
@@ -42,7 +43,7 @@ void XInfinitePlaneRenderNode::createSource()
 void XInfinitePlaneRenderNode::Init()
 {
 	XGeometryNode::Init();
-
+	Attribute->AttrIsValidBoundBox->setValue(false);
 	//!
 	//! source创建
 	createSource();
@@ -78,8 +79,11 @@ void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matri
 	//需要使用
 	mFeedBackBuffer->bind();																											 //------------------------------ 激活
 	glBeginTransformFeedback(GL_TRIANGLES);                                                                           //------------------------------ 启动
-
+	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
+	glEnableObj->enable(XOpenGLEnable::EnableType::DEPTH_CLAMP);
+	auto last = XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_LEQUAL);
 	this->draw(render,shader,parentMatrix);
+	XOpenGLFuntion::xglDepthFunc(last);
 	shader->unUse();
 
 	glEnableObj->restore();
@@ -97,7 +101,9 @@ void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matri
 
 void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
 {
-	return XGeometryNode::draw(render,s,parentMatrix);
+	auto enable = makeShareDbObject<XOpenGLEnable>();
+
+	XGeometryNode::draw(render, s, parentMatrix);
 }
 
 void XInfinitePlaneRenderNode::createFeedBack()

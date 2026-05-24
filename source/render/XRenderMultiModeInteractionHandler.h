@@ -23,6 +23,9 @@ protected:
 	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void LeftButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void RightButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MiddleButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 	virtual void EnterEvent(XEvent& event);
 	virtual void LeaveEvent(XEvent& event);
 	virtual void FoucsInEvent(XEvent& event);

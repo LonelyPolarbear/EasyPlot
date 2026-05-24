@@ -38,7 +38,7 @@ public:
 
 	void virtual render() override;
 
-	void virtual initGLResource();
+	void virtual InitRenderResource();
 
 	void print();
 

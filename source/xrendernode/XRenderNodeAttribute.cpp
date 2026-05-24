@@ -21,7 +21,7 @@ void XRenderNodeSizePolicy::Init()
 	XQ_ATTR_ADD_INIT(AttrIsFixedSize, false);
 	XQ_ATTR_ADD_INIT(AttrPositionOrien, XRenderNodeOriginPositionOrien::left_bottom); 
 	XQ_ATTR_ADD_INIT(AttrPositionPos, XQ::Vec2i(0, 0));
-	XQ_ATTR_ADD_INIT(AttrFixedPixel, XQ::Vec3i(1, 1,1));
+	XQ_ATTR_ADD_INIT(AttrFixedPixel, XQ::Vec3i(1, 1, 1)); 
 }
 
 XRenderNode3DAttribute::XRenderNode3DAttribute()
@@ -44,5 +44,7 @@ void XRenderNode3DAttribute::Init()
 	XQ_ATTR_ADD_INIT(AttrSelectedColor, XQ::XColor(255, 255, 255, 255));
 	XQ_ATTR_ADD_INIT(AttrIsNdc, false);
 	XQ_ATTR_ADD_INIT(AttrDrawOutline, false);
+	XQ_ATTR_ADD_INIT(AttrUseNormalCamera, true);
+	XQ_ATTR_ADD_INIT(AttrIsValidBoundBox, true);
 	XQ_XDATA_ADD(AttrSizePolicy);
 }

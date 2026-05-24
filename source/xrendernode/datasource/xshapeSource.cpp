@@ -17,6 +17,8 @@ XShapeSource::XShapeSource()
 
 	m_VertexIndexs = makeShareDbObject<XUIntArray>(); m_VertexIndexs->setComponent(1);
 
+	m_InstanceAttay = makeShareDbObject<XFloatArray>(); m_InstanceAttay->setComponent(16);
+
 	//更新时间戳，确保数据更新
 	Modified();
 }
@@ -42,6 +44,18 @@ XQ::Vec3f XShapeSource::getFaceNormal(uint32_t index)
 }
 
 
+void XShapeSource::updateInstancedArray()
+{
+	m_InstanceAttay->setNumOfTuple(1);
+	//前后
+	m_InstanceAttay->setTuple(0, 
+				1,0,0,0,
+				0, 1, 0, 0,
+				0, 0, 1, 0,
+				0,0,0,1);
+	m_InstanceAttay->Modified();
+}
+
 bool XShapeSource::update()
 {
 	//更新数据
@@ -57,6 +71,7 @@ bool XShapeSource::update()
 		updateVertextCoordArray();
 		updateVertextNormalArray();
 		updateVertexColorArray();
+		updateInstancedArray();
 
 		updateFaceColorArray();
 		updateFaceIndexArray();

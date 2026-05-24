@@ -28,7 +28,7 @@ public:
 
 	void initiallize();
 
-	void initGLResource();
+	virtual void InitRenderResource();
 
 	void bindSSBO();
 
@@ -47,6 +47,8 @@ protected:
 	sptr<XOpenGLBuffer> m_line_ebo;									//线的索引
 
 	sptr<XOpenGLBuffer> m_point_ebo;								//点的索引，默认显示全部点
+
+	sptr<XOpenGLBuffer> m_vertex_InstancedMat;							//实例化渲染的矩阵
 	
 	//CPU端数据
 	sptr<XShapeSource> m_Input;

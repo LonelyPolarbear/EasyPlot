@@ -42,6 +42,7 @@ const int perspectiveCamera = 2; //透视投影相机
     
     //如果距离超过一个像素，则不绘制线条，即完全透明
     float alpha = 1.0 - min(disToline, 1);
+   
 
     FragColor = vec4(224/225.0, 224/225.0, 224/225.0, alpha);
 #else
@@ -49,6 +50,8 @@ const int perspectiveCamera = 2; //透视投影相机
     float depth = gl_FragCoord.z; //[0-1]
     float normalizeDepth =0;
     float fading = 1.0;
+    //vec3 gridColor = vec3(224/225.0, 224/225.0, 224/225.0);
+    vec3 gridColor = vec3(0.804, 0.788, 0.788);
 
     if(u_cameraType == perspectiveCamera){
         float linearDepth =1.0 /( (1.0/u_far-1.0/u_near)*depth+1.0/u_near);     //范围[n,f]
@@ -96,14 +99,14 @@ const int perspectiveCamera = 2; //透视投影相机
      }else{
         if(mainGridAlpha<0.01){
             //绘制次网格
-            FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.1*subGridAlpha*fading);
+            FragColor = vec4(gridColor, 0.1*subGridAlpha*fading);
         }else{
              if(yaxisAlpha >0.01){
                 FragColor = vec4(1, 0, 0, yaxisAlpha*fading);  //会出现锯齿
             }else if(xaxisAlpha >0.01){
                 FragColor = vec4(0, 1, 0, xaxisAlpha*fading); //会出现锯齿
             }else{
-                FragColor = vec4(224/225.0, 224/225.0, 224/225.0, 0.3*mainGridAlpha*fading);
+                FragColor = vec4(gridColor, 0.3*mainGridAlpha*fading);
             }
         }
     }

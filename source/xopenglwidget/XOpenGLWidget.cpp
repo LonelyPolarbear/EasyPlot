@@ -88,7 +88,7 @@ void XOpenGLWidget::showEvent(QShowEvent* event)
 		//if (testAttribute(Qt::WA_WState_Created)) {
 		initOpenglContext();
 		m_isInit = true;
-		initGLResource();
+		InitRenderResource();
 		//}
 	}
 	return QWidget::showEvent(event);

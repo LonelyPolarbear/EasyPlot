@@ -30,6 +30,8 @@ public:
 
 	 std::shared_ptr<XUIntArray> getVertexIndexArray() { return m_VertexIndexs; }
 
+	 std::shared_ptr<XFloatArray> getInstancedArray() { return m_InstanceAttay; }
+
 	 XQ::Vec3f getFaceNormal(uint32_t index);
 
 	 virtual void updateVertextCoordArray() =0;
@@ -47,6 +49,8 @@ public:
 	 virtual void updateLineColorArray() = 0;
 
 	 virtual void updateVertexIndexArray() = 0;
+
+	 virtual void updateInstancedArray();
 
 	 virtual void updateTextureCoordArray(){};		//目前大部分不需要纹理，因此不使用纯虚函数
 
@@ -88,6 +92,8 @@ protected:
 
 	//点单元
 	std::shared_ptr<XUIntArray> m_VertexIndexs;										//点索引
+
+	std::shared_ptr<XFloatArray> m_InstanceAttay;										//实例化渲染属性
 
 	XTimeStamp m_updateTime;
 	//仅为了在Init调用update，保证source有数据，

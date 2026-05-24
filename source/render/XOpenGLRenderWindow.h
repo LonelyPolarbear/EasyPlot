@@ -7,12 +7,12 @@
 #include <dataBase/XVector.h>
 #include <lib01_shader/xshaderManger.h>
 #include "XRender.h"
+#include "XRenderFontManger.h"
 #include <base/xbaserender/baseRender/XBaseRenderWindow.h>
 
 class XOpenGLContext;
 class XOpenGLBuffer;
 class XRenderWindowEventDispatch;
-//class XRender;
 
 /**
  * @class RenderWindowUbo
@@ -24,9 +24,11 @@ protected:
 	~RenderWindowUbo();
 
 public:
-	void create();
+	void InitRenderResource();
 
-	void writeVS(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection);
+	void writeVS_globalCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection);
+
+	void writeVS_dynamicCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection);
 
 	void writeVS2d(const Eigen::Matrix4f& virtualWorldFrame, const Eigen::Matrix4f& sceneFrameInVirtualWorld);
 
@@ -90,8 +92,7 @@ private:
 	sptr<XOpenGLContext> m_context;										//窗口上下文
 	XQ::Vec2i m_windowSize;														//窗口尺寸
 	sptr<XRenderWindowEventDispatch> m_eventDispatch;	//渲染窗口交互器
-	//std::vector<sptr<XRender>> m_renders;
 	sptr< RenderWindowUbo> m_renderWindowUbo;
-
 	csptr<XDataListT<XRender> > m_renderList;
+	sptr<XRenderFontManger> m_renderFontMgr;
 };

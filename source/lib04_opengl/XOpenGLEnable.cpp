@@ -7,6 +7,7 @@ namespace ns_xopengl_enable {
     //深度测试状态
 	struct state_depth_test_t {
         bool isEnable = true;
+        bool isDepthClampEnable = false;
 	};
 
 	//多重采样状态
@@ -75,9 +76,9 @@ XOpenGLEnable::~XOpenGLEnable()
 
 void XOpenGLEnable::enable(EnableType type)
 {
-    mData->oldEnableMap[(GLenum)type] = glIsEnabled((GLenum)type);
+   /* mData->oldEnableMap[(GLenum)type] = glIsEnabled((GLenum)type);
     if (type == EnableType::SCISSOR_TEST) {
-    }
+    }*/
    glEnable((GLenum)type);
 }
 
@@ -131,7 +132,8 @@ void XOpenGLEnable::save()
 
 void XOpenGLEnable::saveDepthTestState()
 {
-    mData->depthTestState.isEnable = glIsEnabled((GLenum)EnableType::DEPTH_TEST);
+	mData->depthTestState.isEnable = glIsEnabled((GLenum)EnableType::DEPTH_TEST);
+	mData->depthTestState.isDepthClampEnable = glIsEnabled((GLenum)EnableType::DEPTH_CLAMP);
 }
 
 void XOpenGLEnable::saveMultisampleState()
@@ -175,6 +177,11 @@ void XOpenGLEnable::restoreDepthTestState()
         glEnable((GLenum)EnableType::DEPTH_TEST);
     else
         glDisable((GLenum)EnableType::DEPTH_TEST);
+
+	if (mData->depthTestState.isDepthClampEnable)
+		glEnable((GLenum)EnableType::DEPTH_CLAMP);
+	else
+		glDisable((GLenum)EnableType::DEPTH_CLAMP);
 }
 
 void XOpenGLEnable::restoreMultisampleState()

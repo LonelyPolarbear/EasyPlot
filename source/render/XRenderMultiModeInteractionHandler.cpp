@@ -96,6 +96,45 @@ void XRenderMultiModeInteractionHandler::RightButtonReleaseEvent(XQ::Vec2i, XQ::
 		return;
 }
 
+void XRenderMultiModeInteractionHandler::LeftButtonDoublePressEvent(XQ::Vec2i p, XQ::KeyboardModifier k, XEvent& event)
+{
+	if (!isRenderActive())
+		return;
+
+	if (hasMode(XQ::InteractMode::pick))
+		mPickHandler->LeftButtonDoublePressEvent(p,k, event);
+	if (hasMode(XQ::InteractMode::manipulator))
+		mManipulatorHandler->LeftButtonDoublePressEvent(p,k, event);
+	if (hasMode(XQ::InteractMode::camera))
+		mCameraHandler->LeftButtonDoublePressEvent(p,k, event);
+}
+
+void XRenderMultiModeInteractionHandler::RightButtonDoublePressEvent(XQ::Vec2i p, XQ::KeyboardModifier k, XEvent& event)
+{
+	if (!isRenderActive())
+		return;
+
+	if (hasMode(XQ::InteractMode::pick))
+		mPickHandler->RightButtonDoublePressEvent(p, k, event);
+	if (hasMode(XQ::InteractMode::manipulator))
+		mManipulatorHandler->RightButtonDoublePressEvent(p, k, event);
+	if (hasMode(XQ::InteractMode::camera))
+		mCameraHandler->RightButtonDoublePressEvent(p, k, event);
+}
+
+void XRenderMultiModeInteractionHandler::MiddleButtonDoublePressEvent(XQ::Vec2i p, XQ::KeyboardModifier k, XEvent& event)
+{
+	if (!isRenderActive())
+		return;
+
+	if (hasMode(XQ::InteractMode::pick))
+		mPickHandler->MiddleButtonDoublePressEvent(p, k, event);
+	if (hasMode(XQ::InteractMode::manipulator))
+		mManipulatorHandler->MiddleButtonDoublePressEvent(p, k, event);
+	if (hasMode(XQ::InteractMode::camera))
+		mCameraHandler->MiddleButtonDoublePressEvent(p, k, event);
+}
+
 void XRenderMultiModeInteractionHandler::EnterEvent(XEvent& event)
 {
 	if (!isRenderActive())

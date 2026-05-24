@@ -10,6 +10,7 @@
 #define ATTR_VERTEX_NORMAL 1
 #define ATTR_VERTEX_COLOR 2
 #define ATTR_VERTEX_TEXTURE_COORD 3
+#define ATTR_VERTEX_INSTANCED_MAT 4
 
 #define SSBO_FACE_COLOR 0
 #define SSBO_LINE_COLOR 1
@@ -90,6 +91,35 @@ void XPolyDataMapper::updateData()
 	}
 
 	//!
+	//! [4] 顶点实例化位置属性
+	auto vertex_instanced= m_Input->getInstancedArray();
+	if (vertex_instanced && vertex_instanced->GetTimeStamp() > m_UpdateTime) {
+		m_vertex_InstancedMat->bind();
+
+		m_vertex_InstancedMat->allocate(vertex_instanced->data(0), vertex_instanced->size());
+
+		m_vertex_InstancedMat->release();
+
+		if (vertex_instanced->getNumOfTuple()) {
+			m_vao->addBuffer(ATTR_VERTEX_INSTANCED_MAT+0, m_vertex_InstancedMat, 4, XOpenGL::DataType::float_, sizeof(float) * 16, 0, true);
+			m_vao->addBuffer(ATTR_VERTEX_INSTANCED_MAT+1, m_vertex_InstancedMat, 4, XOpenGL::DataType::float_, sizeof(float) * 16, sizeof(float) * 4, true);
+			m_vao->addBuffer(ATTR_VERTEX_INSTANCED_MAT+2, m_vertex_InstancedMat, 4, XOpenGL::DataType::float_, sizeof(float) * 16, sizeof(float) * 8, true);
+			m_vao->addBuffer(ATTR_VERTEX_INSTANCED_MAT+3, m_vertex_InstancedMat, 4, XOpenGL::DataType::float_, sizeof(float) * 16, sizeof(float) * 12, true);
+
+			m_vao->enableAttribute(ATTR_VERTEX_INSTANCED_MAT + 0);
+			m_vao->enableAttribute(ATTR_VERTEX_INSTANCED_MAT + 1);
+			m_vao->enableAttribute(ATTR_VERTEX_INSTANCED_MAT + 2);
+			m_vao->enableAttribute(ATTR_VERTEX_INSTANCED_MAT + 3);
+		}
+		else {
+			m_vao->disableAttribute(ATTR_VERTEX_INSTANCED_MAT + 0);
+			m_vao->disableAttribute(ATTR_VERTEX_INSTANCED_MAT + 1);
+			m_vao->disableAttribute(ATTR_VERTEX_INSTANCED_MAT + 2);
+			m_vao->disableAttribute(ATTR_VERTEX_INSTANCED_MAT + 3);
+		}
+	}
+
+	//!
 	//! [4] 面索引数据更新
 	auto face_indexs = m_Input->getFaceIndexArray();
 	if (face_indexs && face_indexs->GetTimeStamp() > m_UpdateTime) {
@@ -165,8 +195,10 @@ void XPolyDataMapper::updateData()
 
 		m_vertex_textureCoord->release();
 
+		auto component = texture_coord->getComponent();
+
 		if (texture_coord->getNumOfTuple()) {
-			m_vao->addBuffer(ATTR_VERTEX_TEXTURE_COORD, m_vertex_textureCoord, 2, XOpenGL::DataType::float_, sizeof(XQ::Vec2f), 0);
+			m_vao->addBuffer(ATTR_VERTEX_TEXTURE_COORD, m_vertex_textureCoord, component, XOpenGL::DataType::float_, sizeof(XQ::Vec2f), 0);
 			m_vao->enableAttribute(ATTR_VERTEX_TEXTURE_COORD);
 		}
 		else {
@@ -190,6 +222,14 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 	auto face_index_num = m_Input->getFaceIndexArray()->size();
 	auto line_index_num = m_Input->getLineIndexArray()->size();
 	auto point_index_num = m_Input->getVertexIndexArray()->size();
+	auto instance_num = m_Input->getInstancedArray()->getNumOfTuple();
+	//instance_num=0;
+	if (instance_num > 0) {
+		shader->setBool("IsInstancedDraw",true);
+	}
+	else {
+		shader->setBool("IsInstancedDraw", false);
+	}
 
 	auto hasMode=[&](PolygonMode mode)->bool{
 		return (uint32_t)polygonMode & (uint32_t)mode;
@@ -199,7 +239,12 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 		//绑定对应的ebo
 		shader->setPolygonMode((int)PolygonMode::face);
 		m_face_ebo->bind();
-		glDrawElements((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0);
+		if (instance_num > 0) {
+			glDrawElementsInstanced((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0, instance_num);
+		}
+		else {
+			glDrawElements((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0);
+		}
 	}
 
 	if (hasMode(PolygonMode::line)) {
@@ -208,7 +253,10 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 		//glPolygonOffset(0.0f, -0.01f);  // 负值使线更靠近相机
 		shader->setPolygonMode((int)PolygonMode::line);
 		m_line_ebo->bind();
-		glDrawElements((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0);
+		if(instance_num>0)
+			glDrawElementsInstanced((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0, instance_num);
+		else
+			glDrawElements((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0);
 	}
 
 	if (hasMode(PolygonMode::point)) {
@@ -218,7 +266,10 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 		glPointSize(5);
 		shader->setPolygonMode((int)PolygonMode::point);
 		m_point_ebo->bind();
-		glDrawElements((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0);
+		if(instance_num >0)
+			glDrawElementsInstanced((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0, instance_num);
+		else
+			glDrawElements((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0);
 	}
 
 	m_vao->release();
@@ -232,12 +283,12 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 void XPolyDataMapper::initiallize()
 {
 	if (!isGLResourceInit) {
-		initGLResource();
+		InitRenderResource();
 		isGLResourceInit = true;
 	}
 }
 
-void XPolyDataMapper::initGLResource()
+void XPolyDataMapper::InitRenderResource()
 {
 	//!
 	//! [1] VAO 初始化
@@ -273,6 +324,12 @@ void XPolyDataMapper::initGLResource()
 		m_vertex_textureCoord->setUsagePattern(XOpenGLBuffer::StaticDraw);
 
 		m_vertex_textureCoord->create();
+
+		m_vertex_InstancedMat->setBufferType(XOpenGLBuffer::VertexBuffer);
+
+		m_vertex_InstancedMat->setUsagePattern(XOpenGLBuffer::StaticDraw);
+
+		m_vertex_InstancedMat->create();
 
 	}
 
@@ -359,4 +416,6 @@ void XPolyDataMapper::Init()
 	m_line_color = makeShareDbObject<XOpenGLBuffer>();
 
 	m_point_ebo = makeShareDbObject<XOpenGLBuffer>();
+
+	m_vertex_InstancedMat = makeShareDbObject<XOpenGLBuffer>();
 }

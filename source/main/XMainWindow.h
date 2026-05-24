@@ -16,6 +16,7 @@ public:
     ~XMainWindow();
 
     void BuildUI();
+    void AttachSignalSlot();
     void InitLeftTab();
     void InitRightTab();
     void InitBotTab();

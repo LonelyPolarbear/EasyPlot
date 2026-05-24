@@ -29,6 +29,8 @@ public:
     /// <param name=""></param>
     virtual void draw(sptr<XBaseRender>  render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix);
 
+	virtual void adjustPos(sptr<XBaseRender>  render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix);
+
 	/// <summary>
 	/// 对外接口，绘制到屏幕
 	/// </summary>
@@ -71,6 +73,7 @@ public:
 	sptr<XPolyDataMapper> getOrCreateMapper();
 
 	void setInput(sptr<XShapeSource> input);
+	sptr<XShapeSource> getInput();
 
 	void Init() override;
 public:
@@ -80,5 +83,5 @@ private:
 	class Internal;
 	std::unique_ptr<Internal> mData;
  protected:
-	sptr<XPolyDataMapper> m_polyMapper;
+	 sptr<XPolyDataMapper> m_polyMapper;
 };

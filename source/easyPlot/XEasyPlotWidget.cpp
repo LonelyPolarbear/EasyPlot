@@ -74,7 +74,7 @@ void XEasyPlotWidget::test1()
 		cmaeraType.push_back(XRenderCamera::ProjectionType::ortho);
 		cmaeraType.push_back(XRenderCamera::ProjectionType::perspective);
 		cmaeraType.push_back(XRenderCamera::ProjectionType::ortho);
-		cmaeraType.push_back(XRenderCamera::ProjectionType::perspective);
+		cmaeraType.push_back(XRenderCamera::ProjectionType::ortho);
 
 		std::vector< XRenderCamera::CameraStyle> cmaeraStyle;
 		cmaeraStyle.push_back(XRenderCamera::CameraStyle::freely);
@@ -82,28 +82,10 @@ void XEasyPlotWidget::test1()
 		cmaeraStyle.push_back(XRenderCamera::CameraStyle::freely);
 		cmaeraStyle.push_back(XRenderCamera::CameraStyle::freely);
 
-#if 1
-		sptr<xchamferCubeSource> cubeSource = makeShareDbObject<xchamferCubeSource>();
-
-		sptr<XGeometryNode> cubeActor = makeShareDbObject<XGeometryNode>();
-
-		cubeSource->Modified();
-
-		cubeActor->setInput(cubeSource);
-
-		cubeActor->setColorMode(ColorMode::FaceColor);
-
-		cubeActor->setPolygonMode(PolygonMode::face);
-
-		cubeActor->setSingleColor(XQ::Vec4f(0, 0, 1, 1));
-
-		cubeActor->scale(100, 100, 100);
-
-		cubeActor->translate(0, 1, 0);
-#endif
+		mRenderWindow->setName("renderWindow");
 
 		std::vector<sptr<XRender>> renders;
-		XQ::XAlgo::XGridLayout lay(2, 2);
+		XQ::XAlgo::XGridLayout lay(2,2);
 		for (int y = 0; y < 2; y++) {
 			for (int x = 0; x < 2; x++) {
 				auto viewport = lay.getCellPos(x, y);
@@ -114,15 +96,24 @@ void XEasyPlotWidget::test1()
 				render->getCamera()->setProjectionType(cmaeraType[y * 2 + x]);
 				auto ss = render->getCamera()->AttrCameraStyle;
 				render->getCamera()->AttrCameraStyle->setValue(cmaeraStyle[y * 2 + x]);
+				
 				mRenderWindow->addRender(render);
 				renders.push_back(render);
 				render->fitView();
 			}
 		}
-		renders[0]->addRenderNode3D(cubeActor);
-		renders[2]->addRenderNode3D(cubeActor);
-		renders[1]->addRenderNode3D(cubeActor);
-		renders[3]->addRenderNode3D(cubeActor);
+
+		renders[0]->AddCubeTestNode();
+		renders[0]->AddInfinitePlaneNode();
+		renders[0]->AddAxisNode();
+
+		renders[1]->AddCubeTestNode();
+		renders[1]->AddInfinitePlaneNode();
+		renders[1]->AddAxisNode();
+
+
+		renders[2]->AddAxisNode();
+		renders[3]->AddAxisNode();
 
 		#if 1
 		//创建一个视锥
@@ -142,26 +133,8 @@ void XEasyPlotWidget::test1()
 			rectNode->setSingleColor(XQ::Vec4f(1, 0, 0, 0.2));
 			rectNode->setColorMode(ColorMode::SingleColor);
 			renders[3]->addRenderNode3D(rectNode);
-			//renders[3]添加无限平面
-			{
-				/*sptr<XInfinitePlaneRenderNode> InfinitePlaneNode = makeShareDbObject<XInfinitePlaneRenderNode>();
-				renders[3]->addRenderNode3D(InfinitePlaneNode);
-				renders[3]->getCamera()->sigDataChanged.connect([InfinitePlaneNode](sptr<XDataObject> camera, XDataChangeType type) {
-					if (type == XDataChangeType::DataModified) {
-						auto c = camera->asDerived<XRenderCamera>();
-						if (c) {
-							auto ss = c->getFrustumInWorld();
-							auto intersections = XQ::XAlgo::getFrustumXOZIntersections(ss.data(), ss.data() + 4);
-							InfinitePlaneNode->setRect({ intersections[0],intersections[1] ,intersections[2] ,intersections[3] });
-						}
-					}
-					});*/
-			}
 
-			sptr<XInfinitePlaneRenderNode> InfinitePlaneNode = makeShareDbObject<XInfinitePlaneRenderNode>();
-			renders[1]->addRenderNode3D(InfinitePlaneNode);
-
-			renders[1]->getCamera()->sigDataChanged.connect([frustum, r = renders[3], rectNode, InfinitePlaneNode](sptr<XDataObject> camera, XDataChangeType type) {
+			renders[1]->getCamera()->sigDataChanged.connect([frustum, r = renders[3], rectNode](sptr<XDataObject> camera, XDataChangeType type) {
 				if (type == XDataChangeType::DataModified) {
 					auto c = camera->asDerived<XRenderCamera>();
 					if (c) {
@@ -171,8 +144,6 @@ void XEasyPlotWidget::test1()
 
 						auto intersections = XQ::XAlgo::getFrustumXOZIntersections(ss.data(), ss.data() + 4);
 						rectNode->setRect({ intersections[0],intersections[1] ,intersections[2] ,intersections[3] });
-
-						InfinitePlaneNode->setRect({ intersections[0],intersections[1] ,intersections[2] ,intersections[3] });
 					}
 				}
 				});
@@ -190,10 +161,15 @@ void XEasyPlotWidget::test1()
 				frustumNode->setPolygonMode(PolygonMode::line);
 				frustumNode->setColorMode(ColorMode::SingleColor);
 				renders[2]->addRenderNode3D(frustumNode);
-				sptr<XInfinitePlaneRenderNode> InfinitePlaneNode = makeShareDbObject<XInfinitePlaneRenderNode>();
-				renders[0]->addRenderNode3D(InfinitePlaneNode);
 
-				renders[0]->getCamera()->sigDataChanged.connect([frustum, r = renders[2], InfinitePlaneNode](sptr<XDataObject> camera, XDataChangeType type) {
+				sptr<XRectRenderNode> rectNode = makeShareDbObject<XRectRenderNode>();
+				rectNode->setSingleColor(XQ::Vec4f(1, 0, 0, 0.2));
+				rectNode->setColorMode(ColorMode::SingleColor);
+				renders[2]->addRenderNode3D(rectNode);
+
+				
+
+				renders[0]->getCamera()->sigDataChanged.connect([frustum, r = renders[2], rectNode](sptr<XDataObject> camera, XDataChangeType type) {
 					if (type == XDataChangeType::DataModified) {
 						auto c = camera->asDerived<XRenderCamera>();
 						if (c) {
@@ -201,7 +177,8 @@ void XEasyPlotWidget::test1()
 							frustum->setNearPlanePoints({ ss[0],ss[1],ss[2],ss[3] });
 							frustum->setFarPlanePoints({ ss[4],ss[5],ss[6],ss[7] });
 							auto intersections = XQ::XAlgo::getFrustumXOZIntersections(ss.data(), ss.data() + 4);
-							InfinitePlaneNode->setRect({ intersections[0],intersections[1] ,intersections[2] ,intersections[3] });
+							rectNode->setRect({ intersections[0],intersections[1] ,intersections[2] ,intersections[3] });
+							
 						}
 					}
 					});
@@ -214,58 +191,31 @@ void XEasyPlotWidget::test1()
 
 void XEasyPlotWidget::test2()
 {
-	/*{
-		sptr<XGeometryNode> coneNode = makeShareDbObject<XGeometryNode>();
-		sptr<XRegularPrimSource> coneSource = makeShareDbObject<XRegularPrimSource>();
-		coneSource->Modified();
-		coneSource->setNumVertices(8);
-		coneSource->setAngle(240);
-		coneNode->setInput(coneSource);
-		coneNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
-		coneNode->setPolygonMode(PolygonMode::all);
-		coneNode->setColorMode(ColorMode::FaceColor);
-		render->addRenderNode3D(coneNode);
-	}*/
-
 	{
 		auto render = makeShareDbObject<XRender>();
+		render->getCamera()->setProjectionType(XBaseRenderCamera::ProjectionType::ortho);
 		render->setViewPort(0,0,0.5,1);
 		render->setName("renderLeft");
 		mRenderWindow->addRender(render);
 		mRenderWindow->setName("renderWindow");
-		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
-		cubeNode->setName("cubeLeft");
-		sptr<xchamferCubeSource> cubesource = makeShareDbObject<xchamferCubeSource>();
-		cubeNode->setInput(cubesource);
-		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
-		cubeNode->setSelectedColor(XQ::Vec4f(1, 0, 0, 1));
-		cubeNode->setPolygonMode(PolygonMode::all);
-		cubeNode->setColorMode(ColorMode::FaceColor);
-		cubeNode->scale(10,10,10);
-		cubeNode->State->AttrHasSelect->setValue(true);
-		cubesource->Modified();
-		render->addRenderNode3D(cubeNode);
 		render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
+		render->AddAxisNode();
+		render->AddCubeTestNode();
+		render->AddInfinitePlaneNode();
 	}
 
 	{
 		auto render = makeShareDbObject<XRender>();
+		render->getCamera()->setProjectionType(XBaseRenderCamera::ProjectionType::perspective);
+		render->setBackGroundColorTop(0xFF, 0xF1, 0xEB, 255);
+		render->setBackGroundColorBot(0xAC, 0xE0, 0xF9, 255);
 		render->setViewPort(0.5, 0, 0.5, 1);
 		render->setName("renderRight");
 		mRenderWindow->addRender(render);
-		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
-		cubeNode->setName("cubeRight");
-		sptr<XCubeSource> cubesource = makeShareDbObject<XCubeSource>();
-		cubeNode->setInput(cubesource);
-		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
-		cubeNode->setSelectedColor(XQ::Vec4f(1, 0, 0, 1));
-		cubeNode->setPolygonMode(PolygonMode::all);
-		cubeNode->setColorMode(ColorMode::FaceColor);
-		cubeNode->scale(10, 10, 10);
-		cubeNode->State->AttrHasSelect->setValue(true);
-		cubesource->Modified();
-		render->addRenderNode3D(cubeNode);
 		render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
+		render->AddAxisNode();
+		render->AddCubeTestNode();
+		render->AddInfinitePlaneNode();
 	}
 	
 	//HighFive::File file("88888test.h5", HighFive::File::ReadWrite | HighFive::File::Create | HighFive::File::Truncate);
@@ -358,6 +308,28 @@ void XEasyPlotWidget::test5()
 
 	render->addRenderNode3D(Node);
 	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
+}
+
+void XEasyPlotWidget::slotAddCube()
+{
+	auto renders = getRenderWindow()->getRenders();
+	for (auto r : renders) {
+		if (r->isActive()) {
+			sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
+			cubeNode->setName("cube");
+			sptr<XCubeSource> cubesource = makeShareDbObject<XCubeSource>();
+			cubeNode->setInput(cubesource);
+			cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
+			cubeNode->setSelectedColor(XQ::Vec4f(1, 0, 0, 1));
+			cubeNode->setPolygonMode(PolygonMode::all);
+			cubeNode->setColorMode(ColorMode::FaceColor);
+			cubeNode->scale(10, 10, 10);
+			cubeNode->translate(0, 1, 0);
+			cubeNode->State->AttrHasSelect->setValue(true);
+			cubesource->Modified();
+			r-> addRenderNode3D(cubeNode);
+		}
+	}
 }
 
 void XEasyPlotWidget::slotFitView3D()

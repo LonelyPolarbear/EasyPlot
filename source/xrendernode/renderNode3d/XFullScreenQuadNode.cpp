@@ -69,7 +69,7 @@ void XFullScreenQuadNode::setNearRect()
 {
 	auto coord = m_inputSource->getVertextCoordArray();
 	for (int i = 0; i < coord->getNumOfTuple(); i++) {
-		coord->data(i)[2] = -0.9999999;
+		coord->data(i)[2] = -1;
 	}
 	m_inputSource->Modified();
 }
@@ -78,7 +78,7 @@ void XFullScreenQuadNode::setFarRect()
 {
 	auto coord = m_inputSource->getVertextCoordArray();
 	for (int i = 0; i < coord->getNumOfTuple(); i++) {
-		coord->data(i)[2] = 0.9999999;
+		coord->data(i)[2] = 1;
 	}
 	m_inputSource->Modified();
 }

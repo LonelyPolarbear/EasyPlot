@@ -7,6 +7,7 @@
 #include "lib04_opengl/XOpenGLBuffer.h"
 #include "lib04_opengl/XOpenGLFramebufferObject.h"
 #include "xrendernode/XGeometryNode.h"
+#include "xrendernode/datasource/xshapeSource.h"
 
 union PickMode_union
 {
@@ -48,58 +49,10 @@ void XRenderPickHandler::LeftButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardM
 	
 	mData->mouseLstPos = getRender()->window2render(windowpos);
 	mData->mouseType = MouseType::left;
-	std::cout << std::dec;
-	XQ::print("XRenderPickHandler LeftButtonPressEvent ", windowpos, mData->mouseLstPos);
+	//std::cout << std::dec;
+	//XQ::print("XRenderPickHandler LeftButtonPressEvent ", windowpos, mData->mouseLstPos);
 
-	auto render = getRender();
-	auto data = render->getRenderObjectData();
-	auto fbo = data->asDerived<XOpenGLFramebufferObject>();
-	render->makeCurrent();
-	XQ::Vec4u object_data;
-	fbo->readPixel(XOpenGLFramebufferObject::Attachment::Color,
-		mData->mouseLstPos[0], mData->mouseLstPos[1], 1, 1,
-		XOpenGL::TextureExternalFormat::RGBA_Integer, XOpenGL::DataType::unsigned_int, object_data.data, 1);
-
-	//实例化ID 模型ID 图元ID //备用32位
-	if (object_data[1] != 0) {
-		auto objectId = object_data[1];
-		auto node = getRender()->getRenderNode3D(objectId);
-		if (node) {
-			if (auto geomNode = node->asDerived< XGeometryNode>()) {
-				if (auto lastNode = mData->lastPressedPickNode.lock()) {
-					if (auto geom_node = lastNode->asDerived<XGeometryNode>()) {
-						geom_node->Attribute->AttrDrawOutline->setValue(false);
-					}
-				}
-				geomNode->Attribute->AttrDrawOutline->setValue(true);
-				//如果原始状态有预选，则需要清除
-				{
-					if (auto n =mData->lastPressedPickNode.lock()) {
-						if (auto geom = n->asDerived<XGeometryNode>()) {
-							geom->State->setFaceState(mData->lastPressedSelectData[2], PrimitiveState::normal);
-						}	
-					}
-				}
-				mData->lastPressedPickNode = node;
-				mData->lastPressedSelectData = object_data;
-				PickMode_union flags;
-				flags.value = object_data[3];
-				if (flags.bits.face) {
-					geomNode->State->setFaceState(object_data[2],PrimitiveState::selected| PrimitiveState::normal);
-					auto s = geomNode->State->getFaceState(object_data[2]);
-					int i=0;
-				}
-			}
-
-			SigRenderNodeSelected(node, object_data);
-
-			//修改节点的颜色
-		}
-		
-		std::cout << "objectId:" << objectId << " primitiveId:" << object_data[2] << std::endl;
-	}
-
-	render->doneCurrent();
+	mainFboObjectSelected(windowpos);
 }
 
 void XRenderPickHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
@@ -112,7 +65,7 @@ void XRenderPickHandler::LeftButtonReleaseEvent(XQ::Vec2i windowpos, XQ::Keyboar
 		return;
 
 	mData->mouseType = MouseType::none;
-	XQ::print("XRenderPickHandler LeftButtonReleaseEvent");
+	//XQ::print("XRenderPickHandler LeftButtonReleaseEvent");
 }
 
 void XRenderPickHandler::MiddleButtonPressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
@@ -159,6 +112,34 @@ void XRenderPickHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::Keyboa
 	if (!isRenderActive())
 		return;
 	mData->mouseType = MouseType::none;
+}
+
+void XRenderPickHandler::LeftButtonDoublePressEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
+{
+	if (event.isStopPropagate()) {
+		return;
+	}
+
+	if (!isRenderActive())
+		return;
+
+	mData->mouseLstPos = getRender()->window2render(windowpos);
+	
+	
+	//XQ::print("XRenderPickHandler LeftButtonPressEvent ", windowpos, mData->mouseLstPos);
+
+	overlayFboObjectSelected(windowpos, 0);
+
+}
+
+void XRenderPickHandler::RightButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
+void XRenderPickHandler::MiddleButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
 }
 
 void XRenderPickHandler::EnterEvent(XEvent& event)
@@ -240,7 +221,7 @@ void XRenderPickHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifie
 	mData->mouseLstPos = getRender()->window2render(windowpos);
 
 	auto render = getRender();
-	auto data = render->getRenderObjectData();
+	auto data = render->getMainRenderTarget();
 	auto fbo = data->asDerived<XOpenGLFramebufferObject>();
 	render->makeCurrent();
 	XQ::Vec4u object_data;
@@ -328,4 +309,95 @@ void XRenderPickHandler::slotRenderActiveChanged(bool active)
 	if (active == false) {
 		mData->mouseType = MouseType::none;
 	}
+}
+
+void XRenderPickHandler::mainFboObjectSelected(XQ::Vec2i windowpos)
+{
+	auto render = getRender();
+	auto mainRenderTarget = render->getMainRenderTarget();
+	auto mainRenderFbo = mainRenderTarget->asDerived<XOpenGLFramebufferObject>();
+
+	render->makeCurrent();
+	{
+		XQ::Vec4u object_data;
+		mainRenderFbo->readPixel(XOpenGLFramebufferObject::Attachment::Color,
+			mData->mouseLstPos[0], mData->mouseLstPos[1], 1, 1,
+			XOpenGL::TextureExternalFormat::RGBA_Integer, XOpenGL::DataType::unsigned_int, object_data.data, 1);
+
+		//实例化ID 模型ID 图元ID //备用32位
+		if (object_data[1] != 0) {
+			auto objectId = object_data[1];
+			auto node = getRender()->getRenderNode3D(objectId);
+			if (node) {
+				if (auto geomNode = node->asDerived< XGeometryNode>()) {
+					if (auto lastNode = mData->lastPressedPickNode.lock()) {
+						if (auto geom_node = lastNode->asDerived<XGeometryNode>()) {
+							geom_node->Attribute->AttrDrawOutline->setValue(false);
+						}
+					}
+					geomNode->Attribute->AttrDrawOutline->setValue(true);
+					//如果原始状态有预选，则需要清除
+					{
+						if (auto n = mData->lastPressedPickNode.lock()) {
+							if (auto geom = n->asDerived<XGeometryNode>()) {
+								geom->State->setFaceState(mData->lastPressedSelectData[2], PrimitiveState::normal);
+							}
+						}
+					}
+					mData->lastPressedPickNode = node;
+					mData->lastPressedSelectData = object_data;
+					PickMode_union flags;
+					flags.value = object_data[3];
+					if (flags.bits.face) {
+						geomNode->State->setFaceState(object_data[2], PrimitiveState::selected | PrimitiveState::normal);
+						auto s = geomNode->State->getFaceState(object_data[2]);
+						int i = 0;
+					}
+				}
+
+				SigRenderNodeSelected(node, object_data);
+
+				//修改节点的颜色
+			}
+			else {
+				SigRenderNodeSelected(nullptr, object_data);
+			}
+
+			std::cout << "objectId:" << objectId << " primitiveId:" << object_data[2] << std::endl;
+		}
+	}
+	render->doneCurrent();
+}
+
+void XRenderPickHandler::overlayFboObjectSelected(XQ::Vec2i windowpos, int lay)
+{
+	auto render = getRender();
+
+	auto overlayRenderTarget_0 = render->getOverlayRenderTarget(lay);
+	auto overlayRenderTargetFbo_0 = overlayRenderTarget_0->asDerived<XOpenGLFramebufferObject>();
+
+	render->makeCurrent();
+	{
+		XQ::Vec4u object_data;
+		overlayRenderTargetFbo_0->readPixel(XOpenGLFramebufferObject::Attachment::Color,
+			mData->mouseLstPos[0], mData->mouseLstPos[1], 1, 1,
+			XOpenGL::TextureExternalFormat::RGBA_Integer, XOpenGL::DataType::unsigned_int, object_data.data, 1);
+		
+		//实例化ID 模型ID 图元ID //备用32位
+		if (object_data[1] != 0) {
+			auto objectId = object_data[1];
+			auto primitiveId= object_data[2];
+			auto node = getRender()->getRenderNode3D(objectId,0);
+			if (node) {
+				if (auto geomNode = node->asDerived< XGeometryNode>()) {
+					auto normal = geomNode->getInput()->getFaceNormal(primitiveId);
+					getRender()->getCamera()->setEyeDir(normal);
+					int i=0;
+				}
+			}
+
+			//std::cout << "objectId:" << objectId << " primitiveId:" << object_data[2] << std::endl;
+		}
+	}
+	render->doneCurrent();
 }

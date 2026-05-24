@@ -93,6 +93,21 @@ void CameraNavigationHandler::RightButtonReleaseEvent(XQ::Vec2i windowpos, XQ::K
 	mData->mouseType = MouseType::none;
 }
 
+void CameraNavigationHandler::LeftButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
+void CameraNavigationHandler::RightButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
+void CameraNavigationHandler::MiddleButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
 void CameraNavigationHandler::EnterEvent(XEvent& event)
 {
 	if (event.isStopPropagate()) {

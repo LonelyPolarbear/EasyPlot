@@ -248,6 +248,34 @@ void XGLWidget::showEvent(QShowEvent* event)
 	return QWidget::showEvent(event);
 }
 
+void XGLWidget::mouseDoubleClickEvent(QMouseEvent* event)
+{
+	if (mRenderWindow) {
+		const QEvent::Type t = event->type();
+		auto modifiers = (uint32_t)event->modifiers();
+		XQ::KeyboardModifier m = (XQ::KeyboardModifier)modifiers;
+		auto eventDispatcher = mRenderWindow->getEventDispatcher();
+		switch (event->button())
+		{
+		case Qt::LeftButton:
+			eventDispatcher->SigLeftButtonDoublePress(mapToGLScreen(event->pos()), m);
+			break;
+
+		case Qt::MidButton:
+			eventDispatcher->SigMiddleButtonDoublePress(mapToGLScreen(event->pos()), m);
+			break;
+
+		case Qt::RightButton:
+			eventDispatcher->SigRightButtonDoublePress(mapToGLScreen(event->pos()), m);
+			break;
+
+		default:
+			break;
+		}
+	}
+	return QWidget::mouseDoubleClickEvent(event);
+}
+
 void XGLWidget::slotPreDefineEvent(XQ::PreDefineEvent event,void* data)
 {
 	if (mRenderWindow) {

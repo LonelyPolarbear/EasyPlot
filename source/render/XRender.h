@@ -6,6 +6,7 @@
 #include <base/xbaserender/baseRender/XBaseRenderCamera.h>
 #include <base/xbaserender/baseRender/XBaseInteractionEventHandler.h>
 #include <dataBase/XDataObject.h>
+#include <dataBase/XDataList.h>
 #include <dataBase/XDataAttribute.h>
 #include <lib00_utilty/XUtilty.h>
 #include "xsignal/XSignal.h"
@@ -30,13 +31,19 @@ public:
 	void setCamera(sptr<XBaseRenderCamera> camera) override;
 	sptr<XBaseRenderCamera> getCamera() const override;
 
-	sptr<XDataBaseObject> getRenderObjectData();
+	sptr<XDataBaseObject> getMainRenderTarget()  override;
+
+	sptr<XDataBaseObject> getOverlayRenderTarget(int lay)  override;
 
 	void render() override;
 
 	void renderGBuffer() override;
 
+	void renderScreen3dNode2Buffer();
+
 	void renderToScreen() override;
+
+	void renderScreen3dNodeBuffer2Screen();
 
 	bool makeCurrent() override;
 
@@ -63,6 +70,8 @@ public:
 
 	void addRenderNode3D(sptr<XBaseRenderNode>) override;
 
+	void addScreenRenderNode3D(sptr<XBaseRenderNode>) override;
+
 	void addRenderNode2D(sptr<XGraphicsItem>);
 
 	void fitView() override;
@@ -71,9 +80,9 @@ public:
 
 	XQ::Vec3f render2window(const XQ::Vec2i& renderPos) override;
 
-	/// <summary>
-	/// 获取窗口坐标系下的视口大小(原点左下角)
-	/// </summary>
+	/**
+	 * @brief 获取窗口坐标系下的视口大小(原点左下角)
+	 */
 	XQ::Recti getConvertViewPort() const override;
 
 	bool isBelongToRender(const XQ::Vec2i& windowPos) const override;
@@ -84,7 +93,24 @@ public:
 
 	sptr<XBaseRenderNode> getRenderNode3D(int id) override;
 
+	sptr<XBaseRenderNode> getRenderNode3D(int id,int lay);
+
 	sptr<XBaseDrawManger> getDrawManger() override;
+
+	/**
+	 * @brief 遍历接口，增加一个坐标轴节点
+	 */
+	sptr<XBaseRenderNode> AddAxisNode();
+
+	/**
+	 * @brief 遍历接口，增加一个立方体节点
+	 */
+	sptr<XBaseRenderNode> AddCubeTestNode();
+
+	/**
+	 * @brief 遍历接口，增加无限平面网格节点
+	 */
+	sptr<XBaseRenderNode> AddInfinitePlaneNode();
 public:
 	XSIGNAL(void(int id, void*/*data*/)) SigUserEvent;																		//用户自定义事件
 	XSIGNAL(void(XQ::PreDefineEvent, void*/*data*/)) SigPredefineEvent;										//预定义业务逻辑事件
@@ -94,7 +120,9 @@ protected:
 	csptr<XAttr_Bool> AttrSmaa;							//是否启用smaa
 	csptr<XAttr_Bool> AttrPostProcess;					//是否启用屏幕后处理，如果不启用直接写入屏幕默认帧缓冲
 	
-	sptr<XGroupRenderNode3d> m_group3D;
+	csptr<XGroupRenderNode3d> mMainFboNodes;
+	csptr<XGroupRenderNode3d> mScreenNodes;						//特指哪些屏幕固定位置，不允许缩放，但支持旋转的节点
+	//csptr<XGeometryNode> mAxisNode;									//坐标轴	
 protected:
 	void updateUbo();
 

@@ -22,10 +22,11 @@ public:
 	sptr<XDataBaseObject> getBiltFbo();
 	sptr<XDataBaseObject> getOverlayFbo(int lay);
 
-	void InitRenderSource();
-	void setRender(sptr<XBaseRender> render);
-	void bilt();
-	void SlotRenderSizeChanged(XQ::Vec2i);
+	void InitRenderSource() override;
+	void setRender(sptr<XBaseRender> render)override;
+	void biltScreen()override;
+	void biltOverlay(int lay)override;
+	void SlotRenderSizeChanged(XQ::Vec2i)override;
 protected:
 	class Internal;
 	std::unique_ptr<Internal> mData;

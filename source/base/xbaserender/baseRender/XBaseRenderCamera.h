@@ -27,6 +27,8 @@ public:
 
 	virtual void setProjectionType(ProjectionType type) =0;
 
+	virtual void setEyeDir(const XQ::Vec3f& dir) =0;
+
 	virtual void rotate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height) =0;
 
 	virtual void translate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height) =0;
@@ -41,7 +43,11 @@ public:
 
 	virtual double getFar() const =0;
 
-	virtual Eigen::Matrix4f projectionMatrix() const=0;
+	virtual Eigen::Matrix4f projectionMatrix() const = 0;
+
+	virtual Eigen::Matrix4f orthoMatrix(float width, float height,float znear,float zfar) const = 0;
+
+	virtual Eigen::Matrix4f perspectiveMatrix(float aspect, float fovy, float znear, float zfar) const = 0;
 
 	virtual Eigen::Matrix4f getViewMatrix() const=0;
 

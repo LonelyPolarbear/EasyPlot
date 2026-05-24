@@ -63,6 +63,8 @@ protected:
 	void wheelEvent(QWheelEvent* event) override;
 	void resizeEvent(QResizeEvent* event) override;
 	void showEvent(QShowEvent* event) override;
+	void mouseDoubleClickEvent(QMouseEvent* event) override;
+
 
 public slots:
 	void slotPreDefineEvent(XQ::PreDefineEvent even,void *data);

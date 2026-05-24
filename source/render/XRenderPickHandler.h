@@ -19,6 +19,9 @@ public:
 	virtual void MiddleButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 	virtual void RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 	virtual void RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void LeftButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void RightButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
+	virtual void MiddleButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 	virtual void EnterEvent(XEvent& event);
 	virtual void LeaveEvent(XEvent& event);
 	virtual void FoucsInEvent(XEvent& event);
@@ -36,6 +39,8 @@ public:
 	XSIGNAL(void(sptr<XBaseRenderNode>,XQ::Vec4i)) SigRenderNodeSelected;														//信号：选中渲染节点
 protected:
 	void slotRenderActiveChanged(bool active) override;
+	void mainFboObjectSelected(XQ::Vec2i windowpos);
+	void overlayFboObjectSelected(XQ::Vec2i windowpos,int lay);
 protected:
 	struct Internal;
 	sptr< Internal> mData;

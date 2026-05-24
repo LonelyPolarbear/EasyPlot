@@ -19,7 +19,7 @@ void main() {
             color += texelFetch(colorTex, pixelCoord, i);
         }
         color = color / float(sampleNum);
-        fragColor = vec4(color.xyz,1);
+        fragColor = color;
     }else{
         fragColor = vec4(1,0,0,1);
     }

@@ -14,6 +14,7 @@ enum class EnableType:unsigned int {
 	CULL_FACE = 0x0B44,							//GL_CULL_FACE
 	PROGRAM_POINT_SIZE = 0x8642,
 	STENCIL_TEST = 0x0B90,						//GL_STENCIL_TEST
+	DEPTH_CLAMP = 0x864F,						//GL_DEPTH_CLAMP
 };
 protected:
 	XOpenGLEnable();

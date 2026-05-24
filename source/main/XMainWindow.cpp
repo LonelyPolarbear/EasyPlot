@@ -15,6 +15,11 @@
 #include <xlog/XLogger.h>
 #include <QThread>
 #include <QTextBlock>
+#include <QFutureWatcher>
+#include <QtConcurrent> 
+
+#include <lib08_freetype/xfreetype.h>
+#include <sharevar/XShareVar.h>
 
 class XMainWindow::Internal {
 public:
@@ -27,6 +32,11 @@ public:
 	QTextEdit* textEdit = nullptr;
 	xsig::xconnector connector;
 
+	QFutureWatcher<void>* mFutureWatcherVoid = nullptr;
+
+	Internal() {
+		mFutureWatcherVoid = new QFutureWatcher<void>();
+	}
 	~Internal() {
 		connector.disconnect();
 	}
@@ -39,6 +49,13 @@ XMainWindow::XMainWindow(QWidget *parent)
     ui->setupUi(this);
 	BuildUI();
 	InitView();
+	AttachSignalSlot();
+
+	QFuture<void> future = QtConcurrent::run([]()->void {
+		auto ss = XShareVar::instance().currentExeDir + "\\sdf\\data.txt";
+		xfreetype::Instance()->LoadGlyphSdf(QString::fromStdString(ss));
+		});
+	mData->mFutureWatcherVoid->setFuture(future);
 }
 
 XMainWindow::~XMainWindow()
@@ -82,6 +99,17 @@ void XMainWindow::BuildUI()
 	InitLeftTab();
 	InitRightTab();
 	InitBotTab();
+}
+
+void XMainWindow::AttachSignalSlot()
+{
+	connect(ui->ActAddCube,&QAction::triggered,this,[this](){
+		mData->plotWidget->slotAddCube();
+	});
+
+	connect(mData->mFutureWatcherVoid, &QFutureWatcher<void>::finished, this,[](){
+		XLOG_INFO("SDF font file loaded!");
+	});
 }
 
 void XMainWindow::InitLeftTab()

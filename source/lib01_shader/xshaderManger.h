@@ -55,7 +55,7 @@ public:
 
 	std::shared_ptr<xshader> getOutlineShader() const;
 
-	void initGLResource();
+	void InitRenderResource();
 protected:
     class Interal;
     std::unique_ptr<Interal> d;

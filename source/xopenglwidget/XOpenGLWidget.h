@@ -30,7 +30,7 @@ public:
 public:
 	bool initOpenglContext();
 
-	void virtual initGLResource(){}
+	void virtual InitRenderResource(){}
 
 	WId nativeHandle();
 

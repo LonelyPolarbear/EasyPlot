@@ -23,6 +23,7 @@ public:
 
 	virtual void InitRenderSource() =0;
 	virtual void setRender(sptr<XBaseRender> render)=0;
-	virtual void bilt() =0;
+	virtual void biltScreen()=0;
+	virtual void biltOverlay(int lay)=0;
 	virtual void SlotRenderSizeChanged(XQ::Vec2i) =0;
 };

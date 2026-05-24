@@ -58,6 +58,24 @@ void XRenderInteractionEventHandler::RightButtonReleaseEvent(XQ::Vec2i, XQ::Keyb
 	//XQ::print("Render RightButtonReleaseEvent");
 }
 
+void XRenderInteractionEventHandler::LeftButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+	if (!isRenderActive())
+		return;
+}
+
+void XRenderInteractionEventHandler::RightButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+	if (!isRenderActive())
+		return;
+}
+
+void XRenderInteractionEventHandler::MiddleButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+	if (!isRenderActive())
+		return;
+}
+
 void XRenderInteractionEventHandler::EnterEvent(XEvent& event)
 {
 	if (!isRenderActive())

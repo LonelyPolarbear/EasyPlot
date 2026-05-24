@@ -232,7 +232,7 @@ std::shared_ptr<xshader> xShaderManger::getOutlineShader() const
 	return d->getOutlineShader();
 }
 
-void xShaderManger::initGLResource()
+void xShaderManger::InitRenderResource()
 {
 	//初始化着色器资源
 	//创建opengl资源

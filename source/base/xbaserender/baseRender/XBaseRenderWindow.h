@@ -3,6 +3,7 @@
 #include <dataBase/XDataObject.h>
 #include <lib04_opengl/XOpenGLContext.h>
 #include <lib01_shader/xshaderManger.h>
+#include <xsignal/XSignal.h>
 class XBaseRender;
 class XBaseRenderWindowEventDispatch;
 class XBASERENDER_API XBaseRenderWindow : public XDataObject {
@@ -39,4 +40,6 @@ public:
 
 	virtual sptr<xShaderManger> getShaderManger()const =0;;
 
+public:
+	XSIGNAL(void()) SigRenderContextCreated;		///< 渲染上下文首次创建完成时发射该信号
 };

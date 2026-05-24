@@ -11,7 +11,10 @@ class XGeometryNode;
 class xcamera;
 class xshader;
 class XRender;
-
+/**
+ * @class  使用深度剥离实现 id拾取
+	@wraning 该类已经丢弃，目前采用MRT直接输出物体ID附件，不需要再次专门拾取渲染
+ */
 class RENDER_API XViewPicker3D :public XDataBaseObject {
 public:
 protected:

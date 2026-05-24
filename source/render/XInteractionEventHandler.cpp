@@ -37,6 +37,15 @@ void XInteractionEventHandler::Init()
 	mData->mConnector.connect(this, &XInteractionEventHandler::SigRightButtonRelease, [this](XQ::Vec2i p, XQ::KeyboardModifier k)
 		{XEvent event; this->RightButtonReleaseEvent(p, k, event); });
 
+	mData->mConnector.connect(this, &XInteractionEventHandler::SigLeftButtonDoublePress, [this](XQ::Vec2i p, XQ::KeyboardModifier k)
+		{XEvent event; this->LeftButtonDoublePressEvent(p, k, event); });
+
+	mData->mConnector.connect(this, &XInteractionEventHandler::SigRightButtonDoublePress, [this](XQ::Vec2i p, XQ::KeyboardModifier k)
+		{XEvent event; this->RightButtonDoublePressEvent(p, k, event); });
+
+	mData->mConnector.connect(this, &XInteractionEventHandler::SigMiddleButtonDoublePress, [this](XQ::Vec2i p, XQ::KeyboardModifier k)
+		{XEvent event; this->MiddleButtonDoublePressEvent(p, k, event); });
+
 	mData->mConnector.connect(this, &XInteractionEventHandler::SigEnter, [this]() {
 			XEvent event;
 			this->EnterEvent(event);
@@ -116,6 +125,21 @@ void XInteractionEventHandler::RightButtonPressEvent(XQ::Vec2i, XQ::KeyboardModi
 
 void XInteractionEventHandler::RightButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
 {
+}
+
+void XInteractionEventHandler::LeftButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
+void XInteractionEventHandler::RightButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
+}
+
+void XInteractionEventHandler::MiddleButtonDoublePressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event)
+{
+
 }
 
 void XInteractionEventHandler::EnterEvent(XEvent& event)

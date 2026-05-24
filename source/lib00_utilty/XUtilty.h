@@ -230,6 +230,14 @@ namespace XQ {
 																																								tranformType::scale }
 																																								);
 
+		static Eigen::Matrix4f extractRotateMat(Eigen::Affine3f transform);
+
+		static Eigen::Matrix4f extractScaleMat(Eigen::Affine3f transform);
+
+		static Eigen::Matrix4f extractRotateMat(const Eigen::Matrix4f& transform);
+
+		static Eigen::Matrix4f extractScaleMat(const Eigen::Matrix4f& transform);
+
 		static Eigen::Matrix4f perspective(float fovy, float aspect, float znaer, float zfar);
 
 		static Eigen::Matrix4f ortho(float left, float right, float bottom, float top, float zNear, float zFar);

@@ -275,7 +275,7 @@ void XOpenGLTexture::setSubData3D(int xoffset, int yoffset, int zoffset, int wid
 	auto alignment = 1;
 	auto oldPackAlignment = XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_alignment, alignment);
 	glTexSubImage3D(d->target, 0, xoffset, yoffset, zoffset, width, height, depth, d->dataFormat, d->datatype, data);
-	glGenerateMipmap(d->target);
+	//glGenerateMipmap(d->target);
 	XOpenGLFuntion::xglPixelStorei(XOpenGL::PixelStoreParameter::unpack_alignment, oldPackAlignment);
 	XOpenGLFuntion::checkGLError();
 }

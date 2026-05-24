@@ -43,6 +43,20 @@ namespace XQ::XAlgo {
 
 	std::array< XQ::Vec3f, 4> getFrustumXOZIntersections(XQ::Vec3f near[4], XQ::Vec3f far[4])
 	{
+		#if 1
+		std::array< XQ::Vec3f, 4> intersections;
+		for (int i = 0; i < 4; i++) {
+			Eigen::Vector3f pA = Eigen::Vector3f(far[i].x(), far[i].y(), far[i].z());
+			Eigen::Vector3f pB = Eigen::Vector3f(near[i].x(), near[i].y(), near[i].z());
+			Eigen::Vector3f m = Eigen::Vector3f(0, 0, 0);
+			if (pA.y() - pB.y() != 0) {
+				m = pA + (pB - pA) * (-pA.y()) / (pB.y() - pA.y());            //交点   
+			}
+			intersections[i] = XQ::Vec3f(m[0],m[1],m[2]); // 左下
+		}
+		return intersections;
+
+		#else
 		std::array< XQ::Vec3f, 4> intersections;
 		// 步骤1：收集所有交点（最多12个）
 		XQ::Vec3f points[12];
@@ -103,6 +117,8 @@ namespace XQ::XAlgo {
 		intersections[2] = XQ::Vec3f(maxPt.x(), 0.0, maxPt.z()); // 右上
 		intersections[3] = XQ::Vec3f(minPt.x(), 0.0, maxPt.z()); // 左上
 		return intersections;
+		#endif
+		
 	}
 
 	extern xalgo_API int next_in_cycle(int x, int m, int n)

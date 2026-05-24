@@ -101,5 +101,7 @@ public:
 	csptr<XAttr_Color>  AttrSelectedColor;
 	csptr<XAttr_Bool>  AttrIsNdc;
 	csptr<XAttr_Bool>  AttrDrawOutline;
+	csptr<XAttr_Bool>  AttrUseNormalCamera;
 	csptr<XRenderNodeSizePolicy> AttrSizePolicy;
+	csptr<XAttr_Bool> AttrIsValidBoundBox; 
 };

@@ -44,6 +44,7 @@ LIST(APPEND LIB_NAMES
 	xrendernode${DLL_DEBUG_POSTFIX}
 	xbaserender${DLL_DEBUG_POSTFIX}
 	xlog${DLL_DEBUG_POSTFIX}
+	xshareVar${DLL_DEBUG_POSTFIX}
 )
 
 

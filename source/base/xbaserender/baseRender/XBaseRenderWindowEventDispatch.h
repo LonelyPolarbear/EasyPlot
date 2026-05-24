@@ -24,6 +24,9 @@ public:
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigMiddleButtonRelease;								//鼠标中键弹起
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigRightButtonPress;										//鼠标右键摁下
 	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigRightButtonRelease;									//鼠标右键弹起
+	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigLeftButtonDoublePress;								//鼠标左键双击摁下
+	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigRightButtonDoublePress;							//鼠标左键双击摁下
+	XSIGNAL(void(XQ::Vec2i, XQ::KeyboardModifier)) SigMiddleButtonDoublePress;						//鼠标左键双击摁下
 
 	XSIGNAL(void()) SigEnter;
 	XSIGNAL(void()) SigLeave;

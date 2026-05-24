@@ -24,6 +24,7 @@ public:
 	void test3();
 	void test4();
 	void test5();
+	void slotAddCube();
 public slots:
 	void slotFitView3D();
 };

@@ -44,6 +44,10 @@ public:
 
 	virtual void renderToScreen() =0;
 
+	virtual sptr<XDataBaseObject> getMainRenderTarget()  =0;
+
+	virtual sptr<XDataBaseObject> getOverlayRenderTarget(int lay)  =0;
+
 	/**
 	 * @brief 切换渲染上下文。
 	 * @return true表示成功切换，false表示失败。
@@ -87,6 +91,11 @@ public:
 	 * @brief 添加渲染节点
 	 */
 	virtual void addRenderNode3D(sptr<XBaseRenderNode>) =0;
+
+	/**
+	 * @brief 添加在屏幕固定位置的渲染节点
+	 */
+	virtual void addScreenRenderNode3D(sptr<XBaseRenderNode>) =0;
 
 	/**
 	 * @brie fitView

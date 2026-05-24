@@ -93,7 +93,7 @@ SET(LIB_NAMES PRIVATE
 				xlog${DLL_DEBUG_POSTFIX}
 				xpython${DLL_DEBUG_POSTFIX}
 				xshareVar${DLL_DEBUG_POSTFIX}
-
+				xfreetype${DLL_DEBUG_POSTFIX}
 	)
 
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin

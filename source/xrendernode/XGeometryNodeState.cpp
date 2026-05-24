@@ -76,6 +76,9 @@ void XGeometryNodeState::setFaceState(int faceIdx, const PrimitiveState& faceSta
 	}
 
 	//TODO 此处直接操作buffer，不合理
+	if (!mData->mFaceStateBuffer) {
+		return;
+	}
 	uint32_t *pbuffer = (uint32_t*)mData->mFaceStateBuffer->map(XOpenGLBuffer::Access::WriteOnly);
 	pbuffer[faceIdx] = (uint32_t)faceState;
 	mData->mFaceStateBuffer->unmap();
@@ -100,6 +103,9 @@ PrimitiveState XGeometryNodeState::getFaceState(int faceIdx)
 	}
 
 	//TODO 此处直接操作buffer，不合理
+	if (!mData->mFaceStateBuffer) {
+		return {};
+	}
 	uint32_t* pbuffer = (uint32_t*)mData->mFaceStateBuffer->map(XOpenGLBuffer::Access::ReadOnly);
 	auto ret =pbuffer[faceIdx];
 	mData->mFaceStateBuffer->unmap();

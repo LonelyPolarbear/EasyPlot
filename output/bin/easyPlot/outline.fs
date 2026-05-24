@@ -19,12 +19,14 @@ layout(binding = 5) uniform sampler2D DepthSample;
 in vec4 in_color;
 in vec2 in_textureCoord;
 flat in int in_instanceID;
+
+uniform vec2 viewPortOrigin;
 /**************************************************************************************************************/
 //如果coord处有一个样本点的id是0，说明就是边界
 bool haObjectZero(ivec2 coordInput,ivec2 dir, int samples,int step)
 {
     for(int i=1;i<=step;++i){
-        ivec2 coord = coordInput+dir*step;
+        ivec2 coord = coordInput+dir*i;
         if (coord.x < 0 || coord.y < 0 || coord.x >= int(screenSize.x) || coord.y >= int(screenSize.y))
             return false;
     
@@ -39,23 +41,15 @@ bool haObjectZero(ivec2 coordInput,ivec2 dir, int samples,int step)
 
 #if 1
 void main() {
-    ivec2 coord = ivec2(gl_FragCoord.xy);
+    //ivec2 coord = ivec2(gl_FragCoord.xy-viewPortOrigin);
+    ivec2 coord = ivec2(gl_FragCoord.xy); //此处不是渲染到屏幕，是自己的离屏buffer，所以不需要偏移
     const int samples = 8;   // 多重采样样本数
 
     //采样深度，和当前深度缓冲区深度比较
     float depth =0;
-    depth = texture(DepthSample, coord).r;
-    #if 0
-     for (int i = 0; i < samples; ++i) {
-       float d = texelFetch(DepthSample, coord, i).r;
-       depth +=d;
-    }
-    depth /=float(samples);
-    #endif
+    depth = texelFetch(DepthSample, coord,0).r;
 
-     //FragColor = vec4(depth,depth,depth, 1.0);   //边缘
-     //return;
-     if(gl_FragCoord.z > depth){
+     if(gl_FragCoord.z > (depth+0.01)){
         discard;
      }
     
@@ -68,6 +62,9 @@ void main() {
         }
     }
 
+    // 如果全为背景，丢弃（不需要绘制）
+    if (count == 0) discard;
+
     vec3 color = vec3(0,0,0);
     for (int i = 0; i < samples; ++i) {
         color.rgb += texelFetch(ColorSample, coord, i).rgb;
@@ -75,8 +72,8 @@ void main() {
 
     color.rgb = color.rgb/float(samples);
     
-    float edgeStrength = float(count) / float(samples);
-    vec3 edgeColor =vec3(1,1,0);
+    float edgeStrength = 1-float(count) / float(samples);
+    vec3 edgeColor =vec3(1,0.843,0);
     if (count<samples) {
         //存在值为0的样本点，说明是0
         vec3 finalColor = mix(color, edgeColor, edgeStrength);

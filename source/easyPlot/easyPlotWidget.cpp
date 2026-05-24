@@ -172,10 +172,10 @@ void easyPlotWidget::render()
 #endif
 }
 
-void easyPlotWidget::initGLResource()
+void easyPlotWidget::InitRenderResource()
 {
 	//创建opengl资源
-	d->shaderManger->initGLResource();		//创建所有需要的shader
+	d->shaderManger->InitRenderResource();		//创建所有需要的shader
 
 	auto cameraLeft = makeShareDbObject<xcamera>();
 

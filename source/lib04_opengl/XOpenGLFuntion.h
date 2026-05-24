@@ -146,7 +146,7 @@ public:
 	/**
 	 * @brief 设置深度比较函数，比较逻辑当前片段的深度值 < 深度缓冲区中对应位置的已有深度值，缓冲中的深度值始终位于右侧
 	 */
-	static void xglDepthFunc(XOpenGL::DepthOrStencilCompFunType fun);
+	static XOpenGL::DepthOrStencilCompFunType xglDepthFunc(XOpenGL::DepthOrStencilCompFunType fun);
 
 	/**
 	 * @brief 设置模板通过测试的比较函数，比较逻辑(ref & mask) < (stencil_value & mask)，缓冲中的模板值始终位于右侧
@@ -181,6 +181,8 @@ public:
 	 * @brief 获取剪切矩形大小
 	 */
 	static  XQ::Recti xGetglScissor();
+
+	static  XQ::Recti xGetglViewport();
 
 	static std::optional<XQ::Vec3i> xGetTextureSize(int textureID, XOpenGL::TextureTarget target);
 
