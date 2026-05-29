@@ -17,7 +17,7 @@ XShapeSource::XShapeSource()
 
 	m_VertexIndexs = makeShareDbObject<XUIntArray>(); m_VertexIndexs->setComponent(1);
 
-	m_InstanceAttay = makeShareDbObject<XFloatArray>(); m_InstanceAttay->setComponent(16);
+	m_InstanceArray = makeShareDbObject<XFloatArray>(); m_InstanceArray->setComponent(16);
 
 	//更新时间戳，确保数据更新
 	Modified();
@@ -25,6 +25,15 @@ XShapeSource::XShapeSource()
 
 XShapeSource::~XShapeSource()
 {
+}
+
+std::shared_ptr<XFloatArray> XShapeSource::getCustomArray(int name)
+{
+	auto iter = m_customArray.find(name);
+	if (iter != m_customArray.end()) {
+		return m_customArray[name];
+	}
+	return nullptr;
 }
 
 XQ::Vec3f XShapeSource::getFaceNormal(uint32_t index)
@@ -46,14 +55,14 @@ XQ::Vec3f XShapeSource::getFaceNormal(uint32_t index)
 
 void XShapeSource::updateInstancedArray()
 {
-	m_InstanceAttay->setNumOfTuple(1);
+	m_InstanceArray->setNumOfTuple(1);
 	//前后
-	m_InstanceAttay->setTuple(0, 
+	m_InstanceArray->setTuple(0, 
 				1,0,0,0,
 				0, 1, 0, 0,
 				0, 0, 1, 0,
 				0,0,0,1);
-	m_InstanceAttay->Modified();
+	m_InstanceArray->Modified();
 }
 
 bool XShapeSource::update()
@@ -83,6 +92,8 @@ bool XShapeSource::update()
 
 		updateVertextCoordArray();
 
+		updateCustomArray();
+
 		setHasUpdated();
 		return true;
 	}
@@ -110,6 +121,10 @@ XQ::BoundBox XShapeSource::getBoundBox()
 
 XQ::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 {
+	//如果是实例化渲染，应该考虑实例化渲染矩阵
+	auto instaceArray = getInstancedArray();
+	auto instanceNum = instaceArray->getNumOfTuple();
+
 	constexpr double limitMax = std::numeric_limits<double>::max();
 	constexpr double limitMin = std::numeric_limits<double>::lowest();;
 	XQ::Vec3d minBound = XQ::Vec3d(limitMax, limitMax, limitMax);
@@ -119,13 +134,19 @@ XQ::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 		return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 
 	float* pData = m_VertexCoord->data(0);
+	Eigen::Affine3f instanceMat = Eigen::Affine3f::Identity();
 	for (int i = 0; i < m_VertexCoord->getNumOfTuple(); i++) {
 
 		Eigen::Vector3f pos = Eigen::Vector3f(pData[i * 3 + 0], pData[i * 3 + 1], pData[i * 3 + 2]);
-		pos = mat * pos;
 
-		minBound = XQ::Vec3d(std::min<double>(minBound.x(), pos.x()), std::min<double>(minBound.y(), pos.y()), std::min<double>(minBound.z(), pos.z()));
-		maxBound = XQ::Vec3d(std::max<double>(maxBound.x(), pos.x()), std::max<double>(maxBound.y(), pos.y()), std::max<double>(maxBound.z(), pos.z()));
+		for (int j = 0; j < instanceNum; j++) {
+			auto p = instaceArray->data(j);
+			memcpy( instanceMat.matrix().data(), p, 16 * sizeof(float));
+			Eigen::Vector3f tmp_pos = instanceMat *mat * pos;
+			minBound = XQ::Vec3d(std::min<double>(minBound.x(), tmp_pos.x()), std::min<double>(minBound.y(), tmp_pos.y()), std::min<double>(minBound.z(), tmp_pos.z()));
+			maxBound = XQ::Vec3d(std::max<double>(maxBound.x(), tmp_pos.x()), std::max<double>(maxBound.y(), tmp_pos.y()), std::max<double>(maxBound.z(), tmp_pos.z()));
+		}
+		//pos = mat * pos;
 	}
 	return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
 }

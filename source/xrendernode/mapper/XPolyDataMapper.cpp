@@ -207,7 +207,7 @@ void XPolyDataMapper::updateData()
 	}
 
 	//数据已更新，刷新时间戳
-	m_UpdateTime.Modified();
+	//m_UpdateTime.Modified();
 }
 
 void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, PrimitveType drawType)
@@ -216,7 +216,7 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 
 	bindSSBO();
 
-	updateData();
+	update();
 
 	m_vao->bind();
 	auto face_index_num = m_Input->getFaceIndexArray()->size();
@@ -243,7 +243,7 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 			glDrawElementsInstanced((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0, instance_num);
 		}
 		else {
-			glDrawElements((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0);
+			//glDrawElements((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0);
 		}
 	}
 
@@ -255,8 +255,9 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 		m_line_ebo->bind();
 		if(instance_num>0)
 			glDrawElementsInstanced((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0, instance_num);
-		else
-			glDrawElements((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0);
+		else {
+			//glDrawElements((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0);
+		}
 	}
 
 	if (hasMode(PolygonMode::point)) {
@@ -268,8 +269,9 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 		m_point_ebo->bind();
 		if(instance_num >0)
 			glDrawElementsInstanced((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0, instance_num);
-		else
-			glDrawElements((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0);
+		else {
+			//glDrawElements((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0);
+		}
 	}
 
 	m_vao->release();
@@ -330,9 +332,7 @@ void XPolyDataMapper::InitRenderResource()
 		m_vertex_InstancedMat->setUsagePattern(XOpenGLBuffer::StaticDraw);
 
 		m_vertex_InstancedMat->create();
-
 	}
-
 
 	//!
 	//! [3] SSBO 初始化
@@ -351,7 +351,6 @@ void XPolyDataMapper::InitRenderResource()
 		m_line_color->create();
 	}
 	
-
 	//!
 	//! [4] 设置顶点属性
 	//!
@@ -418,4 +417,11 @@ void XPolyDataMapper::Init()
 	m_point_ebo = makeShareDbObject<XOpenGLBuffer>();
 
 	m_vertex_InstancedMat = makeShareDbObject<XOpenGLBuffer>();
+}
+
+void XPolyDataMapper::update()
+{
+	updateData();
+	//数据已更新，刷新时间戳
+	m_UpdateTime.Modified();
 }

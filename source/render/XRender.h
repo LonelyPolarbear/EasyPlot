@@ -17,6 +17,7 @@ class XGeometryNode;
 class XGraphicsItem;
 class XRenderNode;
 class XGroupRenderNode3d;
+class XCustomGroupRenderNode3d;
 
 class RENDER_API XRender :public XBaseRender {
 	REGISTER_CLASS_META_DATA(XRender, XBaseRender);
@@ -29,7 +30,10 @@ public:
 	sptr< XBaseRenderWindow> getRenderWindow() const override;
 
 	void setCamera(sptr<XBaseRenderCamera> camera) override;
+
 	sptr<XBaseRenderCamera> getCamera() const override;
+
+	sptr<XBaseRenderCamera> getSceenCamera() const override;
 
 	sptr<XDataBaseObject> getMainRenderTarget()  override;
 
@@ -120,7 +124,7 @@ protected:
 	csptr<XAttr_Bool> AttrSmaa;							//是否启用smaa
 	csptr<XAttr_Bool> AttrPostProcess;					//是否启用屏幕后处理，如果不启用直接写入屏幕默认帧缓冲
 	
-	csptr<XGroupRenderNode3d> mMainFboNodes;
+	csptr<XCustomGroupRenderNode3d> mMainFboNodes;
 	csptr<XGroupRenderNode3d> mScreenNodes;						//特指哪些屏幕固定位置，不允许缩放，但支持旋转的节点
 	//csptr<XGeometryNode> mAxisNode;									//坐标轴	
 protected:

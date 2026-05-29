@@ -23,17 +23,24 @@ public:
     void resetCamera(XQ::BoundBox box);
     void scale(float factor);
     ProjectionType getProjectionType() const;
+
+	void setNear(double n) override;
+	void setFar(double f) override;
 	double getNear() const;
 	double getFar() const;
 
     Eigen::Matrix4f projectionMatrix() const;
     Eigen::Matrix4f getViewMatrix() const;
 
+	Eigen::Affine3f& getCameraFrame() override;
+
 	Eigen::Matrix4f orthoMatrix(float width,float height, float znear, float zfar) const override;
 
 	Eigen::Matrix4f perspectiveMatrix(float aspect, float fovy, float znear, float zfar) const override;
 
-    void setAspect(float aspect);
+	void setAspect(float aspect);
+	double getAspect() const override;
+
     std::vector<XQ::Vec3f> getFrustumInWorld() const;
 
 	float scaleFactorH(float zValue, float screenw) override;

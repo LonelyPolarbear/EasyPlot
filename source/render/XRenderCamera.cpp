@@ -99,6 +99,18 @@ XRenderCamera::ProjectionType XRenderCamera::getProjectionType() const
 		return ProjectionType::perspective;
 }
 
+void XRenderCamera::setNear(double n)
+{
+	mCamera->setNear(n);
+	sigDataChanged(asDerived<XDataObject>(), XDataChangeType::DataModified);
+}
+
+void XRenderCamera::setFar(double f)
+{
+	mCamera->setFar(f);
+	sigDataChanged(asDerived<XDataObject>(), XDataChangeType::DataModified);
+}
+
 double XRenderCamera::getNear() const
 {
 	return mCamera->getZnear();
@@ -119,6 +131,11 @@ Eigen::Matrix4f XRenderCamera::getViewMatrix() const
 	return mCamera->getViewMatrix();
 }
 
+Eigen::Affine3f& XRenderCamera::getCameraFrame()
+{
+	return mCamera->getCameraFrame();
+}
+
 Eigen::Matrix4f XRenderCamera::orthoMatrix(float width, float height, float znear, float zfar) const
 {
 	return XQ::Matrix::ortho(-0.5 * width, 0.5 * width, -0.5 * height, 0.5 * height, znear, zfar);
@@ -132,6 +149,12 @@ Eigen::Matrix4f XRenderCamera::perspectiveMatrix(float aspect, float fovy, float
 void XRenderCamera::setAspect(float aspect)
 {
 	mCamera->setAspect(aspect);
+	sigDataChanged(asDerived<XDataObject>(), XDataChangeType::DataModified);
+}
+
+double XRenderCamera::getAspect() const
+{
+	return mCamera->getAspect();
 }
 
 std::vector<XQ::Vec3f> XRenderCamera::getFrustumInWorld() const

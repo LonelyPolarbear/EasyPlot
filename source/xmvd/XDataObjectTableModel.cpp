@@ -223,7 +223,7 @@ bool XDataObjectTableModel::setData(const QModelIndex& index, const QVariant& va
 				return true;
 			}
 			else {
-				auto str =value.toString().toStdString();
+				std::string str =value.toString().toUtf8().constData();
 				if (XattrToQstringFactory.hasProcessor<0>(attr->getClassName())) {
 					XattrToQstringFactory.process<0>(attr->getClassName(),attr,str);
 					emit dataChanged(index, index);

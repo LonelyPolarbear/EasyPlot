@@ -39,6 +39,10 @@ public:
 
 	virtual ProjectionType getProjectionType() const =0;
 
+	virtual void setNear(double n) = 0;
+
+	virtual void setFar(double n) = 0;
+
 	virtual double getNear() const =0;
 
 	virtual double getFar() const =0;
@@ -51,7 +55,11 @@ public:
 
 	virtual Eigen::Matrix4f getViewMatrix() const=0;
 
-	virtual void setAspect(float aspect)=0;
+	virtual Eigen::Affine3f& getCameraFrame()=0;
+
+	virtual void setAspect(float aspect) = 0;
+
+	virtual double getAspect() const =0;
 
 	virtual std::vector<XQ::Vec3f> getFrustumInWorld() const =0;
 

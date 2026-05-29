@@ -44,9 +44,9 @@ void main()
         gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
     }else{
         if(UseNoramlCamera){
-            gl_Position = ProjectionMat*ViewMat*instancedMat*ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+            gl_Position = ProjectionMat*ViewMat*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
         }else{
-            gl_Position = Single_ProjMat*Single_ViewMat*instancedMat*ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+            gl_Position = Single_ProjMat*Single_ViewMat*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
         }
     }
 }

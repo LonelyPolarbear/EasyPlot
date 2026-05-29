@@ -15,9 +15,9 @@ public:
 	wptr<XOpenGLRenderWindow> renderWindow;
 };
 
-XRenderFontManger::XRenderFontManger(sptr<XOpenGLRenderWindow> renWindow):mData(new Internal)
+XRenderFontManger::XRenderFontManger(sptr<XBaseRenderWindow> renWindow):mData(new Internal)
 {
-	mData->renderWindow = renWindow;
+	mData->renderWindow = renWindow->asDerived<XOpenGLRenderWindow>();
 }
 
 XRenderFontManger::~XRenderFontManger()
@@ -61,6 +61,7 @@ void XRenderFontManger::InitRenderResource()
 			shareContect->makeCurrent();
 			mData->fontTexture->bind();
 			auto array_data = std::get<2>(result);
+
 			mData->fontTexture->texStorage3D(std::get<0>(result), std::get<1>(result), std::get<2>(result).size());
 			for (int i = 0; i < array_data.size(); i++) {
 				mData->fontTexture->setSubData3D(0, 0, i, std::get<0>(result), std::get<1>(result), 1, array_data[i]);
@@ -75,6 +76,13 @@ void XRenderFontManger::InitRenderResource()
 			shareContect->doneCurrent();
 		}
 		mData->fontinitialized = true;
-		//return result;
 		});
+
+	//字体文件描述信息
+
+}
+
+sptr<XDataBaseObject> XRenderFontManger::getFontTexture() const
+{
+	return mData->fontTexture;
 }

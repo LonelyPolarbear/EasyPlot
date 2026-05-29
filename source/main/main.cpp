@@ -1,5 +1,5 @@
-#pragma execution_character_set("utf-8")
-
+//#pragma execution_character_set("utf-8")
+#include <windows.h> // 必须包含这个头文件
 #include <pybind11/embed.h>
 #include <filesystem>
 
@@ -17,6 +17,8 @@
 #include <sharevar/XShareVar.h>
 
 int main(int argc, char** argv) {
+	SetConsoleOutputCP(CP_UTF8);
+
 	XShareVar::instance().currentExeDir = std::filesystem::path(argv[0]).parent_path().string();
 	QApplication a(argc, argv);
 

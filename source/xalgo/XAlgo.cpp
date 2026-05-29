@@ -54,6 +54,21 @@ namespace XQ::XAlgo {
 			}
 			intersections[i] = XQ::Vec3f(m[0],m[1],m[2]); // 左下
 		}
+		XQ::Vec3f minPt = XQ::Vec3f(1e10, 0.0, 1e10); // 初始化为极大值
+		XQ::Vec3f maxPt = XQ::Vec3f(-1e10, 0.0, -1e10); // 初始化为极小值
+		for (int i = 0; i < 4; i++) {
+			
+			minPt = min(minPt, intersections[i]);
+			minPt = min(minPt, intersections[i]);
+			maxPt = max(maxPt, intersections[i]);
+			maxPt = max(maxPt, intersections[i]);
+		}
+		intersections[0] = XQ::Vec3f(minPt.x(), 0.0, minPt.z()); // 左下
+		intersections[1] = XQ::Vec3f(maxPt.x(), 0.0, minPt.z()); // 右下
+		intersections[2] = XQ::Vec3f(maxPt.x(), 0.0, maxPt.z()); // 右上
+		intersections[3] = XQ::Vec3f(minPt.x(), 0.0, maxPt.z()); // 左上
+		return intersections;
+
 		return intersections;
 
 		#else

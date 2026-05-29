@@ -17,7 +17,7 @@
 #include <xrendernode/XGraphicsItem.h>
 #include <lib02_camera/xcamera.h>
 #include <xrendernode/renderNode3d/XInfinitePlaneRenderNode.h>
-#include <xrendernode/renderNode3d/XGroupRenderNode3d.h>
+#include <xrendernode/renderNode3d/XCustomGroupRenderNode3d.h>
 #include <xrendernode/renderNode3d/XFullScreenQuadNode.h>
 #include <xrendernode/renderNode3d/XSmaaFullScreenQuadNode.h>
 #include <xrendernode/datasource/xchamferCubeSource.h>
@@ -35,6 +35,30 @@
 struct XRender::Internal {
 	Internal(XRender *render) {
 		m_camera = makeShareDbObject<XRenderCamera>();
+		m_screenCamera = makeShareDbObject<XRenderCamera>();
+		
+		//屏幕相机 使用正交投影，但是与m_camera保持相同的相机位姿
+
+		m_screenCamera->setProjectionType(XBaseRenderCamera::ProjectionType::ortho);
+		m_screenCamera->setNear(0.1);
+		m_screenCamera->setFar(5000);
+
+		connector.connect(m_camera,&XRenderCamera::sigDataChanged,[this](sptr<XDataObject>, XDataChangeType){
+			auto &cameraFrame= m_camera->getCameraFrame();
+
+			//提取相机旋转部分
+			//提取旋转部分
+			auto rotMat = XQ::Matrix::extractRotateMat(cameraFrame);
+
+			auto &screenCameraFrame = m_screenCamera->getCameraFrame();
+
+			screenCameraFrame.matrix() = rotMat;
+
+			screenCameraFrame.translate(Eigen::Vector3f(0,0,1000));
+
+			m_screenCamera->setAspect(m_camera->getAspect());
+		});
+
 		m_drawManger = makeShareDbObject<XDrawManger>();
 		host = render;
 	}
@@ -48,6 +72,8 @@ struct XRender::Internal {
 		//! 
 		auto camera = m_camera;
 		getUbo()->writeVS_globalCamera( camera->getViewMatrix(), camera->projectionMatrix());
+
+		getUbo()->writeVS_dynamicCamera(m_screenCamera->getViewMatrix(),m_screenCamera->projectionMatrix());
 
 		//!
 		//! 
@@ -73,24 +99,25 @@ struct XRender::Internal {
 	sptr<XBaseRenderNode> AddAxisNode() {
 		sptr<XGeometryNode> cubeNode = makeShareDbObject<XGeometryNode>();
 		cubeNode->setName("Axis");
-		int cube_w = 18;
-		int cube_h = 18;
-		int cube_z = 18;
+		//int cube_w = 18;
+		//int cube_h = 18;
+		//int cube_z = 18;
 		sptr<xchamferCubeSource> cubesource = makeShareDbObject<xchamferCubeSource>();
-		cubeNode->Attribute->AttrSizePolicy->AttrPositionType->setValue(XRenderNodeOriginPositionType::free);
+		cubeNode->Attribute->AttrSizePolicy->AttrPositionType->setValue(XRenderNodeOriginPositionType::fixed);
 		cubeNode->Attribute->AttrSizePolicy->AttrPositionOrien->setValue(XRenderNodeOriginPositionOrien::left_bottom);
 		cubeNode->Attribute->AttrSizePolicy->AttrPositionPos->setValue(XQ::Vec2i(28, 28));
 		cubeNode->Attribute->AttrUseNormalCamera->setValue(false);
 
-		//cubeNode->Attribute->AttrSizePolicy->AttrIsFixedSize->setValue(false);
-		//cubeNode->Attribute->AttrSizePolicy->AttrFixedPixel->setValue(XQ::Vec3i(15, 15, 15));
-		//cubeNode->Attribute->AttrUseNormalCamera->setValue(false);
+		cubeNode->Attribute->AttrSizePolicy->AttrIsFixedSize->setValue(true);
+		cubeNode->Attribute->AttrSizePolicy->AttrFixedPixel->setValue(XQ::Vec3i(15, 15, 15));
+		cubeNode->Attribute->AttrUseNormalCamera->setValue(false);
+
 		cubeNode->setInput(cubesource);
 		cubeNode->setSingleColor(XQ::Vec4f(0, 0, 0, 1));
 		cubeNode->setSelectedColor(XQ::Vec4f(1, 0, 0, 1));
 		cubeNode->setPolygonMode(PolygonMode::all);
 		cubeNode->setColorMode(ColorMode::FaceColor);
-		cubeNode->scale(cube_w, cube_h, cube_z);
+		//cubeNode->scale(cube_w, cube_h, cube_z);
 		cubeNode->State->AttrHasSelect->setValue(true);
 		cubesource->Modified();
 		host->mScreenNodes->addChildRenderNode(cubeNode);
@@ -138,6 +165,7 @@ public:
 	wptr<XOpenGLRenderWindow> m_renderWindow;
 	sptr<XRenderMultiModeInteractionHandler> m_multiModeEventHandler;
 	sptr<XRenderCamera> m_camera;
+	sptr<XRenderCamera> m_screenCamera;			//屏幕相机，和m_camera唯一的区别是前后裁剪平面距离有差异，如果使用m_screenCamera，往往意味着不希望被裁剪
 	sptr<XDrawManger> m_drawManger;
 	xsig::xconnector connector;
 
@@ -233,6 +261,11 @@ void XRender::setCamera(sptr<XBaseRenderCamera> camera)
 sptr<XBaseRenderCamera> XRender::getCamera() const
 {
 	return mData->m_camera;
+}
+
+sptr<XBaseRenderCamera> XRender::getSceenCamera() const
+{
+	return mData->m_screenCamera;
 }
 
 sptr<XDataBaseObject> XRender::getMainRenderTarget()
@@ -331,7 +364,9 @@ void XRender::renderScreen3dNode2Buffer()
 				fbo->release();
 			}
 			auto num = mScreenNodes->getChildRenderNodeCount();
+			#if 0
 			for (int i = 0; i < num; i++) {
+				//对于每一个屏幕绘制的节点
 				int screen_width = 50;		//todo 待优化，暂不处理了
 				int screen_height = 50;
 				auto projectMatrix = getCamera()->orthoMatrix(screen_width, screen_height, 0.1, 5000);
@@ -367,6 +402,34 @@ void XRender::renderScreen3dNode2Buffer()
 				enable->restore();
 				fbo->release();
 			}
+			#else
+
+			auto fbo = layFbo->asDerived<XOpenGLFramebufferObject>();
+			fbo->bind();
+			{
+				GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+				glDrawBuffers(2, drawBuffers);
+			}
+
+			auto enable = makeShareDbObject<XOpenGLEnable>();
+			enable->save();
+			enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
+			auto viewPort = this->getConvertViewPort();
+			XOpenGLFuntion::xglglScissor(viewPort);
+			XOpenGLFuntion::xglViewport(viewPort);
+
+			XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 0), 0);		//alpha设置为0，方便混合
+			XOpenGLFuntion::xglClearColor(XQ::Vec4u(0, 0, 0, 0), 1);
+			XOpenGLFuntion::xglClearDepthStencil(1, 0);
+
+			for (int i = 0; i < num; i++) {
+				//对于每一个屏幕绘制的节点
+				auto node = mScreenNodes->getChildRenderNode(i);
+				node->draw(asDerived<XBaseRender>(), Eigen::Matrix4f::Identity());
+			}
+			enable->restore();
+			fbo->release();
+			#endif
 		}
 }
 
@@ -577,6 +640,10 @@ void XRender::addRenderNode2D(sptr<XGraphicsItem>)
 void XRender::fitView()
 {
 	auto boundbox = computeBoundBox();
+	if (boundbox.zmax == boundbox.zmin) {
+		boundbox.zmin = -1;
+		boundbox.zmax =1;
+	}
 	getCamera()->resetCamera(boundbox);
 }
 

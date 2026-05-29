@@ -157,7 +157,7 @@ void XMainWindow::InitBotTab()
 void XMainWindow::InitView()
 {
 	mData->objectInspector->setRootObject(mData->plotWidget->getRenderWindow());
-	mData->plotWidget->test2();
+	mData->plotWidget->test4();
 }
 
 Q_INVOKABLE void XMainWindow::SlotAddLog(const std::string& log,int level)

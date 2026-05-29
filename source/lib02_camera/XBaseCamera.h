@@ -138,6 +138,10 @@ public:
 		return m_aspect;
 	}
 
+	void setNear(double n);
+
+	void setFar(double f);
+
 	float getZnear() const {
 		return m_znear;
 	}

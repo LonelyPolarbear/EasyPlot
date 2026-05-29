@@ -36,7 +36,12 @@ public:
 	/**
 	 * @brief 获取渲染相机。
 	 */
-	virtual sptr<XBaseRenderCamera> getCamera() const =0;
+	virtual sptr<XBaseRenderCamera> getCamera() const = 0;
+
+	/**
+	 * @brief 获取屏幕相机
+	 */
+	virtual sptr<XBaseRenderCamera> getSceenCamera() const = 0;
 
 	virtual void render() = 0;
 

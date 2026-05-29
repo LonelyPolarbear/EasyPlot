@@ -1,4 +1,4 @@
-﻿
+
 #include "xfreetype.h"
 #include <glew/glew.h>
 #include <stb_image.h>
@@ -319,6 +319,12 @@ void xfreetype::LoadGlyphNormal(const QString& dir)
 void xfreetype::LoadGlyphSdf(const QString& dir)
 {
     LoadGlyphImpl(dir, mCharactersListSdf);
+	s_sdfLoaded = true;
+}
+
+bool xfreetype::isSdfLoaded()
+{
+	return s_sdfLoaded;
 }
 
 unsigned int xfreetype::getGlyphIndex(wchar_t c)
@@ -567,7 +573,9 @@ void xfreetype::LoadGlyphImpl(const QString& dir, std::vector<Character>& charac
 
 xfreetype::xfreetype()
 {
-	std::cout << "FreeType 版本：" << FREETYPE_MAJOR << "."
+	std::string sss = "FreeType版本";
+
+	std::cout << sss << FREETYPE_MAJOR << "."
 		<< FREETYPE_MINOR << "." << FREETYPE_PATCH << std::endl;
 
     if (FT_Init_FreeType(&ft))

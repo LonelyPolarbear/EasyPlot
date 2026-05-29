@@ -239,3 +239,13 @@ Eigen::Vector3f XBaseCmaera::getPosition() const
 {
     return getCameraFrame().translation();
 }
+
+void XBaseCmaera::setNear(double n)
+{
+    m_znear =n;
+}
+
+void XBaseCmaera::setFar(double f)
+{
+    m_zfar = f;
+}

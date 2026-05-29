@@ -6,6 +6,7 @@
 #include <xsignal/XSignal.h>
 class XBaseRender;
 class XBaseRenderWindowEventDispatch;
+class XBaseRenderFontManger;
 class XBASERENDER_API XBaseRenderWindow : public XDataObject {
 	REGISTER_CLASS_META_DATA(XBaseRenderWindow, XDataObject);
 protected:
@@ -39,6 +40,8 @@ public:
 	virtual std::vector<sptr<XBaseRender>> getRenders() const =0;
 
 	virtual sptr<xShaderManger> getShaderManger()const =0;;
+
+	virtual sptr<XBaseRenderFontManger> getFontManger() const =0;
 
 public:
 	XSIGNAL(void()) SigRenderContextCreated;		///< 渲染上下文首次创建完成时发射该信号

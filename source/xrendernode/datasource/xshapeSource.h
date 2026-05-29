@@ -30,7 +30,9 @@ public:
 
 	 std::shared_ptr<XUIntArray> getVertexIndexArray() { return m_VertexIndexs; }
 
-	 std::shared_ptr<XFloatArray> getInstancedArray() { return m_InstanceAttay; }
+	 std::shared_ptr<XFloatArray> getInstancedArray() { return m_InstanceArray; }
+
+	 std::shared_ptr<XFloatArray> getCustomArray(int name);
 
 	 XQ::Vec3f getFaceNormal(uint32_t index);
 
@@ -52,7 +54,9 @@ public:
 
 	 virtual void updateInstancedArray();
 
-	 virtual void updateTextureCoordArray(){};		//目前大部分不需要纹理，因此不使用纯虚函数
+	 virtual void updateTextureCoordArray() {};		//目前大部分不需要纹理，因此不使用纯虚函数
+
+	 virtual void updateCustomArray() {};
 
 	virtual bool update();
 
@@ -72,9 +76,11 @@ public:
 		return m_updateTime > other->m_updateTime;
 	}
 
+	virtual void setHasUpdated() { m_updateTime.Modified(); }
+
 protected:
 	bool isNeedUpdate() { return m_DataModifyTime > m_updateTime; }
-	void setHasUpdated(){m_updateTime.Modified();}
+	//void setHasUpdated(){m_updateTime.Modified();}
 protected:
 	//顶点属性
 	std::shared_ptr<XFloatArray> m_VertexCoord;										//顶点坐标
@@ -93,7 +99,9 @@ protected:
 	//点单元
 	std::shared_ptr<XUIntArray> m_VertexIndexs;										//点索引
 
-	std::shared_ptr<XFloatArray> m_InstanceAttay;										//实例化渲染属性
+	std::shared_ptr<XFloatArray> m_InstanceArray;										//实例化渲染属性
+
+	std::map<int, std::shared_ptr<XFloatArray>> m_customArray;
 
 	XTimeStamp m_updateTime;
 	//仅为了在Init调用update，保证source有数据，

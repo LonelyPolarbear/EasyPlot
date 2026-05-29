@@ -35,6 +35,8 @@ public:
 	
 	void LoadGlyphNormal(const QString& dir);
 	void LoadGlyphSdf(const QString& dir);
+
+	bool isSdfLoaded();
 	unsigned int getGlyphIndex(wchar_t c);
 
 	Character getCharacterNormal(wchar_t c);
@@ -73,4 +75,5 @@ public:
    static void Release();
 private:
    inline static xfreetype* s_instance = nullptr;
+   inline static bool s_sdfLoaded=  false;
 };

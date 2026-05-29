@@ -16,6 +16,7 @@ protected:
 public:
 	void Init() override;
 	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix) override;
+
 protected:
 	sptr<XSphereSource> m_inputSource;
 };

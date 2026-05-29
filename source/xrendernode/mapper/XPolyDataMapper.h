@@ -22,6 +22,8 @@ public:
 
 	void Init() override;
 
+	virtual void update();
+
 	virtual void updateData();
 
 	virtual void draw(sptr<xshader> shader, PolygonMode mode, PrimitveType type);

@@ -27,6 +27,7 @@
 #include <xrendernode/renderNode3d/XSphereRenderNode.h>
 #include <xrendernode/renderNode3d/XTransformGizmoRenderNode.h>
 #include <xrendernode/renderNode3d/XTorusRenderNode.h>
+#include <xrendernode/renderNode3d/XTextRenderNode.h>
 
 #include <lib04_opengl/XOpenGLBuffer.h>
 
@@ -287,12 +288,19 @@ void XEasyPlotWidget::test4()
 {
 	auto render = makeShareDbObject<XRender>();
 	mRenderWindow->addRender(render);
-	sptr<XTransformGizmoRenderNode> Node = makeShareDbObject<XTransformGizmoRenderNode>();
-	auto n1= Node->getClassName();
-	auto n2= Node->baseClassName();
-	
-	render->addRenderNode3D(Node);
+
 	render->getCamera()->AttrCameraStyle->setValue(XRenderCamera::CameraStyle::freely);
+	render->AddAxisNode();
+
+	auto text = makeShareDbObject<XTextRenderNode>();
+	text->Attribute->AttrSizePolicy->AttrIsFixedOrien->setValue(true);
+	text->Attribute->AttrSizePolicy->AttrIsFixedSize->setValue(true);
+	text->Attribute->AttrSizePolicy->AttrPositionType->setValue(XRenderNodeOriginPositionType::fixed);
+	text->Attribute->AttrSizePolicy->AttrPositionPos->setValue(XQ::Vec2i(100,100));
+	text->Attribute->AttrSizePolicy->AttrFixedPixel->setValue(XQ::Vec3i(200, 64, 1));
+	text->Attribute->AttrUseNormalCamera->setValue(false);
+	text->setText(L"XQQ");
+	render->addScreenRenderNode3D(text);
 }
 
 //‘≤ª∑≤‚ ‘

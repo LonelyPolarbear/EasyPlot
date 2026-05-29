@@ -13,6 +13,7 @@
 class XOpenGLContext;
 class XOpenGLBuffer;
 class XRenderWindowEventDispatch;
+class XBaseRenderFontManger;
 
 /**
  * @class RenderWindowUbo
@@ -87,6 +88,8 @@ public:
 	sptr<xShaderManger> getShaderManger()const override;
 
 	sptr< RenderWindowUbo> getRenderWindowUbo() const;
+
+	sptr<XBaseRenderFontManger> getFontManger() const override;
 private:
 	sptr<xShaderManger> m_shaderManger;								//着色器管理器
 	sptr<XOpenGLContext> m_context;										//窗口上下文

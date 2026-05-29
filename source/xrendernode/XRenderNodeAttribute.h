@@ -69,6 +69,7 @@ public:
 
 	csptr<XAttr_Enum<XRenderNodeOriginPositionType>> AttrPositionType;							///< 是否原点在视口固定位置 
 	csptr<XAttr_Bool> AttrIsFixedSize;																							///< 是否大小是固定像素大小
+	csptr<XAttr_Bool> AttrIsFixedOrien;																						///< 是否大小是固定朝向，即是否固定朝向屏幕
 	csptr<XAttr_Enum<XRenderNodeOriginPositionOrien>> AttrPositionOrien;							///< 只有在XRenderNodeOriginPositionType ==fixed时候有效
 	csptr<XAttr_Vec2i> AttrPositionPos;																							///< 只有在XRenderNodeOriginPositionType ==fixed时候有效
 	csptr<XAttr_Vec3i> AttrFixedPixel;																							///< 只有在XRenderNodeOriginPositionType ==fixed时候有效,固定像素大小

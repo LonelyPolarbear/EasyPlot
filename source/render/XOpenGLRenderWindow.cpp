@@ -250,3 +250,8 @@ sptr<RenderWindowUbo> XOpenGLRenderWindow::getRenderWindowUbo() const
 {
 	return m_renderWindowUbo;
 }
+
+sptr<XBaseRenderFontManger> XOpenGLRenderWindow::getFontManger() const
+{
+	return m_renderFontMgr;
+}

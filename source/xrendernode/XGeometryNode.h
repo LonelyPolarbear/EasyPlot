@@ -36,8 +36,6 @@ public:
 	/// </summary>
 	void draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix ) override;
 
-	void drawInstance(sptr<XBaseRender>  render, const Eigen::Matrix4f& parentMatrix) override {};
-
 	//按列矩阵形式存储
 	const float* getMatrix() const;
 
@@ -70,7 +68,7 @@ public:
 
 	sptr<XPolyDataMapper> getPolyDataMapper() const;
 
-	sptr<XPolyDataMapper> getOrCreateMapper();
+	virtual sptr<XPolyDataMapper> getOrCreateMapper();
 
 	void setInput(sptr<XShapeSource> input);
 	sptr<XShapeSource> getInput();
