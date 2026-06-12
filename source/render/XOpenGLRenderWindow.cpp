@@ -21,7 +21,7 @@ void RenderWindowUbo::InitRenderResource()
 	uniformBufferVs->setUsagePattern(XOpenGLBuffer::UsagePattern::StaticDraw);
 	uniformBufferVs->create();
 	uniformBufferVs->bind();
-	uniformBufferVs->allocate(sizeof(Eigen::Matrix4f) * 4);
+	uniformBufferVs->allocate(sizeof(Eigen::Matrix4f) * 6);
 	uniformBufferVs->setBufferBindIdx(1);
 	uniformBufferVs->release();
 
@@ -72,11 +72,19 @@ void RenderWindowUbo::writeVS_globalCamera(const Eigen::Matrix4f& view, const Ei
 	uniformBufferVs->release();
 }
 
-void RenderWindowUbo::writeVS_dynamicCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection)
+void RenderWindowUbo::writeVS_AxisCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection)
 {
 	uniformBufferVs->bind();
 	uniformBufferVs->write(32, view.data(), 16);
 	uniformBufferVs->write(48, projection.data(), 16);
+	uniformBufferVs->release();
+}
+
+void RenderWindowUbo::writeVS_screenCamera(const Eigen::Matrix4f& nearPlaneFrame, const Eigen::Matrix4f& virtualScreenPlane)
+{
+	uniformBufferVs->bind();
+	uniformBufferVs->write(64, nearPlaneFrame.data(), 16);
+	uniformBufferVs->write(80, virtualScreenPlane.data(), 16);
 	uniformBufferVs->release();
 }
 

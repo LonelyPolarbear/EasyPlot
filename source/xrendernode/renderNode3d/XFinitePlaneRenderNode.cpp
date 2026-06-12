@@ -1,29 +1,29 @@
-#include "XInfinitePlaneRenderNode.h"
+#include "XFinitePlaneRenderNode.h"
 #include <lib04_opengl/XOpenGLEnable.h>
 #include <lib01_shader/xshaderManger.h>
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <lib04_opengl/XOpenGLFuntion.h>
 
-XInfinitePlaneRenderNode::XInfinitePlaneRenderNode()
+XFinitePlaneRenderNode::XFinitePlaneRenderNode()
 {
 	mFeedBackBufferVbo = makeShareDbObject<XOpenGLBuffer>();
 	mFeedBackBufferVbo->setBufferType(XOpenGLBuffer::VertexBuffer);
 	mFeedBackBufferVbo->setUsagePattern(XOpenGLBuffer::DynamicDraw);
 }
 
-XInfinitePlaneRenderNode::~XInfinitePlaneRenderNode()
+XFinitePlaneRenderNode::~XFinitePlaneRenderNode()
 {
 }
 
-void XInfinitePlaneRenderNode::createSource()
+void XFinitePlaneRenderNode::createSource()
 {
 	m_inputSource = makeShareDbObject<XCustomSource>();
 	auto coord = m_inputSource->getVertextCoordArray();
 	coord->setNumOfTuple(4);
-	coord->setTuple(0, -1, -1, -1);
-	coord->setTuple(1, 1, -1, -1);
-	coord->setTuple(2, 1, 1, -1);
-	coord->setTuple(3, -1, 1, -1);
+	coord->setTuple(0, -1, -1, 0);
+	coord->setTuple(1, 1, -1, 0);
+	coord->setTuple(2, 1, 1, 0);
+	coord->setTuple(3, -1, 1, 0);
 	coord->Modified();
 
 	auto index = m_inputSource->getFaceIndexArray();
@@ -40,7 +40,7 @@ void XInfinitePlaneRenderNode::createSource()
 	this->setInput(m_inputSource);
 }
 
-void XInfinitePlaneRenderNode::Init()
+void XFinitePlaneRenderNode::Init()
 {
 	XGeometryNode::Init();
 	//XQ_ATTR_ADD_INIT(AttrIsWorldGrid,true);
@@ -58,12 +58,22 @@ void XInfinitePlaneRenderNode::Init()
 	createSource();
 }
 
-void XInfinitePlaneRenderNode::setFrame(const Eigen::Matrix4f& frame)
+void XFinitePlaneRenderNode::setFrame(const Eigen::Matrix4f& frame)
 {
-	m_planeFrame = frame;
+	m_planeAffineFrame.matrix() = frame;
 }
 
-void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix)
+Eigen::Affine3f& XFinitePlaneRenderNode::getGraidAffine()
+{
+	return m_planeAffineFrame;
+}
+
+const Eigen::Affine3f& XFinitePlaneRenderNode::getGraidAffine() const
+{
+	return m_planeAffineFrame;
+}
+
+void XFinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix)
 {
 	auto glEnableObj = makeShareDbObject<XOpenGLEnable>();
 	glEnableObj->save();
@@ -72,16 +82,10 @@ void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matri
 
 	auto shader = getShaderManger()->getGridShader3D();
 	shader->setObjectID(getID());
-	if (isFeedbackInit == false) {
-		shader->addFeedbackShader({ "fragPos3D" });
-		isFeedbackInit = true;
-		createFeedBack();
-	}
-	
 
 	shader->use();
-	shader->setMat4("gridPlaneMat", m_planeFrame);
-	shader->setBool("u_isInfinite", true);
+	shader->setMat4("gridPlaneMat", m_planeAffineFrame.matrix());
+	shader->setBool("u_isInfinite", false);
 	shader->setFloat("gridSpace", AttrGridSpace->getValue());
 	shader->setFloat("mainGridDensity", AttrMainGridDensity->getValue());
 	shader->setFloat("subGridDensity", AttrSubGridDensity->getValue());
@@ -92,8 +96,6 @@ void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matri
 	this->setPolygonMode(PolygonMode::face);
 
 	//需要使用
-	mFeedBackBuffer->bind();																											 //------------------------------ 激活
-	glBeginTransformFeedback(GL_TRIANGLES);                                                                           //------------------------------ 启动
 	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 	glEnableObj->enable(XOpenGLEnable::EnableType::DEPTH_CLAMP);
 	auto last = XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_LEQUAL);
@@ -102,39 +104,15 @@ void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matri
 	shader->unUse();
 
 	glEnableObj->restore();
-
-	glEndTransformFeedback();
-
-	//mFeedBackBufferVbo->bind();
-	//auto datadd = mFeedBackBufferVbo->map2cpu();
-	//auto ss = makeShareDbObject<XDataArray1D<XQ::Vec3f>>();
-	//ss->setNumOfTuple(6);
-	//ss->memCopy(datadd);
-
-	//sigEndRender(this->asDerived<XRenderNode>());
 }
 
-void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
+void XFinitePlaneRenderNode::draw(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
 {
 	auto enable = makeShareDbObject<XOpenGLEnable>();
 
 	XGeometryNode::draw(render, s, parentMatrix);
 }
 
-void XInfinitePlaneRenderNode::createFeedBack()
-{
-	mFeedBackBufferVbo->create();
-	mFeedBackBufferVbo->bind();
-	mFeedBackBufferVbo->allocate(18 * 3 * 4);
-	mFeedBackBufferVbo->release();
-
-	mFeedBackBuffer =makeShareDbObject<XOpenGLBuffer>();
-	mFeedBackBuffer->setBufferType(XOpenGLBuffer::TransformFeedbackBuffer);
-	mFeedBackBuffer->create();
-	mFeedBackBuffer->bind();
-	
-	mFeedBackBuffer->setFeedbackBufferBindIdx(0, mFeedBackBufferVbo);
-}
 
 //void XInfinitePlaneRenderNode::setRect(std::vector<XQ::Vec3f> points)
 //{
@@ -147,12 +125,8 @@ void XInfinitePlaneRenderNode::createFeedBack()
 //	m_inputSource->Modified();
 //}
 
-sptr<XOpenGLBuffer> XInfinitePlaneRenderNode::getFeedBackBuffer()
-{
-	return mFeedBackBufferVbo;
-}
 
-Eigen::Matrix4f XInfinitePlaneRenderNode::getFrame() const
+Eigen::Matrix4f XFinitePlaneRenderNode::getFrame() const
 {
-	return m_planeFrame;
+	return m_planeAffineFrame.matrix();
 }

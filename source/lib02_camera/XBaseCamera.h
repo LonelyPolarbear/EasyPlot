@@ -71,6 +71,16 @@ public:
 	XQ::Vec3f getNearPointInWorld() const;
 
 	XQ::Vec3f getFarPointInWorld() const;
+
+	/**
+	 * @brief 获取视锥近平面在相机坐标系的矩形大小(宽 高)
+	 */
+	 XQ::Vec2f getNearSizeInCamera() const;
+	
+	/**
+	 * @brief 获取视锥远平面在相机坐标系的矩形大小(宽 高)
+	 */
+	 XQ::Vec2f getFarSizeInCamera() const;
 public:
 	void setRotateCenter(float x, float y, float z);
 

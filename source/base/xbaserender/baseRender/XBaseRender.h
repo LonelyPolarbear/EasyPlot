@@ -10,6 +10,7 @@
 class XBaseRenderNode;
 class XBaseRenderWindow;
 class XBaseRenderCamera;
+class XBaseRenderScreenCamera;
 class XBaseInteractionEventHandler;
 class XBaseDrawManger;
 class XBASERENDER_API XBaseRender : public XRenderPort {
@@ -41,7 +42,7 @@ public:
 	/**
 	 * @brief 获取屏幕相机
 	 */
-	virtual sptr<XBaseRenderCamera> getSceenCamera() const = 0;
+	virtual sptr<XBaseRenderScreenCamera> getSceenCamera() const = 0;
 
 	virtual void render() = 0;
 

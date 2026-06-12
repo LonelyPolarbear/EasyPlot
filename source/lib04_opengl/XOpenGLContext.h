@@ -59,6 +59,7 @@ public:
 
 	void reset();
 
+	std::string getContexMsg() const;
 protected:
 	bool createTempContext();
 	void setNativeContext(void* context);
@@ -66,6 +67,8 @@ protected:
 	//平台原生上下文
 	void* nativeContext = nullptr;
 	void* nativeDisplay = nullptr;
+
+	std::string contextMsg;						//上下文信息字符串
 
 	std::shared_ptr<XOpenGLShareContext> shareContext;
 };

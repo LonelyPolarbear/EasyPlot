@@ -1,9 +1,9 @@
 //顶点着色器
 #version 430 core
-layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
-layout (location = 2) in vec3 aColor;
-layout (location = 3) in vec2 aTextureCoord;
+layout (location = 0) in vec3 aPos;                               //位置
+layout (location = 1) in vec3 aNormal;                         //法线
+layout (location = 2) in vec3 aColor;                            //颜色
+layout (location = 3) in vec2 aTextureCoord;              //纹理坐标
 
 layout (location = 4) in vec4 aInstanceMatC0l1;         //实例化渲染第一列
 layout (location = 5) in vec4 aInstanceMatC0l2;         //实例化渲染第二列
@@ -24,12 +24,18 @@ layout (std140, binding = 1) uniform Matrices
     mat4 ProjectionMat;
     mat4 Single_ViewMat;
     mat4 Single_ProjMat;
+    mat4 NearplaneFrame;
+    mat4 VirtualScreenFrame;
 };
 
-//uniform mat4 Single_ViewMat;
-//uniform mat4 Single_ProjMat;
-uniform bool UseNoramlCamera;
+//uniform bool UseNoramlCamera;
 uniform bool IsInstancedDraw;
+
+const int CAMERA_MODE_3D_NORMAL=1;
+const int CAMERA_MODE_3D_AXIS=2;
+const int CAMERA_MODE_2D=3;
+uniform int cameraMode;
+
 void main()
 {	 
     in_color = vec4(aColor,1);
@@ -43,10 +49,12 @@ void main()
     if(isNdc){
         gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
     }else{
-        if(UseNoramlCamera){
+        if(cameraMode ==CAMERA_MODE_3D_NORMAL ){
             gl_Position = ProjectionMat*ViewMat*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
-        }else{
+        }else  if(cameraMode ==CAMERA_MODE_3D_AXIS ){
             gl_Position = Single_ProjMat*Single_ViewMat*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        }else{
+            gl_Position = ProjectionMat*NearplaneFrame*VirtualScreenFrame*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
         }
     }
 }

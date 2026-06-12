@@ -41,23 +41,125 @@ namespace XQ::XAlgo {
 		return out;
 	}
 
-	std::array< XQ::Vec3f, 4> getFrustumXOZIntersections(XQ::Vec3f near[4], XQ::Vec3f far[4])
+	int next_in_cycle(int x, int m, int n)
 	{
-		#if 1
+		// 可选：确保输入合法（调试时有用）
+		//assert(m <= n);
+		//assert(x >= m && x <= n);
+
+		int length = n - m + 1;                // 区间长度
+		return m + (x - m + 1) % length;
+	}
+
+	std::optional<XQ::Vec3f> intersectLinePlane(const XQ::Vec3f& planePoint, const XQ::Vec3f& planeNormal, const XQ::Vec3f& linePoint, const XQ::Vec3f& lineDir)
+	{
+		std::optional<XQ::Vec3f> result;
+		const double EPSILON = 1e-8; // 浮点数误差容忍度
+		Eigen::Vector3f planePoint_(planePoint[0], planePoint[1], planePoint[2]);
+		Eigen::Vector3f linePoint_(linePoint[0], linePoint[1], linePoint[2]);
+
+		// 1. 计算分母：法线与直线方向的点乘
+		Eigen::Vector3f lineDir_(lineDir[0], lineDir[1], lineDir[2]);
+		Eigen::Vector3f planeNormal_(planeNormal[0], planeNormal[1], planeNormal[2]);
+
+		planeNormal_.normalize();
+		lineDir_.normalize();
+
+		double denom = lineDir_.dot(planeNormal_);
+
+		// 2. 判断是否平行
+		if (std::abs(denom) < EPSILON) {
+			return std::nullopt;
+		}
+
+		// 3. 计算参数 t
+		Eigen::Vector3f diff = planePoint_ - linePoint_;
+		double t = diff.dot(planeNormal_) / denom;
+
+		// 4. 计算交点坐标
+		Eigen::Vector3f intersection;
+		intersection[0] = linePoint_[0] + t * lineDir_[0];
+		intersection[1] = linePoint_[1] + t * lineDir_[1];
+		intersection[2] = linePoint_[2] + t * lineDir_[2];
+
+		result = XQ::Vec3f(intersection[0], intersection[1], intersection[2]);
+		return result;
+	}
+
+	std::array< XQ::Vec3f, 4> getFrustumYOZIntersections(XQ::Vec3f near[4], /* near平面 [N1, N2, N3, N4] (按顺序) */ XQ::Vec3f far[4] /* far平面 [F1, F2, F3, F4] (按顺序) */)
+	{
 		std::array< XQ::Vec3f, 4> intersections;
 		for (int i = 0; i < 4; i++) {
 			Eigen::Vector3f pA = Eigen::Vector3f(far[i].x(), far[i].y(), far[i].z());
 			Eigen::Vector3f pB = Eigen::Vector3f(near[i].x(), near[i].y(), near[i].z());
 			Eigen::Vector3f m = Eigen::Vector3f(0, 0, 0);
-			if (pA.y() - pB.y() != 0) {
+			if (abs(pA.x() - pB.x())> 0.01) {
+				m = pA + (pB - pA) * (-pA.x()) / (pB.x() - pA.x());            //交点   
+			}
+			intersections[i] = XQ::Vec3f(m[0], m[1], m[2]); // 左下
+		}
+		XQ::Vec3f minPt = XQ::Vec3f(0.0, 1e10, 1e10); // 初始化为极大值
+		XQ::Vec3f maxPt = XQ::Vec3f(0.0, -1e10, -1e10); // 初始化为极小值
+		for (int i = 0; i < 4; i++) {
+
+			minPt = min(minPt, intersections[i]);
+			minPt = min(minPt, intersections[i]);
+			maxPt = max(maxPt, intersections[i]);
+			maxPt = max(maxPt, intersections[i]);
+		}
+		intersections[0] = XQ::Vec3f(0,minPt.y(), minPt.z()); // 左下
+		intersections[1] = XQ::Vec3f(0,maxPt.y(), minPt.z()); // 右下
+		intersections[2] = XQ::Vec3f(0,maxPt.y(), maxPt.z()); // 右上
+		intersections[3] = XQ::Vec3f(0,minPt.y(), maxPt.z()); // 左上
+		return intersections;
+	}
+
+	std::array< XQ::Vec3f, 4> getFrustumXOYIntersections(XQ::Vec3f near[4], /* near平面 [N1, N2, N3, N4] (按顺序) */ XQ::Vec3f far[4] /* far平面 [F1, F2, F3, F4] (按顺序) */)
+	{
+		std::array< XQ::Vec3f, 4> intersections;
+		for (int i = 0; i < 4; i++) {
+			Eigen::Vector3f pA = Eigen::Vector3f(far[i].x(), far[i].y(), far[i].z());
+			Eigen::Vector3f pB = Eigen::Vector3f(near[i].x(), near[i].y(), near[i].z());
+			Eigen::Vector3f m = Eigen::Vector3f(0, 0, 0);
+			if (abs(pA.z() - pB.z()) > 0.01) {
+				m = pA + (pB - pA) * (-pA.z()) / (pB.z() - pA.z());            //交点   
+			}
+			intersections[i] = XQ::Vec3f(m[0], m[1], m[2]); // 左下
+		}
+		XQ::Vec3f minPt = XQ::Vec3f(1e10, 1e10, 0); // 初始化为极大值
+		XQ::Vec3f maxPt = XQ::Vec3f(-1e10, -1e10, 0); // 初始化为极小值
+		for (int i = 0; i < 4; i++) {
+
+			minPt = min(minPt, intersections[i]);
+			minPt = min(minPt, intersections[i]);
+			maxPt = max(maxPt, intersections[i]);
+			maxPt = max(maxPt, intersections[i]);
+		}
+		intersections[0] = XQ::Vec3f(minPt.x(), minPt.y(), 0); // 左下
+		intersections[1] = XQ::Vec3f(maxPt.x(), minPt.y(), 0); // 右下
+		intersections[2] = XQ::Vec3f(maxPt.x(), maxPt.y(), 0); // 右上
+		intersections[3] = XQ::Vec3f(minPt.x(), maxPt.y(), 0); // 左上
+		return intersections;
+
+	}
+
+	std::array< XQ::Vec3f, 4> getFrustumXOZIntersections(XQ::Vec3f near[4], XQ::Vec3f far[4])
+	{
+#if 1
+		std::array< XQ::Vec3f, 4> intersections;
+		for (int i = 0; i < 4; i++) {
+			Eigen::Vector3f pA = Eigen::Vector3f(far[i].x(), far[i].y(), far[i].z());
+			Eigen::Vector3f pB = Eigen::Vector3f(near[i].x(), near[i].y(), near[i].z());
+			Eigen::Vector3f m = Eigen::Vector3f(0, 0, 0);
+			if (abs(pA.y() - pB.y()) > 0.01) {
 				m = pA + (pB - pA) * (-pA.y()) / (pB.y() - pA.y());            //交点   
 			}
-			intersections[i] = XQ::Vec3f(m[0],m[1],m[2]); // 左下
+			intersections[i] = XQ::Vec3f(m[0], m[1], m[2]); // 左下
 		}
 		XQ::Vec3f minPt = XQ::Vec3f(1e10, 0.0, 1e10); // 初始化为极大值
 		XQ::Vec3f maxPt = XQ::Vec3f(-1e10, 0.0, -1e10); // 初始化为极小值
 		for (int i = 0; i < 4; i++) {
-			
+
 			minPt = min(minPt, intersections[i]);
 			minPt = min(minPt, intersections[i]);
 			maxPt = max(maxPt, intersections[i]);
@@ -71,7 +173,7 @@ namespace XQ::XAlgo {
 
 		return intersections;
 
-		#else
+#else
 		std::array< XQ::Vec3f, 4> intersections;
 		// 步骤1：收集所有交点（最多12个）
 		XQ::Vec3f points[12];
@@ -132,19 +234,9 @@ namespace XQ::XAlgo {
 		intersections[2] = XQ::Vec3f(maxPt.x(), 0.0, maxPt.z()); // 右上
 		intersections[3] = XQ::Vec3f(minPt.x(), 0.0, maxPt.z()); // 左上
 		return intersections;
-		#endif
-		
+#endif
 	}
 
-	extern xalgo_API int next_in_cycle(int x, int m, int n)
-	{
-		// 可选：确保输入合法（调试时有用）
-		//assert(m <= n);
-		//assert(x >= m && x <= n);
 
-		int length = n - m + 1;                // 区间长度
-		return m + (x - m + 1) % length;
-	}
 
-	
 }

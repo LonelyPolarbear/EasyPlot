@@ -29,9 +29,15 @@ layout (std140, binding = 1) uniform Matrices
     mat4 ProjectionMat;
     mat4 Single_ViewMat;
     mat4 Single_ProjMat;
+    mat4 NearplaneFrame;
+    mat4 VirtualScreenFrame;
 };
 
-uniform bool UseNoramlCamera;
+const int CAMERA_MODE_3D_NORMAL=1;
+const int CAMERA_MODE_3D_AXIS=2;
+const int CAMERA_MODE_2D=3;
+uniform int cameraMode;
+
 uniform bool IsInstancedDraw;
 void main()
 {	 
@@ -63,10 +69,12 @@ void main()
     if(isNdc){
         gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
     }else{
-        if(UseNoramlCamera){
+        if(cameraMode ==CAMERA_MODE_3D_NORMAL ){
             gl_Position = ProjectionMat*ViewMat*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
-        }else{
+        }else  if(cameraMode ==CAMERA_MODE_3D_AXIS ){
             gl_Position = Single_ProjMat*Single_ViewMat*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        }else{
+            gl_Position = ProjectionMat*NearplaneFrame*VirtualScreenFrame*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
         }
     }
 }

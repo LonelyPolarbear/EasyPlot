@@ -4,6 +4,7 @@
 #include <dataBase/XDataAttribute.h>
 #include <QColor>
 #include <xrendernode/XRenderNodeAttribute.h>
+#include <xrendernode/datasource/xtextSource.h>
 
 XDataObjectTableModel* getXDataObjectTableModel(const QModelIndex& index) {
 	return const_cast<XDataObjectTableModel*>(qobject_cast<const XDataObjectTableModel*>(index.model()));
@@ -237,4 +238,12 @@ void XMVD_API InitXAttrItemDelegate()
 	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionOrien>>(), CreateEditor_XAttr_Enum<XRenderNodeOriginPositionOrien>);
 	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionOrien>>(), SetEditorData_XAttr_Enum<XRenderNodeOriginPositionOrien>);
 	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionOrien>>(), SetModelData_XAttr_Enum);
+
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<HAlign>>(), CreateEditor_XAttr_Enum<HAlign>);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<HAlign>>(), SetEditorData_XAttr_Enum<HAlign>);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<HAlign>>(), SetModelData_XAttr_Enum);
+
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<VAlign>>(), CreateEditor_XAttr_Enum<VAlign>);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<VAlign>>(), SetEditorData_XAttr_Enum<VAlign>);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<VAlign>>(), SetModelData_XAttr_Enum);
 }

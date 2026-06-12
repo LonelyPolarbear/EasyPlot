@@ -6,21 +6,21 @@
 /// <summary>
 /// 无限平面渲染节点
 /// </summary>
-class XInfinitePlaneRenderNode : public XGeometryNode {
-	REGISTER_CLASS_META_DATA(XInfinitePlaneRenderNode, XGeometryNode);
+class XFinitePlaneRenderNode : public XGeometryNode {
+	REGISTER_CLASS_META_DATA(XFinitePlaneRenderNode, XGeometryNode);
 protected:
-	XInfinitePlaneRenderNode();
-	virtual ~XInfinitePlaneRenderNode();
+	XFinitePlaneRenderNode();
+	virtual ~XFinitePlaneRenderNode();
 protected:
 	void createSource();
 public:
 	void Init() override;
 	void setFrame(const Eigen::Matrix4f& frame);
+	Eigen::Affine3f& getGraidAffine();
+	const Eigen::Affine3f& getGraidAffine() const;
 	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix) override;
 	void draw(sptr<XBaseRender> render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
-	void createFeedBack();
 	//void setRect(std::vector<XQ::Vec3f> points);
-	sptr<XOpenGLBuffer> getFeedBackBuffer();
 	Eigen::Matrix4f getFrame() const;
 public:
 	csptr<XAttr_Float> AttrGridSpace;										///< 网格间距
@@ -32,7 +32,7 @@ public:
 	csptr<XAttr_Float> AttrMainGridAlphaFactor;						///< 主网格透明度叠加系数
 protected:
 	sptr<XCustomSource> m_inputSource;
-	Eigen::Matrix4f m_planeFrame = Eigen::Matrix4f::Identity();					//平面在世界坐标系下的位姿
+	Eigen::Affine3f m_planeAffineFrame = Eigen::Affine3f::Identity();
 	bool isFeedbackInit = false;
 	sptr<XOpenGLBuffer> mFeedBackBuffer;
 	sptr<XOpenGLBuffer> mFeedBackBufferVbo;

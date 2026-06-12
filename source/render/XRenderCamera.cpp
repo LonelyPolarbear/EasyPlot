@@ -1,5 +1,6 @@
 #include "XRenderCamera.h"
 #include <lib02_camera/XTrackBallCamera.h>
+#include <xalgo/XAlgo.h>
 #include "XRender.h"
 
 XRenderCamera::XRenderCamera()
@@ -146,6 +147,32 @@ Eigen::Matrix4f XRenderCamera::perspectiveMatrix(float aspect, float fovy, float
 	return XQ::Matrix::perspective(fovy, aspect, znear, zfar);
 }
 
+Eigen::Matrix4f XRenderCamera::getNearFrame(sptr<XBaseRender> render) const
+{
+	//在相机的近平面中心创建一个坐标系，X轴向左，Y轴向上，近平面宽对应视口宽 近平面高对应视口高度
+	auto nearSize = getNearSizeInCamera();
+	auto viewport = render->getConvertViewPort();
+	auto viewport_w = viewport[2];
+	auto viewport_h = viewport[3];
+
+	auto scale_x = (float)viewport_w / nearSize[0];
+	auto scale_y = (float)viewport_h / nearSize[1];
+	Eigen::Affine3f frame = Eigen::Affine3f::Identity();
+	frame.translate(Eigen::Vector3f(0,0,-getNear()));
+	frame.scale(Eigen::Vector3f(1./scale_x,1./scale_y,1));
+	return frame.matrix();
+}
+
+XQ::Vec2f XRenderCamera::getNearSizeInCamera() const
+{
+	return mCamera->getNearSizeInCamera();
+}
+
+XQ::Vec2f XRenderCamera::getFarSizeInCamera() const
+{
+	return mCamera->getFarSizeInCamera();
+}
+
 void XRenderCamera::setAspect(float aspect)
 {
 	mCamera->setAspect(aspect);
@@ -205,6 +232,47 @@ Eigen::Vector3f XRenderCamera::ComputeWorldToCamera(Eigen::Vector3f input) const
 Eigen::Vector3f XRenderCamera::ComputeCameraToWorld(Eigen::Vector3f input) const
 {
 	return mCamera->ComputeCameraToWorld(input);
+}
+
+std::array< XQ::Vec3f, 4> XRenderCamera::getFrustumIntersections(const Eigen::Matrix4f& m, int type/*0 1 2 表示 X Y Z平面*/)
+{
+
+	auto points =getFrustumInWorld();		//前4个是近平面的点 后四个是远平面的点
+	//将这些点转换到待绘制网格的坐标系下
+	Eigen::Affine3f affine;
+	affine.matrix() = m.inverse();
+	
+	for (auto& s : points) {
+		auto t1 =affine*Eigen::Vector3f(s[0],s[1],s[2]);
+		s[0] = t1[0];
+		s[1] = t1[1];
+		s[2] = t1[2];
+	}
+	XQ::Vec3f nearPoint[4];
+	XQ::Vec3f fatPoint[4];
+
+	nearPoint[0] = points[0];
+	nearPoint[1] = points[1];
+	nearPoint[2] = points[2];
+	nearPoint[3] = points[3];
+
+	fatPoint[0] = points[4];
+	fatPoint[1] = points[5];
+	fatPoint[2] = points[6];
+	fatPoint[3] = points[7];
+
+	std::array< XQ::Vec3f, 4> result;
+	if (type == 0) {
+		result = XQ::XAlgo::getFrustumYOZIntersections(nearPoint,fatPoint);
+	}
+	if (type == 1) {
+		result = XQ::XAlgo::getFrustumXOZIntersections(nearPoint, fatPoint);
+	}
+	if (type == 2) {
+		result = XQ::XAlgo::getFrustumXOYIntersections(nearPoint, fatPoint);
+	}
+	
+	return result;
 }
 
 void XRenderCamera::render(sptr<XRender> render)

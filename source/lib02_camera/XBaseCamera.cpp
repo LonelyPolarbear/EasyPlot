@@ -76,6 +76,34 @@ XQ::Vec3f XBaseCmaera::getFarPointInWorld() const
 }
 
 
+XQ::Vec2f XBaseCmaera::getNearSizeInCamera() const
+{
+    if (m_type == cameraType::ortho) {
+        return XQ::Vec2f(m_height*m_aspect,m_height);
+    }
+    else {
+		float half_fovy =XQ::Matrix::radian(0.5 * m_fovy);
+		float tan_half_fovy = tanf(half_fovy);
+        float half_height = tan_half_fovy*m_znear;
+        float half_width = m_aspect * half_height;
+        return XQ::Vec2f(2*half_width, 2*half_height);
+    }
+}
+
+XQ::Vec2f XBaseCmaera::getFarSizeInCamera() const
+{
+	if (m_type == cameraType::ortho) {
+		return XQ::Vec2f(m_height * m_aspect, m_height);
+	}
+	else {
+		float half_fovy = XQ::Matrix::radian(0.5 * m_fovy);
+		float tan_half_fovy = tanf(half_fovy);
+		float half_height = tan_half_fovy * m_zfar;
+		float half_width = m_aspect * half_height;
+		return XQ::Vec2f(2 * half_width, 2 * half_height);
+	}
+}
+
 Eigen::Matrix4f XBaseCmaera::getViewMatrix() const
 {
     return getCameraFrame().inverse().matrix();

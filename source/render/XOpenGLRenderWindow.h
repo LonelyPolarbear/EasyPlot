@@ -29,7 +29,9 @@ public:
 
 	void writeVS_globalCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection);
 
-	void writeVS_dynamicCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection);
+	void writeVS_AxisCamera(const Eigen::Matrix4f& view, const Eigen::Matrix4f& projection);
+
+	void writeVS_screenCamera(const Eigen::Matrix4f& nearPlaneFrame, const Eigen::Matrix4f& virtualScreenPlane);
 
 	void writeVS2d(const Eigen::Matrix4f& virtualWorldFrame, const Eigen::Matrix4f& sceneFrameInVirtualWorld);
 

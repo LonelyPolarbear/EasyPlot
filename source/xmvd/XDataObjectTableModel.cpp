@@ -123,8 +123,8 @@ QVariant XDataObjectTableModel::data(const QModelIndex& index, int role) const
 
 	if (col == 0) {
 		if (role == Qt::DisplayRole) {
-			auto str = QString::fromStdString(attr->getName());
-			return QString::fromStdString(attr->getName());
+			auto str = QString::fromUtf8(attr->getName().c_str());
+			return QString::fromUtf8(attr->getName().c_str());
 		}
 		return QVariant();
 	}
@@ -136,9 +136,10 @@ QVariant XDataObjectTableModel::data(const QModelIndex& index, int role) const
 			}
 			else {
 				if (XattrToQstringFactory.hasProcessor<1>(className)) {
-					return QString::fromStdString(XattrToQstringFactory.process<1>(className, attr));
+					auto str = QString::fromUtf8(XattrToQstringFactory.process<1>(className, attr).c_str());
+					return str;
 				}
-				return QString::fromStdString(className);
+				return QString::fromUtf8(className.c_str());
 			}
 			
 		}

@@ -210,6 +210,7 @@ void XTextSource::updateTexCoord()
 			Eigen::Matrix4f m = tranform.matrix();
 			auto p = m.data();
 			m_InstanceArray->setTuple(i, p[0], p[1], p[2], p[3], p[4], p[5], p[6], p[7], p[8], p[9], p[10], p[11], p[12], p[13], p[14], p[15]);
+			
 
 			if (c != '\n') {
 				start_x += glyph.Advance * scale;
@@ -253,6 +254,20 @@ void XTextSource::setIsFixed(bool isFixed)
 	Modified();
 }
 
+void XTextSource::setTextHorAlignment(HAlign alignment)
+{
+	mData->alignment_h = alignment;
+	mData->configDataModified();
+	Modified();
+}
+
+void XTextSource::setTextVerAlignment(VAlign alignment)
+{
+	mData->alignment_v = alignment;
+	mData->configDataModified();
+	Modified();
+}
+
 std::wstring XTextSource::getText() const
 {
 	return mData->text;
@@ -271,4 +286,14 @@ double XTextSource::getFixedWidth() const
 bool XTextSource::isFixedWidth() const
 {
 	return mData->isFixWidth;
+}
+
+HAlign XTextSource::getTextHorAlignment() const
+{
+	return mData->alignment_h;
+}
+
+VAlign XTextSource::getTextVerAlignment() const
+{
+	return mData->alignment_v;
 }

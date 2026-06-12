@@ -46,11 +46,15 @@ public:
 	void setFontSize(double fontSize);
 	void setFixedWidth(double width);
 	void setIsFixed(bool isFixed);
+	void setTextHorAlignment(HAlign alignment);
+	void setTextVerAlignment(VAlign alignment);
 
 	std::wstring getText() const;
 	double getFontSize() const;
 	double getFixedWidth() const;
 	bool isFixedWidth() const;
+	HAlign getTextHorAlignment() const;
+	VAlign getTextVerAlignment() const;
 protected:
 	class Internal;
 	std::unique_ptr<Internal> mData;

@@ -45,7 +45,9 @@ void XRenderNode3DAttribute::Init()
 	XQ_ATTR_ADD_INIT(AttrSelectedColor, XQ::XColor(255, 255, 255, 255));
 	XQ_ATTR_ADD_INIT(AttrIsNdc, false);
 	XQ_ATTR_ADD_INIT(AttrDrawOutline, false);
-	XQ_ATTR_ADD_INIT(AttrUseNormalCamera, true);
+	//XQ_ATTR_ADD_INIT(AttrUseNormalCamera, true);
 	XQ_ATTR_ADD_INIT(AttrIsValidBoundBox, true);
 	XQ_XDATA_ADD(AttrSizePolicy);
+	XQ_ATTR_ADD_INIT(AttrCameraMode, XRenderNodeCameraMode::camera3D);
+
 }

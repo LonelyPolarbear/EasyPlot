@@ -4,6 +4,7 @@
 #include "lib03_stbImage/stbImage.h"
 #include "lib00_utilty/XUtilty.h"
 #include "XOpenGLRenderWindow.h"
+#include <xlog/XLogger.h>
 
 class XRenderFontManger::Internal {
 public:
@@ -37,7 +38,7 @@ void XRenderFontManger::InitRenderResource()
 	fontTexture->release();
 	mData->fontTexture = fontTexture;
 	//字体纹理信息
-	mData->result_future = std::async(std::launch::async, [this]() {
+	//mData->result_future = std::async(std::launch::async, [this]() {
 		int width = 0;
 		int height = 0;
 		std::tuple<int, int, std::vector<const void*>> result;
@@ -56,7 +57,8 @@ void XRenderFontManger::InitRenderResource()
 		std::get<0>(result) = width;
 		std::get<1>(result) = height;
 		auto renWin = mData->renderWindow.lock();
-		auto shareContect = renWin->getContext()->createOrgetShareContext();
+		//auto shareContect = renWin->getContext()->createOrgetShareContext();
+		auto shareContect = renWin->getContext();
 		{
 			shareContect->makeCurrent();
 			mData->fontTexture->bind();
@@ -76,10 +78,11 @@ void XRenderFontManger::InitRenderResource()
 			shareContect->doneCurrent();
 		}
 		mData->fontinitialized = true;
-		});
+		//});
 
 	//字体文件描述信息
-
+	//mData->result_future.get();
+	XLOG_TRACE("XRenderFontManger font bmp loaded!");
 }
 
 sptr<XDataBaseObject> XRenderFontManger::getFontTexture() const

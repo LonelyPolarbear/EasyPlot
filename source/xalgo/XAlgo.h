@@ -46,9 +46,23 @@ namespace XQ::XAlgo {
 	/// </summary>
 	extern xalgo_API std::optional<XQ::Vec3f> intersectSegmentWithXOZ(XQ::Vec3f a, XQ::Vec3f b);
 
+
 	extern xalgo_API std::array< XQ::Vec3f,4> getFrustumXOZIntersections(XQ::Vec3f near[4],		// near平面 [N1, N2, N3, N4] (按顺序)
 																															XQ::Vec3f far[4]			// far平面 [F1, F2, F3, F4] (按顺序)
 																														);
+	extern xalgo_API std::array< XQ::Vec3f, 4> getFrustumYOZIntersections(XQ::Vec3f near[4],		// near平面 [N1, N2, N3, N4] (按顺序)
+																																								XQ::Vec3f far[4]			// far平面 [F1, F2, F3, F4] (按顺序)
+	);
+
+	extern xalgo_API std::array< XQ::Vec3f, 4> getFrustumXOYIntersections(XQ::Vec3f near[4],		// near平面 [N1, N2, N3, N4] (按顺序)
+																															XQ::Vec3f far[4]			// far平面 [F1, F2, F3, F4] (按顺序)
+	);
+
+	/**
+	 * @brief 线面求交
+	 */
+	extern std::optional<XQ::Vec3f> intersectLinePlane(const XQ::Vec3f& planePoint, const  XQ::Vec3f& planeNormal,
+		const XQ::Vec3f& linePoint, const XQ::Vec3f& lineDir);
 
 	extern xalgo_API int next_in_cycle(int x, int m, int n) ;
 

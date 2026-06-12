@@ -14,4 +14,6 @@ protected:
 public:
 	void Init() override;
 	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix) override;
+
+	csptr<XAttr_Bool> AttrGridNodeDrawFirst;		//true表示先画网格，false表示最后绘制网格
 };

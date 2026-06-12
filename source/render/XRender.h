@@ -12,6 +12,7 @@
 #include "xsignal/XSignal.h"
 class XBaseRenderWindow;
 class XRenderCamera;
+class XBaseRenderScreenCamera;
 class XInteractionEventHandler;
 class XGeometryNode;
 class XGraphicsItem;
@@ -33,7 +34,7 @@ public:
 
 	sptr<XBaseRenderCamera> getCamera() const override;
 
-	sptr<XBaseRenderCamera> getSceenCamera() const override;
+	sptr<XBaseRenderScreenCamera> getSceenCamera() const override;
 
 	sptr<XDataBaseObject> getMainRenderTarget()  override;
 
@@ -115,17 +116,26 @@ public:
 	 * @brief 遍历接口，增加无限平面网格节点
 	 */
 	sptr<XBaseRenderNode> AddInfinitePlaneNode();
+
+	/**
+	 * @brief 创建一个tip的文字节点，并添加到场景中，若已经创建，则返回之前的
+	 */
+	sptr<XBaseRenderNode> AddTipTextNode();
+public:
+	/*共有属性*/
+	csptr<XAttr_Bool> AttrIsWorldGrid;		///< true 表示是三维空间中的网格，false表示的是屏幕二维空间中的网格
 public:
 	XSIGNAL(void(int id, void*/*data*/)) SigUserEvent;																		//用户自定义事件
 	XSIGNAL(void(XQ::PreDefineEvent, void*/*data*/)) SigPredefineEvent;										//预定义业务逻辑事件
 protected:
-	//属性
+	/*私有属性*/
 	csptr<XAttr_Bool> AttrActive;
 	csptr<XAttr_Bool> AttrSmaa;							//是否启用smaa
 	csptr<XAttr_Bool> AttrPostProcess;					//是否启用屏幕后处理，如果不启用直接写入屏幕默认帧缓冲
 	
 	csptr<XCustomGroupRenderNode3d> mMainFboNodes;
-	csptr<XGroupRenderNode3d> mScreenNodes;						//特指哪些屏幕固定位置，不允许缩放，但支持旋转的节点
+	csptr<XCustomGroupRenderNode3d> mScreenNodes;						//特指哪些屏幕固定位置，不允许缩放，但支持旋转的节点
+
 	//csptr<XGeometryNode> mAxisNode;									//坐标轴	
 protected:
 	void updateUbo();

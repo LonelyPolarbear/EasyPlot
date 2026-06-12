@@ -157,5 +157,7 @@ void main()
 	//实例化ID 模型ID 图元ID //最低位 PickMode 其余备用
 	uint extraData = 0u;
 	extraData  = PickMode;
+
+	//是否允许拾取
 	out_objectId = uvec4(in_instanceID, objectID,gl_PrimitiveID,extraData);
 }

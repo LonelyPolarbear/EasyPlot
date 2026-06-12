@@ -3,6 +3,7 @@
 #include "lib00_utilty/XUtilty.h"
 #include "lib02_camera/xcamera.h"
 #include "XRenderCamera.h"
+#include "base/xbaserender/baseRender/XBaseRenderScreenCamera.h"
 
 
 
@@ -203,6 +204,9 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 
 		getRender()->getCamera()->translate(curpos, mData->mouseLstPos, viewport[2], viewport[3]);
 
+		auto screenCamera = getRender()->getSceenCamera();
+		screenCamera->translate(curpos,mData->mouseLstPos, viewport[2], viewport[3]);
+
 		//更新位置
 		mData->mouseLstPos = getRender()->window2render(windowpos);
 	}
@@ -220,6 +224,13 @@ void CameraNavigationHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::Ke
 	double factor = 1.1;
 	auto c = getRender()->getCamera();
 	c->scale(factor);
+
+	auto screenCamera =getRender()->getSceenCamera();
+	auto viewport = getRender()->getConvertViewPort();
+	auto curpos = getRender()->window2render(windowpos);			//当前视口坐标系下的位置
+	curpos[0] -= viewport[2] * 0.5;
+	curpos[1] -= viewport[3] * 0.5;
+	screenCamera->scale(factor,curpos);
 }
 
 void CameraNavigationHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
@@ -234,6 +245,13 @@ void CameraNavigationHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::K
 	double factor = 1/1.1;
 	auto c = getRender()->getCamera();
 	c->scale(factor);
+
+	auto screenCamera = getRender()->getSceenCamera();
+	auto viewport = getRender()->getConvertViewPort();
+	auto curpos = getRender()->window2render(windowpos);			//当前视口坐标系下的位置
+	curpos[0] -= viewport[2] * 0.5;
+	curpos[1] -= viewport[3] * 0.5;
+	screenCamera->scale( factor, curpos);
 }
 
 bool CameraNavigationHandler::isRenderActive() const

@@ -21,6 +21,7 @@
 #include "base/xbaserender/baseNode/XBaseRenderTexture.h"
 #include "base/xbaserender/baseRender/XBaseDrawManger.h"
 #include "base/xbaserender/baseRender/XBaseRenderCamera.h"
+#include "base/xbaserender/baseRender/XBaseRenderScreenCamera.h"
 
 /**
  * @class XGeometryNode
@@ -72,7 +73,7 @@ void XGeometryNode::draw(sptr<XBaseRender>  render, std::shared_ptr<xshader> sha
 	shader->setBool("isNdc",Attribute->AttrIsNdc->getValue());
 	shader->setUint("PickMode", (uint32_t)Attribute->AttrPickMode->getValue());
 	shader->setUint("PrimitiveFaceNum", State->AttrFaceNum->getValue());
-	shader->setBool("UseNoramlCamera", Attribute->AttrUseNormalCamera->getValue());
+	shader->setInt("cameraMode", (int)Attribute->AttrCameraMode->getValue());
 	auto singleColor = Attribute->AttrSingleColor->getValue();
 	auto preselectColor = Attribute->AttrPreSelectColor->getValue();
 	auto selectedColor = Attribute->AttrSelectedColor->getValue();
@@ -165,10 +166,78 @@ void XGeometryNode::draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& paren
 }
 
 //对于实例化渲染，下面的实现存在bug TODO
-void XGeometryNode::adjustPos(sptr<XBaseRender> render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix)
+void XGeometryNode::adjustPos(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
 {
-	//节点的位置类型 动态调整节点的矩阵
-	//可能类型 在屏幕的固定位置 屏幕的固定大小
+	if (Attribute->AttrCameraMode->getValue() == XRenderNodeCameraMode::camera2D) {
+		adjustScreenCameraPos(render,s,parentMatrix);
+	}
+	else {
+		adjust3DCameraPos(render, s, parentMatrix);
+	}
+}
+
+void XGeometryNode::adjustScreenCameraPos(sptr<XBaseRender> render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix)
+	{
+		auto camera = render->getSceenCamera();
+		auto neraPlaneFrame = camera->getNearPlaneFrame(render);
+		auto virtualScreenFrame = camera->getVirtualScreenFrame(render);
+
+		auto parent_mat = XQ::Matrix::convert(parentMatrix);
+		auto object_mat = getTransform();
+		auto transform_object_data = XQ::Matrix::transformDecomposition_TRS(object_mat);
+		//auto total_mat = parent_mat * object_mat;
+
+		Eigen::Affine3f virtualScreenAffine, neraPlaneAffine;
+		virtualScreenAffine.matrix() = virtualScreenFrame;
+		neraPlaneAffine.matrix() = neraPlaneFrame;
+		if (Attribute->AttrSizePolicy->AttrPositionType->getValue() == XRenderNodeOriginPositionType::fixed) {
+			//屏幕固定位置
+			auto pos = Attribute->AttrSizePolicy->AttrPositionPos->getValue();
+			//pos =virtualScreenFrame*parent_mat*point
+			Eigen::Vector3f new_pos = parent_mat.inverse() * virtualScreenAffine.inverse() * Eigen::Vector3f(pos[0], pos[1], 0);
+			auto ppp = virtualScreenAffine * parent_mat * new_pos;
+			auto sss = neraPlaneAffine * ppp;
+			transform_object_data.tx = new_pos[0];
+			transform_object_data.ty = new_pos[1];
+			transform_object_data.tz = new_pos[2];
+		}
+		if (Attribute->AttrSizePolicy->AttrIsFixedSize->getValue()) {
+			//是否固定大小
+			auto fixedPixel = Attribute->AttrSizePolicy->AttrFixedPixel->getValue();
+			//需要获取原始物体的大小
+			auto boundBox = m_polyMapper->getInput()->getBoundBox(Eigen::Affine3f::Identity());
+			auto len_x = std::max(abs(boundBox.xmax), abs(boundBox.xmin));
+			auto len_y = std::max(abs(boundBox.ymax), abs(boundBox.ymin));
+
+			auto transform_data = XQ::Matrix::transformDecomposition_TRS(virtualScreenAffine * parent_mat);
+
+			auto scale_x = transform_data.sx;
+			auto scale_y = transform_data.sy;
+
+			float line_real_len = fixedPixel[0] / scale_x;
+			float line_real_len_y = fixedPixel[1] / scale_y;
+			float object_scale_x = line_real_len / len_x;
+			float object_scale_y = line_real_len_y / len_y;
+
+			transform_object_data.sx = object_scale_x;
+			transform_object_data.sy = object_scale_y;
+
+			transform_object_data.sx = 1. / scale_x;
+			transform_object_data.sy = 1. / scale_y;
+
+			transform_object_data.sz = 1;
+		}
+
+		//最后更新物体矩阵
+		{
+			auto mat = XQ::Matrix::computeMatrix(transform_object_data);
+			object_mat.matrix() = mat;
+			this->setTransform(object_mat);
+		}
+	}
+
+void XGeometryNode::adjust3DCameraPos(sptr<XBaseRender> render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix)
+{
 	auto parent_mat = XQ::Matrix::convert(parentMatrix);
 	auto object_mat = getTransform();
 	auto transform_object_data = XQ::Matrix::transformDecomposition_TRS(object_mat);
@@ -178,9 +247,7 @@ void XGeometryNode::adjustPos(sptr<XBaseRender> render, std::shared_ptr<xshader>
 	auto h = viewport[3];
 	Eigen::Vector3f origin = total_mat.translation();
 	auto camera = render->getCamera();
-	if (Attribute->AttrUseNormalCamera->getValue() == false) {
-		camera = render->getSceenCamera();
-	}
+
 	origin = camera->ComputeWorldToDisplay(origin);
 
 	if (Attribute->AttrSizePolicy->AttrPositionType->getValue() == XRenderNodeOriginPositionType::fixed) {
@@ -220,14 +287,14 @@ void XGeometryNode::adjustPos(sptr<XBaseRender> render, std::shared_ptr<xshader>
 		this->setTransform(object_mat);
 #endif
 	}
-	if(Attribute->AttrSizePolicy->AttrIsFixedOrien->getValue())
+	if (Attribute->AttrSizePolicy->AttrIsFixedOrien->getValue())
 	{
 		//希望物体始终朝向屏幕
-		auto parent_rot_mat = XQ::Matrix::extractRotateMat( parent_mat);							//父节点旋转矩阵
+		auto parent_rot_mat = XQ::Matrix::extractRotateMat(parent_mat);							//父节点旋转矩阵
 		auto camera_view_mat = camera->getViewMatrix();							//相机位姿矩阵逆矩阵
 		auto camera_rot_mat = XQ::Matrix::extractRotateMat(camera_view_mat);				//相机位姿逆矩阵 旋转矩阵
 
-		auto obj_rot_mat_new =parent_rot_mat.inverse()* camera_rot_mat.inverse();
+		auto obj_rot_mat_new = parent_rot_mat.inverse() * camera_rot_mat.inverse();
 
 		Eigen::Affine3f t;
 		t.matrix() = obj_rot_mat_new;
@@ -236,7 +303,7 @@ void XGeometryNode::adjustPos(sptr<XBaseRender> render, std::shared_ptr<xshader>
 		transform_object_data.ry = transform_object_rot.ry;
 		transform_object_data.rz = transform_object_rot.rz;
 	}
-	if(Attribute->AttrSizePolicy->AttrIsFixedSize->getValue()) {
+	if (Attribute->AttrSizePolicy->AttrIsFixedSize->getValue()) {
 		//是否固定大小
 		{
 			auto fixedPixel = Attribute->AttrSizePolicy->AttrFixedPixel->getValue();

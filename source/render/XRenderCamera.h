@@ -18,10 +18,10 @@ public:
 
     void setProjectionType(ProjectionType type);
 	void setEyeDir(const XQ::Vec3f& dir) override;
-	void rotate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height);
-	void translate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height);
-    void resetCamera(XQ::BoundBox box);
-    void scale(float factor);
+	void rotate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height) override;
+	void translate(XQ::Vec2i curPoint, XQ::Vec2i lastPoint, float width, float height) override;
+    void resetCamera(XQ::BoundBox box) override;
+    void scale(float factor) override;
     ProjectionType getProjectionType() const;
 
 	void setNear(double n) override;
@@ -37,6 +37,12 @@ public:
 	Eigen::Matrix4f orthoMatrix(float width,float height, float znear, float zfar) const override;
 
 	Eigen::Matrix4f perspectiveMatrix(float aspect, float fovy, float znear, float zfar) const override;
+
+	Eigen::Matrix4f getNearFrame(sptr<XBaseRender>) const override;
+
+	XQ::Vec2f getNearSizeInCamera() const override;
+
+	XQ::Vec2f getFarSizeInCamera() const override;
 
 	void setAspect(float aspect);
 	double getAspect() const override;
@@ -60,6 +66,11 @@ public:
 	Eigen::Vector3f ComputeWorldToCamera(Eigen::Vector3f input) const override;
 
 	Eigen::Vector3f ComputeCameraToWorld(Eigen::Vector3f input) const override;
+
+	/**
+	 * @brief 相机的四条射线与平面的交点，计算的交点是在m坐标系下的交点
+	 */
+	std::array< XQ::Vec3f, 4> getFrustumIntersections(const Eigen::Matrix4f& m, int type=2/*0 1 2 表示 X Y Z平面*/);
 
  protected:
     sptr<XBaseCmaera> mCamera;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "base/xbaserender/xbaserenderApi.h"
+#include "base/xbaserender/baseRender/XBaseRender.h"
 #include <dataBase/XDataObject.h>
 #include <Eigen/Eigen>
 #include <lib00_utilty/XUtilty.h>
@@ -54,6 +55,22 @@ public:
 	virtual Eigen::Matrix4f perspectiveMatrix(float aspect, float fovy, float znear, float zfar) const = 0;
 
 	virtual Eigen::Matrix4f getViewMatrix() const=0;
+
+	/**
+	 * @brief 在相机近平面构造一个坐标系，该坐标系的原点在近平面的中心，X轴 Y轴与相机的X Y保持一致
+	 * @return 构造的坐标系在相机坐标系下的姿态
+	 */
+	virtual Eigen::Matrix4f getNearFrame(sptr<XBaseRender>) const =0;
+
+	/**
+	 * @brief 获取视锥近平面在相机坐标系的矩形大小(宽 高)
+	 */
+	virtual XQ::Vec2f getNearSizeInCamera() const = 0;
+
+	/**
+	 * @brief 获取视锥远平面在相机坐标系的矩形大小(宽 高)
+	 */
+	virtual XQ::Vec2f getFarSizeInCamera() const = 0;
 
 	virtual Eigen::Affine3f& getCameraFrame()=0;
 
