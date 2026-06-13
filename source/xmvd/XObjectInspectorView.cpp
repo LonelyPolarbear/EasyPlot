@@ -22,6 +22,11 @@ void XObjectInspectorView::setRootObject(std::shared_ptr<XDataObject> root)
 	bindSignal();
 }
 
+void XObjectInspectorView::setPropertyObject(std::shared_ptr<XDataObject> obj)
+{
+	m_propertyView->setDataObject(obj);
+}
+
 void XObjectInspectorView::bindSignal()
 {
 	mData->con.disconnect();

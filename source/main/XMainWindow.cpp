@@ -157,7 +157,13 @@ void XMainWindow::InitBotTab()
 void XMainWindow::InitView()
 {
 	mData->objectInspector->setRootObject(mData->plotWidget->getRenderWindow());
-	mData->plotWidget->test4();
+	//mData->plotWidget->SigRenderNodeSelected
+	mData->connector.connect(mData->plotWidget,&XGLWidget::SigRenderNodeSelected,[this](sptr<XBaseRender> ren, sptr<XBaseRenderNode> node, XQ::Vec4i){
+		if (node) {
+			mData->objectInspector->setPropertyObject(node);
+		}
+	});
+	mData->plotWidget->test2();
 }
 
 Q_INVOKABLE void XMainWindow::SlotAddLog(const std::string& log,int level)

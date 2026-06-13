@@ -100,4 +100,5 @@ private:
 	sptr< RenderWindowUbo> m_renderWindowUbo;
 	csptr<XDataListT<XRender> > m_renderList;
 	sptr<XRenderFontManger> m_renderFontMgr;
+	xsig::xconnector m_connector;
 };

@@ -19,11 +19,10 @@ public:
 	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix) override;
 	void draw(sptr<XBaseRender> render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
 	void createFeedBack();
-	//void setRect(std::vector<XQ::Vec3f> points);
 	sptr<XOpenGLBuffer> getFeedBackBuffer();
 	Eigen::Matrix4f getFrame() const;
 public:
-	csptr<XAttr_Float> AttrGridSpace;										///< 网格间距
+	//csptr<XAttr_Float> AttrGridSpace;										///< 网格间距
 	csptr<XAttr_Float> AttrMainGridDensity;							///< 主网格密度
 	csptr<XAttr_Float> AttrSubGridDensity;								///< 次网格密度
 	csptr<XAttr_Float> AttrMainGridLineWidth;						///< 主网格宽度

@@ -10,6 +10,9 @@
 #include <lib00_utilty/XUtilty.h>
 #include <dataBase/XVector.h>
 #include <base/xbaserender/baseRender/XRenderType.h>
+#include <base/xbaserender/baseRender/XBaseRender.h>
+#include <base/xbaserender/baseNode/XBaseRenderNode.h>
+#include <xsignal/XSignal.h>
 
 class QOpenGLContext;
 class QWindow;
@@ -75,4 +78,7 @@ protected:
 	int mHeight = 0;
 	int mTimerId =0;
 	std::shared_ptr<XOpenGLRenderWindow> mRenderWindow;
+	xsig::xconnector mConnector;
+public:
+	XSIGNAL(void(sptr<XBaseRender>, sptr<XBaseRenderNode>, XQ::Vec4i))	SigRenderNodeSelected;			///< 任意一个render有节点被拾取，发射该信号
 };

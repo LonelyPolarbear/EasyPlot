@@ -243,6 +243,7 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 			glDrawElementsInstanced((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0, instance_num);
 		}
 		else {
+			int i=0;
 			//glDrawElements((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0);
 		}
 	}

@@ -16,6 +16,8 @@ public:
 	// 设置要检视的根对象
 	void setRootObject(std::shared_ptr<XDataObject> root);
 
+	void setPropertyObject(std::shared_ptr<XDataObject> root);
+
 	virtual void bindSignal();
 protected:
 	void BuildUI();

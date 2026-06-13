@@ -7,6 +7,7 @@
 class XBaseRender;
 class XBaseRenderWindowEventDispatch;
 class XBaseRenderFontManger;
+class XBaseRenderNode;
 class XBASERENDER_API XBaseRenderWindow : public XDataObject {
 	REGISTER_CLASS_META_DATA(XBaseRenderWindow, XDataObject);
 protected:
@@ -44,5 +45,6 @@ public:
 	virtual sptr<XBaseRenderFontManger> getFontManger() const =0;
 
 public:
-	XSIGNAL(void()) SigRenderContextCreated;		///< 渲染上下文首次创建完成时发射该信号
+	XSIGNAL(void()) SigRenderContextCreated;																										///< 渲染上下文首次创建完成时发射该信号
+	XSIGNAL(void(sptr<XBaseRender>, sptr<XBaseRenderNode>, XQ::Vec4i))	SigRenderNodeSelected;			///< 任意一个render有节点被拾取，发射该信号
 };

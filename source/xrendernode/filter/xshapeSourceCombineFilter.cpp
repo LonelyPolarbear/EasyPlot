@@ -11,6 +11,7 @@ public:
 
 XShapeSourceCombineFilter::XShapeSourceCombineFilter():mData(new Internal)
 {
+	
 }
 
 XShapeSourceCombineFilter::~XShapeSourceCombineFilter()
@@ -134,6 +135,17 @@ bool XShapeSourceCombineFilter::updateSelf()
 		}
 	}
 
+
+	{
+		m_InstanceArray->setNumOfTuple(1);
+		//Ç°ºó
+		m_InstanceArray->setTuple(0,
+			1, 0, 0, 0,
+			0, 1, 0, 0,
+			0, 0, 1, 0,
+			0, 0, 0, 1);
+		m_InstanceArray->Modified();
+	}
 	setHasUpdated();
 	return true;
 }

@@ -46,7 +46,9 @@ public:
 
 	virtual void render() = 0;
 
-	virtual void renderGBuffer() =0;
+	virtual void renderWorldNodeGBuffer() =0;
+
+	virtual void renderScreendNodeGBuffer() =0;
 
 	virtual void renderToScreen() =0;
 
@@ -120,7 +122,9 @@ public:
 	 * @param renderPos 渲染坐标系下的位置(原点在左下角)
 	 * @return 转换后的窗口坐标系下的位置(原点在左下角)
 	 */
-	virtual XQ::Vec3f render2window(const XQ::Vec2i& renderPos)=0;
+	virtual XQ::Vec3f render2window(const XQ::Vec2i& renderPos) = 0;
+
+	virtual XQ::Vec3f render2normal(const XQ::Vec2i& renderPos) = 0;
 
 	/**
 	 * @brief 获取窗口坐标系下的视口大小(原点左下角)
@@ -139,4 +143,6 @@ public:
 	virtual sptr<XBaseRenderNode> getRenderNode3D(int id) =0;
 
 	virtual sptr<XBaseDrawManger> getDrawManger() = 0;
+public:
+		XSIGNAL(void(sptr<XBaseRenderNode>, XQ::Vec4i)) SigRenderNodeSelected;
 };

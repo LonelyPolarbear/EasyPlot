@@ -28,6 +28,7 @@ XGLWidget::XGLWidget(QWidget* parent) :QWidget(parent)
 	mTimerId = this->startTimer(60ms);
 	setFocusPolicy(Qt::StrongFocus);
 	mRenderWindow = makeShareDbObject<XOpenGLRenderWindow>();
+	mConnector.connect(mRenderWindow,&XBaseRenderWindow::SigRenderNodeSelected,this, &XGLWidget::SigRenderNodeSelected);
 }
 
 XGLWidget::~XGLWidget()

@@ -42,13 +42,13 @@ public:
 
 	void render() override;
 
-	void renderGBuffer() override;
+	void renderWorldNodeGBuffer() override;
 
-	void renderScreen3dNode2Buffer();
+	void renderScreendNodeGBuffer() override;
 
 	void renderToScreen() override;
 
-	void renderScreen3dNodeBuffer2Screen();
+	void renderScreenNodeBuffer2Screen();
 
 	bool makeCurrent() override;
 
@@ -84,6 +84,8 @@ public:
 	XQ::Vec2i window2render(const XQ::Vec2i& windowPos) override;
 
 	XQ::Vec3f render2window(const XQ::Vec2i& renderPos) override;
+
+	XQ::Vec3f render2normal(const XQ::Vec2i& renderPos) override;
 
 	/**
 	 * @brief 获取窗口坐标系下的视口大小(原点左下角)
@@ -121,12 +123,15 @@ public:
 	 * @brief 创建一个tip的文字节点，并添加到场景中，若已经创建，则返回之前的
 	 */
 	sptr<XBaseRenderNode> AddTipTextNode();
+
+	sptr<XBaseRenderNode> AddTraceTextNode();
 public:
 	/*共有属性*/
 	csptr<XAttr_Bool> AttrIsWorldGrid;		///< true 表示是三维空间中的网格，false表示的是屏幕二维空间中的网格
 public:
 	XSIGNAL(void(int id, void*/*data*/)) SigUserEvent;																		//用户自定义事件
 	XSIGNAL(void(XQ::PreDefineEvent, void*/*data*/)) SigPredefineEvent;										//预定义业务逻辑事件
+	
 protected:
 	/*私有属性*/
 	csptr<XAttr_Bool> AttrActive;
@@ -136,7 +141,6 @@ protected:
 	csptr<XCustomGroupRenderNode3d> mMainFboNodes;
 	csptr<XCustomGroupRenderNode3d> mScreenNodes;						//特指哪些屏幕固定位置，不允许缩放，但支持旋转的节点
 
-	//csptr<XGeometryNode> mAxisNode;									//坐标轴	
 protected:
 	void updateUbo();
 

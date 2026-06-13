@@ -46,7 +46,7 @@ void XInfinitePlaneRenderNode::Init()
 	//XQ_ATTR_ADD_INIT(AttrIsWorldGrid,true);
 	Attribute->AttrIsValidBoundBox->setValue(false);
 
-	XQ_ATTR_ADD_INIT(AttrGridSpace, 4);
+	//XQ_ATTR_ADD_INIT(AttrGridSpace, 4);
 	XQ_ATTR_ADD_INIT(AttrMainGridDensity, 20);
 	XQ_ATTR_ADD_INIT(AttrSubGridDensity, 4);
 	XQ_ATTR_ADD_INIT(AttrMainGridLineWidth, 1);
@@ -82,7 +82,7 @@ void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matri
 	shader->use();
 	shader->setMat4("gridPlaneMat", m_planeFrame);
 	shader->setBool("u_isInfinite", true);
-	shader->setFloat("gridSpace", AttrGridSpace->getValue());
+	//shader->setFloat("gridSpace", AttrGridSpace->getValue());
 	shader->setFloat("mainGridDensity", AttrMainGridDensity->getValue());
 	shader->setFloat("subGridDensity", AttrSubGridDensity->getValue());
 	shader->setFloat("mainGridLineWidth", AttrMainGridLineWidth->getValue());
@@ -135,17 +135,6 @@ void XInfinitePlaneRenderNode::createFeedBack()
 	
 	mFeedBackBuffer->setFeedbackBufferBindIdx(0, mFeedBackBufferVbo);
 }
-
-//void XInfinitePlaneRenderNode::setRect(std::vector<XQ::Vec3f> points)
-//{
-//	auto coord = m_inputSource->getVertextCoordArray();
-//	coord->setTuple(0, points[0].x(), points[0].y(), points[0].z());
-//	coord->setTuple(1, points[1].x(), points[1].y(), points[1].z());
-//	coord->setTuple(2, points[2].x(), points[2].y(), points[2].z());
-//	coord->setTuple(3, points[3].x(), points[3].y(), points[3].z());
-//	coord->Modified();
-//	m_inputSource->Modified();
-//}
 
 sptr<XOpenGLBuffer> XInfinitePlaneRenderNode::getFeedBackBuffer()
 {

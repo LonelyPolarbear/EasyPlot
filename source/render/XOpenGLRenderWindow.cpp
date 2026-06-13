@@ -124,6 +124,7 @@ XOpenGLRenderWindow::XOpenGLRenderWindow()
 
 XOpenGLRenderWindow::~XOpenGLRenderWindow()
 {
+	m_connector.disconnect();
 }
 
 void XOpenGLRenderWindow::SetWindowId(uint64_t winId)
@@ -238,6 +239,10 @@ void XOpenGLRenderWindow::addRender(sptr<XBaseRender> ren)
 
 	//同时 将事件分发器分发的事件路由到render的事件处理器上
 	ren->connectToRenderWindowSignals();
+
+	m_connector.connect(ren,&XBaseRender::SigRenderNodeSelected,[ren,this](sptr<XBaseRenderNode> node, XQ::Vec4i data){
+		SigRenderNodeSelected(ren,node,data);
+	},ren->getName());
 }
 
 std::vector<sptr<XBaseRender>> XOpenGLRenderWindow::getRenders() const
