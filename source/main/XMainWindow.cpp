@@ -103,9 +103,12 @@ void XMainWindow::BuildUI()
 
 void XMainWindow::AttachSignalSlot()
 {
-	connect(ui->ActAddCube,&QAction::triggered,this,[this](){
-		mData->plotWidget->slotAddCube();
-	});
+	connect(ui->ActAddCube, &QAction::triggered, this, [this]() {mData->plotWidget->slotAddCube(); });
+	connect(ui->ActAddSphere, &QAction::triggered, this, [this]() {mData->plotWidget->slotAddSphere(); });
+	connect(ui->ActAddCylinder, &QAction::triggered, this, [this]() {mData->plotWidget->slotAddCylinder(); });
+	connect(ui->ActCreateChart, &QAction::triggered, this, [this]() {mData->plotWidget->slotAddChart(); });
+	connect(ui->ActAddCone, &QAction::triggered, this, [this]() {mData->plotWidget->slotAddCone(); });
+	connect(ui->ActAddRing, &QAction::triggered, this, [this]() {mData->plotWidget->slotAddRing(); });
 
 	connect(mData->mFutureWatcherVoid, &QFutureWatcher<void>::finished, this,[](){
 		XLOG_INFO("SDF font file loaded!");
@@ -157,13 +160,12 @@ void XMainWindow::InitBotTab()
 void XMainWindow::InitView()
 {
 	mData->objectInspector->setRootObject(mData->plotWidget->getRenderWindow());
-	//mData->plotWidget->SigRenderNodeSelected
 	mData->connector.connect(mData->plotWidget,&XGLWidget::SigRenderNodeSelected,[this](sptr<XBaseRender> ren, sptr<XBaseRenderNode> node, XQ::Vec4i){
 		if (node) {
 			mData->objectInspector->setPropertyObject(node);
 		}
 	});
-	mData->plotWidget->test2();
+	mData->plotWidget->initView();
 }
 
 Q_INVOKABLE void XMainWindow::SlotAddLog(const std::string& log,int level)

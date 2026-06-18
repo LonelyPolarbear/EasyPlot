@@ -1,5 +1,7 @@
 #pragma once
 #include "base/xbaserender/xbaserenderApi.h"
+#include "base/xbaserender/baseRender/XRenderType.h"
+#include "base/xbaserender/baseRender/XBaseInteractionEventHandler.h"
 #include <dataBase/XDataBaseObject.h>
 #include <dataBase/XDataObject.h>
 #include <dataBase/XDataList.h>
@@ -18,6 +20,30 @@ class XBASERENDER_API XBaseRenderNodeState : public XDataObject {
 protected:
 	XBaseRenderNodeState();
 	virtual ~XBaseRenderNodeState();
+};
+
+
+class XBASERENDER_API XBaseRenderNodeExtInterface {
+public:
+	virtual void LeftButtonPressEvent(sptr<XBaseRender>, XQ::Vec2i,XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void LeftButtonReleaseEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void MiddleButtonPressEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void MiddleButtonReleaseEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void RightButtonPressEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void RightButtonReleaseEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void LeftButtonDoublePressEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void RightButtonDoublePressEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void MiddleButtonDoublePressEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void EnterEvent(sptr<XBaseRender>, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void LeaveEvent(sptr<XBaseRender>, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void FoucsInEvent(sptr<XBaseRender>, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void FoucsOutEvent(sptr<XBaseRender>, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void ResizeEvent(sptr<XBaseRender>, XQ::Vec2i, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void KeyPressEvent(sptr<XBaseRender>, XQ::Key, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void KeyReleaseEvent(sptr<XBaseRender>, XQ::Key, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void MouseMoveEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void MouseWheelForwardEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
+	virtual void MouseWheelBackwardEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) {}
 };
 
 class XBASERENDER_API XBaseRenderNode : public XDataObject {
@@ -175,4 +201,7 @@ public:
 		 * @brief 获取节点状态
 		 */
 		virtual sptr<XBaseRenderNodeState> getNodeState() const = 0;
+
+		sptr<XBaseRenderNodeExtInterface> getExtInterface();
 };
+

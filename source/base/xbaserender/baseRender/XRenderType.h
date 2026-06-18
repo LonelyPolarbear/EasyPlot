@@ -545,6 +545,8 @@ namespace XQ {
 		camera = 1,
 		pick = 1 << 1,
 		manipulator = 1 << 2,
+		nodeInteraction = 1 << 3,
+		draw =1<<4
 	};
 
 	DEFINE_BITWISE_OPERATORS(InteractMode);

@@ -40,6 +40,11 @@
     <bool>false</bool>
    </attribute>
    <addaction name="ActAddCube"/>
+   <addaction name="ActAddSphere"/>
+   <addaction name="ActAddRing"/>
+   <addaction name="ActAddCylinder"/>
+   <addaction name="ActAddCone"/>
+   <addaction name="ActCreateChart"/>
   </widget>
   <action name="ActAddCube">
    <property name="icon">
@@ -48,6 +53,51 @@
    </property>
    <property name="text">
     <string>创建立方体</string>
+   </property>
+  </action>
+  <action name="ActAddSphere">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/sphere.svg</normaloff>:/icon/sphere.svg</iconset>
+   </property>
+   <property name="text">
+    <string>创建球</string>
+   </property>
+  </action>
+  <action name="ActAddCylinder">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/cylinder.svg</normaloff>:/icon/cylinder.svg</iconset>
+   </property>
+   <property name="text">
+    <string>创建圆柱</string>
+   </property>
+  </action>
+  <action name="ActCreateChart">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/chart.svg</normaloff>:/icon/chart.svg</iconset>
+   </property>
+   <property name="text">
+    <string>创建图表</string>
+   </property>
+  </action>
+  <action name="ActAddCone">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/cone.svg</normaloff>:/icon/cone.svg</iconset>
+   </property>
+   <property name="text">
+    <string>创建圆锥</string>
+   </property>
+  </action>
+  <action name="ActAddRing">
+   <property name="icon">
+    <iconset resource="../qrc/easyPlotqrc.qrc">
+     <normaloff>:/icon/ring.svg</normaloff>:/icon/ring.svg</iconset>
+   </property>
+   <property name="text">
+    <string>创建圆环</string>
    </property>
   </action>
  </widget>

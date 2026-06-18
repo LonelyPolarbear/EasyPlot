@@ -5,6 +5,7 @@
 #include "XRenderCamera.h"
 #include <xsignal/XSignal.h>
 #include <xrendernode/renderNode3d/XTransformGizmoRenderNode.h>
+#include <base/xbaserender/baseRender/XRenderType.h>
 #include <xlog/XLogger.h>
 
 #include <Eigen/Eigen>
@@ -351,6 +352,84 @@ void XManipulatorHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardModifi
 		mData->mouseLstPos = getRender()->window2render(windowpos);
 	}
 
+	if (mData->mIntaractType == XTransformGizmoRenderNode::InteractObjectType::scale_x ||
+		mData->mIntaractType == XTransformGizmoRenderNode::InteractObjectType::scale_y ||
+		mData->mIntaractType == XTransformGizmoRenderNode::InteractObjectType::scale_z) {
+		//获取当前的向量在屏幕控件的向量投影
+		//TODO 待实现
+		auto local_len = 1.f;
+		Eigen::Vector3f local_dir = Eigen::Vector3f::UnitX();
+		if (mData->mIntaractType == XTransformGizmoRenderNode::InteractObjectType::scale_y) {
+			local_dir = Eigen::Vector3f::UnitY();
+		}
+		else if (mData->mIntaractType == XTransformGizmoRenderNode::InteractObjectType::scale_z) {
+			local_dir = Eigen::Vector3f::UnitZ();
+		}
+
+		Eigen::Vector3f loacl_first_point = Eigen::Vector3f(0, 0, 0);
+		Eigen::Vector3f loacl_second_point = loacl_first_point + local_dir * local_len;
+
+
+		Eigen::Vector3f word_first_point = totalMat * loacl_first_point;
+		Eigen::Vector3f word_second_point = totalMat * loacl_second_point;
+
+		auto screen_normal_pos0 = getRender()->getCamera()->ComputeWorldToDisplay(word_first_point);
+		auto screen_normal_pos1 = getRender()->getCamera()->ComputeWorldToDisplay(word_second_point);
+
+		Eigen::Vector2f screen_pos0 = Eigen::Vector2f(screen_normal_pos0[0], screen_normal_pos0[1]);
+		Eigen::Vector2f screen_pos1 = Eigen::Vector2f(screen_normal_pos1[0], screen_normal_pos1[1]);
+
+		//转换到屏幕坐标系
+		screen_pos0[0] *= viewport[2];
+		screen_pos0[1] *= viewport[3];
+
+		screen_pos1[0] *= viewport[2];
+		screen_pos1[1] *= viewport[3];
+
+		//
+		Eigen::Vector2f screen_dir = screen_pos1 - screen_pos0;
+		auto len = screen_dir.norm();
+		screen_dir.normalize();
+
+		//计算缩放比例
+		float scale = local_len / (float)len;		//世界：屏幕
+
+		Eigen::Vector2f delta = Eigen::Vector2f(curpos[0] - mData->mouseLstPos[0], curpos[1] - mData->mouseLstPos[1]);
+		//计算移动在屏幕方向的投影
+		float ss = delta.dot(screen_dir);
+
+		//世界坐标系期望的长度
+		float real_stride = ss * scale;
+
+		XQ::Vec3f scaleIncrement(1,1,1);
+		//目标是物体沿着缩放方向缩放后，总体长度多了这么多
+		if (mData->mIntaractType == XTransformGizmoRenderNode::InteractObjectType::scale_x) {
+			//objectMat.scale(Eigen::Vector3f(real_stride,1,1));
+			auto oldvalue = gizmoRenderNode->AttrFixLenx->getValue();
+			auto scale = (oldvalue+ss)/oldvalue;
+			scaleIncrement[0] = scale;
+			gizmoRenderNode->AttrFixLenx->setValue(gizmoRenderNode->AttrFixLenx->getValue() + ss);
+			
+		}
+		if (mData->mIntaractType == XTransformGizmoRenderNode::InteractObjectType::scale_y) {
+			auto oldvalue = gizmoRenderNode->AttrFixLeny->getValue();
+			auto scale = (oldvalue + ss) / oldvalue;
+			scaleIncrement[1] = scale;
+			gizmoRenderNode->AttrFixLeny->setValue(gizmoRenderNode->AttrFixLeny->getValue() + ss);
+		}
+		if (mData->mIntaractType == XTransformGizmoRenderNode::InteractObjectType::scale_z) {
+			auto oldvalue = gizmoRenderNode->AttrFixLenz->getValue();
+			auto scale = (oldvalue + ss) / oldvalue;
+			scaleIncrement[2] = scale;
+			gizmoRenderNode->AttrFixLenz->setValue(gizmoRenderNode->AttrFixLenz->getValue() + ss);
+		}
+
+		gizmoRenderNode->setTransform(objectMat);
+		gizmoRenderNode->notifySigMatrixChanged(scaleIncrement);
+		//更新位置
+		mData->mouseLstPos = getRender()->window2render(windowpos);
+	}
+
 	event.stopPropagate();
 }
 
@@ -395,7 +474,7 @@ void XManipulatorHandler::slotRenderActiveChanged(bool active)
 	}
 }
 
-void XManipulatorHandler::slotRenderNodeHasSelected(sptr<XBaseRenderNode> node,XQ::Vec4i obj_data)
+void XManipulatorHandler::slotRenderNodeHasSelected(sptr<XBaseRenderNode> node,XQ::Vec4i obj_data, XQ::KeyboardModifier m)
 {
 	std::cout << "slotRenderNodeHasSelected\n";
 	if (!mData->enable) {
@@ -410,7 +489,7 @@ void XManipulatorHandler::slotRenderNodeHasSelected(sptr<XBaseRenderNode> node,X
 	auto gizmoRenderNode = mData->getGizmoRenderNode();
 	auto found_node = gizmoRenderNode->findNodeById(node->getID());
 	if (node == found_node) {
-		auto type = gizmoRenderNode->getInteractObjectType(found_node);
+		auto type = gizmoRenderNode->getInteractObjectType(found_node,m);
 		mData->mIntaractType = type;
 		XLOG_INFO("Manipulator Interact type:{}", XQ_META::enum_to_string(type));
 		return;
@@ -442,6 +521,8 @@ void XManipulatorHandler::slotManipulatorModeChanged(bool flag)
 		auto gizmoRenderNode_parent = gizmoRenderNode->getRenderNodeParent();
 		if (gizmoRenderNode_parent) {
 			gizmoRenderNode_parent->removeChildRenderNode(gizmoRenderNode);
+			gizmoRenderNode->reset();		//恢复到默认长度
 		}
 	}
+	
 }

@@ -156,11 +156,29 @@ void XOpenGLRenderWindow::bindSigalSlot()
 {
 	xsig::connect(m_eventDispatch, &XRenderWindowEventDispatch::SigResize, this, &XOpenGLRenderWindow::slotUpdateSize);
 	xsig::connect(m_eventDispatch, &XRenderWindowEventDispatch::SigMouseMove, [this](XQ::Vec2i windowPos, XQ::KeyboardModifier){
-		//根据windowPos判断当前应该激活哪个窗口，这个绑定工作是在最前面的
+		//根据windowPos判断当前应该激活哪个窗口，同时需要保证至少有一个render是激活的
 
+		sptr<XRender> activeRender = nullptr;
 		for (auto r : *m_renderList) {
 			auto ren = r->asDerived<XRender>();
-			ren->setActive(ren->isBelongToRender(windowPos));
+			if (ren->isActive()) {
+				activeRender = ren;
+			}
+		}
+
+		sptr<XRender> activeRender_new = nullptr;
+		for (auto r : *m_renderList) {
+			auto ren = r->asDerived<XRender>();
+			bool iaActive = ren->isBelongToRender(windowPos);
+			ren->setActive(iaActive);
+			if (iaActive) {
+				activeRender_new = ren;
+			}
+		}
+
+		if (!activeRender_new) {
+			if(activeRender)
+				activeRender->setActive(true);
 		}
 	});
 

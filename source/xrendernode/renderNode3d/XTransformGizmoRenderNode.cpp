@@ -9,6 +9,11 @@
 #include "base/xbaserender/baseRender/XBaseRenderWindow.h"
 #include "base/xbaserender/baseRender/XBaseRenderCamera.h"
 #include <xrendernode/renderNode3d/XFullScreenQuadNode.h>
+
+static constexpr float s_initFixLenx = 50;
+static constexpr float s_initFixLeny = 50;
+static constexpr float s_initFixLenz = 50;
+static constexpr float s_initFixRadius = 6;
 class XTransformGizmoRenderNode::Internal {
 public:
 	//操作柄由几部分几何组成的装配体 三个箭头、三个圆环,中心点是一个球体
@@ -53,8 +58,15 @@ void XTransformGizmoRenderNode::Init()
 	float radius = 0.2;
 	XQ::Vec2f arrowSize(radius*2, radius*2);
 	XQ::Vec2f lineSize(radius, 1);
-	XQ_ATTR_ADD_INIT(AtteArrowSize, arrowSize);
-	XQ_ATTR_ADD_INIT(AtteLineSize, lineSize);
+	XQ_ATTR_ADD_INIT(AttrArrowSize, arrowSize);
+	XQ_ATTR_ADD_INIT(AttrXLen, lineLen);
+	XQ_ATTR_ADD_INIT(AttrYLen, lineLen);
+	XQ_ATTR_ADD_INIT(AttrZLen, lineLen);
+	XQ_ATTR_ADD_INIT(AttrLineRdius, radius);
+	XQ_ATTR_ADD_INIT(AttrFixLenx, s_initFixLenx);
+	XQ_ATTR_ADD_INIT(AttrFixLeny, s_initFixLeny);
+	XQ_ATTR_ADD_INIT(AttrFixLenz, s_initFixLenz);
+	XQ_ATTR_ADD_INIT(AttrFixRadius, s_initFixRadius);
 
 	mData->mArrowZ = makeShareDbObject<XArrowRenderNode>();
 	mData->mArrowZ->setSingleColor(XQ::Vec4f(0, 0, 1, 1));
@@ -114,30 +126,39 @@ void XTransformGizmoRenderNode::Init()
 
 	mData->mConnector.connect(this,&XTransformGizmoRenderNode::sigItemDataChanged,[this](sptr<XDataAttribute> attr, XDataChangeType type){
 		if (type == XDataChangeType::ItemDataModified) {
-			if (attr == AtteLineSize || attr == AtteArrowSize) {
-				auto arrowSize = AtteArrowSize->getValue();
-				auto lineSize = AtteLineSize->getValue();
-				float radius = lineSize[0];
-				float lineLen = lineSize[1];
+			if (attr == AttrXLen || 
+				attr == AttrYLen ||
+				attr == AttrZLen ||
+				attr == AttrLineRdius ||
+				attr == AttrArrowSize
+			) {
+				auto arrowSize = AttrArrowSize->getValue();
+				
+				float radius = AttrLineRdius->getValue();
+				float lineLenx = AttrXLen->getValue();
+				float lineLeny = AttrYLen->getValue();
+				float lineLenz = AttrZLen->getValue();
 
-				mData->mArrowZ->setLineSize(lineSize[0], lineSize[1]);
+				mData->mArrowZ->setLineSize(radius,lineLenz);
 				mData->mArrowZ->setArrowSize(arrowSize[0], arrowSize[1]);
 
-				mData->mArrowX->setLineSize(lineSize[0], lineSize[1]);
+				mData->mArrowX->setLineSize(radius,lineLenx);
 				mData->mArrowX->setArrowSize(arrowSize[0], arrowSize[1]);
 
-				mData->mArrowY->setLineSize(lineSize[0], lineSize[1]);
+				mData->mArrowY->setLineSize(radius,lineLeny);
 				mData->mArrowY->setArrowSize(arrowSize[0], arrowSize[1]);
 
 				mData->mSphere->setScale(radius * 1.5, radius * 1.5, radius * 1.5);
 
-				mData->mRotateXY->setMajorRadius(lineLen * 0.5);
+				auto min_line_len = std::min({lineLenx,lineLeny,lineLenz});
+
+				mData->mRotateXY->setMajorRadius(min_line_len * 0.5);
 				mData->mRotateXY->setMinorRadius(radius);
 
-				mData->mRotateYZ->setMajorRadius(lineLen * 0.5);
+				mData->mRotateYZ->setMajorRadius(min_line_len * 0.5);
 				mData->mRotateYZ->setMinorRadius(radius);
 
-				mData->mRotateZX->setMajorRadius(lineLen * 0.5);
+				mData->mRotateZX->setMajorRadius(min_line_len * 0.5);
 				mData->mRotateZX->setMinorRadius(radius);
 			}
 		}
@@ -165,15 +186,24 @@ void XTransformGizmoRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matr
 	//scale_v *= transform_data.sy;
 
 	//已知屏幕固定像素 
-	float fix_screen_size_h = 50;
-	float fix_screen_size_w = 6;
+	float fix_screen_size_h_x = /*50*/AttrFixLenx->getValue();
+	float fix_screen_size_h_y = AttrFixLeny->getValue();
+	float fix_screen_size_h_z = AttrFixLenz->getValue();
+	float fix_screen_size_w = AttrFixRadius->getValue();
 
-	float line_real_len = fix_screen_size_h * scale_h;
+	float line_real_len_x = fix_screen_size_h_x * scale_h;
+	float line_real_len_y = fix_screen_size_h_y * scale_h;
+	float line_real_len_z = fix_screen_size_h_z * scale_h;
 	float line_real_radius = fix_screen_size_w * scale_h;
 
 	XQ::Vec2f arrowSize(line_real_radius * 2, line_real_radius * 2);
-	AtteLineSize->setValue(XQ::Vec2f(line_real_radius, line_real_len));
-	AtteArrowSize->setValue(arrowSize);
+	//AtteLineSize->setValue(XQ::Vec2f(line_real_radius, line_real_len));
+	AttrLineRdius->setValue(line_real_radius);
+	AttrXLen->setValue(line_real_len_x);
+	AttrYLen->setValue(line_real_len_y);
+	AttrZLen->setValue(line_real_len_z);
+
+	AttrArrowSize->setValue(arrowSize);
 
 	//为何实现节点不被阻挡，使用模板缓冲的方式 来做
 		//1 启用模板测试，设置深度测试总是通过，但是不写入
@@ -214,6 +244,14 @@ XQ::BoundBox XTransformGizmoRenderNode::getThisBoundBox(const Eigen::Matrix4f& m
 	return {};
 }
 
+void XTransformGizmoRenderNode::reset()
+{
+	AttrFixLenx->setValue(s_initFixLenx);
+	AttrFixLeny->setValue(s_initFixLeny);
+	AttrFixLenz->setValue(s_initFixLenz);
+	AttrFixRadius->setValue(s_initFixRadius);
+}
+
 sptr<XRenderNode> XTransformGizmoRenderNode::getInteractObject(InteractObjectType type)
 {
 	switch (type)
@@ -247,16 +285,25 @@ sptr<XRenderNode> XTransformGizmoRenderNode::getInteractObject(InteractObjectTyp
 	}
 }
 
-XTransformGizmoRenderNode::InteractObjectType XTransformGizmoRenderNode::getInteractObjectType(sptr<XRenderNode> node)
+XTransformGizmoRenderNode::InteractObjectType XTransformGizmoRenderNode::getInteractObjectType(sptr<XRenderNode> node, XQ::KeyboardModifier m)
 {
 	if (node == mData->mArrowX) {
+		if (m == XQ::KeyboardModifier::ControlModifier) {
+			return InteractObjectType::scale_x;
+		}
 		return InteractObjectType::translate_x;
 	}
 	else if (node == mData->mArrowY) {
+		if (m == XQ::KeyboardModifier::ControlModifier) {
+			return InteractObjectType::scale_y;
+		}
 		return InteractObjectType::translate_y;
 	}
 	else if(node == mData->mArrowZ)
 	{
+		if (m == XQ::KeyboardModifier::ControlModifier) {
+			return InteractObjectType::scale_z;
+		}
 		return InteractObjectType::translate_z;
 	}
 	else if (node == mData->mRotateXY) {
@@ -302,7 +349,7 @@ void XTransformGizmoRenderNode::bindRenderNode(sptr<XRenderNode> node)
 
 
 	//绑定函数
-	mData->mConnector.connect(this,&XTransformGizmoRenderNode::SigMatrixChanged,[node](const Eigen::Matrix4f& m){
+	mData->mConnector.connect(this,&XTransformGizmoRenderNode::SigMatrixChanged,[node](const Eigen::Matrix4f& m, const XQ::Vec3f& scaleIncrement){
 		Eigen::Affine3f trans;
 		trans.matrix() =m;
 
@@ -313,6 +360,14 @@ void XTransformGizmoRenderNode::bindRenderNode(sptr<XRenderNode> node)
 		auto node_transform = node->getTransform();
 
 		auto node_mat_data = XQ::Matrix::transformDecomposition_TRS(node_transform);
+
+		auto sx = node_mat_data.sx;
+		auto sy = node_mat_data.sy;
+		auto sz = node_mat_data.sz;
+
+		node_mat_data.sx *= scaleIncrement[0];
+		node_mat_data.sy *= scaleIncrement[1];
+		node_mat_data.sz *= scaleIncrement[2];
 
 		node_mat_data.tx = gizmo_mat_data.tx;
 		node_mat_data.ty = gizmo_mat_data.ty;
@@ -334,8 +389,8 @@ sptr<XRenderNode> XTransformGizmoRenderNode::getBindRenderNode()
 	return mData->mBindRenderNode.lock();
 }
 
-void XTransformGizmoRenderNode::notifySigMatrixChanged()
+void XTransformGizmoRenderNode::notifySigMatrixChanged(const XQ::Vec3f& scaleIncrement)
 {
 	Eigen::Matrix4f m= getTransform().matrix();
-	SigMatrixChanged(m);
+	SigMatrixChanged(m,scaleIncrement);
 }

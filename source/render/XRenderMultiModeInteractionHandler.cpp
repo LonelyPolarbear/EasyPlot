@@ -1,6 +1,7 @@
 #include "XRenderMultiModeInteractionHandler.h"
 #include "CameraNavigationHandler.h"
 #include "XManipulatorHandler.h"
+#include "XRenderDrawHandler.h"
 #include "XRenderPickHandler.h"
 #include "XRender.h"
 #include "lib00_utilty/XUtilty.h"
@@ -175,15 +176,42 @@ void XRenderMultiModeInteractionHandler::KeyPressEvent(XQ::Key key, XQ::Keyboard
 		return;
 	if (key == XQ::Key::Key_E &&  (modifier & XQ::KeyboardModifier::ControlModifier)) {
 		//进入操作柄模式
-		mCurrentMode = mCurrentMode | XQ::InteractMode::manipulator;
+		mCurrentMode = mCurrentMode | XQ::InteractMode::manipulator - XQ::InteractMode::nodeInteraction-XQ::InteractMode::draw;
 		SigInteractModeChange(mCurrentMode);
 		XLOG_INFO("Joystick mode activated!");
 	}
+
+	if (key == XQ::Key::Key_G && (modifier & XQ::KeyboardModifier::ControlModifier)) {
+		//进入操作柄模式
+		mCurrentMode = mCurrentMode | XQ::InteractMode::nodeInteraction - XQ::InteractMode::manipulator - XQ::InteractMode::draw;
+		SigInteractModeChange(mCurrentMode);
+		XLOG_INFO("nodeInteraction mode activated!");
+	}
+	if (key == XQ::Key::Key_D && (modifier & XQ::KeyboardModifier::ControlModifier)) {
+		//进入操作柄模式
+		mCurrentMode = mCurrentMode | XQ::InteractMode::draw - XQ::InteractMode::manipulator - XQ::InteractMode::nodeInteraction;
+		SigInteractModeChange(mCurrentMode);
+		XLOG_INFO("draw mode activated!");
+	}
+
 	if (key == XQ::Key::Key_Escape) {
-		if (hasMode(XQ::InteractMode::manipulator)) {
-			mCurrentMode = mCurrentMode ^ XQ::InteractMode::manipulator;
+		if (bool hasManipulator = hasMode(XQ::InteractMode::manipulator),
+			hasNodeInteraction = hasMode(XQ::InteractMode::nodeInteraction),
+			hasDraw = hasMode(XQ::InteractMode::nodeInteraction);
+			hasManipulator|| hasNodeInteraction || hasDraw
+			) 
+		{
+			mCurrentMode = mCurrentMode - XQ::InteractMode::manipulator - XQ::InteractMode::nodeInteraction - XQ::InteractMode::draw;
 			SigInteractModeChange(mCurrentMode);
-			XLOG_INFO("Exit joystick mode!");
+			if (hasManipulator) {
+				XLOG_INFO("Exit joystick mode!");
+			}
+			if (hasNodeInteraction) {
+				XLOG_INFO("Exit nodeInteraction mode!");
+			}
+			if (hasDraw) {
+				XLOG_INFO("Exit draw mode!");
+			}
 		}
 	}
 }
@@ -212,6 +240,9 @@ void XRenderMultiModeInteractionHandler::MouseWheelForwardEvent(XQ::Vec2i p, XQ:
 	if (!isRenderActive())
 		return;
 	
+	if (hasMode(XQ::InteractMode::pick))
+		mPickHandler->MouseWheelForwardEvent(p, k, event);
+
 	if (hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->MouseWheelForwardEvent(p, k, event);
 	if (hasMode(XQ::InteractMode::camera))
@@ -222,7 +253,9 @@ void XRenderMultiModeInteractionHandler::MouseWheelBackwardEvent(XQ::Vec2i p, XQ
 {
 	if (!isRenderActive())
 		return;
-	
+	if (hasMode(XQ::InteractMode::pick))
+		mPickHandler->MouseWheelBackwardEvent(p, k, event);
+
 	if (hasMode(XQ::InteractMode::manipulator))
 		mManipulatorHandler->MouseWheelBackwardEvent(p, k, event);
 	if (hasMode(XQ::InteractMode::camera))
@@ -247,6 +280,17 @@ void XRenderMultiModeInteractionHandler::setPickHandler(sptr<XRenderPickHandler>
 	mPickHandler = pickHandler;
 	mData->mConnector.disconnect("PickHandler SigRenderNodeSelected");
 	mData->mConnector.connect(pickHandler,&XRenderPickHandler::SigRenderNodeSelected,this, &XRenderMultiModeInteractionHandler::SigRenderNodeSelected,"PickHandler SigRenderNodeSelected");
+
+	mData->mConnector.connect(
+		this, &XRenderMultiModeInteractionHandler::SigInteractModeChange, [this](XQ::InteractMode mode) {
+			if (hasMode(XQ::InteractMode::nodeInteraction)) {
+				mPickHandler->setExtInterfaceEbable(true);
+			}
+			else {
+				mPickHandler->setExtInterfaceEbable(false);
+			}
+		}
+	, "SigNodeInteractionModeChange");
 }
 
 void XRenderMultiModeInteractionHandler::setManipulatorHandler(sptr<XManipulatorHandler> manipulatorHandler)
@@ -269,6 +313,23 @@ void XRenderMultiModeInteractionHandler::setManipulatorHandler(sptr<XManipulator
 	,"SigInteractModeChange");
 }
 
+void XRenderMultiModeInteractionHandler::setDrawHandler(sptr<XRenderDrawHandler> drawHandler)
+{
+	mDrawHandler = drawHandler;
+	mData->mConnector.disconnect("SigDrawModeChange");
+	
+	mData->mConnector.connect(
+		this, &XRenderMultiModeInteractionHandler::SigInteractModeChange, [this](XQ::InteractMode mode) {
+			if (hasMode(XQ::InteractMode::draw)) {
+				mDrawHandler->SigDrawModeChanged(true);
+			}
+			else {
+				mDrawHandler->SigDrawModeChanged(false);
+			}
+		}
+	, "SigDrawModeChange");
+}
+
 sptr<CameraNavigationHandler> XRenderMultiModeInteractionHandler::getCameraNavigationHandler() const
 {
 	return mCameraHandler;
@@ -282,6 +343,11 @@ sptr<XRenderPickHandler> XRenderMultiModeInteractionHandler::getPickHandler() co
 sptr<XManipulatorHandler> XRenderMultiModeInteractionHandler::getManipulatorHandler() const
 {
 	return mManipulatorHandler;
+}
+
+sptr<XRenderDrawHandler> XRenderMultiModeInteractionHandler::getDrawHandler() const
+{
+	return mDrawHandler;
 }
 
 bool XRenderMultiModeInteractionHandler::hasMode(XQ::InteractMode mode)

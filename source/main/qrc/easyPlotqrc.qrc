@@ -44,5 +44,7 @@
         <file>icon/sine_wave.svg</file>
         <file>icon/parallel_compute.svg</file>
         <file>icon/app.image</file>
+        <file>icon/ring.svg</file>
+        <file>icon/trace.svg</file>
     </qresource>
 </RCC>

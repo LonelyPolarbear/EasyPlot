@@ -18,16 +18,39 @@ const int orothoCamera = 1; //正交投影相机
 const int perspectiveCamera = 2; //透视投影相机
 
 
-uniform float gridSpace;                          //网格间距  4
-uniform float mainGridDensity;              //主网格密度 5*gridSpace
-uniform float subGridDensity;                 //次网格密度 gridSpace
+uniform float gridSpacex;                          //网格间距  4
+uniform float gridSpacey;                          //网格间距  4
+uniform int mainGridNum;                      //主网格密度 5*gridSpace
+uniform int subGridNum;                         //次网格密度 gridSpace
 uniform float mainGridLineWidth;         //主网格宽度  2
 uniform float subGridLineWidth;           //主网格宽度  1
 uniform float mainGridAlphaFactor;      //主网格宽度  累加透明系数 0.3
 uniform float subGridAlphaFactor;        //次网格宽度  累加透明系数 0.3
+uniform bool isShowGrid;
+uniform vec4 backgroundColor;
  void main()
 {
-    //获取当前的深度
+#if 0
+    // 单个 gridSpace 占据的像素数
+    float gridSpacePixelsX = gridSpacex / (fwidth(fragPos3D.x));
+    float gridSpacePixelsY = gridSpacey / (fwidth(fragPos3D.y));
+    float useGridSpaceX = gridSpacex;
+    float useGridSpaceY= gridSpacey;
+    if(gridSpacePixelsX>=100){
+        //缩小间距
+        float factor = 100. /gridSpacex;
+        useGridSpaceX =gridSpacex/factor;       //恢复到原始状态
+    }
+    if(gridSpacePixelsX<=1){
+        useGridSpaceX = gridSpacex*4;            //恢复到原始状态
+    }
+#endif
+
+    if(isShowGrid == false){
+        FragColor  = backgroundColor;
+        return;
+    }
+
     float depth = gl_FragCoord.z; //[0-1]
     float normalizeDepth =0;
     float fading = 1.0;
@@ -44,16 +67,17 @@ uniform float subGridAlphaFactor;        //次网格宽度  累加透明系数 0.3
     }
 
     //主网格
-    //float gridSpace = 4;        //网格间距
-    //float mainGridDensity = 5*gridSpace;        //网格密度
-   // float mainGridLineWidth = 2;
-    vec2 mainGridFragpos =vec2(fragPos3D.x/mainGridDensity, fragPos3D.y/mainGridDensity);
+    float mainGridDensity_x = mainGridNum*gridSpacex;                            //网格密度
+    float mainGridDensity_y = mainGridNum*gridSpacey;                                  //网格密度
+    vec2 mainGridFragpos =vec2(fragPos3D.x/mainGridDensity_x, fragPos3D.y/mainGridDensity_y);
     vec2 mainGridDerivative = fwidth(mainGridFragpos.xy);
 
+    // 单个 gridSpace 占据的像素数
+
     //次网格
-    //float  subGridDensity = gridSpace;        //网格密度
-    //float  subGridLineWidth = 1;
-    vec2  subGridFragpos =vec2(fragPos3D.x/subGridDensity, fragPos3D.y/subGridDensity);
+    float  subGridDensity_x = subGridNum*gridSpacex;                                 //网格密度
+    float  subGridDensity_y = subGridNum*gridSpacey;                                       //网格密度
+    vec2  subGridFragpos =vec2(fragPos3D.x/subGridDensity_x, fragPos3D.y/subGridDensity_y);
     vec2  subGridDerivative = fwidth(subGridFragpos.xy);
 
     vec2 mainGridDisToline_ = abs(fract(mainGridFragpos.xy - 0.5) - 0.5) / mainGridDerivative;

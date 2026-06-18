@@ -71,4 +71,6 @@ protected:
 	std::string contextMsg;						//上下文信息字符串
 
 	std::shared_ptr<XOpenGLShareContext> shareContext;
+
+	int refCount=0;				///<引用计数，避免重复调用make done
 };

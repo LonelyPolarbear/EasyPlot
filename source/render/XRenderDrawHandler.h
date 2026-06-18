@@ -9,16 +9,10 @@
 #include <xrendernode/XRenderNode.h>
 class XRender;
 
-struct PickData {
-	wptr<XBaseRenderNode> PickNode;
-	XQ::Vec4u SelectData;
-	XQ::Vec3f FragCoord = XQ::Vec3f();
-};
-
-class XRenderPickHandler : public XRenderInteractionEventHandler {
+class XRenderDrawHandler : public XRenderInteractionEventHandler {
 protected:
-	XRenderPickHandler();
-	virtual ~XRenderPickHandler();
+	XRenderDrawHandler();
+	virtual ~XRenderDrawHandler();
 public:
 	virtual void LeftButtonPressEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
 	virtual void LeftButtonReleaseEvent(XQ::Vec2i, XQ::KeyboardModifier, XEvent& event);
@@ -45,12 +39,9 @@ public:
 
 	void setExtInterfaceEbable(bool enable);
 
-	XSIGNAL(void(sptr<XBaseRenderNode>,XQ::Vec4i, XQ::KeyboardModifier)) SigRenderNodeSelected;														//信号：选中渲染节点
+	XSIGNAL(void(bool) )SigDrawModeChanged;
 protected:
 	void slotRenderActiveChanged(bool active) override;
-	PickData mainFboObjectSelected(XQ::Vec2i windowpos);
-	PickData overlayFboObjectSelected(XQ::Vec2i windowpos, int lay);
-	bool isExtInterfaceEbable() const;
 	
 protected:
 	struct Internal;

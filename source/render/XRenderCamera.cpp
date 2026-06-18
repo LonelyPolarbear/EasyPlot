@@ -158,7 +158,7 @@ Eigen::Matrix4f XRenderCamera::getNearFrame(sptr<XBaseRender> render) const
 	auto scale_x = (float)viewport_w / nearSize[0];
 	auto scale_y = (float)viewport_h / nearSize[1];
 	Eigen::Affine3f frame = Eigen::Affine3f::Identity();
-	frame.translate(Eigen::Vector3f(0,0,-getNear()));
+	frame.translate(Eigen::Vector3f(0,0,-getNear()-0.01));
 	frame.scale(Eigen::Vector3f(1./scale_x,1./scale_y,1));
 	return frame.matrix();
 }

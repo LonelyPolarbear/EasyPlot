@@ -237,6 +237,16 @@ namespace XQ::XAlgo {
 #endif
 	}
 
+	 float getInterpolationCoefficient(float a, float b, float c)
+	{
+		// 1. 防御性编程：如果起点和终点相同，直接返回 0.0 防止除零错误
+		if (b == a) {
+			return 0.0f;
+		}
 
-
+		float t = (c - a) / (b - a);
+		if (t < 0.0f) t = 0.0f;
+		if (t > 1.0f) t = 1.0f;
+		return t;
+	}
 }

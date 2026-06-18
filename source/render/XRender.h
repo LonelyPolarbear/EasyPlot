@@ -105,11 +105,6 @@ public:
 	sptr<XBaseDrawManger> getDrawManger() override;
 
 	/**
-	 * @brief 遍历接口，增加一个坐标轴节点
-	 */
-	sptr<XBaseRenderNode> AddAxisNode();
-
-	/**
 	 * @brief 遍历接口，增加一个立方体节点
 	 */
 	sptr<XBaseRenderNode> AddCubeTestNode();
@@ -125,6 +120,8 @@ public:
 	sptr<XBaseRenderNode> AddTipTextNode();
 
 	sptr<XBaseRenderNode> AddTraceTextNode();
+
+	sptr<XBaseRenderNode> AddAxisNode();
 public:
 	/*共有属性*/
 	csptr<XAttr_Bool> AttrIsWorldGrid;		///< true 表示是三维空间中的网格，false表示的是屏幕二维空间中的网格

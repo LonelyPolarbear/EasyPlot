@@ -23,6 +23,16 @@ namespace XQ::XAlgo {
 	
 	extern xalgo_API XColor lerp_rgb(const XColor& c1, const XColor &c2, float t);
 
+	/**
+ * @brief 根据已知端点 a, b 和目标值 c，计算线性插值系数 t
+ * @param a 起始值
+ * @param b 结束值
+ * @param c 目标值
+ * @return 插值系数 t (范围通常在 0.0 ~ 1.0 之间)
+ *         如果 a == b，则返回 0.0 以避免除零错误
+ */
+	extern xalgo_API float getInterpolationCoefficient(float a, float b, float c);
+
 	struct xalgo_API XGridLayout{
 		int rows =1;
 		int cols =1;

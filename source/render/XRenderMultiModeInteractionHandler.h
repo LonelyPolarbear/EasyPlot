@@ -11,6 +11,7 @@ class XBaseRenderNode;
 class CameraNavigationHandler;
 class XRenderPickHandler;
 class XManipulatorHandler;
+class XRenderDrawHandler;
 
 class XRenderMultiModeInteractionHandler : public XRenderInteractionEventHandler {
 protected:
@@ -41,9 +42,11 @@ public:
 	void setCameraNavigationHandler(sptr<CameraNavigationHandler> cameraHandler);
 	void setPickHandler(sptr<XRenderPickHandler> pickHandler);
 	void setManipulatorHandler(sptr<XManipulatorHandler> manipulatorHandler);
+	void setDrawHandler(sptr<XRenderDrawHandler> drawHandler);
 	sptr<CameraNavigationHandler> getCameraNavigationHandler() const;
 	sptr<XRenderPickHandler> getPickHandler() const;
 	sptr<XManipulatorHandler> getManipulatorHandler() const;
+	sptr<XRenderDrawHandler> getDrawHandler() const;
 
 	bool hasMode(XQ::InteractMode mode);
 	void setMode(XQ::InteractMode mode);
@@ -52,14 +55,15 @@ public:
 	/**
 	 * @breif 信号：mPickHandler 选中渲染节点,此处将mPickHandler的SigRenderNodeSelected信号与其绑定，主要是解耦
 	 */
-	XSIGNAL(void(sptr<XBaseRenderNode>, XQ::Vec4i)) SigRenderNodeSelected;
+	XSIGNAL(void(sptr<XBaseRenderNode>, XQ::Vec4i, XQ::KeyboardModifier)) SigRenderNodeSelected;
 	XSIGNAL(void(XQ::InteractMode)) SigInteractModeChange;
 protected:
 	//包含多个模式交互处理器
 	sptr<CameraNavigationHandler> mCameraHandler;					//相机
 	sptr<XRenderPickHandler> mPickHandler;									//拾取
 	sptr<XManipulatorHandler> mManipulatorHandler;					//操作柄
-	XQ::InteractMode mCurrentMode;												//操作模式,每种模式优先级不同 TODO 待优化
+	sptr<XRenderDrawHandler> mDrawHandler;								//绘图
+	XQ::InteractMode mCurrentMode;												//操作模式
 	class Internal;
 	std::unique_ptr<Internal> mData;
 };

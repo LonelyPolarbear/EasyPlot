@@ -24,7 +24,16 @@ public:
 	void test3();
 	void test4();
 	void test5();
+
+
 	void slotAddCube();
+	void slotAddSphere();
+	void slotAddCylinder();
+	void slotAddChart();
+	void slotAddRing();
+	void slotAddCone();
+
+	void initView();
 public slots:
 	void slotFitView3D();
 };

@@ -17,10 +17,10 @@ void XRectRenderNode::createSource()
 	m_inputSource = makeShareDbObject<XCustomSource>();
 	auto coord = m_inputSource->getVertextCoordArray();
 	coord->setNumOfTuple(4);
-	coord->setTuple(0, -1, -1, -1);
-	coord->setTuple(1, 1, -1, -1);
-	coord->setTuple(2, 1, 1, -1);
-	coord->setTuple(3, -1, 1, -1);
+	coord->setTuple(0, -1, -1, 0);
+	coord->setTuple(1, 1, -1, 0);
+	coord->setTuple(2, 1, 1, 0);
+	coord->setTuple(3, -1, 1, 0);
 	coord->Modified();
 
 	auto index = m_inputSource->getFaceIndexArray();
