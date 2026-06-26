@@ -98,6 +98,7 @@ public:
 	sptr<XRenderNode> findNodeById(uint64_t id);
 public:
 	csptr<XDataListT<XBaseRenderNode>> renderNodes;
+	csptr<XAttr_Bool> AttrRecursiveDraw;
 protected:
 	Eigen::Affine3f m_transform = Eigen::Affine3f::Identity();
 	uint64_t m_id;

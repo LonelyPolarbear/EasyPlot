@@ -12,6 +12,7 @@ layout (location = 7) in vec4 aInstanceMatC0l4;         //实例化渲染第四�
 
 out vec4 in_color;
 out vec2 in_textureCoord;
+out vec4 vWorldPos;//主要给几何着色器传递
 
 flat out int in_instanceID;
 
@@ -46,15 +47,21 @@ void main()
         instancedMat = mat4(aInstanceMatC0l1, aInstanceMatC0l2, aInstanceMatC0l3, aInstanceMatC0l4);
     }
     
+    vec4 world_pos = ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+
+     vWorldPos = world_pos;
     if(isNdc){
         gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
     }else{
         if(cameraMode ==CAMERA_MODE_3D_NORMAL ){
-            gl_Position = ProjectionMat*ViewMat*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+    
+            gl_Position = ProjectionMat*ViewMat*world_pos;
         }else  if(cameraMode ==CAMERA_MODE_3D_AXIS ){
-            gl_Position = Single_ProjMat*Single_ViewMat*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+            
+            gl_Position = Single_ProjMat*Single_ViewMat*world_pos;
         }else{
-            gl_Position = ProjectionMat*NearplaneFrame*VirtualScreenFrame*ModelMat*instancedMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+             
+            gl_Position = ProjectionMat*NearplaneFrame*VirtualScreenFrame*world_pos;
         }
     }
 }

@@ -1,5 +1,6 @@
 #include "XAlgo.h"
 #include "dataBase/XDataArray.h"
+#include "lib00_utilty/XUtilty.h"
 namespace XQ::XAlgo {
 	XColor lerp_rgb(const XColor& c1, const XColor& c2, float t)
 	{
@@ -249,4 +250,27 @@ namespace XQ::XAlgo {
 		if (t > 1.0f) t = 1.0f;
 		return t;
 	}
+
+	 sptr<XFloatArray> generateSinSave(double T, int numInT, double amplitude, double xoffset, double yoffset, double numOfT)
+	 {
+		//XQ::math::randon()
+		double f = 2*XQ::Matrix::PI/T;
+		auto segmentInT = numInT-1;
+		auto totalPointNum = numOfT* segmentInT +1;
+		auto startPos = xoffset;
+		auto step = T/(double)segmentInT;
+
+		sptr<XFloatArray> curves = makeShareDbObject<XFloatArray>();
+		curves->setComponent(3);
+		curves->setNumOfTuple(totalPointNum);
+
+		for (int i = 0; i < totalPointNum; i++) {
+			auto x = xoffset +step*i;
+			auto y = amplitude*sin(f*x)+yoffset;
+			auto z =0;
+			curves->setTuple(i,x,y,z);
+		}
+		return curves;
+	 }
+
 }

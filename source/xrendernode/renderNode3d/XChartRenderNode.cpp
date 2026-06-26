@@ -1,13 +1,20 @@
 #include "XChartRenderNode.h"
 #include <lib04_opengl/XOpenGLEnable.h>
+#include <lib04_opengl/XOpenGLFuntion.h>
 #include <lib01_shader/xshaderManger.h>
 #include <lib04_opengl/XOpenGLBuffer.h>
 #include <xrendernode/renderNode3d/XFinitePlaneRenderNode.h>
+#include <xrendernode/renderNode3d/XGroupRenderNode3d.h>
+#include <xrendernode/renderNode2d/XPolyLineRenderNode.h>
 #include <base/xbaserender/baseRender/XBaseRenderCamera.h>
 #include <xlog/XLogger.h>
+
+static unsigned char s_stencil_value =5;
 class XChartRenderNode::Internal {
 public:
 	wptr<XFinitePlaneRenderNode> grid;
+	wptr<XGroupRenderNode3d> lines;
+	unsigned char stencilValue = s_stencil_value++;
 	bool isPress = false;
 	Eigen::Vector3f lastPos = Eigen::Vector3f(0,0,0);
 
@@ -20,9 +27,10 @@ public:
 		Eigen::Affine3f trans = Eigen::Affine3f::Identity();
 		node->getChainTransform(trans);
 		auto gridAffine = node->getGraidAffine();
-		auto window2grid = trans.inverse() * gridAffine.inverse();
+		auto world2grid = trans*gridAffine ;
 		auto world_point = render->getCamera()->ComputeDisplayToWorld(Eigen::Vector3f(fragcoord[0], fragcoord[1], fragcoord[2]));
-		auto gridpos = window2grid * world_point;
+		auto gridpos = world2grid.inverse() * world_point;
+		auto gridpos2 = trans.inverse() * world_point;
 		return gridpos;
 	}
 };
@@ -64,6 +72,8 @@ void XChartRenderNode::createSource()
 void XChartRenderNode::Init()
 {
 	XGeometryNode::Init();
+	AttrRecursiveDraw->setValue(false);
+
 	{
 		auto Grid = makeShareDbObject<XFinitePlaneRenderNode>();
 		Grid->setName("coordinate");
@@ -71,6 +81,11 @@ void XChartRenderNode::Init()
 		Grid->setXRange(-100, 100);
 		Grid->setYRange(-100, 100);
 		mData->grid = Grid;
+
+		auto lines = makeShareDbObject<XGroupRenderNode3d>();
+		lines->setName("lines");
+		mData->lines =lines;
+		addChildRenderNode(lines);
 	}
 	
 	//!
@@ -91,12 +106,53 @@ void XChartRenderNode::setRect(std::vector<XQ::Vec3f> points)
 
 void XChartRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix)
 {
-	XGeometryNode::draw(render,parentMatrix);
-}
+	auto enable = makeShareDbObject<XOpenGLEnable>();
+	enable->save();
+	enable->enable(XOpenGLEnable::EnableType::POLYGON_OFFSET_FILL);
+	XOpenGLFuntion::xglPolygonOffset(1.0, 2.0);
 
-void XChartRenderNode::draw(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
-{
-	XGeometryNode::draw(render,s, parentMatrix);
+	//启用模板绘制，根据模板，去裁剪片面
+	enable->enable(XOpenGLEnable::EnableType::STENCIL_TEST);
+	XOpenGLFuntion::xglStencilMask(0xffffffff);
+	XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_ALWAYS, mData->stencilValue,0xffffffff);
+	XOpenGLFuntion::xglStencilOp(XOpenGL::StencilBehavior::XGL_KEEP, XOpenGL::StencilBehavior::XGL_KEEP, XOpenGL::StencilBehavior::XGL_REPLACE);
+	XGeometryNode::draw(render,parentMatrix);
+	
+	auto thisMatrix = getTransform().matrix();
+	Eigen::Matrix4f gridMat = Eigen::Matrix4f::Identity();
+	if (auto grid = mData->grid.lock()) {
+		XOpenGLFuntion::xglPolygonOffset(0.5, 1.0);
+		grid->draw(render,parentMatrix * thisMatrix);
+		gridMat = grid->getFrame();
+	}
+	enable->restore();
+
+	enable->save();
+	enable->enable(XOpenGLEnable::EnableType::STENCIL_TEST);
+	XOpenGLFuntion::xglStencilMask(0);
+	XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_EQUAL, mData->stencilValue, 0xffffffff);
+	XOpenGLFuntion::xglStencilOp(XOpenGL::StencilBehavior::XGL_KEEP, XOpenGL::StencilBehavior::XGL_KEEP, XOpenGL::StencilBehavior::XGL_KEEP);
+
+	//绘制直线
+	if (auto lines = mData->lines.lock()) {
+		//计算网格平面的法线
+		auto T = parentMatrix * thisMatrix;
+		auto R = T.block(0,0,3,3);
+		Eigen::Matrix3f newR = R.inverse().transpose(); ;
+		Eigen::Vector3f normal = newR *Eigen::Vector3f::UnitZ();
+		normal.normalize();
+
+		for (int i = 0; i < lines->getChildRenderNodeCount(); i++) {
+			auto line = lines->getChildRenderNode(i)->asDerived<XPolyLineRenderNode>();
+			if (line) {
+				line->AttrPlaneNormal->setValue(XQ::Vec3f(normal[0],normal[1],normal[2]));
+				line->AttrOffset->setValue(-0.001*(i+1));
+			}
+		}
+		lines->draw(render,parentMatrix* thisMatrix*gridMat);
+	}
+	XOpenGLFuntion::xglStencilMask(0xffffffff);
+	enable->restore();
 }
 
 void XChartRenderNode::setXRange(float min, float max)
@@ -127,19 +183,25 @@ void XChartRenderNode::gridScale(float sx, float sy, const XQ::Vec2f center)
 	}
 }
 
+void XChartRenderNode::addLineNode(sptr<XPolyLineRenderNode> line)
+{
+	if (auto lines = mData->lines.lock()) {
+		lines->addChildRenderNode(line);
+	}
+}
+
+XQ::BoundBox XChartRenderNode::getBoundBox(const Eigen::Matrix4f& m) const
+{
+	auto boundBox = getThisBoundBox(m);
+	return boundBox;
+}
+
 void XChartRenderNode::LeftButtonPressEvent(sptr<XBaseRender> render,XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord)
 {
 	if (auto grid = mData->grid.lock()) {
 		//将渲染窗口坐标转换为坐标系的内部坐标
-		/*Eigen::Affine3f trans = Eigen::Affine3f::Identity();
-		grid->getChainTransform(trans);
-		auto gridAffine = grid->getGraidAffine();
-		auto window2grid = trans.inverse() * gridAffine.inverse();
-		auto world_point = render->getCamera()->ComputeDisplayToWorld(Eigen::Vector3f(fragcoord[0], fragcoord[1], fragcoord[2]));
-		auto gridpos = window2grid * world_point;*/
 		auto  gridpos = mData->mapFragCoord2GridPos(render,fragcoord);
 		mData->lastPos = gridpos;
-		//XLOG_INFO("gridpos:{},{}{}", gridpos[0], gridpos[1], gridpos[2]);
 		mData->isPress = true;
 		event.stopPropagate();
 	}
@@ -161,7 +223,6 @@ void XChartRenderNode::MouseMoveEvent(sptr<XBaseRender> render, XQ::Vec2i, XQ::K
 			auto tx = dis[0];
 			auto ty = dis[1];
 			gridTranslate(-tx,-ty);
-			//XLOG_INFO("translat:{},{}",-tx,-ty);
 			mData->lastPos = curpos;
 		}
 		//event.stopPropagate();

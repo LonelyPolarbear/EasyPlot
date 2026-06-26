@@ -13,23 +13,13 @@ protected:
 public:
 	void addShader3D(PrimitveType id, std::shared_ptr<xshader> shader);
 
-	void addShader2D(PrimitveType id, std::shared_ptr<xshader> shader);
+	//void addShader2D(PrimitveType id, std::shared_ptr<xshader> shader);
 
 	std::shared_ptr<xshader> getShader3D(PrimitveType id) const;
 
-	std::shared_ptr<xshader> getShader2D(PrimitveType id) const;
+	//std::shared_ptr<xshader> getShader2D(PrimitveType id) const;
 
-	void setFillShader(std::shared_ptr<xshader> shader);
-
-	void setGridShader3D(std::shared_ptr<xshader> shader);
-
-	void setGridShader2D(std::shared_ptr<xshader> shader);
-
-	void setPickShader3D(std::shared_ptr<xshader> shader);
-
-	void setPickShader2D(std::shared_ptr<xshader> shader);
-
-	void setPickFillShader2D(std::shared_ptr<xshader> shader);
+	void setGridShader(std::shared_ptr<xshader> shader);
 
 	void setTextShader(std::shared_ptr<xshader> shader);
 
@@ -39,17 +29,7 @@ public:
 
 	std::shared_ptr<xshader> getTextShader() const;
 
-	std::shared_ptr<xshader> getFillShader() const ;
-
-	std::shared_ptr<xshader> getGridShader3D() const;
-
-	std::shared_ptr<xshader> getGridShader2D() const;
-
-	std::shared_ptr<xshader> getPickShader3D() const;
-
-	std::shared_ptr<xshader> getPickShader2D() const;
-
-	std::shared_ptr<xshader> getPickFillShader2D() const;
+	std::shared_ptr<xshader> getGridShader() const;
 
 	std::shared_ptr<xshader> getNdcShader() const;
 

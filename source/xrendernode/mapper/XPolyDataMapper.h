@@ -32,7 +32,7 @@ public:
 
 	virtual void InitRenderResource();
 
-	void bindSSBO();
+	virtual void bindSSBO();
 
 protected:
 	//GPU∂À∂‘œÛ

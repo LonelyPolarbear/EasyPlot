@@ -29,7 +29,7 @@ bool XShapeSourceCombineFilter::update()
 	bool updateFlag = false;
 	for (auto i : mData->inputs) {
 		auto flag1 = i->update();
-		auto flag2 =isUpdateBefore(i);
+		auto flag2 =isUpdateBefore(i);			//因为如果输入更新后，flag1已经无法再次检测到，因此需要加判断
 		updateFlag |= (flag1|| flag2);
 		mData->isAckInputAtLeastOnce = true;
 	}

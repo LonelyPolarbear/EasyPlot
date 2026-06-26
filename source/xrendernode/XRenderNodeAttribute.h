@@ -66,6 +66,14 @@ enum class XRenderNodeCameraMode {
 	camera2D =3,
 };
 
+enum class PenStyle {
+	Solid,
+	Dash,
+	Dot,
+	DashDot,
+	DashDotDot
+};
+
 class XRENDERNODE_API XRenderNodeSizePolicy :public XDataObject {
 	REGISTER_CLASS_META_DATA(XRenderNodeSizePolicy, XDataObject);
 protected:

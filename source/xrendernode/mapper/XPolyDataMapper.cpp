@@ -207,7 +207,7 @@ void XPolyDataMapper::updateData()
 	}
 
 	//数据已更新，刷新时间戳
-	//m_UpdateTime.Modified();
+	//m_UpdateTime.Modified();		//将更新放到函数外面，避免子类继承后，无法介入
 }
 
 void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, PrimitveType drawType)
@@ -239,13 +239,11 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 		//绑定对应的ebo
 		shader->setPolygonMode((int)PolygonMode::face);
 		m_face_ebo->bind();
-		if (instance_num > 0) {
-			glDrawElementsInstanced((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0, instance_num);
+		if (instance_num > 0 && face_index_num>0) {
+			if(face_index_num >0)
+				glDrawElementsInstanced((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0, instance_num);
 		}
-		else {
-			int i=0;
-			//glDrawElements((unsigned int)drawType, face_index_num, GL_UNSIGNED_INT, 0);
-		}
+		
 	}
 
 	if (hasMode(PolygonMode::line)) {
@@ -254,11 +252,9 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 		//glPolygonOffset(0.0f, -0.01f);  // 负值使线更靠近相机
 		shader->setPolygonMode((int)PolygonMode::line);
 		m_line_ebo->bind();
-		if(instance_num>0)
+		if(instance_num>0 &&line_index_num>0)
 			glDrawElementsInstanced((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0, instance_num);
-		else {
-			//glDrawElements((unsigned int)(PrimitveType::line), line_index_num, GL_UNSIGNED_INT, 0);
-		}
+		
 	}
 
 	if (hasMode(PolygonMode::point)) {
@@ -268,11 +264,9 @@ void XPolyDataMapper::draw(sptr<xshader> shader, PolygonMode polygonMode, Primit
 		glPointSize(5);
 		shader->setPolygonMode((int)PolygonMode::point);
 		m_point_ebo->bind();
-		if(instance_num >0)
+		if(instance_num >0 && point_index_num>0)
 			glDrawElementsInstanced((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0, instance_num);
-		else {
-			//glDrawElements((unsigned int)(PrimitveType::point), point_index_num, GL_UNSIGNED_INT, 0);
-		}
+		
 	}
 
 	m_vao->release();

@@ -6,6 +6,7 @@ copy .\3rdParty\glew\lib\*.lib .\output\bin\
 
 copy .\3rdParty\assimp\lib\*.lib .\output\bin\
 copy .\3rdParty\linenoise\lib\*.lib .\output\bin\
+copy .\3rdParty\boost\lib\boost_locale-vc143-mt-gd-x64-1_79.dll .\output\bin\
 
 rem copy .\3rdParty\hdf5\1.14.5\lib\*.lib .\output\bin\
 copy .\3rdParty\hdf5\bin\*.dll .\output\bin\

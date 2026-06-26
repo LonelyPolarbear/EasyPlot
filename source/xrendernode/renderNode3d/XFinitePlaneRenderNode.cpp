@@ -99,7 +99,7 @@ void XFinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4
 	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	auto shader = getShaderManger()->getGridShader3D();
+	auto shader = getShaderManger()->getGridShader();
 	shader->setObjectID(getID());
 
 	shader->use();
@@ -118,7 +118,7 @@ void XFinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4
 
 	//需要使用
 	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
-	glEnableObj->enable(XOpenGLEnable::EnableType::DEPTH_CLAMP);
+	//glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_CLAMP);
 	auto last = XOpenGLFuntion::xglDepthFunc(XOpenGL::DepthOrStencilCompFunType::XGL_LEQUAL);
 	this->draw(render,shader,parentMatrix);
 	XOpenGLFuntion::xglDepthFunc(last);
@@ -130,16 +130,12 @@ void XFinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4
 void XFinitePlaneRenderNode::draw(sptr<XBaseRender> render, std::shared_ptr<xshader> s, const Eigen::Matrix4f& parentMatrix)
 {
 	auto enable = makeShareDbObject<XOpenGLEnable>();
-	{
-		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0 };
-		glDrawBuffers(1, drawBuffers);
-	}
+
+	auto old = XOpenGLFuntion::xglDrawBuffers({XOpenGL::XGL_COLOR_ATTACHMENT0});
+	
 	XGeometryNode::draw(render, s, parentMatrix);
 
-	{
-		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-		glDrawBuffers(2, drawBuffers);
-	}
+	XOpenGLFuntion::xglDrawBuffers(old);
 }
 
 

@@ -3,6 +3,8 @@
 #include <xrendernode/datasource/xCustomSource.h>
 #include <Eigen/Eigen>
 class XFinitePlaneRenderNode;
+class XPolyLineRenderNode;
+class XGroupRenderNode3d;
 class XChartRenderNode : public XGeometryNode,public XBaseRenderNodeExtInterface {
 	REGISTER_CLASS_META_DATA(XChartRenderNode, XGeometryNode, XBaseRenderNodeExtInterface);
 protected:
@@ -14,13 +16,14 @@ public:
 	void Init() override;
 	void setRect(std::vector<XQ::Vec3f> points);
 	void draw(sptr<XBaseRender> render, const Eigen::Matrix4f& parentMatrix) override;
-	void draw(sptr<XBaseRender> render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix) override;
 
 	void setXRange(float min, float max);
 	void setYRange(float min, float max);
 
 	void gridTranslate(float tx, float ty);
 	void gridScale(float sx, float sy, const XQ::Vec2f center);
+	void addLineNode(sptr<XPolyLineRenderNode> line);
+	XQ::BoundBox getBoundBox(const Eigen::Matrix4f& m) const override;
 protected:
 	void LeftButtonPressEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord) override;
 	void LeftButtonReleaseEvent(sptr<XBaseRender>, XQ::Vec2i, XQ::KeyboardModifier, XEvent& event, XQ::Vec3f fragcoord)override;

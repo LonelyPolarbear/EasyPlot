@@ -92,7 +92,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 			glEnableObj->save();
 			glEnableObj->disable(XOpenGLEnable::EnableType::BLEND);
 			glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
-			drawFill(getShaderManger()->getFillShader(), m);
+			//drawFill(getShaderManger()->getFillShader(), m);
 			glEnableObj->restore();
 		}
 
@@ -102,7 +102,7 @@ void XGraphicsItem::draw(const Eigen::Matrix4f& m)
 		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		glEnableObj->disable(XOpenGLEnable::EnableType::DEPTH_TEST);
-		drawBorder(getShaderManger()->getShader2D(getDrawType()), m);
+		//drawBorder(getShaderManger()->getShader2D(getDrawType()), m);
 		glEnableObj->restore();
 	}
 
@@ -248,7 +248,7 @@ void XGraphicsItem::beginClip(const Eigen::Matrix4f& m)
 	initiallize();
 	if(!m_clipEnable)
 		return;
-	auto shader = getShaderManger()->getFillShader();
+	auto shader =/* getShaderManger()->getFillShader()*/makeShareDbObject<xshader>();
 	shader->use();
 	//在绘制之前，需要利用模板缓冲，避免图表外的曲线点被渲染
 	//开启模板测试
@@ -639,7 +639,7 @@ XQ::BoundBox XGraphicsItem::getBoundBox()
 	XQ::Vec3d maxBound = XQ::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_coordArray->size() == 0)
-		return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+		return XQ::BoundBox();
 
 	float* pData = m_coordArray->data(0);
 	for (int i = 0; i < m_coordArray->getNumOfTuple(); i++) {
@@ -650,7 +650,7 @@ XQ::BoundBox XGraphicsItem::getBoundBox()
 		minBound = XQ::Vec3d(std::min<double>(minBound.x(), pos.x()), std::min<double>(minBound.y(), pos.y()), pData[i * 3 + 2]);
 		maxBound = XQ::Vec3d(std::max<double>(maxBound.x(), pos.x()), std::max<double>(maxBound.y(), pos.y()), pData[i * 3 + 2]);
 	}
-	return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+	return XQ::BoundBox(minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z());
 }
 
 float* XGraphicsItem::getMatrix() const

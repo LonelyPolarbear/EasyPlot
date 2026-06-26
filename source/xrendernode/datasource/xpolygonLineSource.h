@@ -3,11 +3,15 @@
 #include "xshapeSource.h"
 #include <filesystem>
 
-class XRENDERNODE_API XCustomSource : public XShapeSource {
+/**
+ * @class XPolygonLineSource
+ * @detail 多端线的source，主要差异是其采用带邻接信息的线段
+ */
+class XRENDERNODE_API XPolygonLineSource : public XShapeSource {
 protected:
-	XCustomSource();
+	XPolygonLineSource();
 
-	~XCustomSource();
+	~XPolygonLineSource();
 
 public:
 	void updateVertextCoordArray() override;
@@ -27,8 +31,14 @@ public:
 	void updateVertexIndexArray() override;
 
 	void updateInstancedArray() override;
-
+	
 	void updateTextureCoordArray() override{};	
 
 	void updateCustomArray() override{};
+
+	void setPolygonLineCoords(sptr<XFloatArray> coords);
+	sptr<XFloatArray> getPolygonLineCoords() const;
+protected:
+	class Internal;
+	std::unique_ptr<Internal> mData;
 };

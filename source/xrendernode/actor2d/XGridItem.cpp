@@ -40,7 +40,7 @@ XGridItem::~XGridItem()
 void XGridItem::draw(const Eigen::Matrix4f& m)
 {
 	initiallize();
-	auto shader = getShaderManger()->getGridShader2D();
+	auto shader = /*getShaderManger()->getGridShader2D()*/makeShareDbObject<xshader>();
 	drawBorder(shader,m);
 
 	auto selfTransform = this->getTransform();
@@ -62,7 +62,7 @@ void XGridItem::drawBorder(std::shared_ptr<xshader> border_shader, const Eigen::
 
 	updateData();
 	
-	auto shader = getShaderManger()->getGridShader2D();
+	auto shader = /*getShaderManger()->getGridShader2D()*/makeShareDbObject<xshader>();
 	shader->use();
 	shader->setBool("isScreenGrid", m_isScreenGrid);
 

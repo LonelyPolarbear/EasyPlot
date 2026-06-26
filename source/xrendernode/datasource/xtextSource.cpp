@@ -144,14 +144,6 @@ void XTextSource::updateTexCoord()
 			mData->instanceTextCoordArray->setTuple(4 * i + 1, x_ + w_, y_, layer);
 			mData->instanceTextCoordArray->setTuple(4 * i + 2, x_ + w_, y_ + h_, layer);
 			mData->instanceTextCoordArray->setTuple(4 * i + 3, x_, y_ + h_, layer);
-
-			/*
-			mData->instanceTextCoordArray->setTuple(4 * i + 0,		0, 0, 0);
-			mData->instanceTextCoordArray->setTuple(4 * i+	1 ,		1,0, 0);
-			mData->instanceTextCoordArray->setTuple(4 * i + 2,		1, 1, 0);
-			mData->instanceTextCoordArray->setTuple(4 * i + 3,		0, 1, 0);
-			*/
-
 			//×Ö·ûÎ»ÖÃ
 
 			float scale_x = glyph.width * 0.5 * scale;

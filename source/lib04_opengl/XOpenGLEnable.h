@@ -15,6 +15,7 @@ enum class EnableType:unsigned int {
 	PROGRAM_POINT_SIZE = 0x8642,
 	STENCIL_TEST = 0x0B90,						//GL_STENCIL_TEST
 	DEPTH_CLAMP = 0x864F,						//GL_DEPTH_CLAMP
+	POLYGON_OFFSET_FILL = 0x8037
 };
 protected:
 	XOpenGLEnable();
@@ -40,6 +41,7 @@ protected:
 	void saveCullFaceState();
 	void saveProgramPointSizeState();
 	void saveStencilTestState();
+	void savePolygenOffsetState();
 
 	void restoreDepthTestState();
 	void restoreMultisampleState();
@@ -48,6 +50,7 @@ protected:
 	void restoreCullFaceState();
 	void restoreProgramPointSizeState();
 	void restoreStencilTestState();
+	void restorePolygenOffsetState();
 protected:
 	class Intertal;
 private:

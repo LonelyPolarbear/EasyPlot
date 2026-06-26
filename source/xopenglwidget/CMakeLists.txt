@@ -82,6 +82,7 @@ list(APPEND LIB_DIRECTORIES
 )
 
 target_compile_definitions(${proName} PRIVATE LIBPANEL01_XOPENGLWIDGET_DLL)
+target_compile_definitions(${proName} PRIVATE NOMINMAX)
 set_target_properties(${proName} PROPERTIES OUTPUT_NAME ${outPutName})
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIB_TARGETS ${proName})
 set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS ${outPutName})

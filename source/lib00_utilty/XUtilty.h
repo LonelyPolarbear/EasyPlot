@@ -16,6 +16,7 @@
 #include <any>
 #include <iostream>
 #include <utility>
+#include <limits>
 
 #define PY_INIT_HELPER(name) \
 class PyInitHelper_##name \
@@ -256,12 +257,32 @@ namespace XQ {
 	};*/
 	
 	struct lib00_utilty_API BoundBox {
-		double xmin{ 0 };
-		double ymin{ 0 };
-		double zmin{ 0 };
-		double xmax{ 0 };
-		double ymax{ 0 };
-		double zmax{ 0 };
+		double xmin;
+		double ymin;
+		double zmin;
+		double xmax;
+		double ymax;
+		double zmax;
+
+		BoundBox(double xmin_, double ymin_, double zmin_, double xmax_, double ymax_, double zmax_):
+			xmin(xmin_)
+			, ymin(ymin_)
+			, zmin(zmin_)
+			, xmax(xmax_)
+			, ymax(ymax_)
+			, zmax(zmax_)
+		{
+
+		}
+
+		BoundBox()
+			: xmin(std::numeric_limits<double>::max())
+			, ymin(std::numeric_limits<double>::max())
+			, zmin(std::numeric_limits<double>::max())
+			, xmax(std::numeric_limits<double>::lowest())
+			, ymax(std::numeric_limits<double>::lowest())
+			, zmax(std::numeric_limits<double>::lowest())
+		{}
 
 		void merge(const BoundBox& other) {
 			xmin = std::min<double>(xmin, other.xmin);

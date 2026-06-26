@@ -115,8 +115,11 @@ void XGeometryNode::draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& paren
 		enable->enable(XOpenGLEnable::EnableType::MULTISAMPLE);
 		enable->enable(XOpenGLEnable::EnableType::DEPTH_TEST);
 		//enable->enable(XOpenGLEnable::EnableType::STENCIL_TEST);
-		GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-		glDrawBuffers(2, drawBuffers);
+		//GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		//glDrawBuffers(2, drawBuffers);
+
+		auto old =XOpenGLFuntion::xglDrawBuffers({XOpenGL::XGL_COLOR_ATTACHMENT0,XOpenGL::XGL_COLOR_ATTACHMENT0 +1});
+
 		XOpenGLFuntion::xglClearColor(XQ::Vec4u(0, 0, 0, 0), 1);
 		XOpenGLFuntion::xglClearColor(XQ::Vec4f(0, 0, 0, 0), 0);
 		XOpenGLFuntion::xglClearDepthStencil(1,0);
@@ -125,8 +128,6 @@ void XGeometryNode::draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& paren
 		draw(render, getShaderManger()->getShader3D(getDrawType()), parentMatrix);
 
 		auto id_texture = fbo->getColorAttachment(1);
-		/*auto ssss = id_texture->mapMultiSample2pbo(XOpenGLFramebufferObject::Attachment::Color)->map2cpu();
-		auto c = ssss->heteroCast<uint32_t>(1);*/
 		auto color_texture = fbo->getColorAttachment(0);
 
 		auto ss = fbo->isComplete();
@@ -159,9 +160,11 @@ void XGeometryNode::draw(sptr<XBaseRender>  render, const Eigen::Matrix4f& paren
 		enable->restore();
 	}
 	
-	Eigen::Matrix4f matrix = parentMatrix * m_transform.matrix();
-	for (auto m : *renderNodes) {
-		m->asDerived<XRenderNode>()->draw(render,matrix);
+	if (AttrRecursiveDraw->getValue()) {
+		Eigen::Matrix4f matrix = parentMatrix * m_transform.matrix();
+		for (auto m : *renderNodes) {
+			m->asDerived<XRenderNode>()->draw(render, matrix);
+		}
 	}
 }
 

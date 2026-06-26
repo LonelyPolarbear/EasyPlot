@@ -419,6 +419,19 @@ XQ::Recti XOpenGLFuntion::xglglScissor(XQ::Recti rect)
 	return XQ::Recti(scissor[0],scissor[1],scissor[2],scissor[3]);
 }
 
+void XOpenGLFuntion::xglPolygonOffset(float factor, float unit)
+{
+	glPolygonOffset(factor,unit);
+	checkGLError();
+}
+
+void XOpenGLFuntion::xglGetPolygonOffsetParm(float& factor, float& unit)
+{
+	glGetFloatv(GL_POLYGON_OFFSET_FACTOR, &factor);
+	glGetFloatv(GL_POLYGON_OFFSET_UNITS, &unit);
+	checkGLError();
+}
+
 XQ::Recti XOpenGLFuntion::xGetglScissor()
 {
 	GLint scissor[4]{0,0,1,1};
@@ -474,6 +487,22 @@ std::optional<int> XOpenGLFuntion::xGetTextureSampleNum(int textureId, XOpenGL::
 	}
 	return samples;
 }
+
+std::vector<uint32_t> XOpenGLFuntion::xglDrawBuffers(const std::vector<uint32_t>& drawAttachment)
+{
+	GLint maxDrawBuffers = 0;
+	glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
+
+	std::vector<uint32_t> oldDrawBuffers;
+	oldDrawBuffers.resize(maxDrawBuffers);
+	for (GLint i = 0; i < maxDrawBuffers; ++i) {
+		glGetIntegerv(GL_DRAW_BUFFER0 + i, (GLint*)(oldDrawBuffers.data()+i));
+	}
+
+	glDrawBuffers(drawAttachment.size(), drawAttachment.data());
+	return oldDrawBuffers;
+}
+
 //glGetTextureLevelParameteriv(textureID, 0, GL_TEXTURE_SAMPLES, &samples);
 /*
 最大本地工作组大小限制

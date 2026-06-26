@@ -1,5 +1,13 @@
 #pragma once
 #include "XOpenglApi.h"
+/**
+ * @brief 一些opengl常量
+ */
+namespace XOpenGL {
+	constexpr unsigned int XGL_DRAW_BUFFER0 = 0x8825;
+	constexpr unsigned int XGL_MAX_DRAW_BUFFERS = 0x8824;
+	constexpr unsigned int XGL_COLOR_ATTACHMENT0 = 0x8CE0;
+}
 
 /// <summary>
 /// opengl相关的宏定义

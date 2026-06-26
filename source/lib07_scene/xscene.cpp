@@ -185,7 +185,7 @@ public:
 		if (!viewSelection) {
 			viewSelection = makeShareDbObject<XViewSelection>();
 			viewSelection->create();
-            viewSelection->setPickShader(shaderManger->getPickShader3D());
+            //viewSelection->setPickShader(shaderManger->getPickShader3D());
 			viewSelection->updateBufferSize(getViewportWidth(), getViewportHeight());
 		}
     }
@@ -194,8 +194,8 @@ public:
 		if (!viewSelection2D) {
             viewSelection2D = makeShareDbObject<XViewSelection2D>();
             viewSelection2D->create();
-			viewSelection2D->setPickFillShader(shaderManger->getPickFillShader2D());
-			viewSelection2D->setPickShader(shaderManger->getPickShader2D());
+			//viewSelection2D->setPickFillShader(shaderManger->getPickFillShader2D());
+			//viewSelection2D->setPickShader(shaderManger->getPickShader2D());
             viewSelection2D->updateBufferSize(getViewportWidth(), getViewportHeight());
             viewSelection2D->setGetMatrixforScreen2Scene(f);
             viewSelection2D->setScene(scene);
@@ -667,7 +667,7 @@ void XScene::render3D()
         glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		auto shader = d->shaderManger->getGridShader3D();
+		auto shader = d->shaderManger->getGridShader();
 		shader->use();
         Eigen::Affine3f t= Eigen::Affine3f::Identity();
         t.rotate(Eigen::AngleAxisf(XQ::Matrix::radian(90), Eigen::Vector3f::UnitX()));
@@ -819,7 +819,7 @@ void XScene::render2D()
 	{
 		glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		auto shader = d->shaderManger->getGridShader2D();
+		auto shader = d->shaderManger->getGridShader();
 		auto shape = d->gridShape2d;
 		shape->draw(Eigen::Matrix4f::Identity());
 		glEnableObj->restore();
@@ -1151,9 +1151,7 @@ void XScene::doneCurrent()
 }
 
 XQ::BoundBox  XScene::computeBoundBox() {
-	 constexpr double limitMax = std::numeric_limits<double>::max();
-     constexpr double limitMin = std::numeric_limits<double>::lowest();;
-    XQ::BoundBox boundBox{ limitMax ,limitMax ,limitMax ,limitMin,limitMin,limitMin };
+    XQ::BoundBox boundBox;
     for (auto& shape : d->shapes) {
         auto shapeBoundBox = shape->getBoundBox(Eigen::Matrix4f::Identity());
         boundBox.xmin = std::min(boundBox.xmin, shapeBoundBox.xmin);

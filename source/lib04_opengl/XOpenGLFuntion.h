@@ -177,6 +177,9 @@ public:
 
 	static XQ::Recti xglglScissor(XQ::Recti rect);
 
+	static void xglPolygonOffset(float factor, float unit);
+	static void xglGetPolygonOffsetParm(float& factor,float& unit);
+
 	/**
 	 * @brief 获取剪切矩形大小
 	 */
@@ -187,5 +190,10 @@ public:
 	static std::optional<XQ::Vec3i> xGetTextureSize(int textureID, XOpenGL::TextureTarget target);
 
 	static std::optional<int> xGetTextureSampleNum(int textureId, XOpenGL::TextureTarget target);
+
+	/**
+	 * @brief 设置新的绘制缓冲区，并返回旧的绘制缓冲区
+	 */
+	static std::vector<uint32_t> xglDrawBuffers(const std::vector<uint32_t>& drawAttachment);
 
 };

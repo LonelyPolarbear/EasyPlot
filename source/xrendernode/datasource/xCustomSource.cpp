@@ -53,3 +53,8 @@ void XCustomSource::updateLineColorArray()
 void XCustomSource::updateVertexIndexArray()
 {
 }
+
+void XCustomSource::updateInstancedArray()
+{
+	XShapeSource::updateInstancedArray();
+}

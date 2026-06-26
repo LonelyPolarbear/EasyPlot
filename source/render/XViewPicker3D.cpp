@@ -129,7 +129,7 @@ bool XViewPicker3D::renderLayer(int layer)
 	auto manger =render->getRenderWindow()->getShaderManger();
 	if(!manger)
 		return false;
-	auto pick_shader = manger->getPickShader3D();
+	auto pick_shader = /*manger->getPickShader3D();*/ makeShareDbObject<xshader>();
 
 	if(!makeCurrent())
 		return false;

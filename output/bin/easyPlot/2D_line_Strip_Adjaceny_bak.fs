@@ -2,8 +2,11 @@
 #version 430 core
  out vec4 FragColor;
  in vec2 texCoord;		//FSAA
+ layout(std430, binding = 0) buffer MySSBO_Block  {
+    vec4 data[]; // 动态大小数组
+}MySSBO;
 
- layout(std430, binding = 5) buffer MySSBO_Block2  {
+ layout(std430, binding = 1) buffer MySSBO_Block2  {
     int size; // 动态大小数组
     float data[]; // 动态大小数组
 }MySSBO_Len;        //记录每一个图元的长度
@@ -37,11 +40,21 @@ uniform int polygonMode;
 
 uniform int colorMode;																		//颜色模式
 uniform vec4 singleColor;																	//单色
+uniform vec4 selectTestColor;															//选择测试颜色
+uniform vec4 preSelectColor;															//预选颜色
 
 uniform uint objectID;																		//当前对象ID
-uniform int u_penStyle;																		    //画笔样式
+uniform int penStyle;																		    //画笔样式
 
-//flat in float gs_lineLength;     
+layout(binding = 1) uniform sampler2D depthSample;					//深度纹理，暂未用到
+layout(binding = 2) uniform usampler2D objectIdSample;				//对象ID纹理(来自FBO)，用于预选
+
+
+//顶点属性输入
+in vec4 in_color;
+flat in float SCalelineWidth;               //SCalelineWidth可能小于2
+flat in float SCalelineWidthInGs;       //用于GS中计算线宽，受缩放影响，但是在几何着色器中使用的线宽 >=2
+flat in float gs_lineLength;                 //线的长度，是屏幕空间的长度，不受缩放影响
 
 float paintDashLine(float distancex, float dashLength, float dashSpace,float alpha){
     float result = alpha;
@@ -120,28 +133,40 @@ float paintDashDotDotLine(float distancex, float dashLength, float dashSpace, fl
 
 void main()
 {	
-   // FragColor = singleColor;
-   // return;
-
 	if(colorMode == COLOMODE_SINGLECOLOR){
          float minLineWidth =1;
-         float ratio =1;
+         float ratio =min(SCalelineWidth/ minLineWidth,1);       //alpha需要叠加这个值，从而让线看着更透明，从而表现线的缩放效果
+        // float ratio = SCalelineWidth;
         float alpha =1;
-
+#if 0
+         float len =  SCalelineWidthInGs;      
+         float uHalfWidth  = 0.5 * len;
+         vec2 derivative = fwidth(texCoord.xy);
+         float uAARadius =  clamp(uHalfWidth,0.5f,1.f); 
+         float distancey = abs(texCoord.y - 0.5) * len;
+         alpha = 1.0 - smoothstep(uHalfWidth-uAARadius, uHalfWidth+uAARadius*0.3, distancey);
+#else
          float uHalfWidth  = 0.5;
          vec2 derivative = fwidth(texCoord.xy);
          float uAARadius = derivative.y;
          float distancey = abs(texCoord.y - 0.5);
-       
-          alpha = 1.0 - smoothstep(uHalfWidth-uAARadius, uHalfWidth+uAARadius*0.3, distancey);
-          float gs_lineLength =MySSBO_Len.data[gl_PrimitiveID+1]-MySSBO_Len.data[gl_PrimitiveID];
+         if(SCalelineWidthInGs <=1.001){
+            //线宽太小，不用AA
+            alpha =1;
+            //alpha = 1.0 - smoothstep(uHalfWidth-uAARadius, uHalfWidth+uAARadius*2, distancey);
+            //alpha = 1.0 - smoothstep(0.4, 0.6, distancey);
+            
+         }
+         else
+            alpha = 1.0 - smoothstep(uHalfWidth-uAARadius, uHalfWidth+uAARadius*0.3, distancey);
+#endif
           float distancex = texCoord.x * gs_lineLength;  //当前像素在当前图元的长度
           distancex = distancex+MySSBO_Len.data[gl_PrimitiveID];
           float dashLength = 10;
           float dashSpace = 5;
           float dotLength = 5;
           float dotSpace = 10;
-          switch(u_penStyle){
+          switch(penStyle){
               case PEN_STYLE_SOLID:
                   break;
               case PEN_STYLE_DASH:

@@ -107,7 +107,7 @@ XQ::BoundBox XShapeSource::getBoundBox()
 	XQ::Vec3d maxBound = XQ::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_VertexCoord->size() == 0)
-		return XQ::BoundBox{ minBound.x(), maxBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+		return XQ::BoundBox( minBound.x(), maxBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z());
 
 	float* pData = m_VertexCoord->data(0);
 	for (int i = 0; i < m_VertexCoord->getNumOfTuple(); i++) {
@@ -116,7 +116,7 @@ XQ::BoundBox XShapeSource::getBoundBox()
 		minBound = XQ::Vec3d(std::min(minBound.x(), pos.x()), std::min(minBound.y(), pos.y()), std::min(minBound.z(), pos.z()));
 		maxBound = XQ::Vec3d(std::max(maxBound.x(), pos.x()), std::max(maxBound.y(), pos.y()), std::max(maxBound.z(), pos.z()));
 	}
-	return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+	return XQ::BoundBox(minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z());
 }
 
 XQ::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
@@ -131,7 +131,7 @@ XQ::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 	XQ::Vec3d maxBound = XQ::Vec3d(limitMin, limitMin, limitMin);
 
 	if (m_VertexCoord->size() == 0)
-		return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+		return XQ::BoundBox();
 
 	float* pData = m_VertexCoord->data(0);
 	Eigen::Affine3f instanceMat = Eigen::Affine3f::Identity();
@@ -148,7 +148,7 @@ XQ::BoundBox XShapeSource::getBoundBox(const Eigen::Affine3f& mat)
 		}
 		//pos = mat * pos;
 	}
-	return XQ::BoundBox{ minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z()};
+	return XQ::BoundBox( minBound.x(), minBound.y(), minBound.z(), maxBound.x(), maxBound.y(), maxBound.z());
 }
 
 void XShapeSource::writeToFile(const std::string& filename)

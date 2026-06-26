@@ -96,6 +96,7 @@ SET(LIB_NAMES PRIVATE
 				xfreetype${DLL_DEBUG_POSTFIX}
 	)
 
+target_compile_definitions(${proName} PRIVATE NOMINMAX)
 target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin
 										${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 )		#库目录

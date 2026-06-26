@@ -48,6 +48,12 @@ namespace ns_xopengl_enable {
         XOpenGL::StencilBehavior zfail = XOpenGL::StencilBehavior::XGL_KEEP;
         XOpenGL::StencilBehavior zpass = XOpenGL::StencilBehavior::XGL_REPLACE;
     };
+
+    struct polygon_offset_fill_test_t {
+        bool isEnable = false;
+        float factor;
+        float unit;
+    };
 }
 
 
@@ -57,7 +63,7 @@ public:
     }
 
 public:
-	std::map<GLenum, bool> oldEnableMap;
+	//std::map<GLenum, bool> oldEnableMap;
 	ns_xopengl_enable::state_depth_test_t depthTestState;
 	ns_xopengl_enable::state_multisample_t multisampleState;
 	ns_xopengl_enable::state_scissor_test_t scissorTestState;
@@ -65,6 +71,7 @@ public:
 	ns_xopengl_enable::state_cull_face_t cullFaceState;
 	ns_xopengl_enable::state_program_point_size_t programPointSizeState;
 	ns_xopengl_enable::state_stencil_test_t stencilTestState;
+	ns_xopengl_enable::polygon_offset_fill_test_t polygonOffsetState;
 };
 XOpenGLEnable::XOpenGLEnable():mData(new Intertal())
 {
@@ -89,7 +96,7 @@ void XOpenGLEnable::setScissorRect(XQ::Recti rect)
 
 void XOpenGLEnable::disable(EnableType type)
 {
-    mData->oldEnableMap[(GLenum)type] = glIsEnabled((GLenum)type);
+    //mData->oldEnableMap[(GLenum)type] = glIsEnabled((GLenum)type);
 	glDisable((GLenum)type);
 }
 
@@ -108,7 +115,7 @@ void XOpenGLEnable::restore()
             glDisable(it->first);
         }
     }*/
-    mData->oldEnableMap.clear();
+    //mData->oldEnableMap.clear();
 
     restoreDepthTestState();
     restoreMultisampleState();
@@ -117,6 +124,7 @@ void XOpenGLEnable::restore()
     restoreCullFaceState();
     restoreProgramPointSizeState();
     restoreStencilTestState();
+    restorePolygenOffsetState();
 }
 
 void XOpenGLEnable::save()
@@ -128,6 +136,7 @@ void XOpenGLEnable::save()
     saveCullFaceState();
     saveProgramPointSizeState();
     saveStencilTestState();
+    savePolygenOffsetState();
 }
 
 void XOpenGLEnable::saveDepthTestState()
@@ -169,6 +178,12 @@ void XOpenGLEnable::saveStencilTestState()
     mData->stencilTestState.isEnable = glIsEnabled((GLenum)EnableType::STENCIL_TEST);
     XOpenGLFuntion::xGetStencilFunc(mData->stencilTestState.fun,mData->stencilTestState.ref,mData->stencilTestState.mask);
     XOpenGLFuntion::xGetStencilOp(mData->stencilTestState.sfail,mData->stencilTestState.zfail,mData->stencilTestState.zpass);
+}
+
+void XOpenGLEnable::savePolygenOffsetState()
+{
+    mData->polygonOffsetState.isEnable = glIsEnabled((GLenum)EnableType::POLYGON_OFFSET_FILL);
+    XOpenGLFuntion::xglGetPolygonOffsetParm(mData->polygonOffsetState.factor, mData->polygonOffsetState.unit);
 }
 
 void XOpenGLEnable::restoreDepthTestState()
@@ -235,4 +250,13 @@ void XOpenGLEnable::restoreStencilTestState()
         glDisable((GLenum)EnableType::STENCIL_TEST);
     XOpenGLFuntion::xglStencilFunc(mData->stencilTestState.fun,mData->stencilTestState.ref,mData->stencilTestState.mask);
     XOpenGLFuntion::xglStencilOp(mData->stencilTestState.sfail,mData->stencilTestState.zfail,mData->stencilTestState.zpass);
+}
+
+void XOpenGLEnable::restorePolygenOffsetState()
+{
+	if (mData->polygonOffsetState.isEnable)
+		glEnable((GLenum)EnableType::POLYGON_OFFSET_FILL);
+	else
+		glDisable((GLenum)EnableType::POLYGON_OFFSET_FILL);
+    XOpenGLFuntion::xglPolygonOffset(mData->polygonOffsetState.factor,mData->polygonOffsetState.unit);
 }

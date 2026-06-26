@@ -27,6 +27,7 @@ LIST (APPEND LIB_INCLUDE_DIRECTORY
 #-------------------------------------------------------
 LIST(APPEND LIB_NAMES 	
 	dataBase${DLL_DEBUG_POSTFIX}
+	xutilty${DLL_DEBUG_POSTFIX}
 	
 )
 

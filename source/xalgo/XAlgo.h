@@ -76,6 +76,17 @@ namespace XQ::XAlgo {
 
 	extern xalgo_API int next_in_cycle(int x, int m, int n) ;
 
+	/**
+	 * @brief 生成正弦波曲线
+	 * @param T 正弦曲线的周期 
+	 * @param numInT 每个周期包含的点的个数
+	 * @param amplitude 幅值
+	 * @param yoffset 垂直方向的偏移
+	 * @param xoffset 垂直方向的偏移
+	 * @param numOfT 生成几个周期的数据
+	 */
+	extern xalgo_API  sptr<XFloatArray> generateSinSave(double T,int numInT ,double amplitude,double xoffset, double yoffset,double numOfT);
+
 	/// <summary>
 	///  把做个组分相同的XDataArray合并为一个更大的XDataArray
 	/// </summary>

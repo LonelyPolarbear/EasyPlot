@@ -75,7 +75,7 @@ void XInfinitePlaneRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matri
 	glEnableObj->enable(XOpenGLEnable::EnableType::BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	auto shader = getShaderManger()->getGridShader3D();
+	auto shader = getShaderManger()->getGridShader();
 	shader->setObjectID(getID());
 	if (isFeedbackInit == false) {
 		shader->addFeedbackShader({ "fragPos3D" });
