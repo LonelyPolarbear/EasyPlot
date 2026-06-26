@@ -17,7 +17,7 @@ file(GLOB_RECURSE SOURCES_FILES *.cpp)
 #Qt支持
 #-------------------------------------------------------
 #查找所有的需要moc预处理的文件
-set(MOC_FILES easyPlotWidget.h XEasyPlotWidget.h)
+set(MOC_FILES XEasyPlotWidget.h)
 
 #GLOB_RECURSE 
 FILE(GLOB UI_FILES "ui/*.ui")
