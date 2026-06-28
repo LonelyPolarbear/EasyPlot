@@ -1,5 +1,9 @@
+/**
+ * @warning 该类及其子类全部废弃，后续会全部删除
+ */
+
 #pragma once
-#include "xrendernodeApi.h"
+#include "../xrendernodeApi.h"
 #include <dataBase/XDataBaseObject.h>
 #include <Eigen/Eigen>
 #include <dataBase/XTimeStamp.h>
@@ -7,7 +11,7 @@
 #include <dataBase/XVector.h>
 #include <mutex>
 #include <dataBase/XDataArray.h>
-#include "XGeometryNode.h"
+#include "../XGeometryNode.h"
 
 class xshader;
 class xcamera;

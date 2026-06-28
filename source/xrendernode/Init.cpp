@@ -39,6 +39,7 @@ static void InitBaseObjectMeta() {
 	XBaseObjectMeta::registerObject<XAttr_Enum<ColorMode>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<VAlign>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<HAlign>>();
+	XBaseObjectMeta::registerObject<XAttr_Enum<PenStyle>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<ColorMode>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<PrimitveType>>();
 	XBaseObjectMeta::registerObject<XAttr_Enum<XRenderNodeOriginPositionType>>();
@@ -52,6 +53,7 @@ static void InitAttrToString() {
 	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PrimitveType>>(), XattrEnumToString<PrimitveType>);
 	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<VAlign>>(), XattrEnumToString<VAlign>);
 	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<HAlign>>(), XattrEnumToString<HAlign>);
+	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PenStyle>>(), XattrEnumToString<PenStyle>);
 	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionType>>(), XattrEnumToString<XRenderNodeOriginPositionType>);
 	XattrToQstringFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<XRenderNodeOriginPositionOrien>>(), XattrEnumToString<XRenderNodeOriginPositionOrien>);
 }

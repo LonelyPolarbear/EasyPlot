@@ -19,10 +19,9 @@ public:
 
 	virtual void contextMenuEvent(QContextMenuEvent* event)override;
 
-	void test1();
-	void test2();
-	void test3();
-	void test4();
+	void test_multiViewPort();
+	void test_text();
+	void test_chart();
 
 
 	void slotAddCube();

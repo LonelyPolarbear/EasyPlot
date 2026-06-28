@@ -65,6 +65,13 @@ public:
 		virtual bool addChildRenderNode(sptr<XBaseRenderNode> child) =0;
 
 		/**
+		 * @brief 同步状态，如相机类型
+		 */
+		virtual void synchronizationStatus() = 0;
+
+		virtual void synchronizationStatusImpl()= 0;
+
+		/**
 		 * @brief 移除子渲染节点
 		 */
 		virtual bool removeChildRenderNode(sptr< XBaseRenderNode> child) =0;

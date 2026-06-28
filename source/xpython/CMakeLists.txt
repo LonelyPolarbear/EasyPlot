@@ -33,6 +33,8 @@ list(APPEND LIB_NAMES
 	dataBase${DLL_DEBUG_POSTFIX}
 	MyLib::pybind
 	MyLib::example
+	xshareVar${DLL_DEBUG_POSTFIX}
+	xcodecvt${DLL_DEBUG_POSTFIX}
 )
 
 list(APPEND LIB_DIRECTORIES ${CMAKE_SOURCE_DIR}/output/bin)

@@ -246,4 +246,8 @@ void XMVD_API InitXAttrItemDelegate()
 	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<VAlign>>(), CreateEditor_XAttr_Enum<VAlign>);
 	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<VAlign>>(), SetEditorData_XAttr_Enum<VAlign>);
 	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<VAlign>>(), SetModelData_XAttr_Enum);
+
+	XAttrItemDelegateFactory.registerProcessor<0>(XQ_META::ClassName<XAttr_Enum<PenStyle>>(), CreateEditor_XAttr_Enum<PenStyle>);
+	XAttrItemDelegateFactory.registerProcessor<1>(XQ_META::ClassName<XAttr_Enum<PenStyle>>(), SetEditorData_XAttr_Enum<PenStyle>);
+	XAttrItemDelegateFactory.registerProcessor<2>(XQ_META::ClassName<XAttr_Enum<PenStyle>>(), SetModelData_XAttr_Enum);
 }

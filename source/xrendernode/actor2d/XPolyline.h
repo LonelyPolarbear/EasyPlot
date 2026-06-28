@@ -1,5 +1,5 @@
 #pragma once
-#include "../XGraphicsItem.h"
+#include "XGraphicsItem.h"
 
 
 class XRENDERNODE_API XPolyline :public XGraphicsItem {

@@ -181,6 +181,10 @@ void XGeometryNode::adjustPos(sptr<XBaseRender> render, std::shared_ptr<xshader>
 
 void XGeometryNode::adjustScreenCameraPos(sptr<XBaseRender> render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix)
 	{
+		auto view_port = render->getConvertViewPort();
+		auto w = view_port[2];
+		auto h = view_port[3];
+
 		auto camera = render->getSceenCamera();
 		auto neraPlaneFrame = camera->getNearPlaneFrame(render);
 		auto virtualScreenFrame = camera->getVirtualScreenFrame(render);
@@ -196,7 +200,42 @@ void XGeometryNode::adjustScreenCameraPos(sptr<XBaseRender> render, std::shared_
 		if (Attribute->AttrSizePolicy->AttrPositionType->getValue() == XRenderNodeOriginPositionType::fixed) {
 			//屏幕固定位置
 			auto pos = Attribute->AttrSizePolicy->AttrPositionPos->getValue();
-			//pos =virtualScreenFrame*parent_mat*point
+
+			//将视口固定位置，转换位virtualScreenAffine的位置
+			auto orien = Attribute->AttrSizePolicy->AttrPositionOrien->getValue();
+			switch (orien)
+			{
+			case XRenderNodeOriginPositionOrien::left_top:
+			{
+				pos[0] = -0.5 * w + pos[0];
+				pos[1] = 0.5 * h - pos[1];
+			}
+			break;
+			case XRenderNodeOriginPositionOrien::left_bottom:
+			{
+				pos[0] = -0.5 * w + pos[0];
+				pos[1] = -0.5 * h + pos[1];
+			}
+			break;
+			case XRenderNodeOriginPositionOrien::right_top:
+			{
+				pos[0] = 0.5 * w - pos[0];
+				pos[1] = 0.5 * h - pos[1];
+			}
+			break;
+			case XRenderNodeOriginPositionOrien::right_bottom:
+			{
+				pos[0] = 0.5 * w - pos[0];
+				pos[1] = -0.5 * h + pos[1];
+			}
+			break;
+			case XRenderNodeOriginPositionOrien::center:
+				pos = pos;
+				break;
+			default:
+				break;
+			}
+
 			Eigen::Vector3f new_pos = parent_mat.inverse() * virtualScreenAffine.inverse() * Eigen::Vector3f(pos[0], pos[1], 0);
 			auto ppp = virtualScreenAffine * parent_mat * new_pos;
 			auto sss = neraPlaneAffine * ppp;
@@ -225,8 +264,8 @@ void XGeometryNode::adjustScreenCameraPos(sptr<XBaseRender> render, std::shared_
 			transform_object_data.sx = object_scale_x;
 			transform_object_data.sy = object_scale_y;
 
-			transform_object_data.sx = 1. / scale_x;
-			transform_object_data.sy = 1. / scale_y;
+			//transform_object_data.sx = 1. / scale_x;
+			//transform_object_data.sy = 1. / scale_y;
 
 			transform_object_data.sz = 1;
 		}
@@ -337,6 +376,22 @@ void XGeometryNode::adjust3DCameraPos(sptr<XBaseRender> render, std::shared_ptr<
 		auto mat = XQ::Matrix::computeMatrix(transform_object_data);
 		object_mat.matrix() = mat;
 		this->setTransform(object_mat);
+	}
+}
+
+bool XGeometryNode::addChildRenderNode(sptr<XBaseRenderNode> child)
+{
+	return XRenderNode3D::addChildRenderNode(child);
+}
+
+void XGeometryNode::synchronizationStatusImpl()
+{
+	auto num = getChildRenderNodeCount();
+	for (int i = 0; i < num; i++) {
+		auto subNode = getChildRenderNode(i);
+		if (auto n = subNode->asDerived<XGeometryNode>()) {
+			n->Attribute->AttrCameraMode->setValue(Attribute->AttrCameraMode->getValue());
+		}
 	}
 }
 

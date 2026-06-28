@@ -191,7 +191,7 @@ add_dependencies(xopenglwidget  lib00_utilty lib01_shader lib02_camera lib04_ope
 add_dependencies(easyPlot  xopenglwidget lib04_opengl xrendernode  lib08_freetype render xlog sharevar)
 add_dependencies(xmvd  dataBase lib00_utilty xlog xrendernode)
 add_dependencies(main sharevar easyPlot xlog xpython sharevar)
-add_dependencies(xpython xlog)
+add_dependencies(xpython xlog sharevar xcodecvt)
 add_dependencies(xbaserender lib00_utilty dataBase xlog lib04_opengl xcodecvt)
 
 

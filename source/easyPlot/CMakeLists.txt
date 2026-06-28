@@ -81,11 +81,8 @@ SET(LIB_NAMES
 				xopengl${DLL_DEBUG_POSTFIX}
 				xrendernode${DLL_DEBUG_POSTFIX}
 				dataBase${DLL_DEBUG_POSTFIX}
-				xselect${DLL_DEBUG_POSTFIX}
-				xscene${DLL_DEBUG_POSTFIX}
 				xfreetype${DLL_DEBUG_POSTFIX}
 				stbImage${DLL_DEBUG_POSTFIX}
-				xpanel${DLL_DEBUG_POSTFIX}
 				xrender${DLL_DEBUG_POSTFIX}
 				xalgo${DLL_DEBUG_POSTFIX}
 				xsharevar${DLL_DEBUG_POSTFIX}

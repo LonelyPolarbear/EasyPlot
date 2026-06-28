@@ -35,6 +35,9 @@ public:
 
 	virtual void adjust3DCameraPos(sptr<XBaseRender>  render, std::shared_ptr<xshader>, const Eigen::Matrix4f& parentMatrix);
 
+	bool addChildRenderNode(sptr<XBaseRenderNode> child)override;
+
+	void synchronizationStatusImpl() override;
 	/// <summary>
 	/// 对外接口，绘制到屏幕
 	/// </summary>

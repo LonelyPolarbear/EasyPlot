@@ -195,7 +195,7 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 		getRender()->getCamera()->rotate(curpos,mData->mouseLstPos,viewport[2],viewport[3]);
 
 		//更新位置
-		mData->mouseLstPos = getRender()->window2render(windowpos);
+		mData->mouseLstPos = /*getRender()->window2render(windowpos)*/curpos;
 	}
 	else if (mData->mouseType == MouseType::middle) {
 		//平移
@@ -208,7 +208,7 @@ void CameraNavigationHandler::MouseMoveEvent(XQ::Vec2i windowpos, XQ::KeyboardMo
 		screenCamera->translate(curpos,mData->mouseLstPos, viewport[2], viewport[3]);
 
 		//更新位置
-		mData->mouseLstPos = getRender()->window2render(windowpos);
+		mData->mouseLstPos = /*getRender()->window2render(windowpos)*/curpos;
 	}
 }
 
@@ -230,7 +230,7 @@ void CameraNavigationHandler::MouseWheelForwardEvent(XQ::Vec2i windowpos, XQ::Ke
 	auto curpos = getRender()->window2render(windowpos);			//当前视口坐标系下的位置
 	curpos[0] -= viewport[2] * 0.5;
 	curpos[1] -= viewport[3] * 0.5;
-	screenCamera->scale(factor,curpos);
+	//screenCamera->scale(factor,curpos);		//todo 暂时屏蔽
 }
 
 void CameraNavigationHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::KeyboardModifier, XEvent& event)
@@ -251,7 +251,7 @@ void CameraNavigationHandler::MouseWheelBackwardEvent(XQ::Vec2i windowpos, XQ::K
 	auto curpos = getRender()->window2render(windowpos);			//当前视口坐标系下的位置
 	curpos[0] -= viewport[2] * 0.5;
 	curpos[1] -= viewport[3] * 0.5;
-	screenCamera->scale( factor, curpos);
+	//screenCamera->scale( factor, curpos);		//todo 暂时屏蔽
 }
 
 bool CameraNavigationHandler::isRenderActive() const

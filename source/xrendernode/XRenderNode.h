@@ -36,6 +36,8 @@ public:
 	void Init() override;
 
 	bool addChildRenderNode(sptr<XBaseRenderNode> child)override;
+	void synchronizationStatus()override;
+	void synchronizationStatusImpl()override;
 	bool removeChildRenderNode(sptr< XBaseRenderNode> child)override;
 	void clearChildrenRenderNode()override;
 	int getChildRenderNodeCount() const override;

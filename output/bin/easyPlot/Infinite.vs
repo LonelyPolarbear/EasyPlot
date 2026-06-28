@@ -103,5 +103,13 @@ void main()
 
          //真实的位置
          gl_Position = ProjectionMat*ViewMat*ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+
+         if(cameraMode ==CAMERA_MODE_3D_NORMAL ){
+              gl_Position = ProjectionMat*ViewMat*ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+        }else  if(cameraMode ==CAMERA_MODE_3D_AXIS ){
+              gl_Position = vec4(0,0,0,1);
+        }else{
+              gl_Position = ProjectionMat*NearplaneFrame*VirtualScreenFrame*ModelMat*vec4(aPos.x, aPos.y, aPos.z, 1.0);
+         }
     }
 }

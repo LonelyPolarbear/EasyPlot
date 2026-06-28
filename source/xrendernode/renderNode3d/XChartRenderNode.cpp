@@ -16,7 +16,7 @@ public:
 	wptr<XGroupRenderNode3d> lines;
 	unsigned char stencilValue = s_stencil_value++;
 	bool isPress = false;
-	Eigen::Vector3f lastPos = Eigen::Vector3f(0,0,0);
+	XQ::Vec3f lastPos;
 
 	Eigen::Vector3f mapFragCoord2GridPos(sptr<XBaseRender> render,const XQ::Vec3f& fragcoord) {
 		auto node = grid.lock();
@@ -30,7 +30,8 @@ public:
 		auto world2grid = trans*gridAffine ;
 		auto world_point = render->getCamera()->ComputeDisplayToWorld(Eigen::Vector3f(fragcoord[0], fragcoord[1], fragcoord[2]));
 		auto gridpos = world2grid.inverse() * world_point;
-		auto gridpos2 = trans.inverse() * world_point;
+		auto ss = trans.inverse() * world_point;
+		auto gridpos2 = gridAffine.inverse()*ss;
 		return gridpos;
 	}
 };
@@ -132,8 +133,12 @@ void XChartRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& par
 	XOpenGLFuntion::xglStencilMask(0);
 	XOpenGLFuntion::xglStencilFunc(XOpenGL::DepthOrStencilCompFunType::XGL_EQUAL, mData->stencilValue, 0xffffffff);
 	XOpenGLFuntion::xglStencilOp(XOpenGL::StencilBehavior::XGL_KEEP, XOpenGL::StencilBehavior::XGL_KEEP, XOpenGL::StencilBehavior::XGL_KEEP);
-
+	XOpenGLFuntion::xglDepthMask(false);
 	//绘制直线
+
+	//enable->enable(XOpenGLEnable::EnableType::BLEND);
+	//XOpenGLFuntion::xglBlendFunc(XOpenGL::BlendFuncFactor::XGL_SRC_ALPHA, XOpenGL::BlendFuncFactor::XGL_ONE_MINUS_SRC_ALPHA);
+
 	if (auto lines = mData->lines.lock()) {
 		//计算网格平面的法线
 		auto T = parentMatrix * thisMatrix;
@@ -153,6 +158,7 @@ void XChartRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& par
 	}
 	XOpenGLFuntion::xglStencilMask(0xffffffff);
 	enable->restore();
+	XOpenGLFuntion::xglDepthMask(true);
 }
 
 void XChartRenderNode::setXRange(float min, float max)
@@ -201,7 +207,7 @@ void XChartRenderNode::LeftButtonPressEvent(sptr<XBaseRender> render,XQ::Vec2i, 
 	if (auto grid = mData->grid.lock()) {
 		//将渲染窗口坐标转换为坐标系的内部坐标
 		auto  gridpos = mData->mapFragCoord2GridPos(render,fragcoord);
-		mData->lastPos = gridpos;
+		mData->lastPos = fragcoord;
 		mData->isPress = true;
 		event.stopPropagate();
 	}
@@ -219,11 +225,12 @@ void XChartRenderNode::MouseMoveEvent(sptr<XBaseRender> render, XQ::Vec2i, XQ::K
 	if (auto grid = mData->grid.lock()) {
 		if (mData->isPress) {
 			auto curpos = mData->mapFragCoord2GridPos(render, fragcoord);
-			auto dis = curpos - mData->lastPos;
+			auto lastpos = mData->mapFragCoord2GridPos(render, mData->lastPos);
+			auto dis = curpos - lastpos;
 			auto tx = dis[0];
 			auto ty = dis[1];
 			gridTranslate(-tx,-ty);
-			mData->lastPos = curpos;
+			mData->lastPos = fragcoord;
 		}
 		//event.stopPropagate();
 	}

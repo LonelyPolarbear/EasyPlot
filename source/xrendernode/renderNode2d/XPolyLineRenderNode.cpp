@@ -5,6 +5,7 @@
 #include <base/xbaserender/baseRender/XBaseRenderCamera.h>
 #include <lib01_shader/xshaderManger.h>
 #include <lib04_opengl/XOpenGLFuntion.h>
+#include <lib04_opengl/XOpenGLEnable.h>
 
 class XPolyLineRenderNode::Internal {
 	public:
@@ -65,23 +66,31 @@ void XPolyLineRenderNode::draw(sptr<XBaseRender> render, const Eigen::Matrix4f& 
 
 	shader->setUint("u_lineWidth", expacted_len);
 	shader->setFloat("u_offset", AttrOffset->getValue());
-	{
-		auto parent_mat = XQ::Matrix::convert(parentMatrix);
-		auto transform_data = XQ::Matrix::transformDecomposition_TRS(parent_mat);
-		auto viewport = render->getConvertViewPort();
-		auto w = viewport[2];
-		auto h = viewport[3];
+	if (Attribute->AttrCameraMode->getValue() == XRenderNodeCameraMode::camera3D) {
 
-		auto camera = render->getCamera();
-		auto scale_x = camera->scaleFactorH(0, w);		//相机宽度：屏幕宽度
-		
-		float line_real_len = expacted_len * scale_x;		//得到相机坐标系下的宽度
+		{
+			auto parent_mat = XQ::Matrix::convert(parentMatrix);
+			auto transform_data = XQ::Matrix::transformDecomposition_TRS(parent_mat);
+			auto viewport = render->getConvertViewPort();
+			auto w = viewport[2];
+			auto h = viewport[3];
 
-		shader->setUint("u_lineWidth", line_real_len);
+			auto camera = render->getCamera();
+			auto scale_x = camera->scaleFactorH(0, w);		//相机宽度：屏幕宽度
+
+			float line_real_len = expacted_len * scale_x;		//得到相机坐标系下的宽度
+
+			shader->setUint("u_lineWidth", line_real_len);
+		}
+	}
+	else if(Attribute->AttrCameraMode->getValue() == XRenderNodeCameraMode::camera2D){
+		shader->setUint("u_lineWidth", 2);		//TODO
 	}
 
 	auto old = XOpenGLFuntion::xglDrawBuffers({ XOpenGL::XGL_COLOR_ATTACHMENT0 });
+	
 	XGeometryNode::draw(render, shader, parentMatrix);
+
 	XOpenGLFuntion::xglDrawBuffers({old });
 }
 
