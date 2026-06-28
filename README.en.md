@@ -90,5 +90,5 @@ cmake --build build --config Release
 ```
 ### 示例
 
-![multiViewPort](https://gitee.com/LonelyPolarbear/EasyPlot/blob/master/assets/multiViewPort.png)
-![render2D 3D](https://gitee.com/LonelyPolarbear/EasyPlot/blob/master/assets/chart.gif)
+![多窗口](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/multiViewPort.png)
+![2D 3D渲染](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/chart.gif)
