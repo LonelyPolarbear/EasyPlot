@@ -91,5 +91,11 @@ cmake --build build --config Release
 
 ### 示例
 
+*2×2 多视口布局，展示正交/透视投影对比与视锥体可视化*
 ![多窗口](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/multiViewPort.png)
+
+*动态 2D 图表：左为 3D 场景中的图表，右为屏幕空间自适应图表*
 ![2D 3D渲染](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/chart.gif)
+
+*属性检视器及操作柄*
+![2D 3D渲染](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/mvd.gif)

@@ -22,6 +22,7 @@ public:
 	void test_multiViewPort();
 	void test_text();
 	void test_chart();
+	void test_xmvd();
 
 
 	void slotAddCube();

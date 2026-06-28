@@ -90,5 +90,11 @@ cmake --build build --config Release
 ```
 ### 示例
 
-![多窗口](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/multiViewPort.png)
-![2D 3D渲染](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/chart.gif)
+*2×2 multi-viewport layout demonstrating orthographic vs. perspective projection comparison with frustum visualization.*
+![Multi-Viewport](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/multiViewPort.png)
+
+*Dynamic 2D charts: 3D scene-embedded charts on the left, screen-space adaptive charts on the right.*
+![2D/3D Charts](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/chart.gif)
+
+*Property inspector and 3D manipulator (translate/rotate/scale) in action.*
+![Property Inspector & Manipulator](https://gitee.com/LonelyPolarbear/EasyPlot/raw/master/assets/mvd.gif)
