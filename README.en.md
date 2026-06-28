@@ -87,3 +87,8 @@ git clone https://gitee.com/LonelyPolarbear/EasyPlot.git
 cd EasyPlot
 cmake -B build -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 17 2022"
 cmake --build build --config Release
+```
+### 示例
+
+![multiViewPort](https://gitee.com/LonelyPolarbear/EasyPlot/blob/master/assets/multiViewPort.png)
+![render2D 3D](https://gitee.com/LonelyPolarbear/EasyPlot/blob/master/assets/chart.gif)
