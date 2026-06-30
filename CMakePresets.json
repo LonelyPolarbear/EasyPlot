@@ -1,0 +1,49 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "MSVC2022-Debug",
+      "displayName": "MSVC 2022 (Debug)",
+      "description": "使用 VS2022 编译器，x64 架构，Debug 构建",
+      "generator": "Visual Studio 17 2022",
+      "toolset": "host=x64",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
+        "Qt5_DIR": "C:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5",
+        "BUILD_EXAMPLES": "OFF",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "MSVC2022-Release",
+      "displayName": "MSVC 2022 (Release)",
+      "description": "使用 VS2022 编译器，x64 架构，Release 构建",
+      "generator": "Visual Studio 17 2022",
+      "toolset": "host=x64",
+      "architecture": "x64",
+      "binaryDir": "${sourceDir}/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_INSTALL_PREFIX": "${sourceDir}/install/${presetName}",
+        "Qt5_DIR": "C:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5",
+        "BUILD_EXAMPLES": "OFF",
+        "BUILD_TESTING": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "MSVC2022-Debug",
+      "configurePreset": "MSVC2022-Debug",
+      "configuration": "Debug"
+    },
+    {
+      "name": "MSVC2022-Release",
+      "configurePreset": "MSVC2022-Release",
+      "configuration": "Release"
+    }
+  ]
+}

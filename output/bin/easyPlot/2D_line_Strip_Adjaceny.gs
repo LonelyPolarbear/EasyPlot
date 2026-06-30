@@ -108,10 +108,14 @@ void emitLineSegment(vec4 pos0 ,vec4 pos1,vec4 pos2,vec4 pos3,vec3 planeNormal,f
 			world_p21 = pos2.xyz - rightDir *lineWidth*0.5*rightLenFactor; 
 		}
 		
-		vec4 ndc_p10 = world2ndc(world_p10);	ndc_p10.z +=u_offset;
-		vec4 ndc_p11 = world2ndc(world_p11);	ndc_p11.z +=u_offset;
-		vec4 ndc_p20 = world2ndc(world_p20);	ndc_p20.z +=u_offset;
-		vec4 ndc_p21 = world2ndc(world_p21);	ndc_p21.z +=u_offset;
+		float offset = u_offset;
+		if(cameraMode ==CAMERA_MODE_2D){
+			offset = 0.0;
+		}
+		vec4 ndc_p10 = world2ndc(world_p10);	ndc_p10.z +=offset;
+		vec4 ndc_p11 = world2ndc(world_p11);	ndc_p11.z +=offset;
+		vec4 ndc_p20 = world2ndc(world_p20);	ndc_p20.z +=offset;
+		vec4 ndc_p21 = world2ndc(world_p21);	ndc_p21.z +=offset;
 
 		gl_Position = ndc_p11;
 		gl_PrimitiveID =gl_PrimitiveIDIn;

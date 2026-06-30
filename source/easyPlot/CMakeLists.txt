@@ -47,7 +47,7 @@ target_sources(${proName} PRIVATE ${SOURCES_FILES}
 			)
 
 #设置exe名称						 
-#set_target_properties(${proName} PROPERTIES OUTPUT_NAME "out")	
+#set_target_properties(${proName} PROPERTIES OUTPUT_NAME "Easyplot")	
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
 SET(DLL_DEBUG_POSTFIX "")  
 else() 
