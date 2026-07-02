@@ -25,7 +25,7 @@ lIST(APPEND LIB_NAMES
 )
 
 LIST(APPEND LIB_DIRECTORIES 
-${CMAKE_SOURCE_DIR}/output/bin 
+${BIN_DIR}
 )
 														
 #生成动态库

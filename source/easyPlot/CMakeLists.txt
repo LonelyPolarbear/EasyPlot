@@ -89,7 +89,7 @@ SET(LIB_NAMES
 				xcodecvt${DLL_DEBUG_POSTFIX}
 	)
 
-target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin
+target_link_directories(${proName} PRIVATE ${BIN_DIR}
 										${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 )		#库目录
 

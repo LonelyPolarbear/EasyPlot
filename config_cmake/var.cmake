@@ -1,9 +1,9 @@
-set(SOURCES_FILES)																								#Í·ÎÄ¼þÂ·¾¶
-set(HERDERS_FILES)																								#Ô´ÎÄ¼þÂ·¾¶
-set(LIB_INCLUDE_DIRECTORY)																				#°üº¬Ä¿Â¼
-set(LIB_NAMES)																										#libÃû³Æ
-set(LIB_DIRECTORIES)																							#lib°üº¬Ä¿Â¼
-set(ALL_SOURCES)																							#lib°üº¬Ä¿Â¼
+set(SOURCES_FILES)																								#Í·ï¿½Ä¼ï¿½Â·ï¿½ï¿½
+set(HERDERS_FILES)																								#Ô´ï¿½Ä¼ï¿½Â·ï¿½ï¿½
+set(LIB_INCLUDE_DIRECTORY)																				#ï¿½ï¿½ï¿½ï¿½Ä¿Â¼
+set(LIB_NAMES)																										#libï¿½ï¿½ï¿½ï¿½
+set(LIB_DIRECTORIES)																							#libï¿½ï¿½ï¿½ï¿½Ä¿Â¼
+set(ALL_SOURCES)																							#libï¿½ï¿½ï¿½ï¿½Ä¿Â¼
 
 
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
@@ -11,6 +11,5 @@ SET(DLL_DEBUG_POSTFIX)
 else() 
 SET(DLL_DEBUG_POSTFIX)
 endif()
-
 #
 list(APPEND LIB_NAMES MyLib::HeaderOnly MyLib::HDF5) 

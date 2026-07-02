@@ -11,7 +11,7 @@ endif()
 add_executable(${proName} xutilty_test.cpp)
 set_target_properties(${proName} PROPERTIES FOLDER ${EXAMPLES_TOP_FOLDER})
 
-# ½«Ä¿±êÌí¼Óµ½È«¾ÖÊôÐÔ
+# ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 set_property(GLOBAL APPEND PROPERTY MY_EXAMPLE_TARGETS ${proName})
 
 get_property(ALL_LIB_TARGETS GLOBAL PROPERTY MY_PROJECT_LIB_TARGETS)
@@ -29,9 +29,9 @@ SET(LIB_NAMES
 	xtest${DLL_DEBUG_POSTFIX}
 )
 
-#Èý·½¿â
+#ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 set(LIB_DIRECTORIES 
-${CMAKE_SOURCE_DIR}/output/bin
+${BIN_DIR}
 )
 
 

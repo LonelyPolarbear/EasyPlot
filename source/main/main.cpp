@@ -1,5 +1,5 @@
 //#pragma execution_character_set("utf-8")
-#include <windows.h> // ±ØĞë°üº¬Õâ¸öÍ·ÎÄ¼ş
+#include <windows.h> 				// å¿…é¡»åŒ…å«è¿™ä¸ªå¤´æ–‡ä»¶
 #include <pybind11/embed.h>
 #include <filesystem>
 
@@ -37,8 +37,8 @@ int main(int argc, char** argv) {
 	ins->execute("xjson.hello()");
 	ins->execute("xdata.hello()");*/
 
-	//¹¹ÔìÊ±£ºµ÷ÓÃ PyEval_SaveThread() ÊÍ·Å GIL£¬²¢±£´æµ±Ç°Ïß³Ì×´Ì¬
-	//Îö¹¹Ê±£ºµ÷ÓÃ PyEval_RestoreThread() ÖØĞÂ»ñÈ¡ GIL¡£
+	//æ„é€ æ—¶ï¼šè°ƒç”¨ PyEval_SaveThread() é‡Šæ”¾ GILï¼Œå¹¶ä¿å­˜å½“å‰çº¿ç¨‹çŠ¶æ€
+	//ææ„æ—¶ï¼šè°ƒç”¨ PyEval_RestoreThread() é‡æ–°è·å– GILã€‚
 	pybind11::gil_scoped_release release;
 
 	XPythonConsole console;

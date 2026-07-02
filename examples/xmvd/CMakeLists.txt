@@ -20,7 +20,7 @@ find_package(Qt5 REQUIRED COMPONENTS Widgets )
 add_executable(${proName} xmvd_test.cpp)
 set_target_properties(${proName} PROPERTIES FOLDER ${EXAMPLES_TOP_FOLDER})
 
-# ½«Ä¿±êÌí¼Óµ½È«¾ÖÊôÐÔ
+# ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 set_property(GLOBAL APPEND PROPERTY MY_EXAMPLE_TARGETS ${proName})
 
 get_property(ALL_LIB_TARGETS GLOBAL PROPERTY MY_PROJECT_LIB_TARGETS)
@@ -47,9 +47,9 @@ SET(LIB_INCLUDE_DIRECTORY
 )
 
 set(LIB_DIRECTORIES 
-${CMAKE_SOURCE_DIR}/output/bin
+${BIN_DIR}
 )
 
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})	
-target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})				#°üº¬Ä¿Â¼
+target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})				#ï¿½ï¿½ï¿½ï¿½Ä¿Â¼
 target_link_libraries(${proName} PRIVATE  ${LIB_NAMES})

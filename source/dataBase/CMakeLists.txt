@@ -34,7 +34,7 @@ list(APPEND LIB_NAMES
 	MyLib::pybind
 )
 
-list(APPEND LIB_DIRECTORIES ${CMAKE_SOURCE_DIR}/output/bin)
+list(APPEND LIB_DIRECTORIES ${BIN_DIR})
 														
 #生成动态库
 add_library(${proName}  SHARED)

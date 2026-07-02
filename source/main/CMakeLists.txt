@@ -48,7 +48,7 @@ add_executable(${proName}
 						  ${RCC_SOURCES}
 			  )	
 #设置exe名称						 
-set_target_properties(${proName} PROPERTIES OUTPUT_NAME "Easyplot")	
+set_target_properties(${proName} PROPERTIES OUTPUT_NAME "EasyPlot")	
 if(CMAKE_BUILD_TYPE  MATCHES "Debug")
 SET(DLL_DEBUG_POSTFIX "")  
 else() 
@@ -96,7 +96,7 @@ SET(LIB_NAMES PRIVATE
 	)
 
 target_compile_definitions(${proName} PRIVATE NOMINMAX)
-target_link_directories(${proName} PRIVATE ${CMAKE_SOURCE_DIR}/output/bin
+target_link_directories(${proName} PRIVATE ${BIN_DIR}
 										${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 )		#库目录
 

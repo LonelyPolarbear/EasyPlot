@@ -77,7 +77,7 @@ LIST(APPEND LIB_NAMES
 )
 
 list(APPEND LIB_DIRECTORIES 
-	${CMAKE_SOURCE_DIR}/output/bin
+	${BIN_DIR}
 	${CMAKE_SOURCE_DIR}/3rdParty/glew/lib
 )
 
