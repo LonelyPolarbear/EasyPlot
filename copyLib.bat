@@ -12,9 +12,19 @@ rem copy .\3rdParty\hdf5\1.14.5\lib\*.lib .\output\bin\
 copy .\3rdParty\hdf5\bin\*.dll .\output\bin\
 copy .\Python38\python38.dll .\output\bin\
 
+copy .\3rdParty\freetype\*.dll .\output\bin_d\
+copy .\3rdParty\freetype\lib\*.lib .\output\bin_d\
 
-@rem  copy .\3rdParty\boost\lib\boost_python38-vc143-mt-gd-x64-1_79.lib .\output\bin\boost_python38-vc143-mt-gd-x64-1_79.lib
-@rem copy .\3rdParty\boost\lib\boost_python38-vc143-mt-x64-1_79.lib .\output\bin\boost_python38-vc143-mt-x64-1_79.lib
-@rem copy .\3rdParty\boost\lib\boost_python38-vc143-mt-x64-1_79.lib .\output\bin\boost_python38-vc143-mt-x64-1_79.lib
-@rem copy .\3rdParty\boost\lib\boost_python38-vc143-mt-gd-x64-1_79.dll .\output\bin\boost_python38-vc143-mt-gd-x64-1_79.dll
-@rem copy .\3rdParty\boost\lib\boost_python38-vc143-mt-x64-1_79.dll .\output\bin\boost_python38-vc143-mt-x64-1_79.dll
+copy .\3rdParty\glew\bin\*.dll .\output\bin_d\
+copy .\3rdParty\glew\lib\*.lib .\output\bin_d\
+
+copy .\3rdParty\assimp\lib\*.lib .\output\bin_d\
+copy .\3rdParty\linenoise\lib\*.lib .\output\bin_d\
+copy .\3rdParty\boost\lib\boost_locale-vc143-mt-gd-x64-1_79.dll .\output\bin_d\
+
+rem copy .\3rdParty\hdf5\1.14.5\lib\*.lib .\output\bin\
+copy .\3rdParty\hdf5\bin\*.dll .\output\bin_d\
+copy .\Python38\python38.dll .\output\bin_d\
+
+xcopy /E /I .\data .\output\bin_d
+xcopy /E /I .\data .\output\bin

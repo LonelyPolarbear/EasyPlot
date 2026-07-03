@@ -54,3 +54,19 @@ set_property(GLOBAL APPEND PROPERTY MY_PROJECT_LIBS ${proName})												#添�
 target_link_directories(${proName} PRIVATE ${LIB_DIRECTORIES})											#库目录
 target_include_directories(${proName} PRIVATE ${LIB_INCLUDE_DIRECTORY})						#包含目录
 target_link_libraries(${proName} PRIVATE ${LIB_NAMES})																			#依赖的lib目标名称
+
+#INSTALL 配置
+#[1] 安装目标
+install(TARGETS ${proName}
+    #EXPORT EasyPlotTargets                    # 导出目标（需与顶层配合）
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}   # Windows DLL 或可执行文件 → bin/
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}   # Linux/macOS 共享库 → lib/ 或 lib64/
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}   # 静态库或导入库 → lib/
+)
+#[2] 安装头文件
+install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/
+	DESTINATION ${PROJECT_INSTALL_INCLUDEDIR}/${proName}
+	FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+	PATTERN "CMakeLists.txt" EXCLUDE
+    PATTERN "*.cpp" EXCLUDE
+)

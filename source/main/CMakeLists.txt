@@ -106,3 +106,9 @@ target_link_libraries(${proName} ${LIB_NAMES})									#库名称
 
 #cmake -B build -DCMAKE_BUILD_TYPE=Debug -G  "Visual Studio 17 2022"
 #cmake -B build -DCMAKE_BUILD_TYPE=Release -G  "Visual Studio 17 2022"
+
+# 安装并导出可执行文件
+install(TARGETS main
+    #EXPORT EasyPlotTargets
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+)

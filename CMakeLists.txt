@@ -103,7 +103,17 @@ set_property(GLOBAL PROPERTY MY_PROJECT_LIBS "")
 #--------------------------------------------------------------------------------------------------------------
 # install配置
 #--------------------------------------------------------------------------------------------------------------
-include(GNUInstallDirs)
+include(GNUInstallDirs)                                                                                                                                       #引入 GNUInstallDirs 模块
+set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)                                                                       #设置安装根目录前缀
+set(PROJECT_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_INCLUDEDIR}/EasyPlot)
+
+#安装配置文件和第三方dll
+install(DIRECTORY  ${CMAKE_SOURCE_DIR}/3rdParty/freetype/ DESTINATION ${CMAKE_INSTALL_BINDIR} FILES_MATCHING PATTERN "*.dll")
+install(DIRECTORY  ${CMAKE_SOURCE_DIR}/3rdParty/glew/bin/ DESTINATION ${CMAKE_INSTALL_BINDIR} FILES_MATCHING PATTERN "*.dll")
+install(FILES ${CMAKE_SOURCE_DIR}/3rdParty/boost/lib/boost_locale-vc143-mt-gd-x64-1_79.dll DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/hdf5/bin/ DESTINATION ${CMAKE_INSTALL_BINDIR} FILES_MATCHING PATTERN "*.dll")
+install(FILES ${CMAKE_SOURCE_DIR}/Python38/python38.dll DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(DIRECTORY ${CMAKE_SOURCE_DIR}/data/ DESTINATION ${CMAKE_INSTALL_BINDIR})
 #[[
 调用后，cmake会自动定义以下缓冲变量
 CMAKE_INSTALL_BINDIR                        bin                                                                                         可执行文件目录（对应 RUNTIME）
@@ -126,7 +136,7 @@ CMAKE_CURRENT_SOURCE_DIR                当前 CMakeLists.txt 所在的源码目
 ]]
 
 
-set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install)  #安装路径
+
 #install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/CLI/include/CLI DESTINATION include)
 #install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/linenoise/include/linenoise DESTINATION include)
 #install(DIRECTORY ${CMAKE_SOURCE_DIR}/3rdParty/highFive/include/highfive DESTINATION include)

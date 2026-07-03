@@ -10,6 +10,10 @@
                 "UNICODE",
                 "_UNICODE"
             ],
+            //这是CMake Tools插件与C/C++插件之间的一个集成机制。
+            //原理：当在c_cpp_properties.json中设置了"configurationProvider": "ms-vscode.cmake-tools"时，
+            //C/C++插件会将提供智能提示配置的任务“委托”给CMake Tools插件。CMake Tools插件则会根据当前的CMake配置
+            //（ 包括你的预设），动态地为C/C++插件提供包含路径等信息
             "configurationProvider": "ms-vscode.cmake-tools"
         }
     ],

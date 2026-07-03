@@ -5,13 +5,13 @@
             "name": "Debug Main (EasyPlot)",
             "type": "cppvsdbg",          // Windows 下调试 MSVC 编译的程序
             "request": "launch",
-            "program": "${workspaceFolder}/output/bin/out.exe", // ⚠️ 重点：指向你的 exe
+            "program": "${workspaceFolder}/output/bin_d/EasyPlot.exe", // ⚠️ 重点：指向你的 exe
             "args": [],                  // 程序运行时需要加的命令行参数，没有则留空
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}", // 程序运行时的起始目录（默认为项目根目录）
             "environment": [
                 {"name" :"PATH",
-                 "value" :"C:\\Qt\\5.15.2\\msvc2019_64\\bin;${env:PATH}"
+                 "value" :"C:\\Qt\\5.15.2\\msvc2019_64\\bin_d;${env:PATH}"
                 }
             ],
             "console": "externalTerminal", // 或 "integratedTerminal"（内置终端）
