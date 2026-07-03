@@ -8,6 +8,7 @@ rem copy E:\work\EasyPlot\3rdParty\hdf5\cmake E:\work\myGit\EasyPlot\3rdParty\hd
 
 
 call copy.bat E:\work\EasyPlot\source E:\work\myGit\EasyPlot\source
+call copy.bat E:\work\EasyPlot\data E:\work\myGit\EasyPlot\data
 copy E:\work\EasyPlot\copy2git.bat E:\work\myGit\EasyPlot\copy2git.bat
 copy E:\work\EasyPlot\copyLib.bat E:\work\myGit\EasyPlot\copyLib.bat
 rem call copy.bat E:\work\EasyPlot\Python38 E:\work\myGit\EasyPlot\Python38
